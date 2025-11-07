@@ -41,35 +41,35 @@ export default function UsersPage() {
   }, []);
 
   // 🟢 Tạo user mới
-// 🟢 Tạo user mới
-const handleCreateUser = async () => {
-  if (!newUser.username || !newUser.password || !newUser.fullName) {
-    toast.warning("⚠️ Vui lòng điền đầy đủ thông tin!");
-    return;
-  }
+  // 🟢 Tạo user mới
+  const handleCreateUser = async () => {
+    if (!newUser.username || !newUser.password || !newUser.fullName) {
+      toast.warning("⚠️ Vui lòng điền đầy đủ thông tin!");
+      return;
+    }
 
-  try {
-    setCreating(true);
+    try {
+      setCreating(true);
 
-    const payload = {
-      username: newUser.username,
-      password: newUser.password,
-      fullName: newUser.fullName,
-    };
+      const payload = {
+        username: newUser.username,
+        password: newUser.password,
+        fullName: newUser.fullName,
+      };
 
-    // ✅ Gọi service, service đã dùng đúng /auth/register rồi
-    await createUser(payload);
+      // ✅ Gọi service, service đã dùng đúng /auth/register rồi
+      await createUser(payload);
 
-    toast.success("✅ Tạo người dùng thành công!");
-    setNewUser({ fullName: "", username: "", password: "" });
-    fetchUsers();
-  } catch (err) {
-    console.error("❌ Lỗi tạo người dùng:", err);
-    toast.error(err.response?.data?.message || "Không thể tạo người dùng!");
-  } finally {
-    setCreating(false);
-  }
-};
+      toast.success("✅ Tạo người dùng thành công!");
+      setNewUser({ fullName: "", username: "", password: "" });
+      fetchUsers();
+    } catch (err) {
+      console.error("❌ Lỗi tạo người dùng:", err);
+      toast.error(err.response?.data?.message || "Không thể tạo người dùng!");
+    } finally {
+      setCreating(false);
+    }
+  };
 
   // 🟢 Cập nhật vai trò
   const handleUpdateRole = async (id, newRole) => {
@@ -83,53 +83,53 @@ const handleCreateUser = async () => {
   };
 
   const handleDeleteUser = async (id) => {
-  if (!id) {
-    toast.error("❌ Không xác định được ID người dùng!");
-    return;
-  }
-
-  console.log("🗑️ Đang xóa user ID:", id);
-
-  toast.info(
-    <div className="text-center">
-      <p className="font-medium mb-2">Bạn có chắc muốn xóa người dùng này?</p>
-      <div className="flex justify-center gap-3 mt-3">
-        <button
-          onClick={async () => {
-            try {
-              await deleteUser(id);
-              toast.dismiss();
-              toast.success("✅ Đã xóa người dùng!");
-              setUsers((prev) => prev.filter((u) => u.id !== id));
-            } catch (err) {
-              console.error("❌ Lỗi khi xóa:", err.response?.data || err);
-              toast.dismiss();
-              toast.error(
-                err.response?.data?.message ||
-                  "Không thể xóa người dùng! Có thể do quyền hoặc ràng buộc dữ liệu."
-              );
-            }
-          }}
-          className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
-        >
-          Xóa
-        </button>
-        <button
-          onClick={() => toast.dismiss()}
-          className="bg-gray-300 text-gray-800 px-3 py-1 rounded hover:bg-gray-400"
-        >
-          Hủy
-        </button>
-      </div>
-    </div>,
-    {
-      autoClose: false,
-      closeOnClick: false,
-      draggable: false,
-      position: "top-center",
+    if (!id) {
+      toast.error("❌ Không xác định được ID người dùng!");
+      return;
     }
-  );
-};
+
+    console.log("🗑️ Đang xóa user ID:", id);
+
+    toast.info(
+      <div className="text-center">
+        <p className="font-medium mb-2">Bạn có chắc muốn xóa người dùng này?</p>
+        <div className="flex justify-center gap-3 mt-3">
+          <button
+            onClick={async () => {
+              try {
+                await deleteUser(id);
+                toast.dismiss();
+                toast.success("✅ Đã xóa người dùng!");
+                setUsers((prev) => prev.filter((u) => u.id !== id));
+              } catch (err) {
+                console.error("❌ Lỗi khi xóa:", err.response?.data || err);
+                toast.dismiss();
+                toast.error(
+                  err.response?.data?.message ||
+                    "Không thể xóa người dùng! Có thể do quyền hoặc ràng buộc dữ liệu."
+                );
+              }
+            }}
+            className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+          >
+            Xóa
+          </button>
+          <button
+            onClick={() => toast.dismiss()}
+            className="bg-gray-300 text-gray-800 px-3 py-1 rounded hover:bg-gray-400"
+          >
+            Hủy
+          </button>
+        </div>
+      </div>,
+      {
+        autoClose: false,
+        closeOnClick: false,
+        draggable: false,
+        position: "top-center",
+      }
+    );
+  };
 
   return (
     <div className="p-8">
@@ -161,21 +161,27 @@ const handleCreateUser = async () => {
             type="text"
             placeholder="Họ và tên"
             value={newUser.fullName}
-            onChange={(e) => setNewUser({ ...newUser, fullName: e.target.value })}
+            onChange={(e) =>
+              setNewUser({ ...newUser, fullName: e.target.value })
+            }
             className="border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white p-2 rounded-lg focus:ring focus:ring-blue-200"
           />
           <input
             type="text"
             placeholder="Tên người dùng"
             value={newUser.username}
-            onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
+            onChange={(e) =>
+              setNewUser({ ...newUser, username: e.target.value })
+            }
             className="border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white p-2 rounded-lg focus:ring focus:ring-blue-200"
           />
           <input
             type="password"
             placeholder="Mật khẩu"
             value={newUser.password}
-            onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+            onChange={(e) =>
+              setNewUser({ ...newUser, password: e.target.value })
+            }
             className="border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white p-2 rounded-lg focus:ring focus:ring-blue-200"
           />
           <button
@@ -213,13 +219,19 @@ const handleCreateUser = async () => {
           <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
             {loading ? (
               <tr>
-                <td colSpan="6" className="text-center py-6 text-gray-500 dark:text-gray-400">
+                <td
+                  colSpan="6"
+                  className="text-center py-6 text-gray-500 dark:text-gray-400"
+                >
                   Đang tải dữ liệu...
                 </td>
               </tr>
             ) : users.length === 0 ? (
               <tr>
-                <td colSpan="6" className="text-center py-6 text-gray-500 dark:text-gray-400">
+                <td
+                  colSpan="6"
+                  className="text-center py-6 text-gray-500 dark:text-gray-400"
+                >
                   Không có người dùng nào
                 </td>
               </tr>
@@ -238,7 +250,9 @@ const handleCreateUser = async () => {
                   <td className="p-4">
                     <select
                       value={user.roles[0]}
-                      onChange={(e) => handleUpdateRole(user.id, e.target.value)}
+                      onChange={(e) =>
+                        handleUpdateRole(user.id, e.target.value)
+                      }
                       className="border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md p-1"
                     >
                       <option value="ROLE_USER">User</option>
