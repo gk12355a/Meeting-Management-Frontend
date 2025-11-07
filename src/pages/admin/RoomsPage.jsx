@@ -74,8 +74,6 @@ export default function RoomsPage() {
       const sortedData = response.data.sort((a, b) => b.id - a.id);
       setRooms(sortedData);
       setFilteredRooms(sortedData);
-      // setRooms(response.data);
-      // setFilteredRooms(response.data);
     } catch (error) {
       showNotification("Không thể tải danh sách phòng họp", "error");
       console.error(error);
@@ -89,7 +87,6 @@ export default function RoomsPage() {
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 3000);
   };
-
   // Mở modal (Thêm/Sửa)
   const handleOpenModal = (room = null) => {
     if (room) {
@@ -128,7 +125,7 @@ export default function RoomsPage() {
     // Quan trọng: Chuyển đổi capacity sang SỐ
     const capacityValue = parseInt(formData.capacity, 10);
     if (isNaN(capacityValue) || capacityValue <= 0) {
-      showNotification("Sức chứa phải là một số lớn hơn 0", "error");
+      showNotification("Sức chứa phải > 0", "error");
       return;
     }
 
