@@ -1,22 +1,24 @@
 import { useEffect, useState } from "react";
-import {
-  getRooms,
-  createRoom,
-  updateRoom,
-  deleteRoom,
-} from "../../services/roomService";
-import {
-  Search,
-  Plus,
-  Edit2,
-  Trash2,
-  X,
-  Check,
-  AlertCircle,
-  AlertTriangle,
-  Building,
-} from "lucide-react";
+import { getRooms, createRoom, updateRoom, deleteRoom} from "../../services/roomService";
+import { Search, Plus, Edit2, Trash2, X, Check, AlertCircle,  AlertTriangle, Building } from "lucide-react";
+import { toast } from "react-toastify";
 
+const toastColors = {
+  success: "#10b981", // xanh ngọc dịu
+  error: "#ef4444", // đỏ ấm
+  warning: "#e4650aff", // vàng dịu
+  info: "#3b82f6", // xanh dương nhạt
+}
+// Ap dụng màu cho toastìy
+const setToastTheme = () => {
+  const root = document.documentElement;
+  root.style.setProperty("--toastify-color-success", toastColors.success);
+  root.style.setProperty("--toastify-color-error", toastColors.error);
+  root.style.setProperty("--toastify-color-warning", toastColors.warning);
+  root.style.setProperty("--toastify-color-info", toastColors.info);
+}
+setToastTheme();
+// Ap dung ma
 export default function RoomsPage() {
   // === States ===
   const [rooms, setRooms] = useState([]);
@@ -75,18 +77,12 @@ export default function RoomsPage() {
       setRooms(sortedData);
       setFilteredRooms(sortedData);
     } catch (error) {
-      showNotification("Không thể tải danh sách phòng họp", "error");
-      console.error(error);
+      toast.error("Lỗi khi tải danh sách phòng hop");
+      console.error("Fetch rooms error:", error);
     } finally {
       setLoading(false);
     }
-  };
-
-  // Hiển thị thông báo
-  const showNotification = (message, type = "success") => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 3000);
-  };
+  }
   // Mở modal (Thêm/Sửa)
   const handleOpenModal = (room = null) => {
     if (room) {
@@ -118,14 +114,14 @@ export default function RoomsPage() {
     e.preventDefault();
 
     if (!formData.name.trim()) {
-      showNotification("Vui lòng nhập tên phòng họp", "error");
+      toast.error("Vui lòng nhập tên phòng họp");
       return;
     }
 
     // Quan trọng: Chuyển đổi capacity sang SỐ
     const capacityValue = parseInt(formData.capacity, 10);
     if (isNaN(capacityValue) || capacityValue <= 0) {
-      showNotification("Sức chứa phải > 0", "error");
+      toast.error("Số người phòng hợp phải lớn hơn 0");
       return;
     }
 
@@ -141,22 +137,16 @@ export default function RoomsPage() {
 
       if (editingRoom) {
         await updateRoom(editingRoom.id, submitData);
-        showNotification("Cập nhật phòng họp thành công!");
+        toast.success("Cập nhật phòng hợp thành công!");
       } else {
         await createRoom(submitData);
-        showNotification("Thêm phòng họp mới thành công!");
+        toast.success("Tạo phòng hợp thành công!");
       }
 
       await fetchRooms();
       handleCloseModal();
     } catch (error) {
-      showNotification(
-        `❌ ${editingRoom ? "Cập nhật" : "Thêm"} phòng thất bại: ${
-          error.response?.data?.message || error.message
-        }`,
-        "error"
-      );
-      console.error("Submit error:", error.response?.data || error);
+      toast.error("Lỗi khi cập nhật phòng hợp");
     } finally {
       setLoading(false);
     }
@@ -181,11 +171,11 @@ export default function RoomsPage() {
     try {
       setLoading(true);
       await deleteRoom(roomToDelete.id);
-      showNotification("Đã xóa phòng họp thành công!");
+      toast.success("Đã xóa phòng họp thành công!");
       await fetchRooms();
       handleCloseDeleteModal();
     } catch (error) {
-      showNotification("Xóa phòng họp thất bại", "error");
+      toast.error("Xóa phòng họp thất bại", "error");
       console.error(error);
     } finally {
       setLoading(false);
