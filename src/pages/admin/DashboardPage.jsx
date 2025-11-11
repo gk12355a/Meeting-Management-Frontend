@@ -54,7 +54,7 @@ export default function DashboardPage() {
   const upcomingMeetings = [
     {
       id: 1,
-      title: "Họp kế hoạch thán",
+      title: "Họp kế hoạch tháng 11",
       time: "14:00 - 15:30",
       room: "Phòng họp 1",
       organizer: "Phuong Anh",
