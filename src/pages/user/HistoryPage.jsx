@@ -219,7 +219,7 @@ const HistoryPage = () => {
               )}
 
               {selectedMeeting.description && (
-                <p className="mt-3 italic text-gray-500 dark:text-gray-400">
+                <p className="mt-3 italic text-gray-500 dark:text-gray-400" title="Ghi chú cuộc họp">
                   Ghi chú: {selectedMeeting.description}
                 </p>
               )}
