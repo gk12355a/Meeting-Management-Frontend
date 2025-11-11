@@ -1,14 +1,29 @@
 import { useEffect, useState } from "react";
-import { getRooms, createRoom, updateRoom, deleteRoom} from "../../services/roomService";
-import { Search, Plus, Edit2, Trash2, X, Check, AlertCircle,  AlertTriangle, Building } from "lucide-react";
+import {
+  getRooms,
+  createRoom,
+  updateRoom,
+  deleteRoom,
+} from "../../services/roomService";
+import {
+  Search,
+  Plus,
+  Edit2,
+  Trash2,
+  X,
+  Check,
+  AlertCircle,
+  AlertTriangle,
+  Building,
+} from "lucide-react";
 import { toast } from "react-toastify";
 
 const toastColors = {
   success: "#10b981", // xanh ngọc dịu
   error: "#ef4444", // đỏ ấm
-  warning: "#e4650aff", // vàng dịu
+  warning: "#e4650", // vàng dịu
   info: "#3b82f6", // xanh dương nhạt
-}
+};
 // Ap dụng màu cho toastìy
 const setToastTheme = () => {
   const root = document.documentElement;
@@ -16,7 +31,7 @@ const setToastTheme = () => {
   root.style.setProperty("--toastify-color-error", toastColors.error);
   root.style.setProperty("--toastify-color-warning", toastColors.warning);
   root.style.setProperty("--toastify-color-info", toastColors.info);
-}
+};
 setToastTheme();
 // Ap dung ma
 export default function RoomsPage() {
@@ -82,7 +97,7 @@ export default function RoomsPage() {
     } finally {
       setLoading(false);
     }
-  }
+  };
   // Mở modal (Thêm/Sửa)
   const handleOpenModal = (room = null) => {
     if (room) {

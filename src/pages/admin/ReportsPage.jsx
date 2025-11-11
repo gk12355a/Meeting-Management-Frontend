@@ -41,7 +41,7 @@ export default function ReportsPage() {
       </section>
 
       <section>
-        <h2 className="font-semibold">Thống kê hủy họp</h2>
+        <h2 className="font-semibold">❌ Thống kê hủy họp</h2>
         <pre className="bg-gray-100 p-2 rounded text-sm">
           {JSON.stringify(cancel, null, 2)}
         </pre>
