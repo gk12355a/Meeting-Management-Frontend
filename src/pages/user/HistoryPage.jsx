@@ -6,7 +6,7 @@ import { getMyMeetings } from "../../services/meetingService";
 import dayjs from "dayjs";
 import "dayjs/locale/vi";
 dayjs.locale("vi");
-import { Tag } from "antd";
+
 const HistoryPage = () => {
   const [activeTab, setActiveTab] = useState("joined"); // joined | cancelled
   const [joinedMeetings, setJoinedMeetings] = useState([]);
@@ -61,17 +61,17 @@ const HistoryPage = () => {
 
   // === 2. HÀM HELPER MỚI ĐỂ HIỂN THỊ TAG TRẠNG THÁI ===
   const getTag = (status) => {
-  switch (status) {
-    case 'ACCEPTED':
-      return <Tag color="success" className="ml-2">Đã chấp nhận</Tag>;
-    case 'DECLINED':
-      return <Tag color="error" className="ml-2">Đã từ chối</Tag>;
-    case 'PENDING':
-      return <Tag color="warning" className="ml-2">Chờ phản hồi</Tag>;
-    default:
-      return null;
-  }
-};
+    switch (status) {
+      case 'ACCEPTED':
+        return <Tag color="success" className="ml-2">Đã chấp nhận</Tag>;
+      case 'DECLINED':
+        return <Tag color="error" className="ml-2">Đã từ chối</Tag>;
+      case 'PENDING':
+        return <Tag color="warning" className="ml-2">Chờ phản hồi</Tag>;
+      default:
+        return null;
+    }
+  };
 
   const meetings = activeTab === "joined" ? joinedMeetings : cancelledMeetings;
 
@@ -91,14 +91,8 @@ const HistoryPage = () => {
           }`}
           onClick={() => setActiveTab("joined")}
         >
-          Đã tham gia📅
+          Đã tham gia
         </button>
-        <button
-  onClick={() => navigator.clipboard.writeText(`${dayjs(selectedMeeting.startTime).format("DD/MM/YYYY HH:mm")} - ${dayjs(selectedMeeting.endTime).format("HH:mm")} | ${selectedMeeting.room?.name || "N/A"}`)}
-  className="ml-2 text-blue-600 dark:text-blue-400 text-xs hover:underline"
->
-  Copy
-</button>
         <button
           className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
             activeTab === "cancelled"
@@ -107,7 +101,7 @@ const HistoryPage = () => {
           }`}
           onClick={() => setActiveTab("cancelled")}
         >
-          Đã hủy❌
+          Đã hủy
         </button>
       </div>
 
@@ -126,21 +120,15 @@ const HistoryPage = () => {
           <ul className="divide-y divide-gray-200 dark:divide-slate-700">
             {meetings.map((item) => (
               <li
-                  key={item.id}
-                  className={`py-4 px-2 rounded-xl transition-colors duration-200 cursor-pointer ${
-                    activeTab === "cancelled"
-                      ? "hover:bg-red-100 dark:hover:bg-red-700/30"
-                      : "hover:bg-gray-50 dark:hover:bg-slate-700/40"
-                  }`}
-                  onClick={() => handleMeetingClick(item)}
-                >
-                {activeTab === "joined" && getTag(item.status)}
+                key={item.id}
+                className="py-4 px-2 hover:bg-gray-50 dark:hover:bg-slate-700/40 rounded-xl transition-colors duration-200 cursor-pointer"
+                onClick={() => handleMeetingClick(item)}
+              >
                 <p
                   className={`font-semibold mb-1 ${
                     activeTab === "cancelled"
                       ? "text-red-600 dark:text-red-400"
                       : "text-gray-800 dark:text-gray-100"
-                      
                   }`}
                 >
                   {item.title}
@@ -155,9 +143,6 @@ const HistoryPage = () => {
                   </span>
                   <span className="flex items-center gap-1">
                     <FiMapPin size={14} /> {item.room?.name || "N/A"}
-                  </span>
-                  <span className="ml-2 text-sm font-medium">
-                    {activeTab === "joined" ? joinedMeetings.length : cancelledMeetings.length}
                   </span>
                 </div>
               </li>
@@ -205,9 +190,7 @@ const HistoryPage = () => {
                   <ul className="mt-2 ml-2 list-none space-y-1 p-0">
                     {selectedMeeting.participants.map((p) => (
                       <li key={p.id} className="flex justify-between items-center py-1">
-                        <span className="text-gray-800 dark:text-gray-100" title={p.email}>
-                          {p.fullName}
-                        </span>
+                        <span className="text-gray-800 dark:text-gray-100">{p.fullName}</span>
                         {/* Hiển thị trạng thái (nếu là tab "Đã tham gia") */}
                         {activeTab === "joined" && getTag(p.status)}
                       </li>
@@ -225,7 +208,7 @@ const HistoryPage = () => {
               )}
 
               {selectedMeeting.description && (
-                <p className="mt-3 italic text-gray-500 dark:text-gray-400" title="Ghi chú cuộc họp">
+                <p className="mt-3 italic text-gray-500 dark:text-gray-400">
                   Ghi chú: {selectedMeeting.description}
                 </p>
               )}
