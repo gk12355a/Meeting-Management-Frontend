@@ -19,7 +19,7 @@ export default function ForgotPasswordPage() {
       });
       setMessage(response.data); // (Hiển thị: "Nếu email tồn tại...")
     } catch (err) {
-      setMessage("Đã xảy ra lỗi. Vui lòng thử lại.");
+      setMessage("Đã xảy ra lỗi.");
     } finally {
       setIsLoading(false);
     }
