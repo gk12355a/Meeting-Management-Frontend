@@ -1,10 +1,10 @@
 // src/pages/ForgotPasswordPage.jsx
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import api from '../utils/api'; // Import Axios
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import api from "../utils/api"; // Import Axios
 
 export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState(null); // Để hiển thị thông báo
 
@@ -14,12 +14,12 @@ export default function ForgotPasswordPage() {
     setMessage(null);
 
     try {
-      const response = await api.post('/auth/forgot-password', {
+      const response = await api.post("/auth/forgot-password", {
         email: email,
       });
       setMessage(response.data); // (Hiển thị: "Nếu email tồn tại...")
     } catch (err) {
-      setMessage('Đã xảy ra lỗi. Vui lòng thử lại.');
+      setMessage("Đã xảy ra lỗi.");
     } finally {
       setIsLoading(false);
     }
@@ -58,18 +58,18 @@ export default function ForgotPasswordPage() {
               disabled={isLoading}
               className="w-full rounded-xl bg-blue-600 text-white px-3 py-3 font-semibold"
             >
-              {isLoading ? 'Đang gửi...' : 'Gửi link'}
+              {isLoading ? "Đang gửi..." : "Gửi link"}
             </button>
           </form>
         )}
-         <div className="text-sm text-center mt-4">
-            <Link 
-              to="/login" 
-              className="font-medium text-blue-600 hover:text-blue-500"
-            >
-              Quay lại Đăng nhập
-            </Link>
-          </div>
+        <div className="text-sm text-center mt-4">
+          <Link
+            to="/login"
+            className="font-medium text-blue-600 hover:text-blue-500"
+          >
+            Quay lại Đăng nhập
+          </Link>
+        </div>
       </div>
     </div>
   );
