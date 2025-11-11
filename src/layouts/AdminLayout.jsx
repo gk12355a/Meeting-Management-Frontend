@@ -13,10 +13,22 @@ export default function AdminLayout() {
 
   const menu = [
     { to: "/admin", label: "Dashboard", icon: <BsCalendar4Week size={18} /> },
-    { to: "/admin/users", label: "Người dùng & quyền hạn", icon: <FiUsers size={18} /> },
-    { to: "/admin/rooms", label: "Quản lý phòng họp", icon: <FiBriefcase size={18} /> },
-    { to: "/admin/devices", label: "Quản lý thiết bị", icon: <HiOutlineDeviceMobile size={18} /> },
-    { to: "/admin/reports", label: "Thống kê & báo cáo", icon: <FiBarChart2 size={18} /> },
+    { to: "/admin/users", label: "Người dùng ", icon: <FiUsers size={18} /> },
+    {
+      to: "/admin/rooms",
+      label: "Quản lý phòng họp",
+      icon: <FiBriefcase size={18} />,
+    },
+    {
+      to: "/admin/devices",
+      label: "Quản lý thiết bị",
+      icon: <HiOutlineDeviceMobile size={18} />,
+    },
+    {
+      to: "/admin/reports",
+      label: "Thống kê & báo cáo",
+      icon: <FiBarChart2 size={18} />,
+    },
   ];
 
   return (
@@ -40,7 +52,9 @@ export default function AdminLayout() {
         </div>
 
         <div className="flex items-center gap-4">
-          <span className="text-sm bg-blue-500 px-3 py-1 rounded-full shadow-md">Admin</span>
+          <span className="text-sm bg-blue-500 px-3 py-1 rounded-full shadow-md">
+            Admin
+          </span>
           <button
             onClick={logout}
             className="text-xs border border-gray-400 rounded-full px-3 py-1 hover:bg-[#1c2541] transition"
@@ -56,13 +70,19 @@ export default function AdminLayout() {
         <aside
           className={`fixed md:static top-14 md:top-0 left-0 bg-white dark:bg-slate-900 
                       border-r dark:border-slate-800 shadow-md w-64 h-[calc(100%-56px)] md:h-auto 
-                      transform ${isSidebarOpen ? "translate-x-0" : "-translate-x-64"} 
+                      transform ${
+                        isSidebarOpen ? "translate-x-0" : "-translate-x-64"
+                      } 
                       transition-transform duration-300 ease-in-out z-20`}
         >
           <div className="flex flex-col items-center py-5 border-b border-gray-100 dark:border-slate-800">
             <div className="text-center">
-              <p className="font-semibold text-gray-700 dark:text-gray-100 text-base">MeetFlow Admin</p>
-              <p className="text-xs text-gray-400 dark:text-gray-500">Quản lý cuộc họp</p>
+              <p className="font-semibold text-gray-700 dark:text-gray-100 text-base">
+                MeetFlow Admin
+              </p>
+              <p className="text-xs text-gray-400 dark:text-gray-500">
+                Quản lý cuộc họp
+              </p>
             </div>
           </div>
 
