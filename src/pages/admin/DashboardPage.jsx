@@ -57,7 +57,7 @@ export default function DashboardPage() {
       title: "Họp kế hoạch tháng 11",
       time: "14:00 - 15:30",
       room: "Phòng họp 1",
-      organizer: "Phuong Anh",
+      organizer: "",
     },
     {
       id: 2,
