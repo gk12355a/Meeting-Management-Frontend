@@ -13,9 +13,7 @@ export default function LoginPage() {
     try {
       await login(username, password);
     } catch (err) {
-      const msg =
-        err?.response?.data?.message ||
-        "Sai tài khoản hoặc mật khẩu. Vui lòng thử lại!";
+      const msg = err?.response?.data?.message || "Sai tài khoản hoặc mật khẩu";
       setError(msg);
     }
   };
