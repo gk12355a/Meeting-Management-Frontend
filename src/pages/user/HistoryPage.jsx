@@ -61,17 +61,17 @@ const HistoryPage = () => {
 
   // === 2. HÀM HELPER MỚI ĐỂ HIỂN THỊ TAG TRẠNG THÁI ===
   const getTag = (status) => {
-    switch (status) {
-      case 'ACCEPTED':
-        return <Tag color="success" className="ml-2">Đã chấp nhận</Tag>;
-      case 'DECLINED':
-        return <Tag color="error" className="ml-2">Đã từ chối</Tag>;
-      case 'PENDING':
-        return <Tag color="warning" className="ml-2">Chờ phản hồi</Tag>;
-      default:
-        return null;
-    }
-  };
+  switch (status) {
+    case 'ACCEPTED':
+      return <Tag color="success" className="ml-2">Đã chấp nhận</Tag>;
+    case 'DECLINED':
+      return <Tag color="error" className="ml-2">Đã từ chối</Tag>;
+    case 'PENDING':
+      return <Tag color="warning" className="ml-2">Chờ phản hồi</Tag>;
+    default:
+      return null;
+  }
+};
 
   const meetings = activeTab === "joined" ? joinedMeetings : cancelledMeetings;
 
