@@ -54,7 +54,7 @@ export default function DashboardPage() {
   const upcomingMeetings = [
     {
       id: 1,
-      title: "Họp kế hoạch tháng 11",
+      title: "Họp kế hoạch thán",
       time: "14:00 - 15:30",
       room: "Phòng họp 1",
       organizer: "Phuong Anh",
@@ -89,7 +89,9 @@ export default function DashboardPage() {
             className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 
                        rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-300"
           >
-            <p className="text-sm text-gray-500 dark:text-gray-400">{card.label}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {card.label}
+            </p>
             <h2 className="text-lg font-semibold text-blue-700 dark:text-blue-400 mt-1">
               {card.value}
             </h2>
@@ -150,7 +152,10 @@ export default function DashboardPage() {
                 dataKey="value"
               >
                 {participantsDistribution.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={COLORS[index % COLORS.length]}
+                  />
                 ))}
               </Pie>
               <Tooltip
@@ -178,10 +183,7 @@ export default function DashboardPage() {
               vertical={false}
               stroke={isDarkMode ? "#334155" : "#e5e7eb"}
             />
-            <XAxis
-              dataKey="week"
-              stroke={isDarkMode ? "#cbd5e1" : "#475569"}
-            />
+            <XAxis dataKey="week" stroke={isDarkMode ? "#cbd5e1" : "#475569"} />
             <YAxis stroke={isDarkMode ? "#cbd5e1" : "#475569"} />
             <Tooltip
               contentStyle={{
@@ -216,7 +218,9 @@ export default function DashboardPage() {
                            hover:bg-gray-50 dark:hover:bg-slate-700 transition flex justify-between items-center"
               >
                 <div>
-                  <p className="font-medium text-gray-800 dark:text-gray-100">{m.title}</p>
+                  <p className="font-medium text-gray-800 dark:text-gray-100">
+                    {m.title}
+                  </p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
                     {m.time} • {m.room}
                   </p>
@@ -245,7 +249,9 @@ export default function DashboardPage() {
                   <span className="text-sm font-semibold text-blue-600 dark:text-blue-400 w-6 h-6 bg-blue-50 dark:bg-slate-700 flex items-center justify-center rounded-full">
                     {index + 1}
                   </span>
-                  <p className="font-medium text-gray-800 dark:text-gray-100">{u.name}</p>
+                  <p className="font-medium text-gray-800 dark:text-gray-100">
+                    {u.name}
+                  </p>
                 </div>
                 <span className="text-sm text-gray-500 dark:text-gray-400">
                   {u.count} cuộc họp
