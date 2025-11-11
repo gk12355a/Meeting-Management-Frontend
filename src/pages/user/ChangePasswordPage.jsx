@@ -114,14 +114,9 @@ const handleChange = (key, value) => {
           >
             Mật khẩu cũ
           </label>
-          <input
-            type="password"
-            id="oldPassword"
-            value={oldPassword}
-            onChange={(e) => setOldPassword(e.target.value)}
-            required
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white"
-          />
+          <Input label="Mật khẩu cũ" typeKey="old" placeholder="Nhập mật khẩu cũ" />
+          <Input label="Mật khẩu mới" typeKey="new" placeholder="Nhập mật khẩu mới" />
+          <Input label="Xác nhận mật khẩu mới" typeKey="confirm" placeholder="Nhập lại mật khẩu mới" />
         </div>
 
         {/* Mật khẩu mới */}
