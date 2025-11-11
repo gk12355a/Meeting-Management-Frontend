@@ -18,7 +18,18 @@ const [show, setShow] = useState({
 const handleChange = (key, value) => {
   setForm(prev => ({ ...prev, [key]: value }));
 };
-  
+  const validate = () => {
+  if (!form.oldPassword || !form.newPassword || !form.confirmPassword)
+    return "Vui lòng điền đầy đủ thông tin.";
+
+  if (form.newPassword.length < 6)
+    return "Mật khẩu mới phải có ít nhất 6 ký tự.";
+
+  if (form.newPassword !== form.confirmPassword)
+    return "Mật khẩu mới và xác nhận mật khẩu không khớp.";
+
+  return null;
+};
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [loading, setLoading] = useState(false);
