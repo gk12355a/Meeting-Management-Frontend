@@ -94,6 +94,12 @@ const HistoryPage = () => {
           Đã tham gia
         </button>
         <button
+  onClick={() => navigator.clipboard.writeText(`${dayjs(selectedMeeting.startTime).format("DD/MM/YYYY HH:mm")} - ${dayjs(selectedMeeting.endTime).format("HH:mm")} | ${selectedMeeting.room?.name || "N/A"}`)}
+  className="ml-2 text-blue-600 dark:text-blue-400 text-xs hover:underline"
+>
+  Copy
+</button>
+        <button
           className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
             activeTab === "cancelled"
               ? "bg-red-600 text-white"
