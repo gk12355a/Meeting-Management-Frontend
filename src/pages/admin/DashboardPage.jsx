@@ -64,7 +64,7 @@ export default function DashboardPage() {
       title: "Review Sprint 2",
       time: "16:00 - 17:00",
       room: "Phòng họp 3",
-      organizer: "Duong",
+      organizer: "",
     },
   ];
 
