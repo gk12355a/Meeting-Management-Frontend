@@ -6,7 +6,7 @@ import { getMyMeetings } from "../../services/meetingService";
 import dayjs from "dayjs";
 import "dayjs/locale/vi";
 dayjs.locale("vi");
-
+import { Tag } from "antd";
 const HistoryPage = () => {
   const [activeTab, setActiveTab] = useState("joined"); // joined | cancelled
   const [joinedMeetings, setJoinedMeetings] = useState([]);
