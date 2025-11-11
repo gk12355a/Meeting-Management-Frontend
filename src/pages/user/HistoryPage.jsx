@@ -91,7 +91,7 @@ const HistoryPage = () => {
           }`}
           onClick={() => setActiveTab("joined")}
         >
-          Đã tham gia
+          Đã tham gia📅
         </button>
         <button
   onClick={() => navigator.clipboard.writeText(`${dayjs(selectedMeeting.startTime).format("DD/MM/YYYY HH:mm")} - ${dayjs(selectedMeeting.endTime).format("HH:mm")} | ${selectedMeeting.room?.name || "N/A"}`)}
@@ -107,7 +107,7 @@ const HistoryPage = () => {
           }`}
           onClick={() => setActiveTab("cancelled")}
         >
-          Đã hủy
+          Đã hủy❌
         </button>
       </div>
 
