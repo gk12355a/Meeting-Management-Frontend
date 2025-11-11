@@ -124,11 +124,13 @@ const HistoryPage = () => {
                 className="py-4 px-2 hover:bg-gray-50 dark:hover:bg-slate-700/40 rounded-xl transition-colors duration-200 cursor-pointer"
                 onClick={() => handleMeetingClick(item)}
               >
+                {activeTab === "joined" && getTag(item.status)}
                 <p
                   className={`font-semibold mb-1 ${
                     activeTab === "cancelled"
                       ? "text-red-600 dark:text-red-400"
                       : "text-gray-800 dark:text-gray-100"
+                      
                   }`}
                 >
                   {item.title}
