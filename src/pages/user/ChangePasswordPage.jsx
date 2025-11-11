@@ -27,6 +27,33 @@ const handleChange = (key, value) => {
     e.preventDefault();
     setError(null);
     setSuccess(null);
+    const Input = ({ label, typeKey, placeholder }) => (
+  <div>
+    <label htmlFor={typeKey} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+      {label}
+    </label>
+    <div className="relative">
+      <input
+        id={typeKey}
+        type={show[typeKey] ? "text" : "password"}
+        value={form[typeKey]}
+        onChange={(e) => handleChange(typeKey, e.target.value)}
+        required
+        placeholder={placeholder}
+        className="w-full pr-10 px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white"
+      />
+      <button
+        type="button"
+        onClick={() => setShow(prev => ({ ...prev, [typeKey]: !prev[typeKey] }))}
+        className="absolute right-2 top-2 text-gray-500 hover:text-gray-700"
+        aria-label={show[typeKey] ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+      >
+        {show[typeKey] ? <FiEyeOff /> : <FiEye />}
+      </button>
+    </div>
+  </div>
+);
+
 
     // 1. Kiểm tra mật khẩu xác nhận
     if (newPassword !== confirmPassword) {
