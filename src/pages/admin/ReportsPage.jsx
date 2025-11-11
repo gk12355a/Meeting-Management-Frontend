@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
-import { getVisitorReport, getRoomUsageReport, getCancelStats } from "../../services/reportService";
+import {
+  getVisitorReport,
+  getRoomUsageReport,
+  getCancelStats,
+} from "../../services/reportService";
 
 export default function ReportsPage() {
   const [visitors, setVisitors] = useState([]);
@@ -24,17 +28,23 @@ export default function ReportsPage() {
 
       <section className="mb-6">
         <h2 className="font-semibold">📅 Danh sách khách mời</h2>
-        <pre className="bg-gray-100 p-2 rounded text-sm">{JSON.stringify(visitors, null, 2)}</pre>
+        <pre className="bg-gray-100 p-2 rounded text-sm">
+          {JSON.stringify(visitors, null, 2)}
+        </pre>
       </section>
 
       <section className="mb-6">
         <h2 className="font-semibold">🏢 Tần suất sử dụng phòng họp</h2>
-        <pre className="bg-gray-100 p-2 rounded text-sm">{JSON.stringify(usage, null, 2)}</pre>
+        <pre className="bg-gray-100 p-2 rounded text-sm">
+          {JSON.stringify(usage, null, 2)}
+        </pre>
       </section>
 
       <section>
-        <h2 className="font-semibold">❌ Thống kê hủy họp</h2>
-        <pre className="bg-gray-100 p-2 rounded text-sm">{JSON.stringify(cancel, null, 2)}</pre>
+        <h2 className="font-semibold">Thống kê hủy họp</h2>
+        <pre className="bg-gray-100 p-2 rounded text-sm">
+          {JSON.stringify(cancel, null, 2)}
+        </pre>
       </section>
     </div>
   );
