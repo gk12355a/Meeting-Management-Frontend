@@ -193,7 +193,9 @@ const HistoryPage = () => {
                   <ul className="mt-2 ml-2 list-none space-y-1 p-0">
                     {selectedMeeting.participants.map((p) => (
                       <li key={p.id} className="flex justify-between items-center py-1">
-                        <span className="text-gray-800 dark:text-gray-100">{p.fullName}</span>
+                        <span className="text-gray-800 dark:text-gray-100" title={p.email}>
+                          {p.fullName}
+                        </span>
                         {/* Hiển thị trạng thái (nếu là tab "Đã tham gia") */}
                         {activeTab === "joined" && getTag(p.status)}
                       </li>
