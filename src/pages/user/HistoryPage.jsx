@@ -120,10 +120,14 @@ const HistoryPage = () => {
           <ul className="divide-y divide-gray-200 dark:divide-slate-700">
             {meetings.map((item) => (
               <li
-                key={item.id}
-                className="py-4 px-2 hover:bg-gray-50 dark:hover:bg-slate-700/40 rounded-xl transition-colors duration-200 cursor-pointer"
-                onClick={() => handleMeetingClick(item)}
-              >
+                  key={item.id}
+                  className={`py-4 px-2 rounded-xl transition-colors duration-200 cursor-pointer ${
+                    activeTab === "cancelled"
+                      ? "hover:bg-red-100 dark:hover:bg-red-700/30"
+                      : "hover:bg-gray-50 dark:hover:bg-slate-700/40"
+                  }`}
+                  onClick={() => handleMeetingClick(item)}
+                >
                 {activeTab === "joined" && getTag(item.status)}
                 <p
                   className={`font-semibold mb-1 ${
