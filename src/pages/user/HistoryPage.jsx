@@ -144,6 +144,9 @@ const HistoryPage = () => {
                   <span className="flex items-center gap-1">
                     <FiMapPin size={14} /> {item.room?.name || "N/A"}
                   </span>
+                  <span className="ml-2 text-sm font-medium">
+                    {activeTab === "joined" ? joinedMeetings.length : cancelledMeetings.length}
+                  </span>
                 </div>
               </li>
             ))}
