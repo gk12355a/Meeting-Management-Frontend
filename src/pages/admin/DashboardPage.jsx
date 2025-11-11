@@ -63,7 +63,7 @@ export default function DashboardPage() {
       id: 2,
       title: "Review Sprint 2",
       time: "16:00 - 17:00",
-      room: "Phòng h",
+      room: "Phòng họp 3",
       organizer: "Duong",
     },
   ];
