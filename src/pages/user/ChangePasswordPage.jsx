@@ -4,9 +4,16 @@ import * as authService from '../../services/authService';
 import { FiLock, FiSave } from 'react-icons/fi';
 
 export default function ChangePasswordPage() {
-  const [oldPassword, setOldPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [form, setForm] = useState({
+  oldPassword: '',
+  newPassword: '',
+  confirmPassword: ''
+});
+
+// Hàm cập nhật value
+const handleChange = (key, value) => {
+  setForm(prev => ({ ...prev, [key]: value }));
+};
   
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
