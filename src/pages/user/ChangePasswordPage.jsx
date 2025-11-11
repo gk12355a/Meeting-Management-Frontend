@@ -9,7 +9,11 @@ export default function ChangePasswordPage() {
   newPassword: '',
   confirmPassword: ''
 });
-
+const [show, setShow] = useState({
+  old: false,
+  new: false,
+  confirm: false
+});
 // Hàm cập nhật value
 const handleChange = (key, value) => {
   setForm(prev => ({ ...prev, [key]: value }));
