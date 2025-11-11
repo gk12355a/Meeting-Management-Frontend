@@ -19,13 +19,30 @@ const handleChange = (key, value) => {
   setForm(prev => ({ ...prev, [key]: value }));
 };
   const validate = () => {
-  if (!form.oldPassword || !form.newPassword || !form.confirmPassword)
+  const { oldPassword, newPassword, confirmPassword } = form;
+
+  if (!oldPassword || !newPassword || !confirmPassword)
     return "Vui lòng điền đầy đủ thông tin.";
 
-  if (form.newPassword.length < 6)
+  if (newPassword.length < 6)
     return "Mật khẩu mới phải có ít nhất 6 ký tự.";
 
-  if (form.newPassword !== form.confirmPassword)
+  // Kiểm tra mật khẩu mạnh
+  const uppercase = /[A-Z]/;
+  const lowercase = /[a-z]/;
+  const number = /[0-9]/;
+  const special = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/;
+
+  if (!uppercase.test(newPassword))
+    return "Mật khẩu phải có ít nhất 1 chữ hoa.";
+  if (!lowercase.test(newPassword))
+    return "Mật khẩu phải có ít nhất 1 chữ thường.";
+  if (!number.test(newPassword))
+    return "Mật khẩu phải có ít nhất 1 số.";
+  if (!special.test(newPassword))
+    return "Mật khẩu phải có ít nhất 1 ký tự đặc biệt.";
+
+  if (newPassword !== confirmPassword)
     return "Mật khẩu mới và xác nhận mật khẩu không khớp.";
 
   return null;
