@@ -21,7 +21,7 @@ import { toast } from "react-toastify";
 const toastColors = {
   success: "#10b981", // xanh ngọc dịu
   error: "#ef4444", // đỏ ấm
-  warning: "#e4650", // vàng dịu
+  warning: "#e4650aff", // vàng dịu
   info: "#3b82f6", // xanh dương nhạt
 };
 // Ap dụng màu cho toastìy
