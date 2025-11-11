@@ -13,7 +13,11 @@ export default function AdminLayout() {
 
   const menu = [
     { to: "/admin", label: "Dashboard", icon: <BsCalendar4Week size={18} /> },
-    { to: "/admin/users", label: "Người dùng ", icon: <FiUsers size={18} /> },
+    {
+      to: "/admin/users",
+      label: "Người dùng & quyền hạn",
+      icon: <FiUsers size={18} />,
+    },
     {
       to: "/admin/rooms",
       label: "Quản lý phòng họp",
