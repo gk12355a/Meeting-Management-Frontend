@@ -1,9 +1,10 @@
 // src/pages/user/RoomsPage.jsx
 import React, { useEffect, useState } from "react";
 import { FiSearch, FiTool, FiMonitor, FiUsers } from "react-icons/fi";
-import { Spin, message } from "antd";
+import { Spin, message, Tag, Tooltip } from "antd"; // <-- THÊM Tag, Tooltip
 import { getAllRooms } from "../../services/roomService";
 import { HiBuildingOffice } from "react-icons/hi2";
+import { FaCrown } from "react-icons/fa"; // <-- Icon VIP (cần cài react-icons/fa)
 import BookRoomModal from "../../components/user/BookRoomModal";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -16,11 +17,11 @@ const RoomsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("Tất cả");
   const [bookingModal, setBookingModal] = useState({
-  open: false,
-  room: null,
-  start: null,
-  end: null,
-});
+    open: false,
+    room: null,
+    start: null,
+    end: null,
+  });
   const [calendarModal, setCalendarModal] = useState({ open: false, room: null });
 
   // Load rooms
@@ -67,15 +68,11 @@ const RoomsPage = () => {
     setProcessedRooms(filtered);
   }, [searchTerm, filterStatus, rooms]);
 
-  const handleBookRoom = (room) => {
-  setCalendarModal({ open: true, room });
-};
-
   return (
     <div className="p-6 min-h-screen bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
       <ToastContainer position="top-right" autoClose={2500} />
 
-      {/* HEADER STYLE GIỐNG "Lịch họp của tôi" */}
+      {/* HEADER */}
       <div className="flex items-center gap-4 mb-6 pb-3 border-b border-gray-300 dark:border-gray-700">
         <div className="p-3 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-500 shadow-md">
           <HiBuildingOffice className="text-white text-2xl" />
@@ -129,26 +126,35 @@ const RoomsPage = () => {
             processedRooms.map((room) => {
               const statusDisplay = getStatusDisplay(room.status);
               const isAvailable = room.status === "AVAILABLE";
+              // Kiểm tra xem phòng có cần duyệt không
+              const isVip = room.requiresApproval; 
 
               return (
                 <div
                   key={room.id}
                   className={`
                     rounded-xl p-5 border shadow-md transition-all duration-200
-
                     ${
                       isAvailable
-                        ? // PHÒNG TRỐNG — màu xanh dịu
-                          "bg-green-50 border-green-200 hover:shadow-green-300 hover:scale-[1.02] dark:bg-green-900/20 dark:border-green-700"
-                        : // PHÒNG BẢO TRÌ — xám
-                          "bg-gray-200/60 border-gray-300 cursor-not-allowed dark:bg-slate-700/40 dark:border-slate-600"
+                        ? "bg-green-50 border-green-200 hover:shadow-green-300 hover:scale-[1.02] dark:bg-green-900/20 dark:border-green-700"
+                        : "bg-gray-200/60 border-gray-300 cursor-not-allowed dark:bg-slate-700/40 dark:border-slate-600"
                     }
                   `}
                 >
                   <div className="flex justify-between items-start">
-                    <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
-                      {room.name}
-                    </h2>
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
+                        {room.name}
+                      </h2>
+                      {/* === HIỂN THỊ BADGE VIP === */}
+                      {isVip && (
+                        <Tooltip title="Phòng này cần Admin phê duyệt">
+                          <Tag color="gold" className="flex items-center gap-1 ml-2 px-2 py-0.5 text-xs font-bold border-none shadow-sm">
+                            <FaCrown size={10} /> VIP
+                          </Tag>
+                        </Tooltip>
+                      )}
+                    </div>
 
                     {room.status === "UNDER_MAINTENANCE" && (
                       <span className="flex items-center gap-1 text-xs text-orange-500 dark:text-orange-400 font-medium">
@@ -157,7 +163,7 @@ const RoomsPage = () => {
                     )}
                   </div>
 
-                  <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300 mt-1">
+                  <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300 mt-2">
                     <FiUsers size={14} /> Sức chứa: {room.capacity} người
                   </p>
 
@@ -168,24 +174,35 @@ const RoomsPage = () => {
                       : "Không có"}
                   </p>
 
-                  <p className="mt-2 text-gray-700 dark:text-gray-300">
-                    Trạng thái:{" "}
-                    <span className={statusDisplay.color}>
-                      {statusDisplay.text}
-                    </span>
-                  </p>
+                  <div className="flex items-center justify-between mt-3">
+                    <p className="text-gray-700 dark:text-gray-300 text-sm">
+                      Trạng thái:{" "}
+                      <span className={statusDisplay.color}>
+                        {statusDisplay.text}
+                      </span>
+                    </p>
+                  </div>
+
+                  {/* Lưu ý cho phòng VIP */}
+                  {isVip && isAvailable && (
+                    <p className="text-xs text-yellow-600 dark:text-yellow-500 mt-2 italic">
+                      * Yêu cầu phê duyệt từ Admin
+                    </p>
+                  )}
 
                   <div className="mt-4 flex justify-end">
                     <button
                       disabled={!isAvailable}
-                      onClick={() => handleBookRoom(room)}
+                      onClick={() => setCalendarModal({ open: true, room })}
                       className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                         isAvailable
-                          ? "bg-green-600 hover:bg-green-700 text-white"
+                          ? isVip 
+                            ? "bg-yellow-600 hover:bg-yellow-700 text-white shadow-sm" // Nút màu vàng cho VIP
+                            : "bg-green-600 hover:bg-green-700 text-white shadow-sm"
                           : "bg-gray-400 text-gray-700 cursor-not-allowed"
                       }`}
                     >
-                      Đặt phòng
+                      {isVip ? "Đăng ký duyệt" : "Đặt phòng"}
                     </button>
                   </div>
                 </div>
@@ -201,32 +218,33 @@ const RoomsPage = () => {
 
       {/* Modal đặt phòng */}
       <BookRoomModal
-  open={bookingModal.open}
-  onCancel={() =>
-    setBookingModal({ open: false, room: null, start: null, end: null })
-  }
-  prefilledRoom={bookingModal.room}
-  start={bookingModal.start}
-  end={bookingModal.end}
-  onSuccess={() => {
-    // có thể reload rooms nếu cần
-  }}
-/>
+        open={bookingModal.open}
+        onCancel={() =>
+          setBookingModal({ open: false, room: null, start: null, end: null })
+        }
+        prefilledRoom={bookingModal.room}
+        start={bookingModal.start}
+        end={bookingModal.end}
+        onSuccess={() => {
+           // Có thể thêm logic reload danh sách phòng nếu cần,
+           // nhưng thường là không cần thiết vì trạng thái phòng không đổi ngay lập tức
+        }}
+      />
 
       <RoomCalendarModal
-  open={calendarModal.open}
-  room={calendarModal.room}
-  onClose={() => setCalendarModal({ open: false, room: null })}
-  onSelectSlot={({ start, end }) => {
-    setCalendarModal({ open: false, room: null });
-    setBookingModal({
-      open: true,
-      room: calendarModal.room,
-      start,
-      end,
-    });
-  }}
-/>
+        open={calendarModal.open}
+        room={calendarModal.room}
+        onClose={() => setCalendarModal({ open: false, room: null })}
+        onSelectSlot={({ start, end }) => {
+          setCalendarModal({ open: false, room: null });
+          setBookingModal({
+            open: true,
+            room: calendarModal.room,
+            start,
+            end,
+          });
+        }}
+      />
     </div>
   );
 };

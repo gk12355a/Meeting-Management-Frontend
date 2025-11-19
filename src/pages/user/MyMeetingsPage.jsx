@@ -1,4 +1,3 @@
-
 // src/pages/user/MyMeetingsPage.jsx
 import React, { useEffect, useState, useRef } from "react";
 import FullCalendar from "@fullcalendar/react";
@@ -128,10 +127,14 @@ function getEventTooltipContent(event) {
   const time = `${dayjs(start).format("HH:mm")} - ${dayjs(end).format("HH:mm, DD/MM/YYYY")}`;
   const room = extendedProps?.roomName || "Chưa xác định";
   return `
-    <div>
-      <div><b>${title}</b></div>
-      <div>Thời gian: ${time}</div>
-      <div>Phòng: ${room}</div>
+    <div style="line-height: 1.6; min-width: 220px;">
+      <div style="font-weight: 600; margin-bottom: 6px; font-size: 14px;">${title}</div>
+      <div style="font-size: 12px; opacity: 0.9; margin-bottom: 3px;">
+        <strong>Thời gian:</strong> ${time}
+      </div>
+      <div style="font-size: 12px; opacity: 0.9; margin-bottom: 3px;">
+        <strong>Phòng:</strong> ${room}
+      </div>
     </div>
   `;
 }
@@ -145,11 +148,9 @@ function isBusinessTime(date) {
   // Ngày trong tuần: 0 (CN), 6 (T7)
   const day = d.day();
   if (day === 0 || day === 6) return false;
-  // Giờ hành chính: >= 08:00 và <= 18:00 (CHỈ SỬA Ở ĐÂY)
+  // Giờ hành chính: >= 08:00 và <= 18:00
   const hour = d.hour();
   const minute = d.minute();
-  // Cho phép đặt giờ đúng từ 08:00 đến 18:00: Không được bắt đầu trước 08:00 và không kết thúc sau 18:00
-  // Để hỗ trợ book từ 10h đến đúng 18h (tức end là 18:00), cần trả về true khi giờ nhỏ hơn 18 HOẶC (giờ=18 && phút=0)
   return (
     hour > WORK_HOUR_START && hour < WORK_HOUR_END
     || (hour === WORK_HOUR_START)
@@ -248,28 +249,28 @@ const [quickBooking, setQuickBooking] = useState({ open: false, start: null, end
     injectNoBusinessTimeStyle();
   }, []);
 
-  // CSS cho cuộc họp bị hủy
-useEffect(() => {
-  const style = document.createElement("style");
-  style.innerHTML = `
-    .meeting-cancelled {
-  opacity: 0.4 !important;
-  filter: grayscale(0.5);
-}
+  // CSS cho cuộc họp bị hủy VÀ TỪ CHỐI
+  useEffect(() => {
+    const style = document.createElement("style");
+    style.innerHTML = `
+      .meeting-cancelled {
+        opacity: 0.4 !important;
+        filter: grayscale(0.5);
+      }
 
-.meeting-cancelled .fc-event-title,
-.meeting-cancelled .fc-event-time {
-  text-decoration: line-through !important;
-  text-decoration-color: #b91c1c !important;
-  text-decoration-thickness: 1.2px !important;
-  text-underline-offset: -4px;
-}
-  `;
-  document.head.appendChild(style);
-  return () => style.remove();
-}, []);
+      .meeting-cancelled .fc-event-title,
+      .meeting-cancelled .fc-event-time {
+        text-decoration: line-through !important;
+        text-decoration-color: #b91c1c !important;
+        text-decoration-thickness: 1.2px !important;
+        text-underline-offset: -4px;
+      }
+    `;
+    document.head.appendChild(style);
+    return () => style.remove();
+  }, []);
 
-  // === TẢI LỊCH HỌP (ĐÃ SỬA LỖI LOGIC LỌC) ===
+  // === TẢI LỊCH HỌP ===
   const fetchMeetings = async () => {
     if (!user) return; // Đảm bảo user đã tải xong
 
@@ -279,20 +280,20 @@ useEffect(() => {
       const data = res.data?.content || [];
 
       const filteredData = data.filter(m => {
-        // 1. Bỏ qua nếu cuộc họp bị HỦY (toàn bộ)
-        // if (m.status === 'CANCELLED') {
-        //   return false;
-        // }
+        // Logic lọc cũ: Bỏ qua meeting đã hủy nếu muốn (hiện tại đang comment lại để hiển thị cả hủy)
+        // if (m.status === 'CANCELLED') return false;
+        
         // 2. Kiểm tra xem user có phải người tổ chức không
         const isOrganizer = m.organizer?.id === user.id;
         // 3. Tìm trạng thái của user (nếu là người tham gia)
         const userParticipant = m.participants?.find(p => p.id === user.id);
+        
         // 4. LOGIC QUYẾT ĐỊNH:
-        // NẾU TÔI LÀ NGƯỜI TỔ CHỨC:
+        // NẾU TÔI LÀ NGƯỜI TỔ CHỨC: Luôn hiển thị
         if (isOrganizer) {
-          return true; // Luôn hiển thị
+          return true; 
         }
-        // NẾU TÔI CHỈ LÀ NGƯỜI THAM GIA:
+        // NẾU TÔI CHỈ LÀ NGƯỜI THAM GIA: Chỉ hiển thị nếu không từ chối
         if (userParticipant) {
           return userParticipant.status !== 'DECLINED';
         }
@@ -303,32 +304,40 @@ useEffect(() => {
 
       // Map từ dữ liệu ĐÃ LỌC
       const mappedEvents = filteredData.map((m) => {
-  const startLocal = dayjs(m.startTime).local().format();
-  const endLocal = dayjs(m.endTime).local().format();
+        const startLocal = dayjs(m.startTime).local().format();
+        const endLocal = dayjs(m.endTime).local().format();
 
-  return {
-    id: m.id,
-    title: m.title || "Cuộc họp",
-    start: startLocal,
-    end: endLocal,
-    backgroundColor: m.status === "CANCELLED"
-  ? "#f50c0cff" 
-  : m.status === "CONFIRMED"
-  ? "#3b82f6"
-  : "#f59e0b",
+        // === LOGIC MỚI: Nhóm CANCELLED và REJECTED ===
+        const isNegativeStatus = m.status === "CANCELLED" || m.status === "REJECTED";
 
-borderColor: m.status === "CANCELLED"
-  ? "#b91c1c" 
-  : m.status === "CONFIRMED"
-  ? "#2563eb"
-  : "#d97706",
-    extendedProps: {
-      roomName: m.room?.name || "Chưa xác định",
-    },
-    // add class only if cancelled
-    classNames: m.status === "CANCELLED" ? ["meeting-cancelled"] : []
-  };
-});
+        let bgColor, borderColor;
+        
+        if (isNegativeStatus) {
+          bgColor = "#ef4444"; // Đỏ
+          borderColor = "#b91c1c"; // Đỏ đậm
+        } else if (m.status === "CONFIRMED") {
+          bgColor = "#3b82f6"; // Xanh dương
+          borderColor = "#2563eb";
+        } else {
+          // PENDING_APPROVAL
+          bgColor = "#f59e0b"; // Vàng cam
+          borderColor = "#d97706";
+        }
+
+        return {
+          id: m.id,
+          title: m.title || "Cuộc họp",
+          start: startLocal,
+          end: endLocal,
+          backgroundColor: bgColor,
+          borderColor: borderColor,
+          extendedProps: {
+            roomName: m.room?.name || "Chưa xác định",
+          },
+          // Áp dụng class gạch ngang nếu là CANCELLED hoặc REJECTED
+          classNames: isNegativeStatus ? ["meeting-cancelled"] : []
+        };
+      });
 
       setEvents(mappedEvents);
     } catch (err) {
@@ -346,7 +355,7 @@ borderColor: m.status === "CANCELLED"
       setMeetingDetail(null);
       setIsModalOpen(true);
       const res = await getMeetingById(id);
-      setMeetingDetail(res.data); // res.data sẽ chứa recurrenceSeriesId nếu có
+      setMeetingDetail(res.data); 
     } catch (err) {
       console.error("Lỗi khi lấy chi tiết:", err);
       toast.error("Không thể tải chi tiết cuộc họp!");
@@ -405,8 +414,6 @@ borderColor: m.status === "CANCELLED"
 
   // ---- GENERATE NON-BUSINESS HOURS SLOTS (for day/week view vertical grid coloring) ----
   function getNonBusinessHourBackgroundEvents(viewStart, viewEnd) {
-    // viewStart, viewEnd: JS Date
-    // Output: [{start, end, display: 'background', classNames: ...}, ...]
     const slots = [];
     let d = dayjs(viewStart).startOf("day");
     const until = dayjs(viewEnd).startOf("day");
@@ -443,7 +450,7 @@ borderColor: m.status === "CANCELLED"
       }
       d = d.add(1, "day");
     }
-    // Thêm các slot ở quá khứ đến thời điểm hiện tại (lí do: disable background cho quá khứ)
+    // Thêm các slot ở quá khứ
     const now = dayjs();
     let dPast = dayjs(viewStart).startOf("day");
     while (dPast.isSameOrBefore(now, "day")) {
@@ -462,17 +469,15 @@ borderColor: m.status === "CANCELLED"
     return slots;
   }
 
-  // RED LINE NOW-INDICATOR: force refresh every ~20s to keep now-indicator up to date visually. (Ref: admin DashboardPage.jsx)
+  // RED LINE NOW-INDICATOR
   useEffect(() => {
     let interval = setInterval(() => {
-      // FullCalendar's "now-indicator" updates only at minute granularity unless forced.
-      // We call calendarApi "updateNow" to force the now indicator line to move.
       try {
         if (calendarRef.current && calendarRef.current.getApi) {
           calendarRef.current.getApi().updateNow();
         }
       } catch (e) {}
-    }, 20000); // update every 20 seconds for smoothness but reasonable performance
+    }, 20000); 
     return () => clearInterval(interval);
   }, []);
 
@@ -500,7 +505,7 @@ borderColor: m.status === "CANCELLED"
     });
   };
 
-  // === HÀM RENDER NGƯỜI THAM GIA (ĐÃ CẬP NHẬT) ===
+  // === HÀM RENDER NGƯỜI THAM GIA ===
   const renderParticipants = (organizer, participants) => {
     if (!participants && !organizer) {
       return <span className="text-gray-500 dark:text-gray-400">Không có người tham gia.</span>;
@@ -627,44 +632,35 @@ borderColor: m.status === "CANCELLED"
             selectMirror={true}
             // ---------
             select={handleDateSelect}
-            // Giới hạn chọn khung giờ hành chính & disable quá khứ khi kéo rê hoặc click chọn slot
-            // ĐÃ BỔ SUNG: loại trừ luôn thứ 7 (6), chủ nhật (0)
+            
             selectAllow={function(selectInfo) {
               const start = dayjs(selectInfo.start);
               const end = dayjs(selectInfo.end);
-              // Chặn thứ 7 (6) & chủ nhật (0) cho cả start & end
               const validStart = isBusinessTime(start);
               const validEnd = isBusinessTime(end);
               return validStart && validEnd;
             }}
 
-            // -- Chặn drag, resize event ra ngoài giờ hành chính (nếu cần, cho UX tốt hơn)
             eventAllow={function(dropInfo, draggedEvent) {
               const start = dayjs(dropInfo.start);
               const end = dayjs(dropInfo.end);
-              // Chặn thứ 7 (6) & chủ nhật (0) cho cả start & end
               const validStart = isBusinessTime(start);
               const validEnd = isBusinessTime(end);
               return validStart && validEnd;
             }}
 
-            // highlight non-business bằng backgroundEvents
-            // Sử dụng key để trigger rerender background khi chuyển week hoặc month
             businessHours={{
-              // Chỉ cho phép từ 08:00 đến 18:00 các ngày trong tuần
-              daysOfWeek: [1, 2, 3, 4, 5], // thứ 2-6
+              daysOfWeek: [1, 2, 3, 4, 5],
               startTime: '08:00',
               endTime: '18:00',
             }}
-            // Sử dụng backgroundEvents để làm mờ vùng không business hour và quá khứ, ĐÃ BỔ SUNG BLOCK T7, CN
             backgroundEvents={(arg) => getNonBusinessHourBackgroundEvents(arg.start, arg.end)}
-            // THÊM RED LINE: chỉ cần thuộc tính này trong fullcalendar để hiện line thời gian thực
             nowIndicator={true}
           />
         </div>
       )}
 
-      {/* Modal chi tiết cuộc họp - CẬP NHẬT PHẦN FOOTER */}
+      {/* Modal chi tiết cuộc họp */}
       <Modal
         open={isModalOpen}
         onCancel={() => setIsModalOpen(false)}
@@ -701,7 +697,6 @@ borderColor: m.status === "CANCELLED"
         width={600}
         className="dark:[&_.ant-modal-content]:bg-gray-800 dark:[&_.ant-modal-content]:text-gray-200"
       >
-        {/* Giữ nguyên nội dung bên trong */}
         {meetingDetail ? (
           <Descriptions
             bordered
@@ -715,7 +710,15 @@ borderColor: m.status === "CANCELLED"
               {`${dayjs(meetingDetail.startTime).format("HH:mm")} - ${dayjs(meetingDetail.endTime).format("HH:mm, DD/MM/YYYY")}`}
             </Descriptions.Item>
             <Descriptions.Item label="Trạng thái">
-              <Tag color={meetingDetail.status === 'CONFIRMED' ? 'blue' : 'warning'}>
+              <Tag 
+                color={
+                  meetingDetail.status === 'CONFIRMED' 
+                  ? 'blue' 
+                  : meetingDetail.status === 'REJECTED' 
+                  ? 'red' 
+                  : 'warning'
+                }
+              >
                 {meetingDetail.status}
               </Tag>
             </Descriptions.Item>
