@@ -263,11 +263,11 @@ setTimeout(() => {
     <div className="p-8 min-h-screen transition-colors bg-gray-50 dark:bg-gray-900">
       {/* ==================== HEADER ==================== */}
       <motion.div
-  initial={{ opacity: 0, y: -10 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.4 }}
-  className="flex items-center gap-2 mb-8"
->
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="flex items-center gap-2 mb-8"
+      >
         <span>
           <svg
             width={32}
@@ -293,7 +293,11 @@ setTimeout(() => {
       </motion.div>
 
       {/* ==================== FILTERS & ACTIONS ==================== */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 mb-7 border border-gray-100 dark:border-gray-700 transition">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 mb-7 border border-gray-100 dark:border-gray-700 transition"
+      >
         <div className="flex flex-col md:flex-row gap-4">
           {/* Ô tìm kiếm */}
           <div className="flex-1 relative">
@@ -335,35 +339,69 @@ setTimeout(() => {
             Thêm thiết bị
           </button>
         </div>
-      </div>
+      </motion.div>
 
       {/* ==================== STATS CARDS ==================== */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-7">
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          duration: 0.55,
+          ease: [0.18, 0.71, 0.35, 0.98],
+        }}
+        className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-7"
+      >
         {/* Tổng số thiết bị */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow transition">
-          <div className="text-gray-500 dark:text-gray-400 text-base mb-0.5">Tổng số thiết bị</div>
-          <div className="text-2xl font-bold text-gray-800 dark:text-white">{devices.length}</div>
-        </div>
-
+        <motion.div
+          initial={false}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow transition"
+        >
+          <div className="text-gray-500 dark:text-gray-400 text-base mb-0.5">
+            Tổng số thiết bị
+          </div>
+          <div className="text-2xl font-bold text-gray-800 dark:text-white">
+            {devices.length}
+          </div>
+        </motion.div>
         {/* Số thiết bị có sẵn */}
-        <div className="bg-green-50 dark:bg-green-900/20 rounded-2xl p-6 border border-green-200 dark:border-green-800 shadow transition">
-          <div className="text-green-700 dark:text-green-400 text-base mb-0.5">Có sẵn</div>
+        <motion.div
+          initial={false}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="bg-green-50 dark:bg-green-900/20 rounded-2xl p-6 border border-green-200 dark:border-green-800 shadow transition"
+        >
+          <div className="text-green-700 dark:text-green-400 text-base mb-0.5">
+            Có sẵn
+          </div>
           <div className="text-2xl font-bold text-green-700 dark:text-green-200">
             {getStatsByStatus("AVAILABLE")}
           </div>
-        </div>
-
+        </motion.div>
         {/* Số thiết bị đang bảo trì */}
-        <div className="bg-orange-50 dark:bg-orange-900/20 rounded-2xl p-6 border border-orange-200 dark:border-orange-800 shadow transition">
-          <div className="text-orange-700 dark:text-orange-400 text-base mb-0.5">Đang bảo trì</div>
+        <motion.div
+          initial={false}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="bg-orange-50 dark:bg-orange-900/20 rounded-2xl p-6 border border-orange-200 dark:border-orange-800 shadow transition"
+        >
+          <div className="text-orange-700 dark:text-orange-400 text-base mb-0.5">
+            Đang bảo trì
+          </div>
           <div className="text-2xl font-bold text-orange-700 dark:text-orange-100">
             {getStatsByStatus("UNDER_MAINTENANCE")}
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* ==================== TABLE - DANH SÁCH THIẾT BỊ ==================== */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden border border-gray-100 dark:border-gray-700 relative">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden border border-gray-100 dark:border-gray-700 relative"
+      >
         {/* Loading overlay */}
         {loading && (
           <div className="absolute inset-0 bg-white/80 dark:bg-gray-900/80 flex items-center justify-center z-10">
@@ -386,92 +424,96 @@ setTimeout(() => {
             
             {/* Table body */}
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700 text-base">
-  {filteredDevices.length === 0 ? (
-    // Empty state
-    <tr>
-      <td colSpan="5" className="p-10 text-center text-gray-500 dark:text-gray-400">
-        <div className="flex flex-col items-center gap-2">
-          <Search size={48} className="text-gray-300 dark:text-gray-600" />
-          <p className="text-lg font-semibold">Không tìm thấy thiết bị nào</p>
-          <p className="text-base">Thử thay đổi bộ lọc hoặc tìm kiếm khác</p>
-        </div>
-      </td>
-    </tr>
-  ) : (
-    // Danh sách thiết bị – THÊM ANIMATION ĐÚNG CÁCH
-    paginatedDevices.map((device, i) => (
-      <motion.tr
-        key={device.id}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: i * 0.03 }}
-        className="hover:bg-gray-50 dark:hover:bg-gray-700 transition"
-      >
-        <td className="p-4 font-semibold text-center">
-          {(currentPage - 1) * ITEMS_PER_PAGE + i + 1}
-        </td>
+              {filteredDevices.length === 0 ? (
+                // Empty state
+                <tr>
+                  <td colSpan="5" className="p-10 text-center text-gray-500 dark:text-gray-400">
+                    <div className="flex flex-col items-center gap-2">
+                      <Search size={48} className="text-gray-300 dark:text-gray-600" />
+                      <p className="text-lg font-semibold">Không tìm thấy thiết bị nào</p>
+                      <p className="text-base">Thử thay đổi bộ lọc hoặc tìm kiếm khác</p>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                paginatedDevices.map((device, i) => (
+                  <motion.tr
+                    key={device.id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: i * 0.03 }}
+                    className="hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                  >
+                    <td className="p-4 font-semibold text-center">
+                      {(currentPage - 1) * ITEMS_PER_PAGE + i + 1}
+                    </td>
 
-        <td className="p-4 font-medium text-gray-900 dark:text-white">
-          {device.name}
-        </td>
+                    <td className="p-4 font-medium text-gray-900 dark:text-white">
+                      {device.name}
+                    </td>
 
-        <td className="p-4 text-gray-600 dark:text-gray-400">
-          {device.description || (
-            <span className="text-gray-400 dark:text-gray-600 italic">
-              Chưa có mô tả
-            </span>
-          )}
-        </td>
+                    <td className="p-4 text-gray-600 dark:text-gray-400">
+                      {device.description || (
+                        <span className="text-gray-400 dark:text-gray-600 italic">
+                          Chưa có mô tả
+                        </span>
+                      )}
+                    </td>
 
-        <td className="p-4">{getStatusBadge(device.status)}</td>
+                    <td className="p-4">{getStatusBadge(device.status)}</td>
 
-        <td className="p-4 text-center">
-          <div className="flex items-center justify-center gap-2">
-            {/* Nút chỉnh sửa */}
-            <button
-              onClick={() => handleOpenModal(device)}
-              disabled={loading}
-              className="p-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300
-                hover:bg-blue-100 dark:hover:bg-blue-900/20 rounded-md transition
-                disabled:opacity-50 disabled:cursor-not-allowed"
-              title="Chỉnh sửa"
-            >
-              <Edit2 size={18} />
-            </button>
+                    <td className="p-4 text-center">
+                      <div className="flex items-center justify-center gap-2">
+                        {/* Nút chỉnh sửa */}
+                        <button
+                          onClick={() => handleOpenModal(device)}
+                          disabled={loading}
+                          className="p-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300
+                            hover:bg-blue-100 dark:hover:bg-blue-900/20 rounded-md transition
+                            disabled:opacity-50 disabled:cursor-not-allowed"
+                          title="Chỉnh sửa"
+                        >
+                          <Edit2 size={18} />
+                        </button>
 
-            {/* Nút xoá */}
-            <button
-              onClick={() => handleOpenDeleteModal(device)}
-              disabled={loading}
-              className="p-2 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300
-                hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition
-                disabled:opacity-50 disabled:cursor-not-allowed"
-              title="Xóa"
-            >
-              <Trash2 size={18} />
-            </button>
-          </div>
-        </td>
-      </motion.tr>
-    ))
-  )}
-</tbody>
+                        {/* Nút xoá */}
+                        <button
+                          onClick={() => handleOpenDeleteModal(device)}
+                          disabled={loading}
+                          className="p-2 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300
+                            hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition
+                            disabled:opacity-50 disabled:cursor-not-allowed"
+                          title="Xóa"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
+                    </td>
+                  </motion.tr>
+                ))
+              )}
+            </tbody>
           </table>
         </div>
-      </div>
+      </motion.div>
 
       {/* 📄 Phân trang */}
       <Pagination
-  totalItems={filteredDevices.length}
-  pageSize={ITEMS_PER_PAGE}
-  currentPage={currentPage}
-  onPageChange={(page) => setCurrentPage(page)}
-/>
+        totalItems={filteredDevices.length}
+        pageSize={ITEMS_PER_PAGE}
+        currentPage={currentPage}
+        onPageChange={(page) => setCurrentPage(page)}
+      />
 
       {/* ==================== MODAL THÊM/SỬA THIẾT BỊ ==================== */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border border-gray-200 dark:border-gray-700 animate-slide-up">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.25 }}
+            className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border border-gray-200 dark:border-gray-700 animate-slide-up"
+          >
             {/* Modal Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -588,14 +630,19 @@ setTimeout(() => {
                 </button>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       )}
 
       {/* ==================== MODAL XÁC NHẬN XÓA THIẾT BỊ ==================== */}
       {isDeleteModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border border-gray-200 dark:border-gray-700 animate-slide-up">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.25 }}
+            className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border border-gray-200 dark:border-gray-700 animate-slide-up"
+          >
             {/* Modal Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-center gap-3">
@@ -679,7 +726,7 @@ setTimeout(() => {
                 )}
               </button>
             </div>
-          </div>
+          </motion.div>
         </div>
       )}
     </div>

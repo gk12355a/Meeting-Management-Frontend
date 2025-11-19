@@ -16,11 +16,12 @@ import {
   AlertCircle,
   AlertTriangle,
   Building,
-  Crown, // <-- THÊM ICON VIP
+  Crown,
+  Users,
 } from "lucide-react";
 import { toast } from "react-toastify";
 import Pagination from "../../components/Pagination";
-import { motion } from "framer-motion"; 
+import { motion } from "framer-motion";
 
 /* Toast màu */
 const toastColors = {
@@ -56,7 +57,7 @@ export default function RoomsPage() {
     capacity: 0,
     location: "",
     status: "AVAILABLE",
-    requiresApproval: false, // <-- THÊM STATE MỚI
+    requiresApproval: false,
   });
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -71,8 +72,7 @@ export default function RoomsPage() {
     try {
       setLoading(true);
       const response = await getRooms();
-      // Sắp xếp: Mới nhất lên đầu
-      const sortedData = response.data.sort((a, b) => b.id - a.id);
+      const sortedData = (response.data || []).sort((a, b) => b.id - a.id);
       setRooms(sortedData);
       setFilteredRooms(sortedData);
     } catch (error) {
@@ -122,16 +122,16 @@ export default function RoomsPage() {
         capacity: room.capacity,
         location: room.location,
         status: room.status,
-        requiresApproval: room.requiresApproval || false, // <-- THÊM
+        requiresApproval: room.requiresApproval || false,
       });
     } else {
       setEditingRoom(null);
-      setFormData({ 
-        name: "", 
-        capacity: 0, 
-        location: "", 
+      setFormData({
+        name: "",
+        capacity: 0,
+        location: "",
         status: "AVAILABLE",
-        requiresApproval: false, // <-- Mặc định false
+        requiresApproval: false,
       });
     }
     setIsModalOpen(true);
@@ -140,12 +140,12 @@ export default function RoomsPage() {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingRoom(null);
-    setFormData({ 
-      name: "", 
-      capacity: 0, 
-      location: "", 
+    setFormData({
+      name: "",
+      capacity: 0,
+      location: "",
       status: "AVAILABLE",
-      requiresApproval: false 
+      requiresApproval: false,
     });
   };
 
@@ -172,7 +172,7 @@ export default function RoomsPage() {
         location: formData.location.trim(),
         capacity: capacityValue,
         status: formData.status,
-        requiresApproval: formData.requiresApproval, // <-- GỬI LÊN SERVER
+        requiresApproval: formData.requiresApproval,
       };
 
       if (editingRoom) {
@@ -221,10 +221,8 @@ export default function RoomsPage() {
   // === Helpers ===
   const getStatusBadge = (status) => {
     const styles = {
-      AVAILABLE:
-        "bg-green-100 text-green-700 dark:bg-green-700 dark:text-green-100",
-      UNDER_MAINTENANCE:
-        "bg-orange-100 text-orange-700 dark:bg-orange-700 dark:text-orange-100",
+      AVAILABLE: "bg-green-100 text-green-700 dark:bg-green-700 dark:text-green-100",
+      UNDER_MAINTENANCE: "bg-orange-100 text-orange-700 dark:bg-orange-700 dark:text-orange-100",
     };
 
     const labels = {
@@ -247,10 +245,16 @@ export default function RoomsPage() {
     setCurrentPage(page);
   };
 
+  // ====== CARD LOGIC ======
+  const totalRooms = rooms.length;
+  const totalAvailable = rooms.filter((room) => room.status === "AVAILABLE").length;
+  const totalMaintenance = rooms.filter((room) => room.status === "UNDER_MAINTENANCE").length;
+  const totalVip = rooms.filter((room) => !!room.requiresApproval).length;
+  // const totalCapacity = rooms.reduce((acc, cur) => acc + (cur.capacity || 0), 0);
+
   // === Render ===
   return (
     <div className="p-8 min-h-screen transition-colors bg-gray-50 dark:bg-gray-900">
-
       {/* ⭐ HEADER */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
@@ -272,7 +276,6 @@ export default function RoomsPage() {
         className="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 mb-7 border border-gray-100 dark:border-gray-700 transition"
       >
         <div className="flex flex-col md:flex-row gap-4">
-
           {/* Search */}
           <div className="flex-1 relative">
             <Search
@@ -289,7 +292,6 @@ export default function RoomsPage() {
               focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-400 focus:border-transparent text-base transition"
             />
           </div>
-
           {/* Filter by status */}
           <select
             value={statusFilter}
@@ -301,7 +303,6 @@ export default function RoomsPage() {
             <option value="AVAILABLE">Có sẵn</option>
             <option value="UNDER_MAINTENANCE">Đang bảo trì</option>
           </select>
-
           {/* Add button */}
           <button
             onClick={() => handleOpenModal()}
@@ -312,8 +313,71 @@ export default function RoomsPage() {
             <Plus size={20} />
             Thêm phòng họp
           </button>
-
         </div>
+      </motion.div>
+
+      {/* ====== Card Stats ====== */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-7"
+      >
+        {/* Tổng số phòng họp */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.08 }}
+          className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow transition"
+        >
+          <div className="text-gray-500 dark:text-gray-400 text-base mb-0.5">
+            Tổng số phòng họp
+          </div>
+          <div className="text-2xl font-bold text-gray-800 dark:text-white">
+            {totalRooms}
+          </div>
+        </motion.div>
+        {/* Số phòng có sẵn */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.17 }}
+          className="bg-green-50 dark:bg-green-900/20 rounded-2xl p-6 border border-green-200 dark:border-green-800 shadow transition"
+        >
+          <div className="text-green-700 dark:text-green-400 text-base mb-0.5">
+            Đang sẵn sàng
+          </div>
+          <div className="text-2xl font-bold text-green-700 dark:text-green-200">
+            {totalAvailable}
+          </div>
+        </motion.div>
+        {/* Số phòng bảo trì */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.26 }}
+          className="bg-orange-50 dark:bg-orange-900/20 rounded-2xl p-6 border border-orange-200 dark:border-orange-800 shadow transition"
+        >
+          <div className="text-orange-700 dark:text-orange-400 text-base mb-0.5">
+            Đang bảo trì
+          </div>
+          <div className="text-2xl font-bold text-orange-700 dark:text-orange-100">
+            {totalMaintenance}
+          </div>
+        </motion.div>
+        {/* Số phòng VIP (cần phê duyệt) */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.33 }}
+          className="bg-yellow-50 dark:bg-yellow-900/20 rounded-2xl p-6 border border-yellow-200 dark:border-yellow-800 shadow transition"
+        >
+          <div className="text-yellow-700 dark:text-yellow-300 text-base mb-0.5">
+            Số phòng VIP (cần phê duyệt)
+          </div>
+          <div className="text-2xl font-bold text-yellow-700 dark:text-yellow-200">
+            {totalVip}
+          </div>
+        </motion.div>
       </motion.div>
 
       {/* ⭐ TABLE */}
@@ -329,7 +393,6 @@ export default function RoomsPage() {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
           </div>
         )}
-
         <div className="overflow-x-auto">
           <table className="min-w-full table-auto text-base text-left">
             <thead className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200">
@@ -344,9 +407,7 @@ export default function RoomsPage() {
                 <th className="p-4 font-semibold text-center">Hành động</th>
               </tr>
             </thead>
-
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-
               {/* Không tìm thấy */}
               {paginatedRooms.length === 0 ? (
                 <tr>
@@ -374,12 +435,10 @@ export default function RoomsPage() {
                     <td className="p-4 text-center">
                       {(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}
                     </td>
-
                     {/* Name */}
                     <td className="p-4 font-medium text-gray-900 dark:text-white">
                       {room.name}
                     </td>
-
                     {/* CỘT VIP */}
                     <td className="p-4">
                       {room.requiresApproval ? (
@@ -392,7 +451,6 @@ export default function RoomsPage() {
                         </span>
                       )}
                     </td>
-
                     {/* Location */}
                     <td className="p-4 text-gray-600 dark:text-gray-400">
                       {room.location || (
@@ -401,15 +459,12 @@ export default function RoomsPage() {
                         </span>
                       )}
                     </td>
-
                     {/* Capacity */}
                     <td className="p-4 text-gray-600 dark:text-gray-400">
                       {room.capacity}
                     </td>
-
                     {/* Status */}
                     <td className="p-4">{getStatusBadge(room.status)}</td>
-
                     {/* Actions */}
                     <td className="p-4 text-center">
                       <div className="flex items-center justify-center gap-2">
@@ -421,7 +476,6 @@ export default function RoomsPage() {
                         >
                           <Edit2 size={18} />
                         </button>
-
                         <button
                           onClick={() => handleOpenDeleteModal(room)}
                           disabled={loading}
@@ -453,7 +507,6 @@ export default function RoomsPage() {
       {/* ⭐ MODAL THÊM / SỬA */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-
           <motion.div
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -466,7 +519,6 @@ export default function RoomsPage() {
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                 {editingRoom ? "Chỉnh sửa phòng họp" : "Thêm phòng họp mới"}
               </h2>
-
               <button
                 onClick={handleCloseModal}
                 disabled={loading}
@@ -476,11 +528,9 @@ export default function RoomsPage() {
                 <X size={20} className="text-gray-500 dark:text-gray-400" />
               </button>
             </div>
-
             {/* Body Form */}
             <form onSubmit={handleSubmit}>
               <div className="p-6 space-y-4">
-
                 {/* Tên phòng */}
                 <div>
                   <label className="block text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -502,7 +552,6 @@ export default function RoomsPage() {
                     disabled:opacity-50 transition-all"
                   />
                 </div>
-
                 {/* Vị trí */}
                 <div>
                   <label className="block text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -523,10 +572,9 @@ export default function RoomsPage() {
                     disabled:opacity-50 transition-all"
                   />
                 </div>
-
                 <div className="grid grid-cols-2 gap-4">
-                   {/* Sức chứa */}
-                   <div>
+                  {/* Sức chứa */}
+                  <div>
                     <label className="block text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Sức chứa <span className="text-red-500">*</span>
                     </label>
@@ -547,7 +595,6 @@ export default function RoomsPage() {
                       disabled:opacity-50 transition-all"
                     />
                   </div>
-
                   {/* Trạng thái */}
                   <div>
                     <label className="block text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -570,7 +617,6 @@ export default function RoomsPage() {
                     </select>
                   </div>
                 </div>
-
                 {/* === CẤU HÌNH PHÒNG VIP (MỚI) === */}
                 <div className="bg-yellow-50 dark:bg-yellow-900/10 p-4 rounded-xl border border-yellow-200 dark:border-yellow-800/30 flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -594,7 +640,6 @@ export default function RoomsPage() {
                     <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                   </label>
                 </div>
-
                 {/* Footer */}
                 <div className="flex gap-3 pt-2">
                   <button
@@ -607,7 +652,6 @@ export default function RoomsPage() {
                   >
                     Hủy
                   </button>
-
                   <button
                     type="submit"
                     disabled={loading}
@@ -628,7 +672,6 @@ export default function RoomsPage() {
                     )}
                   </button>
                 </div>
-
               </div>
             </form>
           </motion.div>
@@ -638,7 +681,6 @@ export default function RoomsPage() {
       {/* ⭐ MODAL XÓA — scale + fade */}
       {isDeleteModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-
           <motion.div
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -656,7 +698,6 @@ export default function RoomsPage() {
                   Xác nhận xóa
                 </h2>
               </div>
-
               <button
                 onClick={handleCloseDeleteModal}
                 disabled={loading}
@@ -666,13 +707,11 @@ export default function RoomsPage() {
                 <X size={20} className="text-gray-500 dark:text-gray-400" />
               </button>
             </div>
-
             {/* Body */}
             <div className="p-6">
               <p className="text-base text-gray-700 dark:text-gray-300 mb-4">
                 Bạn có chắc chắn muốn xóa phòng họp này không?
               </p>
-
               {roomToDelete && (
                 <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 mb-4">
                   <div className="flex items-start gap-3">
@@ -684,17 +723,14 @@ export default function RoomsPage() {
                         {roomToDelete.location || "Không có vị trí"}
                       </p>
                     </div>
-
                     {getStatusBadge(roomToDelete.status)}
                   </div>
                 </div>
               )}
-
               <p className="text-base text-red-600 dark:text-red-400">
                 ⚠️ Hành động này không thể hoàn tác!
               </p>
             </div>
-
             {/* Footer */}
             <div className="flex gap-3 p-6 pt-0">
               <button
@@ -706,7 +742,6 @@ export default function RoomsPage() {
               >
                 Hủy
               </button>
-
               <button
                 type="button"
                 onClick={handleConfirmDelete}
