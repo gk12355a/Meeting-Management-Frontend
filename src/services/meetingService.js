@@ -19,7 +19,7 @@ export const respondToMeeting = (meetingId, status) => {
  * @param {number} page - trang (tùy chọn)
  * @param {number} size - số phần tử mỗi trang (tùy chọn)
  */
-export const getMyMeetings = (page = 0, size = 20) => {
+export const getMyMeetings = (page = 0, size = 9000) => {
   return api.get("/meetings/my-meetings", { params: { page, size } });
 };
 
@@ -70,3 +70,26 @@ export const getAllUsers = () => {
   return api.get("/admin/users");
 };
 
+/* -------------------------------------------------------------------------- */
+/* 🆕 Thêm các API cập nhật và xóa cuộc họp, cập nhật/hủy chuỗi recurring     */
+/* -------------------------------------------------------------------------- */
+
+// Cập nhật cuộc họp
+export const updateMeeting = (meetingId, payload) => {
+  return api.put(`/meetings/${meetingId}`, payload);
+};
+
+// Xóa/Hủy cuộc họp
+export const deleteMeeting = (meetingId, payload) => {
+  return api.delete(`/meetings/${meetingId}`, { data: payload });
+};
+
+// Cập nhật toàn bộ chuỗi lịch định kỳ
+export const updateRecurringSeries = (seriesId, payload) => {
+  return api.put(`/meetings/series/${seriesId}`, payload);
+};
+
+// Hủy toàn bộ chuỗi lịch định kỳ
+export const deleteRecurringSeries = (seriesId, payload) => {
+  return api.delete(`/meetings/series/${seriesId}`, { data: payload });
+};

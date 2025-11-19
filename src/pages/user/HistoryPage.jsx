@@ -1,47 +1,96 @@
 // src/pages/user/HistoryPage.jsx
 import React, { useEffect, useState } from "react";
 import { FiCalendar, FiMapPin, FiClock, FiUsers, FiX } from "react-icons/fi";
-import { Spin, message, Tag } from "antd"; // <-- THÊM Tag
+import { Spin, message } from "antd";
 import { getMyMeetings } from "../../services/meetingService";
 import dayjs from "dayjs";
 import "dayjs/locale/vi";
 dayjs.locale("vi");
 
+/* ===============================
+   🎨 Màu LIGHT MODE
+================================ */
+const roomColors = [
+  { bg: "#FFE0E9", border: "#FF99B2" },
+  { bg: "#D6F4FF", border: "#4CB4FF" },
+  { bg: "#DBFFFC", border: "#04CCC6" },
+  { bg: "#FFF7C8", border: "#FFD560" },
+  { bg: "#F3EBFF", border: "#B88CFF" },
+  { bg: "#FFE8F0", border: "#FF6FA5" },
+];
+
+/* ===============================
+   🌙 Màu DARK MODE (đậm hơn)
+================================ */
+const roomColorsDark = [
+  { bg: "#3B2631", border: "#FF7FA5" },
+  { bg: "#112533", border: "#4FABFF" },
+  { bg: "#0F2E2C", border: "#26D7C8" },
+  { bg: "#3A351B", border: "#FFC857" },
+  { bg: "#2A1D3A", border: "#B892FF" },
+  { bg: "#3A1E2A", border: "#FF729A" },
+];
+
+/* ===============================
+   🎨 getRoomColor xử lý theme
+================================ */
+const getRoomColor = (roomName, isDark) => {
+  const palette = isDark ? roomColorsDark : roomColors;
+
+  if (!roomName) return palette[0];
+
+  let hash = 0;
+  for (let i = 0; i < roomName.length; i++) {
+    hash = roomName.charCodeAt(i) + ((hash << 5) - hash);
+  }
+
+  return palette[Math.abs(hash % palette.length)];
+};
+
 const HistoryPage = () => {
-  const [activeTab, setActiveTab] = useState("joined"); // joined | cancelled
+  const [activeTab, setActiveTab] = useState("joined");
   const [joinedMeetings, setJoinedMeetings] = useState([]);
   const [cancelledMeetings, setCancelledMeetings] = useState([]);
   const [selectedMeeting, setSelectedMeeting] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // === 1. TẢI DỮ LIỆU TỪ API (Logic này vẫn đúng) ===
+  /* ======================================================
+     🌙 Theo dõi theme real-time (KHÔNG còn lỗi màu)
+  ======================================================== */
+  const [isDark, setIsDark] = useState(
+    document.documentElement.classList.contains("dark")
+  );
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.classList.contains("dark"));
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  /* ===============================
+     LOAD HISTORY
+  ================================= */
   useEffect(() => {
     const fetchHistory = async () => {
       setLoading(true);
       try {
-        const res = await getMyMeetings(0, 100); 
-        const allMeetings = res.data?.content || [];
+        const res = await getMyMeetings(0, 100);
+        const all = res.data?.content || [];
+
         const now = dayjs();
+        const past = all.filter((m) => dayjs(m.endTime).isBefore(now));
+        const cancelled = all.filter((m) => m.status === "CANCELLED");
 
-        // Lọc dữ liệu
-        const pastMeetings = allMeetings.filter(m => 
-          dayjs(m.endTime).isBefore(now)
-        );
-        
-        const cancelled = allMeetings.filter(m => 
-          m.status === 'CANCELLED'
-        );
-
-        // Tab "Đã tham gia" = Các cuộc họp đã qua VÀ không bị hủy
-        setJoinedMeetings(
-          pastMeetings.filter(m => m.status !== 'CANCELLED')
-        );
-
-        // Tab "Đã hủy" = Tất cả các cuộc họp bị hủy (cả quá khứ và tương lai)
+        setJoinedMeetings(past.filter((m) => m.status !== "CANCELLED"));
         setCancelledMeetings(cancelled);
-
       } catch (err) {
-        console.error("Lỗi tải lịch sử họp:", err);
         message.error("Không thể tải lịch sử cuộc họp.");
       } finally {
         setLoading(false);
@@ -49,39 +98,27 @@ const HistoryPage = () => {
     };
 
     fetchHistory();
-  }, []); // Chỉ chạy 1 lần
-
-  const handleMeetingClick = (meeting) => {
-    setSelectedMeeting(meeting);
-  };
-
-  const closeModal = () => {
-    setSelectedMeeting(null);
-  };
-
-  // === 2. HÀM HELPER MỚI ĐỂ HIỂN THỊ TAG TRẠNG THÁI ===
-  const getTag = (status) => {
-    switch (status) {
-      case 'ACCEPTED':
-        return <Tag color="success" className="ml-2">Đã chấp nhận</Tag>;
-      case 'DECLINED':
-        return <Tag color="error" className="ml-2">Đã từ chối</Tag>;
-      case 'PENDING':
-        return <Tag color="warning" className="ml-2">Chờ phản hồi</Tag>;
-      default:
-        return null;
-    }
-  };
+  }, []);
 
   const meetings = activeTab === "joined" ? joinedMeetings : cancelledMeetings;
 
   return (
-    <div className="p-6 min-h-screen bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
-      <h1 className="text-2xl font-semibold mb-6 text-gray-800 dark:text-gray-100 flex items-center gap-2">
-        📖 Lịch sử họp
-      </h1>
+    <div className="p-6 min-h-screen bg-gray-50 dark:bg-slate-900 transition-colors">
 
-      {/* Tabs (Giữ nguyên) */}
+      {/* ================== HEADER ================== */}
+      <div className="flex items-center gap-3 mb-6 pb-3 border-b border-gray-300 dark:border-gray-700">
+        <div className="p-3 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-500 shadow-md">
+          <FiCalendar className="text-white text-2xl" />
+        </div>
+        <div>
+          <h1 className="text-3xl font-bold dark:text-gray-100">Lịch sử họp</h1>
+          <p className="text-gray-500 dark:text-gray-400">
+            Xem lại các cuộc họp bạn đã tham gia
+          </p>
+        </div>
+      </div>
+
+      {/* ================== TABS ================== */}
       <div className="flex gap-3 mb-6">
         <button
           className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
@@ -93,6 +130,7 @@ const HistoryPage = () => {
         >
           Đã tham gia
         </button>
+
         <button
           className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
             activeTab === "cancelled"
@@ -105,117 +143,171 @@ const HistoryPage = () => {
         </button>
       </div>
 
-      {/* Danh sách cuộc họp (Giữ nguyên) */}
-      <div className="bg-white dark:bg-slate-800 shadow-md rounded-2xl p-5 transition-colors duration-300">
+      {/* ================== LIST ================== */}
+      <div className="bg-white dark:bg-slate-800 shadow-md rounded-2xl p-5 transition-colors">
+
         {loading ? (
-          <div className="flex justify-center items-center py-16">
+          <div className="flex justify-center py-16">
             <Spin size="large" />
           </div>
         ) : meetings.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-gray-500 dark:text-gray-400">
+          <div className="flex flex-col items-center py-16 text-gray-500 dark:text-gray-400">
             <FiCalendar size={32} className="mb-3" />
-            <p>Không có cuộc họp nào trong danh sách này.</p>
+            Không có dữ liệu.
           </div>
         ) : (
-          <ul className="divide-y divide-gray-200 dark:divide-slate-700">
-            {meetings.map((item) => (
-              <li
-                key={item.id}
-                className="py-4 px-2 hover:bg-gray-50 dark:hover:bg-slate-700/40 rounded-xl transition-colors duration-200 cursor-pointer"
-                onClick={() => handleMeetingClick(item)}
-              >
-                <p
-                  className={`font-semibold mb-1 ${
-                    activeTab === "cancelled"
-                      ? "text-red-600 dark:text-red-400"
-                      : "text-gray-800 dark:text-gray-100"
-                  }`}
+          <ul className="flex flex-col gap-4">
+
+            {meetings.map((item) => {
+              const color = getRoomColor(item.room?.name, isDark);
+
+              return (
+                <li
+                  key={item.id}
+                  onClick={() => setSelectedMeeting(item)}
+                  style={{
+                    backgroundColor: color.bg,
+                    border: `2px solid ${color.border}`,
+                  }}
+                  className="p-4 rounded-xl cursor-pointer hover:shadow-xl hover:-translate-y-0.5 transition-all"
                 >
-                  {item.title}
-                </p>
-                <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-300">
-                  <span className="flex items-center gap-1">
-                    <FiCalendar size={14} /> {dayjs(item.startTime).format("DD/MM/YYYY")}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <FiClock size={14} /> 
-                    {`${dayjs(item.startTime).format("HH:mm")} - ${dayjs(item.endTime).format("HH:mm")}`}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <FiMapPin size={14} /> {item.room?.name || "N/A"}
-                  </span>
-                </div>
-              </li>
-            ))}
+                  <p className="font-semibold mb-2 text-lg text-gray-900 dark:text-white">
+                    {item.title}
+                  </p>
+
+                  <div className="flex flex-wrap items-center gap-5 text-sm text-gray-700 dark:text-gray-100">
+                    <span className="flex items-center gap-1">
+                      <FiCalendar size={15} />
+                      {dayjs(item.startTime).format("DD/MM/YYYY")}
+                    </span>
+
+                    <span className="flex items-center gap-1">
+                      <FiClock size={15} />
+                      {dayjs(item.startTime).format("HH:mm")} –{" "}
+                      {dayjs(item.endTime).format("HH:mm")}
+                    </span>
+
+                    <span className="flex items-center gap-1">
+                      <FiMapPin size={15} />
+                      {item.room?.name}
+                    </span>
+                  </div>
+                </li>
+              );
+            })}
+
           </ul>
         )}
       </div>
 
-      {/* === 4. MODAL CHI TIẾT (ĐÃ CẬP NHẬT) === */}
+      {/* ================== MODAL ================== */}
       {selectedMeeting && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-lg shadow-lg relative">
+          <div className="bg-white dark:bg-slate-800 p-7 rounded-2xl w-full max-w-lg shadow-2xl relative">
+
             <button
-              onClick={closeModal}
-              className="absolute top-3 right-3 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+              onClick={() => setSelectedMeeting(null)}
+              className="absolute top-4 right-4 text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
             >
-              <FiX size={20} />
+              <FiX size={22} />
             </button>
 
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">
+            <h2 className="text-2xl font-bold mb-5 text-gray-900 dark:text-gray-100">
               {selectedMeeting.title}
             </h2>
 
-            <div className="space-y-2 text-gray-700 dark:text-gray-300 text-sm">
-              <p className="flex items-center gap-2">
-                <FiCalendar size={14} /> <strong>Ngày:</strong> 
-                {dayjs(selectedMeeting.startTime).format("DD/MM/YYYY")}
-              </p>
-              <p className="flex items-center gap-2">
-                <FiClock size={14} /> <strong>Giờ:</strong> 
-                {`${dayjs(selectedMeeting.startTime).format("HH:mm")} - ${dayjs(selectedMeeting.endTime).format("HH:mm")}`}
-              </p>
-              <p className="flex items-center gap-2">
-                <FiMapPin size={14} /> <strong>Phòng:</strong> 
-                {selectedMeeting.room?.name || "N/A"}
-              </p>
-
-              {/* === SỬA LỖI LOGIC HIỂN THỊ NGƯỜI THAM GIA === */}
-              {selectedMeeting.participants && (
-                <div className="mt-3">
-                  <p className="flex items-center gap-2 font-medium text-gray-800 dark:text-gray-100">
-                    <FiUsers size={14} /> Người tham gia:
+            <div className="space-y-4">
+              {/* Ngày */}
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-blue-100 dark:bg-slate-700">
+                  <FiCalendar className="text-blue-600 dark:text-blue-300" />
+                </div>
+                <div>
+                  <span className="font-medium dark:text-gray-100">Ngày</span>
+                  <p className="dark:text-gray-300">
+                    {dayjs(selectedMeeting.startTime).format("DD/MM/YYYY")}
                   </p>
-                  {/* Sử dụng list-none để căn chỉnh đẹp hơn */}
-                  <ul className="mt-2 ml-2 list-none space-y-1 p-0">
-                    {selectedMeeting.participants.map((p) => (
-                      <li key={p.id} className="flex justify-between items-center py-1">
-                        <span className="text-gray-800 dark:text-gray-100">{p.fullName}</span>
-                        {/* Hiển thị trạng thái (nếu là tab "Đã tham gia") */}
-                        {activeTab === "joined" && getTag(p.status)}
-                      </li>
-                    ))}
+                </div>
+              </div>
+
+              {/* Giờ */}
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-green-100 dark:bg-slate-700">
+                  <FiClock className="text-green-600 dark:text-green-300" />
+                </div>
+                <div>
+                  <span className="font-medium dark:text-gray-100">Giờ</span>
+                  <p className="dark:text-gray-300">
+                    {dayjs(selectedMeeting.startTime).format("HH:mm")} –{" "}
+                    {dayjs(selectedMeeting.endTime).format("HH:mm")}
+                  </p>
+                </div>
+              </div>
+
+              {/* Phòng */}
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-purple-100 dark:bg-slate-700">
+                  <FiMapPin className="text-purple-600 dark:text-purple-300" />
+                </div>
+                <div>
+                  <span className="font-medium dark:text-gray-100">Phòng</span>
+                  <p className="dark:text-gray-300">{selectedMeeting.room?.name}</p>
+                </div>
+              </div>
+
+              {/* Người tham gia */}
+              {selectedMeeting.participants && (
+                <div className="mt-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 rounded-xl bg-orange-100 dark:bg-slate-700">
+                      <FiUsers className="text-orange-600 dark:text-orange-300" />
+                    </div>
+                    <span className="font-medium dark:text-gray-100">
+                      Người tham gia
+                    </span>
+                  </div>
+
+                  <ul className="space-y-2">
+                    {selectedMeeting.participants.map((p) => {
+                      const statusColor = {
+                        PENDING: "text-yellow-600 dark:text-yellow-400",
+                        ACCEPTED: "text-green-600 dark:text-green-400",
+                        REJECTED: "text-red-600 dark:text-red-400",
+                        ATTENDED: "text-blue-600 dark:text-blue-400",
+                        CANCELLED: "text-gray-500 dark:text-gray-400",
+                      }[p.status] || "text-gray-600 dark:text-gray-300";
+
+                      const statusLabel = {
+                        PENDING: "Chờ xác nhận",
+                        ACCEPTED: "Đã chấp nhận",
+                        REJECTED: "Từ chối",
+                        ATTENDED: "Đã tham dự",
+                        CANCELLED: "Đã hủy",
+                      }[p.status] || p.status;
+
+                      return (
+                        <li
+                          key={p.id}
+                          className="flex items-center justify-between bg-gray-50 dark:bg-slate-700 p-2 rounded-lg"
+                        >
+                          <span className="text-gray-900 dark:text-gray-100">
+                            {p.fullName}
+                          </span>
+
+                          <span className={`text-sm font-medium ${statusColor}`}>
+                            {statusLabel}
+                          </span>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
-              )}
-              {/* === KẾT THÚC SỬA LỖI === */}
-
-              {activeTab === "cancelled" && (
-                <p className="mt-3 text-red-600 dark:text-red-400">
-                  <strong>Trạng thái:</strong> Đã hủy
-                  {/* (API getMyMeetings không có lý do hủy, nên chúng ta chỉ hiển thị trạng thái) */}
-                </p>
-              )}
-
-              {selectedMeeting.description && (
-                <p className="mt-3 italic text-gray-500 dark:text-gray-400">
-                  Ghi chú: {selectedMeeting.description}
-                </p>
               )}
             </div>
           </div>
         </div>
       )}
+
     </div>
   );
 };
