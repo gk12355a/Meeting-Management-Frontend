@@ -341,113 +341,89 @@ const HistoryPage = () => {
                       let participants = Array.isArray(selectedMeeting.participants)
                         ? [...selectedMeeting.participants]
                         : [];
+                      
+                      // Tìm người tổ chức nếu chưa có
                       if (!organizer) {
-                        organizer =
-                          participants.find(
-                            (p) =>
-                              p.role === "ORGANIZER" ||
-                              p.isOrganizer === true
-                          );
-                        // Loại người tổ chức khỏi danh sách participants hiển thị bên dưới
+                        organizer = participants.find(
+                          (p) => p.role === "ORGANIZER" || p.isOrganizer === true
+                        );
                         if (organizer) {
                           participants = participants.filter((p) => p !== organizer);
                         }
                       } else {
-                        // Nếu tìm đc organizer trong participants thì lọc ra luôn cho khỏi bị duplicate
-                        participants = participants.filter(
-                          (p) => p.id !== organizer.id
-                        );
+                        participants = participants.filter((p) => p.id !== organizer.id);
                       }
 
-                      // Helper lấy status display và màu
-                      const getStatus = (p) => {
-                        const statusColor = {
-                          PENDING: "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900",
-                          ACCEPTED: "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900",
-                          REJECTED: "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900",
-                          ATTENDED: "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900",
-                          CANCELLED: "text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-slate-700",
-                        }[p.status] || "text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-slate-700";
-
-                        const statusLabel = {
-                          PENDING: "Chờ xác nhận",
-                          ACCEPTED: "Đã chấp nhận",
-                          DECLINED: "Từ chối",
-                          ATTENDED: "Đã tham dự",
-                          CANCELLED: "Đã hủy",
-                        }[p.status] || p.status;
-
-                        return { statusColor, statusLabel };
-                      };
-
-                      // Định dạng BADGE cho trạng thái (dùng chung cả organizer & participant)
-                      const renderStatusBadge = (status, children, extraClass = "") => (
-                        <span
-                          className={
-                            `ml-2 px-2.5 py-0.5 rounded-full text-xs font-medium 
-                              inline-block align-middle
-                              ${getStatus({status}).statusColor}
-                              ${extraClass}`
+                      // Helper lấy status display và màu (chỉ 3 trạng thái)
+                      const getStatus = (status) => {
+                        const statusMap = {
+                          PENDING: {
+                            color: "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/50",
+                            label: "Chờ xác nhận"
+                          },
+                          ACCEPTED: {
+                            color: "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/50",
+                            label: "Đã chấp nhận"
+                          },
+                          DECLINED: {
+                            color: "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/50",
+                            label: "Từ chối"
                           }
-                        >
-                          {children}
-                        </span>
-                      );
+                        };
+
+                        // Mặc định cho trường hợp không khớp
+                        return statusMap[status] || {
+                          color: "text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-slate-700",
+                          label: status || "Không rõ"
+                        };
+                      };
 
                       return (
                         <>
+                          {/* Người tổ chức */}
                           {organizer && (
                             <li
                               key={organizer.id || "organizer"}
                               className="flex items-center justify-between bg-gray-50 dark:bg-slate-700 p-2 rounded-lg"
                             >
-                              <span className="text-gray-900 dark:text-gray-100 flex items-center gap-2 font-medium">
+                              <span className="text-gray-900 dark:text-gray-100 font-medium">
                                 {organizer.fullName || "Không rõ"}
                               </span>
-                              {/* Status badge: Người tổ chức + trạng thái kiểu badge */}
-                              <span className="flex items-center gap-2">
-                                <span
-                                  className={
-                                    `px-2 py-0.5 rounded-full text-xs font-medium 
-                                    bg-orange-200 dark:bg-orange-800 text-orange-700 dark:text-orange-300
-                                    `
-                                  }
-                                >
+                              <div className="flex items-center gap-2">
+                                <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-200 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300">
                                   Người tổ chức
                                 </span>
-                                <span
-                                  className={
-                                    `px-2 py-0.5 rounded-full text-xs font-medium
-                                    ${getStatus(organizer).statusColor}
-                                    `
-                                  }
-                                >
-                                  {getStatus(organizer).statusLabel}
-                                </span>
-                              </span>
+                                {organizer.status && (
+                                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatus(organizer.status).color}`}>
+                                    {getStatus(organizer.status).label}
+                                  </span>
+                                )}
+                              </div>
                             </li>
                           )}
+                          
+                          {/* Danh sách người tham gia */}
                           {participants.length > 0 ? (
                             participants.map((p) => {
-                              const { statusColor, statusLabel } = getStatus(p);
+                              const status = getStatus(p.status);
                               return (
                                 <li
                                   key={p.id}
                                   className="flex items-center justify-between bg-gray-50 dark:bg-slate-700 p-2 rounded-lg"
                                 >
-                                  <span className="text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                                    {p.fullName}
+                                  <span className="text-gray-900 dark:text-gray-100">
+                                    {p.fullName || "Không rõ"}
                                   </span>
-                                  <span
-                                    className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColor}`}
-                                  >
-                                    {statusLabel}
+                                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${status.color}`}>
+                                    {status.label}
                                   </span>
                                 </li>
                               );
                             })
                           ) : !organizer ? (
-                            <li className="italic text-gray-500 dark:text-gray-400">Không có người tham gia</li>
+                            <li className="italic text-gray-500 dark:text-gray-400">
+                              Không có người tham gia
+                            </li>
                           ) : null}
                         </>
                       );
