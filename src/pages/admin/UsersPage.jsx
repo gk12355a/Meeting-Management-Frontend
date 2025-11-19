@@ -336,31 +336,54 @@ export default function UsersPage() {
       </motion.div>
 
       {/* Thống kê người dùng */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-7">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-7"
+      >
         {/* Tổng số người dùng */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow transition">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.08 }}
+          className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow transition"
+        >
           <div className="text-gray-500 dark:text-gray-400 text-base mb-0.5">
             Tổng số người dùng
           </div>
           <div className="text-2xl font-bold text-gray-800 dark:text-white">
             {users.length}
           </div>
-        </div>
+        </motion.div>
         {/* Số đang hoạt động */}
-        <div className="bg-green-50 dark:bg-green-900/20 rounded-2xl p-6 border border-green-200 dark:border-green-800 shadow transition">
-          <div className="text-green-700 dark:text-green-400 text-base mb-0.5">Đang hoạt động</div>
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.17 }}
+          className="bg-green-50 dark:bg-green-900/20 rounded-2xl p-6 border border-green-200 dark:border-green-800 shadow transition"
+        >
+          <div className="text-green-700 dark:text-green-400 text-base mb-0.5">
+            Đang hoạt động
+          </div>
           <div className="text-2xl font-bold text-green-700 dark:text-green-200">
             {users.filter((u) => u.active).length}
           </div>
-        </div>
+        </motion.div>
         {/* Số vô hiệu hoá */}
-        <div className="bg-orange-50 dark:bg-orange-900/20 rounded-2xl p-6 border border-orange-200 dark:border-orange-800 shadow transition">
-          <div className="text-orange-700 dark:text-orange-400 text-base mb-0.5">Vô hiệu hoá</div>
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.26 }}
+          className="bg-orange-50 dark:bg-orange-900/20 rounded-2xl p-6 border border-orange-200 dark:border-orange-800 shadow transition"
+        >
+          <div className="text-orange-700 dark:text-orange-400 text-base mb-0.5">
+            Vô hiệu hoá
+          </div>
           <div className="text-2xl font-bold text-orange-700 dark:text-orange-100">
             {users.filter((u) => !u.active).length}
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* TABLE - DANH SÁCH NGƯỜI DÙNG */}
       <motion.div
