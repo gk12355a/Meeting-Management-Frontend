@@ -53,12 +53,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             </NavLink>
           ))}
         </nav>
-        <div className="mt-auto px-5 py-4 border-t border-gray-100 dark:border-slate-800 absolute bottom-0 w-full">
-          <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-            <span>Phiên bản 1.0</span>
-            <ThemeToggle />
-          </div>
-        </div>
+
       </aside>
 
       {isOpen && (
