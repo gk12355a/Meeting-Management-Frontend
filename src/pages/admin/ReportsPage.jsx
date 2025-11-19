@@ -157,19 +157,6 @@ const ReportPage = () => {
       y: { ticks: { color: textColor }, grid: { color: gridColor } },
     },
   };
-  const pieOptions = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: {
-      position: "bottom",
-      labels: { color: textColor },
-    },
-    tooltip: {
-      enabled: true,
-    },
-  },
-};
 
   // 🟢 PIE OPTIONS (ẨN TRỤC)
   const pieOptions = {
