@@ -280,7 +280,7 @@ export default function UsersPage() {
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between mb-6"
+        className="flex items-center justify-between mb-8"
       >
         <div className="flex items-center gap-2">
           <FiUsers className="text-3xl text-blue-600 dark:text-blue-400" />
@@ -335,17 +335,20 @@ export default function UsersPage() {
         </button>
       </motion.div>
 
-      {/* Thống kê người dùng */}
+      {/* Thống kê người dùng - motion cùng lúc */}
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          duration: 0.55,
+          ease: [0.18, 0.71, 0.35, 0.98],
+        }}
         className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-7"
       >
         {/* Tổng số người dùng */}
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.08 }}
+          initial={false}
+          animate={false}
           className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow transition"
         >
           <div className="text-gray-500 dark:text-gray-400 text-base mb-0.5">
@@ -357,9 +360,8 @@ export default function UsersPage() {
         </motion.div>
         {/* Số đang hoạt động */}
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.17 }}
+          initial={false}
+          animate={false}
           className="bg-green-50 dark:bg-green-900/20 rounded-2xl p-6 border border-green-200 dark:border-green-800 shadow transition"
         >
           <div className="text-green-700 dark:text-green-400 text-base mb-0.5">
@@ -371,9 +373,8 @@ export default function UsersPage() {
         </motion.div>
         {/* Số vô hiệu hoá */}
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.26 }}
+          initial={false}
+          animate={false}
           className="bg-orange-50 dark:bg-orange-900/20 rounded-2xl p-6 border border-orange-200 dark:border-orange-800 shadow transition"
         >
           <div className="text-orange-700 dark:text-orange-400 text-base mb-0.5">
