@@ -185,6 +185,10 @@ export default function DashboardPage() {
     navigate("/user/rooms");
   };
 
+  const handleViewDevices = () => {
+  navigate("/user/devices");
+};
+
   // --- HANDLER FOR POPUP ---
   const handleShowMeetingDetail = async (meeting) => {
     setMeetingDetailModal((prev) => ({
@@ -380,24 +384,33 @@ export default function DashboardPage() {
       </Modal>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <button
-          className="bg-blue-600 text-white rounded-xl p-6 text-left hover:bg-blue-700 transition shadow-md"
+          className="bg-blue-500 text-white rounded-xl p-6 text-left hover:bg-blue-600 transition shadow-md"
           onClick={handleCreateMeeting}
         >
-          <h3 className="font-semibold text-lg mb-2">➕ Tạo lịch họp mới</h3>
+          <h3 className="font-semibold text-lg mb-2">Tạo lịch họp mới</h3>
           <p className="text-sm text-blue-100">
             Đặt phòng và thiết bị cho cuộc họp
           </p>
         </button>
 
         <button
-          className="bg-green-600 text-white rounded-xl p-6 text-left hover:bg-green-700 transition shadow-md"
+          className="bg-green-500 text-white rounded-xl p-6 text-left hover:bg-green-600 transition shadow-md"
           onClick={handleViewRooms}
         >
-          <h3 className="font-semibold text-lg mb-2">🏢 Xem phòng trống</h3>
+          <h3 className="font-semibold text-lg mb-2">Xem phòng trống</h3>
           <p className="text-sm text-green-100">
             Tìm phòng họp phù hợp với nhu cầu
+          </p>
+        </button>
+        <button
+          className="bg-purple-500 text-white rounded-xl p-6 text-left hover:bg-purple-600 transition shadow-md"
+          onClick={handleViewDevices}
+        >
+          <h3 className="font-semibold text-lg mb-2">Xem thiết bị</h3>
+          <p className="text-sm text-purple-100">
+            Xem thiết bị phù hợp với nhu cầu
           </p>
         </button>
       </div>
