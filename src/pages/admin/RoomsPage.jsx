@@ -17,10 +17,11 @@ import {
   AlertTriangle,
   Building,
   Crown, // <-- THÊM ICON VIP
+  Users, // Cho card tổng sức chứa
 } from "lucide-react";
 import { toast } from "react-toastify";
 import Pagination from "../../components/Pagination";
-import { motion } from "framer-motion"; 
+import { motion } from "framer-motion";
 
 /* Toast màu */
 const toastColors = {
@@ -72,7 +73,7 @@ export default function RoomsPage() {
       setLoading(true);
       const response = await getRooms();
       // Sắp xếp: Mới nhất lên đầu
-      const sortedData = response.data.sort((a, b) => b.id - a.id);
+      const sortedData = (response.data || []).sort((a, b) => b.id - a.id);
       setRooms(sortedData);
       setFilteredRooms(sortedData);
     } catch (error) {
@@ -126,10 +127,10 @@ export default function RoomsPage() {
       });
     } else {
       setEditingRoom(null);
-      setFormData({ 
-        name: "", 
-        capacity: 0, 
-        location: "", 
+      setFormData({
+        name: "",
+        capacity: 0,
+        location: "",
         status: "AVAILABLE",
         requiresApproval: false, // <-- Mặc định false
       });
@@ -140,12 +141,12 @@ export default function RoomsPage() {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingRoom(null);
-    setFormData({ 
-      name: "", 
-      capacity: 0, 
-      location: "", 
+    setFormData({
+      name: "",
+      capacity: 0,
+      location: "",
       status: "AVAILABLE",
-      requiresApproval: false 
+      requiresApproval: false,
     });
   };
 
@@ -221,10 +222,8 @@ export default function RoomsPage() {
   // === Helpers ===
   const getStatusBadge = (status) => {
     const styles = {
-      AVAILABLE:
-        "bg-green-100 text-green-700 dark:bg-green-700 dark:text-green-100",
-      UNDER_MAINTENANCE:
-        "bg-orange-100 text-orange-700 dark:bg-orange-700 dark:text-orange-100",
+      AVAILABLE: "bg-green-100 text-green-700 dark:bg-green-700 dark:text-green-100",
+      UNDER_MAINTENANCE: "bg-orange-100 text-orange-700 dark:bg-orange-700 dark:text-orange-100",
     };
 
     const labels = {
@@ -247,6 +246,15 @@ export default function RoomsPage() {
     setCurrentPage(page);
   };
 
+  // ====== CARD LOGIC ======
+  const totalRooms = rooms.length;
+  const totalAvailable = rooms.filter((room) => room.status === "AVAILABLE").length;
+  const totalMaintenance = rooms.filter((room) => room.status === "UNDER_MAINTENANCE").length;
+  // Tổng phòng VIP (cần duyệt)
+  const totalVip = rooms.filter((room) => !!room.requiresApproval).length;
+  // Tổng sức chứa của tất cả phòng
+  const totalCapacity = rooms.reduce((acc, cur) => acc + (cur.capacity || 0), 0);
+
   // === Render ===
   return (
     <div className="p-8 min-h-screen transition-colors bg-gray-50 dark:bg-gray-900">
@@ -263,6 +271,49 @@ export default function RoomsPage() {
           Quản lý phòng họp
         </h1>
       </motion.div>
+
+      {/* ====== Card Stats ====== */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-7">
+        {/* Tổng số phòng họp */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow transition">
+          <div className="text-gray-500 dark:text-gray-400 text-base mb-0.5">
+            Tổng số phòng họp
+          </div>
+          <div className="flex items-center gap-1 text-2xl font-bold text-gray-800 dark:text-white">
+            <Building size={22} className="text-blue-600 dark:text-blue-400" />
+            {totalRooms}
+          </div>
+        </div>
+        {/* Số phòng có sẵn */}
+        <div className="bg-green-50 dark:bg-green-900/20 rounded-2xl p-6 border border-green-200 dark:border-green-800 shadow transition">
+          <div className="text-green-700 dark:text-green-400 text-base mb-0.5">
+            Đang sẵn sàng
+          </div>
+          <div className="flex items-center gap-1 text-2xl font-bold text-green-700 dark:text-green-200">
+            {totalAvailable}
+          </div>
+        </div>
+        {/* Số phòng cần duyệt (VIP) */}
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-2xl p-6 border border-yellow-200 dark:border-yellow-800 shadow transition">
+          <div className="text-yellow-700 dark:text-yellow-300 text-base mb-0.5">
+            Phòng VIP (phê duyệt)
+          </div>
+          <div className="flex items-center gap-2 text-2xl font-bold text-yellow-700 dark:text-yellow-200">
+            <Crown size={20} className="mr-1" />
+            {totalVip}
+          </div>
+        </div>
+        {/* Tổng sức chứa */}
+        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-2xl p-6 border border-blue-200 dark:border-blue-800 shadow transition">
+          <div className="text-blue-700 dark:text-blue-400 text-base mb-0.5">
+            Tổng sức chứa
+          </div>
+          <div className="flex items-center gap-2 text-2xl font-bold text-blue-700 dark:text-blue-200">
+            <Users size={20} className="mr-1" />
+            {totalCapacity}
+          </div>
+        </div>
+      </div>
 
       {/* ⭐ FILTERS */}
       <motion.div
