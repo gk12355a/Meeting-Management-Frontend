@@ -1,5 +1,5 @@
 // src/pages/user/DashboardPage
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { FiCalendar, FiClock, FiUsers, FiCheckSquare } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
@@ -89,9 +89,20 @@ export default function DashboardPage() {
   const [upcomingMeetings, setUpcomingMeetings] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // --- POPUP STATE ---
-  const [selectedMeeting, setSelectedMeeting] = useState(null);
+  // --- POPUP STATE (Tối ưu lại để popup mở mượt hơn) ---
+  const [selectedMeetingId, setSelectedMeetingId] = useState(null); // Chỉ lưu id khi click
+  const [selectedMeeting, setSelectedMeeting] = useState(null);     // Dữ liệu chi tiết, để truyền vào modal
   const [loadingDetail, setLoadingDetail] = useState(false);
+
+  // Dùng ref để tránh memory leak khi component bị unmount khi đang load
+  const unmountedRef = useRef(false);
+
+  useEffect(() => {
+    unmountedRef.current = false;
+    return () => {
+      unmountedRef.current = true;
+    };
+  }, []);
 
   // === 3. GỌI API KHI MỞ TRANG (ĐÃ SỬA LOGIC LỌC) ===
   useEffect(() => {
@@ -111,13 +122,9 @@ export default function DashboardPage() {
         // === LOGIC SỬA LỖI QUAN TRỌNG ===
         // Lọc các cuộc họp mà user này KHÔNG TỪ CHỐI
         const activeMeetings = allMeetings.filter((m) => {
-          // 1. Bỏ qua nếu cuộc họp bị HỦY
           if (m.status === "CANCELLED") {
             return false;
           }
-
-          // 2. Tìm trạng thái của user hiện tại
-          // (API mới đã có m.participants là mảng object {id, fullName, status})
           const userParticipant = m.participants?.find((p) => p.id === user.id);
 
           if (userParticipant) {
@@ -144,7 +151,7 @@ export default function DashboardPage() {
 
         setUpcomingMeetings(upcoming.slice(0, 3)); // Chỉ lấy 3 cuộc họp
 
-        // --- B. Xử lý Thống kê (Dùng activeMeetings đã lọc) ---
+        // Thống kê
         const meetingsToday = activeMeetings.filter((m) =>
           dayjs(m.startTime).isToday()
         ).length;
@@ -167,43 +174,67 @@ export default function DashboardPage() {
         console.error("Lỗi tải dashboard:", err);
         message.error("Không thể tải dữ liệu dashboard.");
       } finally {
-        setLoading(false);
+        if (!unmountedRef.current) setLoading(false);
       }
     };
 
     fetchDashboardData();
   }, [user]); // <-- THÊM 'user' làm dependency
 
+  // Khi selectedMeetingId thay đổi (khi user click), mới fetch chi tiết và show popup (tối ưu tránh nháy)
+  useEffect(() => {
+    // Nếu không có id (đã tắt dialog) hoặc đang chưa chọn gì => clear dữ liệu
+    if (!selectedMeetingId) {
+      setSelectedMeeting(null);
+      setLoadingDetail(false);
+      return;
+    }
+
+    // 1. Hiển thị popup ngay với dữ liệu tạm thời (lần mở đầu sẽ chưa có detail)
+    const meetingInList = upcomingMeetings.find(x => x.id === selectedMeetingId);
+    // Khi handleShowMeetingDetail được gọi, ta sẽ setSelectedMeetingId, và selectedMeeting = undefined => mở luôn Modal với trạng thái loadingDetail=true
+    if (meetingInList) setSelectedMeeting(meetingInList);
+
+    setLoadingDetail(true);
+
+    // 2. Gọi API lấy detail
+    getMeetingById(selectedMeetingId)
+      .then((res) => {
+        if (unmountedRef.current) return;
+        setSelectedMeeting(res.data);
+      })
+      .catch(() => {
+        if (unmountedRef.current) return;
+        message.error("Không thể tải chi tiết cuộc họp.");
+      })
+      .finally(() => {
+        if (unmountedRef.current) return;
+        setLoadingDetail(false);
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedMeetingId]);
+
+  // Handler popup
+  const handleShowMeetingDetail = (meeting) => {
+    setSelectedMeetingId(meeting.id);
+    // Không đặt loadingDetail=true ở đây nữa (do effect trên sẽ xử lý)
+    // Không setSelectedMeeting(null) ở đây luôn (giữ lại, chỉ mất khi id=null)
+  };
+
+  const handleCloseMeetingDetail = () => {
+    setSelectedMeetingId(null);
+    // setSelectedMeeting sẽ clear bên trong useEffect khi selectedMeetingId = null
+  };
+
   // Handler functions for navigation
   const handleCreateMeeting = () => {
     navigate("/user/create-meeting");
   };
-
   const handleViewRooms = () => {
     navigate("/user/rooms");
   };
-
   const handleViewDevices = () => {
     navigate("/user/devices");
-  };
-
-  // --- HANDLER FOR POPUP ---
-  const handleShowMeetingDetail = async (meeting) => {
-    setLoadingDetail(true);
-    setSelectedMeeting(null);
-
-    try {
-      const res = await getMeetingById(meeting.id);
-      setSelectedMeeting(res.data);
-    } catch (err) {
-      message.error("Không thể tải chi tiết cuộc họp.");
-    } finally {
-      setLoadingDetail(false);
-    }
-  };
-
-  const handleCloseMeetingDetail = () => {
-    setSelectedMeeting(null);
   };
 
   return (
@@ -251,7 +282,7 @@ export default function DashboardPage() {
             ))}
           </div>
 
-          {/* UPCOMING MEETINGS (ĐÃ CẬP NHẬT) */}
+          {/* UPCOMING MEETINGS (Optimized popup) */}
           <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-gray-200 dark:border-slate-800 p-6">
             <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">
               📅 Lịch họp sắp tới
@@ -295,11 +326,12 @@ export default function DashboardPage() {
         </>
       )}
 
-      {/* Meeting Details Modal */}
+      {/* Meeting Details Modal (Tối ưu - popup sẽ show luôn, loading chi tiết sau) */}
       <MeetingDetailModal
-        open={!!selectedMeeting && !loadingDetail}
+        open={!!selectedMeetingId}
         onClose={handleCloseMeetingDetail}
         meeting={selectedMeeting}
+        loading={loadingDetail}
       >
         <button
           className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-semibold transition-colors"
@@ -309,8 +341,8 @@ export default function DashboardPage() {
         </button>
       </MeetingDetailModal>
 
-      {/* Loading overlay khi đang fetch data */}
-      {loadingDetail && (
+      {/* Loading overlay khi đang fetch dashboard (giữ nguyên cho loading trang) */}
+      {loadingDetail && false && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[9998]">
           <Spin size="large" />
         </div>
