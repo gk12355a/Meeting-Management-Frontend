@@ -1,9 +1,9 @@
 // src/pages/user/DashboardPage
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { FiCalendar, FiClock, FiUsers, FiCheckSquare } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
-import { Spin, message, Modal, Descriptions, Tag } from "antd";
+import { Spin, message } from "antd";
 import { getMyMeetings, getMeetingById } from "../../services/meetingService";
 import dayjs from "dayjs";
 import "dayjs/locale/vi";
@@ -11,6 +11,7 @@ import isToday from "dayjs/plugin/isToday";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import isBetween from "dayjs/plugin/isBetween"; // <-- THÊM PLUGIN
 import isoWeek from "dayjs/plugin/isoWeek";
+import MeetingDetailModal from "../../components/user/MeetingDetailModal";
 
 // --- dayjs config ---
 dayjs.locale("vi");
@@ -51,34 +52,34 @@ const statTemplates = [
   },
 ];
 
-// Helper renderParticipants như MyMeetingsPage.jsx
-function renderParticipants(organizer, participants) {
-  const otherParticipants =
-    participants && Array.isArray(participants)
-      ? participants.filter((p) => p.id !== organizer?.id)
-      : [];
-  return (
-    <span>
-      <Tag color="volcano">{organizer?.fullName || organizer?.username || "Người tổ chức"}</Tag>
-      {otherParticipants.map((p) => (
-        <Tag
-          key={p.id}
-          color={
-            p.status === "ACCEPTED"
-              ? "blue"
-              : p.status === "DECLINED"
-              ? "red"
-              : p.status === "TENTATIVE"
-              ? "orange"
-              : "default"
-          }
-        >
-          {p.fullName || p.username}
-        </Tag>
-      ))}
-    </span>
-  );
-}
+// // Helper renderParticipants như MyMeetingsPage.jsx
+// function renderParticipants(organizer, participants) {
+//   const otherParticipants =
+//     participants && Array.isArray(participants)
+//       ? participants.filter((p) => p.id !== organizer?.id)
+//       : [];
+//   return (
+//     <span>
+//       <Tag color="volcano">{organizer?.fullName || organizer?.username || "Người tổ chức"}</Tag>
+//       {otherParticipants.map((p) => (
+//         <Tag
+//           key={p.id}
+//           color={
+//             p.status === "ACCEPTED"
+//               ? "blue"
+//               : p.status === "DECLINED"
+//               ? "red"
+//               : p.status === "TENTATIVE"
+//               ? "orange"
+//               : "default"
+//           }
+//         >
+//           {p.fullName || p.username}
+//         </Tag>
+//       ))}
+//     </span>
+//   );
+// }
 
 export default function DashboardPage() {
   const { user } = useAuth(); // <-- Cần user.id để lọc
@@ -88,12 +89,20 @@ export default function DashboardPage() {
   const [upcomingMeetings, setUpcomingMeetings] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // --- POPUP STATE ---
-  const [meetingDetailModal, setMeetingDetailModal] = useState({
-    open: false,
-    meeting: null,
-    loading: false,
-  });
+  // --- POPUP STATE (Tối ưu lại để popup mở mượt hơn) ---
+  const [selectedMeetingId, setSelectedMeetingId] = useState(null); // Chỉ lưu id khi click
+  const [selectedMeeting, setSelectedMeeting] = useState(null);     // Dữ liệu chi tiết, để truyền vào modal
+  const [loadingDetail, setLoadingDetail] = useState(false);
+
+  // Dùng ref để tránh memory leak khi component bị unmount khi đang load
+  const unmountedRef = useRef(false);
+
+  useEffect(() => {
+    unmountedRef.current = false;
+    return () => {
+      unmountedRef.current = true;
+    };
+  }, []);
 
   // === 3. GỌI API KHI MỞ TRANG (ĐÃ SỬA LOGIC LỌC) ===
   useEffect(() => {
@@ -113,13 +122,9 @@ export default function DashboardPage() {
         // === LOGIC SỬA LỖI QUAN TRỌNG ===
         // Lọc các cuộc họp mà user này KHÔNG TỪ CHỐI
         const activeMeetings = allMeetings.filter((m) => {
-          // 1. Bỏ qua nếu cuộc họp bị HỦY
           if (m.status === "CANCELLED") {
             return false;
           }
-
-          // 2. Tìm trạng thái của user hiện tại
-          // (API mới đã có m.participants là mảng object {id, fullName, status})
           const userParticipant = m.participants?.find((p) => p.id === user.id);
 
           if (userParticipant) {
@@ -146,7 +151,7 @@ export default function DashboardPage() {
 
         setUpcomingMeetings(upcoming.slice(0, 3)); // Chỉ lấy 3 cuộc họp
 
-        // --- B. Xử lý Thống kê (Dùng activeMeetings đã lọc) ---
+        // Thống kê
         const meetingsToday = activeMeetings.filter((m) =>
           dayjs(m.startTime).isToday()
         ).length;
@@ -169,55 +174,67 @@ export default function DashboardPage() {
         console.error("Lỗi tải dashboard:", err);
         message.error("Không thể tải dữ liệu dashboard.");
       } finally {
-        setLoading(false);
+        if (!unmountedRef.current) setLoading(false);
       }
     };
 
     fetchDashboardData();
   }, [user]); // <-- THÊM 'user' làm dependency
 
+  // Khi selectedMeetingId thay đổi (khi user click), mới fetch chi tiết và show popup (tối ưu tránh nháy)
+  useEffect(() => {
+    // Nếu không có id (đã tắt dialog) hoặc đang chưa chọn gì => clear dữ liệu
+    if (!selectedMeetingId) {
+      setSelectedMeeting(null);
+      setLoadingDetail(false);
+      return;
+    }
+
+    // 1. Hiển thị popup ngay với dữ liệu tạm thời (lần mở đầu sẽ chưa có detail)
+    const meetingInList = upcomingMeetings.find(x => x.id === selectedMeetingId);
+    // Khi handleShowMeetingDetail được gọi, ta sẽ setSelectedMeetingId, và selectedMeeting = undefined => mở luôn Modal với trạng thái loadingDetail=true
+    if (meetingInList) setSelectedMeeting(meetingInList);
+
+    setLoadingDetail(true);
+
+    // 2. Gọi API lấy detail
+    getMeetingById(selectedMeetingId)
+      .then((res) => {
+        if (unmountedRef.current) return;
+        setSelectedMeeting(res.data);
+      })
+      .catch(() => {
+        if (unmountedRef.current) return;
+        message.error("Không thể tải chi tiết cuộc họp.");
+      })
+      .finally(() => {
+        if (unmountedRef.current) return;
+        setLoadingDetail(false);
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedMeetingId]);
+
+  // Handler popup
+  const handleShowMeetingDetail = (meeting) => {
+    setSelectedMeetingId(meeting.id);
+    // Không đặt loadingDetail=true ở đây nữa (do effect trên sẽ xử lý)
+    // Không setSelectedMeeting(null) ở đây luôn (giữ lại, chỉ mất khi id=null)
+  };
+
+  const handleCloseMeetingDetail = () => {
+    setSelectedMeetingId(null);
+    // setSelectedMeeting sẽ clear bên trong useEffect khi selectedMeetingId = null
+  };
+
   // Handler functions for navigation
   const handleCreateMeeting = () => {
     navigate("/user/create-meeting");
   };
-
   const handleViewRooms = () => {
     navigate("/user/rooms");
   };
-
-  // --- HANDLER FOR POPUP ---
-  const handleShowMeetingDetail = async (meeting) => {
-    setMeetingDetailModal((prev) => ({
-      ...prev,
-      open: true,
-      loading: true,
-      meeting: null,
-    }));
-
-    try {
-      // Lấy lại chi tiết mới nhất từ API để hiển thị đồng bộ với bên MyMeetingsPage
-      const res = await getMeetingById(meeting.id);
-      setMeetingDetailModal({
-        open: true,
-        loading: false,
-        meeting: res.data,
-      });
-    } catch (err) {
-      setMeetingDetailModal({
-        open: false,
-        loading: false,
-        meeting: null,
-      });
-      message.error("Không thể tải chi tiết cuộc họp.");
-    }
-  };
-
-  const handleCloseMeetingDetail = () => {
-    setMeetingDetailModal({
-      open: false,
-      loading: false,
-      meeting: null,
-    });
+  const handleViewDevices = () => {
+    navigate("/user/devices");
   };
 
   return (
@@ -265,7 +282,7 @@ export default function DashboardPage() {
             ))}
           </div>
 
-          {/* UPCOMING MEETINGS (ĐÃ CẬP NHẬT) */}
+          {/* UPCOMING MEETINGS (Optimized popup) */}
           <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-gray-200 dark:border-slate-800 p-6">
             <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">
               📅 Lịch họp sắp tới
@@ -309,95 +326,50 @@ export default function DashboardPage() {
         </>
       )}
 
-      {/* Meeting Details Popup (like MyMeetingsPage, no edit/cancel) */}
-      <Modal
-        open={meetingDetailModal.open}
-        onCancel={handleCloseMeetingDetail}
-        footer={
-          <div className="flex justify-end">
-            <button
-              className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded font-semibold shadow transition dark:bg-blue-500 dark:hover:bg-blue-600"
-              onClick={handleCloseMeetingDetail}
-              autoFocus
-            >
-              Đóng
-            </button>
-          </div>
-        }
-        title={<span className="dark:text-white">Chi tiết cuộc họp</span>}
-        width={600}
-        className="dark:[&_.ant-modal-content]:bg-gray-800 dark:[&_.ant-modal-content]:text-gray-200"
+      {/* Meeting Details Modal (Tối ưu - popup sẽ show luôn, loading chi tiết sau) */}
+      <MeetingDetailModal
+        open={!!selectedMeetingId}
+        onClose={handleCloseMeetingDetail}
+        meeting={selectedMeeting}
+        loading={loadingDetail}
       >
-        {meetingDetailModal.loading ? (
-          <div className="flex justify-center py-6">
-            <Spin size="large" />
-          </div>
-        ) : meetingDetailModal.meeting ? (
-          <Descriptions
-            bordered
-            column={1}
-            className="dark:[&_.ant-descriptions-item-label]:text-gray-300 dark:[&_.ant-descriptions-item-content]:text-gray-100"
-          >
-            <Descriptions.Item label="Tên cuộc họp">
-              {meetingDetailModal.meeting.title}
-            </Descriptions.Item>
-            <Descriptions.Item label="Thời gian">
-              {`${dayjs(meetingDetailModal.meeting.startTime).format("HH:mm")} - ${dayjs(
-                meetingDetailModal.meeting.endTime
-              ).format("HH:mm, DD/MM/YYYY")}`}
-            </Descriptions.Item>
-            <Descriptions.Item label="Trạng thái">
-              <Tag
-                color={
-                  meetingDetailModal.meeting.status === "CONFIRMED"
-                    ? "blue"
-                    : meetingDetailModal.meeting.status === "CANCELLED"
-                    ? "red"
-                    : "warning"
-                }
-              >
-                {meetingDetailModal.meeting.status}
-              </Tag>
-            </Descriptions.Item>
-            <Descriptions.Item label="Phòng họp">
-              {meetingDetailModal.meeting.room?.name || "Chưa xác định"}
-            </Descriptions.Item>
-            <Descriptions.Item label="Người tham gia">
-              {renderParticipants(
-                meetingDetailModal.meeting.organizer,
-                meetingDetailModal.meeting.participants
-              )}
-            </Descriptions.Item>
-            <Descriptions.Item label="Ghi chú">
-              {meetingDetailModal.meeting.description || "Không có"}
-            </Descriptions.Item>
-          </Descriptions>
-        ) : (
-          <div className="flex justify-center py-6">
-            <Spin size="large" />
-          </div>
-        )}
-      </Modal>
+      </MeetingDetailModal>
+
+      {/* Loading overlay khi đang fetch dashboard (giữ nguyên cho loading trang) */}
+      {loadingDetail && false && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[9998]">
+          <Spin size="large" />
+        </div>
+      )}
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <button
-          className="bg-blue-600 text-white rounded-xl p-6 text-left hover:bg-blue-700 transition shadow-md"
+          className="bg-blue-500 text-white rounded-xl p-6 text-left hover:bg-blue-600 transition shadow-md"
           onClick={handleCreateMeeting}
         >
-          <h3 className="font-semibold text-lg mb-2">➕ Tạo lịch họp mới</h3>
+          <h3 className="font-semibold text-lg mb-2">Tạo lịch họp mới</h3>
           <p className="text-sm text-blue-100">
             Đặt phòng và thiết bị cho cuộc họp
           </p>
         </button>
 
         <button
-          className="bg-green-600 text-white rounded-xl p-6 text-left hover:bg-green-700 transition shadow-md"
+          className="bg-green-500 text-white rounded-xl p-6 text-left hover:bg-green-600 transition shadow-md"
           onClick={handleViewRooms}
         >
-          <h3 className="font-semibold text-lg mb-2">🏢 Xem phòng trống</h3>
+          <h3 className="font-semibold text-lg mb-2">Xem phòng trống</h3>
           <p className="text-sm text-green-100">
             Tìm phòng họp phù hợp với nhu cầu
+          </p>
+        </button>
+        <button
+          className="bg-purple-500 text-white rounded-xl p-6 text-left hover:bg-purple-600 transition shadow-md"
+          onClick={handleViewDevices}
+        >
+          <h3 className="font-semibold text-lg mb-2">Xem thiết bị</h3>
+          <p className="text-sm text-purple-100">
+            Xem thiết bị phù hợp với nhu cầu
           </p>
         </button>
       </div>
