@@ -384,6 +384,7 @@ export default function UsersPage() {
                 <th className="p-4 text-base font-semibold w-16 text-center">STT</th>
                 <th className="p-4 text-base font-semibold">Họ và tên</th>
                 <th className="p-4 text-base font-semibold">Email</th>
+                <th className="p-4 text-base font-semibold">Vai trò</th>
                 <th className="p-4 text-base font-semibold text-center">Trạng thái</th>
                 <th className="p-4 text-base font-semibold text-center">Hành động</th>
               </tr>
