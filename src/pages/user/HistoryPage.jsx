@@ -223,7 +223,7 @@ const HistoryPage = () => {
         )}
       </div>
 
-      {/* ================== MODAL (Làm lại layout) ================== */}
+      {/* ================== MODAL ================== */}
       {selectedMeeting && (
         <div
           className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
@@ -232,158 +232,228 @@ const HistoryPage = () => {
           <div
             ref={modalContentRef}
             className="
-              bg-white dark:bg-slate-800 rounded-2xl w-full max-w-3xl shadow-2xl relative
-              flex flex-col max-h-[92vh]
+              bg-white dark:bg-slate-800 p-0 rounded-2xl w-full max-w-2xl shadow-2xl relative
+              flex flex-col
+              max-h-[90vh]
             "
-            style={{ minHeight: 0 }}
+            style={{
+              minHeight: 0,
+            }}
           >
-            {/* Nút đóng */}
+            {/* Close button */}
             <button
               onClick={() => setSelectedMeeting(null)}
-              className="absolute top-4 right-4 text-gray-400 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-100 z-10"
+              className="absolute top-4 right-4 text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white z-10"
               tabIndex={0}
               aria-label="Đóng"
             >
-              <FiX size={24} />
+              <FiX size={22} />
             </button>
-            
-            {/* Modal content */}
-            <div className="flex-1 flex flex-col md:flex-row gap-8 overflow-y-auto p-8 md:p-10">
-              
-              {/* LEFT: Info chi tiết chính */}
-              <div className="md:w-1/2 w-full flex flex-col gap-5">
-                {/* Tiêu đề */}
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">{selectedMeeting.title}</h2>
+            {/* Modal content with layout and scrollable */}
+            <div className="flex-1 overflow-y-auto p-7 pt-5">
+              {/* Title */}
+              <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">
+                {selectedMeeting.title}
+              </h2>
 
-                {/* Grid các thông tin */}
-                <div className="flex flex-col gap-4">
-                  {/* Ngày & giờ */}
-                  <div className="flex items-center gap-4">
-                    <div className="p-2.5 rounded-xl bg-blue-100 dark:bg-slate-700">
-                      <FiCalendar className="text-blue-600 dark:text-blue-300" size={20}/>
+              {/* Info - Ngày, Giờ, Phòng cùng 1 hàng */}
+              <div className="flex flex-col gap-4 mb-6">
+                <div className="flex flex-col md:flex-row md:items-center gap-4 w-full">
+                  {/* Ngày */}
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <div className="p-2 rounded-xl bg-blue-100 dark:bg-slate-700 shrink-0">
+                      <FiCalendar className="text-blue-600 dark:text-blue-300" />
                     </div>
                     <div>
-                      <div className="font-medium dark:text-gray-100 mb-0.5">Ngày diễn ra</div>
-                      <div className="dark:text-gray-300 text-gray-700">
+                      <span className="font-medium dark:text-gray-100">Ngày</span>
+                      <p className="dark:text-gray-300">
                         {dayjs(selectedMeeting.startTime).format("DD/MM/YYYY")}
-                      </div>
+                      </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <div className="p-2.5 rounded-xl bg-green-100 dark:bg-slate-700">
-                      <FiClock className="text-green-600 dark:text-green-300" size={20}/>
+                  {/* Giờ */}
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <div className="p-2 rounded-xl bg-green-100 dark:bg-slate-700 shrink-0">
+                      <FiClock className="text-green-600 dark:text-green-300" />
                     </div>
                     <div>
-                      <div className="font-medium dark:text-gray-100 mb-0.5">Khung giờ</div>
-                      <div className="dark:text-gray-300 text-gray-700">
+                      <span className="font-medium dark:text-gray-100">Giờ</span>
+                      <p className="dark:text-gray-300">
                         {dayjs(selectedMeeting.startTime).format("HH:mm")} – {dayjs(selectedMeeting.endTime).format("HH:mm")}
-                      </div>
+                      </p>
                     </div>
                   </div>
                   {/* Phòng */}
-                  <div className="flex items-center gap-4">
-                    <div className="p-2.5 rounded-xl bg-purple-100 dark:bg-slate-700">
-                      <FiMapPin className="text-purple-600 dark:text-purple-300" size={20}/>
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <div className="p-2 rounded-xl bg-purple-100 dark:bg-slate-700 shrink-0">
+                      <FiMapPin className="text-purple-600 dark:text-purple-300" />
                     </div>
                     <div>
-                      <div className="font-medium dark:text-gray-100 mb-0.5">Phòng họp</div>
-                      <div className="dark:text-gray-300">{selectedMeeting.room?.name}</div>
-                    </div>
-                  </div>
-                  {/* Thiết bị sử dụng */}
-                  <div className="flex items-start gap-4">
-                    <div className="p-2.5 rounded-xl bg-pink-100 dark:bg-slate-700 mt-0.5">
-                      <FiCpu className="text-pink-600 dark:text-pink-300" size={20}/>
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-medium dark:text-gray-100 mb-0.5">Thiết bị sử dụng</div>
-                      <ul className="dark:text-gray-300 text-gray-800 space-y-1 max-h-32 overflow-y-auto pr-1">
-                        {(selectedMeeting.devices && selectedMeeting.devices.length > 0) ? (
-                          selectedMeeting.devices.map((device, idx) => (
-                            <li key={device.id || idx} className="flex items-start gap-1">
-                              <span className="inline-block bullet bg-pink-400 rounded-full w-1.5 h-1.5 mt-[7px] mr-2" />
-                              <span>
-                                <span className="font-semibold">{device.name}</span>
-                                {device.description ? (
-                                  <span className="text-gray-500 dark:text-gray-400 ml-2">
-                                    - {device.description}
-                                  </span>
-                                ) : ""}
-                              </span>
-                            </li>
-                          ))
-                        ) : (
-                          <li className="italic text-gray-500 dark:text-gray-400">
-                            Không có thiết bị sử dụng
-                          </li>
-                        )}
-                      </ul>
+                      <span className="font-medium dark:text-gray-100">Phòng</span>
+                      <p className="dark:text-gray-300">{selectedMeeting.room?.name}</p>
                     </div>
                   </div>
                 </div>
               </div>
-              
-              {/* RIGHT: Người tham gia & mô tả */}
-              <div className="md:w-1/2 w-full flex flex-col gap-6">
-                {/* Người tham gia */}
-                {selectedMeeting.participants && (
-                  <div>
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="p-2.5 rounded-xl bg-orange-100 dark:bg-slate-700">
-                        <FiUsers className="text-orange-600 dark:text-orange-300" size={20}/>
-                      </div>
-                      <span className="font-medium dark:text-gray-100">
-                        Danh sách tham dự
-                      </span>
+
+              {/* Thiết bị & người tham gia: Xếp dọc ở mobile, ngang ở md+ */}
+              <div className="flex flex-col md:flex-row gap-6">
+                {/* Thiết bị sử dụng */}
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 rounded-xl bg-pink-100 dark:bg-slate-700 shrink-0">
+                      <FiCpu className="text-pink-600 dark:text-pink-300" />
                     </div>
-                    <ul className="space-y-2 max-h-44 overflow-y-auto pr-1">
-                      {selectedMeeting.participants.map((p) => {
+                    <span className="font-medium dark:text-gray-100">Thiết bị sử dụng</span>
+                  </div>
+                  {
+                    (selectedMeeting.devices && selectedMeeting.devices.length > 0) ? (
+                      <ul className="dark:text-gray-300 text-gray-800 flex flex-wrap gap-2">
+                        {selectedMeeting.devices.map((device, idx) => (
+                          <li
+                            key={device.id || idx}
+                            className="px-3 py-1 rounded bg-gray-100 dark:bg-slate-700 font-semibold text-sm break-all"
+                          >
+                            {device.name}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="italic text-gray-500 dark:text-gray-400 mt-1">
+                        Không có thiết bị sử dụng
+                      </p>
+                    )
+                  }
+                </div>
+                {/* Người tham gia */}
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 rounded-xl bg-orange-100 dark:bg-slate-700 shrink-0">
+                      <FiUsers className="text-orange-600 dark:text-orange-300" />
+                    </div>
+                    <span className="font-medium dark:text-gray-100">
+                      Người tham gia
+                    </span>
+                  </div>
+                  <ul className="flex flex-col gap-2">
+                    {(() => {
+                      let organizer = selectedMeeting.organizer;
+                      let participants = Array.isArray(selectedMeeting.participants)
+                        ? [...selectedMeeting.participants]
+                        : [];
+                      if (!organizer) {
+                        organizer =
+                          participants.find(
+                            (p) =>
+                              p.role === "ORGANIZER" ||
+                              p.isOrganizer === true
+                          );
+                        // Loại người tổ chức khỏi danh sách participants hiển thị bên dưới
+                        if (organizer) {
+                          participants = participants.filter((p) => p !== organizer);
+                        }
+                      } else {
+                        // Nếu tìm đc organizer trong participants thì lọc ra luôn cho khỏi bị duplicate
+                        participants = participants.filter(
+                          (p) => p.id !== organizer.id
+                        );
+                      }
+
+                      // Helper lấy status display và màu
+                      const getStatus = (p) => {
                         const statusColor = {
-                          PENDING: "text-yellow-600 dark:text-yellow-400",
-                          ACCEPTED: "text-green-600 dark:text-green-400",
-                          REJECTED: "text-red-600 dark:text-red-400",
-                          ATTENDED: "text-blue-600 dark:text-blue-400",
-                          CANCELLED: "text-gray-500 dark:text-gray-400",
-                        }[p.status] || "text-gray-600 dark:text-gray-300";
+                          PENDING: "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900",
+                          ACCEPTED: "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900",
+                          REJECTED: "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900",
+                          ATTENDED: "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900",
+                          CANCELLED: "text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-slate-700",
+                        }[p.status] || "text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-slate-700";
 
                         const statusLabel = {
                           PENDING: "Chờ xác nhận",
                           ACCEPTED: "Đã chấp nhận",
-                          REJECTED: "Từ chối",
+                          DECLINED: "Từ chối",
                           ATTENDED: "Đã tham dự",
                           CANCELLED: "Đã hủy",
                         }[p.status] || p.status;
 
-                        return (
-                          <li key={p.id} className="flex items-center justify-between bg-gray-50 dark:bg-slate-700 py-2 px-3 rounded-lg">
-                            <span className="text-gray-900 dark:text-gray-100">
-                              {p.fullName}
-                            </span>
-                            <span className={`text-xs font-medium ${statusColor}`}>
-                              {statusLabel}
-                            </span>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </div>
-                )}
+                        return { statusColor, statusLabel };
+                      };
 
-                {/* Mô tả (nếu có) */}
-                {!!selectedMeeting.description && (
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <div className="p-2.5 rounded-xl bg-gray-100 dark:bg-slate-700">
-                        {/* Rename icon, here using <FiFileText /> for note/desc if available */}
-                        <svg className="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16h8M8 12h8m-6-8h2a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" />
-                        </svg>
-                      </div>
-                      <span className="font-medium dark:text-gray-100">Mô tả</span>
-                    </div>
-                    <div className="text-gray-700 dark:text-gray-300 whitespace-pre-line">{selectedMeeting.description}</div>
-                  </div>
-                )}
+                      // Định dạng BADGE cho trạng thái (dùng chung cả organizer & participant)
+                      const renderStatusBadge = (status, children, extraClass = "") => (
+                        <span
+                          className={
+                            `ml-2 px-2.5 py-0.5 rounded-full text-xs font-medium 
+                              inline-block align-middle
+                              ${getStatus({status}).statusColor}
+                              ${extraClass}`
+                          }
+                        >
+                          {children}
+                        </span>
+                      );
+
+                      return (
+                        <>
+                          {organizer && (
+                            <li
+                              key={organizer.id || "organizer"}
+                              className="flex items-center justify-between bg-gray-50 dark:bg-slate-700 p-2 rounded-lg"
+                            >
+                              <span className="text-gray-900 dark:text-gray-100 flex items-center gap-2 font-medium">
+                                {organizer.fullName || "Không rõ"}
+                              </span>
+                              {/* Status badge: Người tổ chức + trạng thái kiểu badge */}
+                              <span className="flex items-center gap-2">
+                                <span
+                                  className={
+                                    `px-2 py-0.5 rounded-full text-xs font-medium 
+                                    bg-orange-200 dark:bg-orange-800 text-orange-700 dark:text-orange-300
+                                    `
+                                  }
+                                >
+                                  Người tổ chức
+                                </span>
+                                <span
+                                  className={
+                                    `px-2 py-0.5 rounded-full text-xs font-medium
+                                    ${getStatus(organizer).statusColor}
+                                    `
+                                  }
+                                >
+                                  {getStatus(organizer).statusLabel}
+                                </span>
+                              </span>
+                            </li>
+                          )}
+                          {participants.length > 0 ? (
+                            participants.map((p) => {
+                              const { statusColor, statusLabel } = getStatus(p);
+                              return (
+                                <li
+                                  key={p.id}
+                                  className="flex items-center justify-between bg-gray-50 dark:bg-slate-700 p-2 rounded-lg"
+                                >
+                                  <span className="text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                                    {p.fullName}
+                                  </span>
+                                  <span
+                                    className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColor}`}
+                                  >
+                                    {statusLabel}
+                                  </span>
+                                </li>
+                              );
+                            })
+                          ) : !organizer ? (
+                            <li className="italic text-gray-500 dark:text-gray-400">Không có người tham gia</li>
+                          ) : null}
+                        </>
+                      );
+                    })()}
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
