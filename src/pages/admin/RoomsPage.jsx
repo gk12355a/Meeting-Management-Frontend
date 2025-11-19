@@ -272,49 +272,6 @@ export default function RoomsPage() {
         </h1>
       </motion.div>
 
-      {/* ====== Card Stats ====== */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-7">
-        {/* Tổng số phòng họp */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow transition">
-          <div className="text-gray-500 dark:text-gray-400 text-base mb-0.5">
-            Tổng số phòng họp
-          </div>
-          <div className="flex items-center gap-1 text-2xl font-bold text-gray-800 dark:text-white">
-            <Building size={22} className="text-blue-600 dark:text-blue-400" />
-            {totalRooms}
-          </div>
-        </div>
-        {/* Số phòng có sẵn */}
-        <div className="bg-green-50 dark:bg-green-900/20 rounded-2xl p-6 border border-green-200 dark:border-green-800 shadow transition">
-          <div className="text-green-700 dark:text-green-400 text-base mb-0.5">
-            Đang sẵn sàng
-          </div>
-          <div className="flex items-center gap-1 text-2xl font-bold text-green-700 dark:text-green-200">
-            {totalAvailable}
-          </div>
-        </div>
-        {/* Số phòng cần duyệt (VIP) */}
-        <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-2xl p-6 border border-yellow-200 dark:border-yellow-800 shadow transition">
-          <div className="text-yellow-700 dark:text-yellow-300 text-base mb-0.5">
-            Phòng VIP (phê duyệt)
-          </div>
-          <div className="flex items-center gap-2 text-2xl font-bold text-yellow-700 dark:text-yellow-200">
-            <Crown size={20} className="mr-1" />
-            {totalVip}
-          </div>
-        </div>
-        {/* Tổng sức chứa */}
-        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-2xl p-6 border border-blue-200 dark:border-blue-800 shadow transition">
-          <div className="text-blue-700 dark:text-blue-400 text-base mb-0.5">
-            Tổng sức chứa
-          </div>
-          <div className="flex items-center gap-2 text-2xl font-bold text-blue-700 dark:text-blue-200">
-            <Users size={20} className="mr-1" />
-            {totalCapacity}
-          </div>
-        </div>
-      </div>
-
       {/* ⭐ FILTERS */}
       <motion.div
         initial={{ opacity: 0 }}
@@ -366,6 +323,49 @@ export default function RoomsPage() {
 
         </div>
       </motion.div>
+
+      {/* ====== Card Stats ====== */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-7">
+        {/* Tổng số phòng họp */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow transition">
+          <div className="text-gray-500 dark:text-gray-400 text-base mb-0.5">
+            Tổng số phòng họp
+          </div>
+          <div className="flex items-center gap-1 text-2xl font-bold text-gray-800 dark:text-white">
+            <Building size={22} className="text-blue-600 dark:text-blue-400" />
+            {totalRooms}
+          </div>
+        </div>
+        {/* Số phòng có sẵn */}
+        <div className="bg-green-50 dark:bg-green-900/20 rounded-2xl p-6 border border-green-200 dark:border-green-800 shadow transition">
+          <div className="text-green-700 dark:text-green-400 text-base mb-0.5">
+            Đang sẵn sàng
+          </div>
+          <div className="flex items-center gap-1 text-2xl font-bold text-green-700 dark:text-green-200">
+            {totalAvailable}
+          </div>
+        </div>
+        {/* Số phòng cần duyệt (VIP) */}
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-2xl p-6 border border-yellow-200 dark:border-yellow-800 shadow transition">
+          <div className="text-yellow-700 dark:text-yellow-300 text-base mb-0.5">
+            Số phòng VIP (cần phê duyệt)
+          </div>
+          <div className="flex items-center gap-2 text-2xl font-bold text-yellow-700 dark:text-yellow-200">
+            <Crown size={20} className="mr-1" />
+            {totalVip}
+          </div>
+        </div>
+        {/* Tổng sức chứa */}
+        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-2xl p-6 border border-blue-200 dark:border-blue-800 shadow transition">
+          <div className="text-blue-700 dark:text-blue-400 text-base mb-0.5">
+            Tổng sức chứa
+          </div>
+          <div className="flex items-center gap-2 text-2xl font-bold text-blue-700 dark:text-blue-200">
+            <Users size={20} className="mr-1" />
+            {totalCapacity}
+          </div>
+        </div>
+      </div>
 
       {/* ⭐ TABLE */}
       <motion.div
