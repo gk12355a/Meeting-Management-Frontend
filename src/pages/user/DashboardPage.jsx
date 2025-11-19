@@ -333,12 +333,6 @@ export default function DashboardPage() {
         meeting={selectedMeeting}
         loading={loadingDetail}
       >
-        <button
-          className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-semibold transition-colors"
-          onClick={handleCloseMeetingDetail}
-        >
-          Đóng
-        </button>
       </MeetingDetailModal>
 
       {/* Loading overlay khi đang fetch dashboard (giữ nguyên cho loading trang) */}
