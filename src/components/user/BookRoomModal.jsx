@@ -22,6 +22,7 @@ import { createMeeting } from "../../services/meetingService";
 import { searchUsers } from "../../services/userService";
 import { getAvailableDevices } from "../../services/deviceService";
 import { useAuth } from "../../context/AuthContext";
+import RoomSchedule from "./RoomSchedule";
 
 // MUI STATIC TIME PICKER
 import { LocalizationProvider } from "@mui/x-date-pickers";
@@ -34,7 +35,7 @@ dayjs.extend(utc);
 const { TextArea } = Input;
 const { Option } = Select;
 
-const BookRoomModal = ({ open, onCancel, prefilledRoom, onSuccess }) => {
+const BookRoomModal = ({ open, onCancel, prefilledRoom, start, end, onSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [isRecurring, setIsRecurring] = useState(false);
   
@@ -61,17 +62,27 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, onSuccess }) => {
           SET INITIAL FORM VALUES WITH PREFILLED ROOM
   ==================================================== */
   useEffect(() => {
-    if (open && prefilledRoom) {
-      setIsRecurring(false);
-      setClockValue(dayjs().hour(9).minute(0));
-      
+  if (open && prefilledRoom) {
+    setIsRecurring(false);
+
+    // Mặc định 09:00
+    let defaultClock = dayjs().hour(9).minute(0);
+
+    // Nếu có slot được chọn từ calendar -> dùng giờ đó
+    if (start && end) {
+      const startD = dayjs(start);
+      const endD = dayjs(end);
+      const durationMin = Math.max(endD.diff(startD, "minute"), 15); // tối thiểu 15p
+
+      defaultClock = startD;
+
       setTimeout(() => {
         form.setFieldsValue({
           title: "",
-          date: undefined,
-          time: undefined,
-          duration: 60,
-          roomId: prefilledRoom.id, // Pre-fill room
+          date: startD,
+          time: startD,
+          duration: durationMin,
+          roomId: prefilledRoom.id,
           deviceIds: [],
           participantIds: [],
           guestEmails: [],
@@ -81,11 +92,31 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, onSuccess }) => {
           description: "",
         });
       }, 100);
-      
-      setSearchResults([]);
-      setAvailableDevices([]);
+    } else {
+      // Trường hợp user mở modal mà không đi qua calendar
+      setTimeout(() => {
+        form.setFieldsValue({
+          title: "",
+          date: undefined,
+          time: undefined,
+          duration: 60,
+          roomId: prefilledRoom.id,
+          deviceIds: [],
+          participantIds: [],
+          guestEmails: [],
+          isRecurring: false,
+          frequency: "DAILY",
+          repeatUntil: undefined,
+          description: "",
+        });
+      }, 100);
     }
-  }, [open, prefilledRoom, form]);
+
+    setClockValue(defaultClock);
+    setSearchResults([]);
+    setAvailableDevices([]);
+  }
+}, [open, prefilledRoom, start, end, form]);
 
   /* ===================================================
           LOAD DEVICES WHEN TIME CHANGES
@@ -253,9 +284,13 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, onSuccess }) => {
       bodyStyle={{ paddingTop: 18, paddingBottom: 10 }}
     >
       <Card
-        className="shadow-none bg-white dark:bg-[#1e293b] border-none dark:text-gray-100"
-        bodyStyle={{ padding: 0 }}
-      >
+  className="shadow-none bg-white dark:bg-[#1e293b] border-none dark:text-gray-100"
+  bodyStyle={{ padding: 0 }}
+>
+  {prefilledRoom && (
+    <RoomSchedule roomId={prefilledRoom.id} />
+  )}
+      
         <Form
           layout="vertical"
           form={form}

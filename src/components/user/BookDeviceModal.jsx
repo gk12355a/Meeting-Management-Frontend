@@ -11,6 +11,7 @@ import {
   Divider,
   Checkbox,
   Spin,
+  InputNumber,       // ✅ Import InputNumber tại đây
 } from "antd";
 import { FiPlusCircle, FiUsers } from "react-icons/fi";
 import dayjs from "dayjs";
@@ -38,10 +39,10 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [isRecurring, setIsRecurring] = useState(false);
   const [rooms, setRooms] = useState([]);
-  
+
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
-  
+
   const [availableDevices, setAvailableDevices] = useState([]);
   const [devicesLoading, setDevicesLoading] = useState(false);
 
@@ -84,14 +85,14 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
 
         const res = await getAvailableDevices(startTime, endTime);
         const availableList = res.data || [];
-        
+
         // Đảm bảo thiết bị đã chọn luôn có trong danh sách (ngay cả khi đang được sử dụng)
         const prefilledInList = availableList.find(d => d.id === prefilledDevice?.id);
         if (!prefilledInList && prefilledDevice) {
           // Thêm thiết bị đã chọn vào đầu danh sách
           availableList.unshift(prefilledDevice);
         }
-        
+
         setAvailableDevices(availableList);
       } catch (err) {
         console.error(err);
@@ -104,6 +105,7 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
     const t = setTimeout(fetchDevices, 500);
     return () => clearTimeout(t);
   }, [watchedDate, watchedTime, watchedDuration, prefilledDevice]);
+
   useEffect(() => {
     if (!open) return;
 
@@ -123,7 +125,7 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
     if (open && prefilledDevice) {
       setIsRecurring(false);
       setClockValue(dayjs().hour(9).minute(0));
-      
+
       setTimeout(() => {
         form.setFieldsValue({
           title: "",
@@ -131,7 +133,7 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
           time: undefined,
           duration: 60,
           roomId: undefined,
-          deviceIds: [prefilledDevice.id], // Pre-fill device
+          deviceIds: [prefilledDevice.id],
           participantIds: [],
           guestEmails: [],
           isRecurring: false,
@@ -140,12 +142,12 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
           description: "",
         });
       }, 100);
-      
+
       setSearchResults([]);
     }
   }, [open, prefilledDevice, form]);
 
-  /* ======  SEARCH INTERNAL USERS ====== */
+  /* ====== SEARCH INTERNAL USERS ====== */
   const handleSearchUsers = (query) => {
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
 
@@ -288,8 +290,8 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
             />
           </Form.Item>
 
-          {/* TIME */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {/* TIME + DURATION + CUSTOM DURATION */}
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
             {/* DATE */}
             <Form.Item
               name="date"
@@ -299,11 +301,13 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
               <DatePicker
                 className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
                 format="DD/MM/YYYY"
-                disabledDate={(d) => d && (d < dayjs().startOf("day") || d.day() === 0 || d.day() === 6)}
+                disabledDate={(d) =>
+                  d && (d < dayjs().startOf("day") || d.day() === 0 || d.day() === 6)
+                }
               />
             </Form.Item>
 
-            {/* TIME PICKER */}
+            {/* TIME */}
             <Form.Item
               name="time"
               label="Giờ bắt đầu"
@@ -317,7 +321,7 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
                     onClick={() => setClockOpen(true)}
                     className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
                   />
-                  <Button 
+                  <Button
                     onClick={() => setClockOpen(true)}
                     className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
                   >
@@ -367,16 +371,18 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
               </>
             </Form.Item>
 
-            {/* DURATION */}
+            {/* PRESET DURATION */}
             <Form.Item
               name="duration"
               label="Thời lượng"
               initialValue={60}
-              rules={[{ required: true, message: "Chọn thời lượng" }]}
             >
               <Select
                 className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
                 popupClassName="dark:bg-gray-700 dark:text-gray-100"
+                onChange={() => {
+                  form.setFieldsValue({ customDuration: undefined });
+                }}
               >
                 <Option value={15}>15 phút</Option>
                 <Option value={30}>30 phút</Option>
@@ -385,6 +391,25 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
                 <Option value={90}>1 giờ 30 phút</Option>
                 <Option value={120}>2 giờ</Option>
               </Select>
+            </Form.Item>
+
+            {/* CUSTOM DURATION */}
+            <Form.Item
+              name="customDuration"
+              label="Khác (giờ)"
+            >
+              <InputNumber
+                min={0.5}
+                max={8}
+                step={0.5}
+                placeholder="VD: 1.5"
+                className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                onChange={(value) => {
+                  if (value) {
+                    form.setFieldsValue({ duration: undefined });
+                  }
+                }}
+              />
             </Form.Item>
           </div>
 
@@ -424,9 +449,10 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
             </Select>
           </Form.Item>
 
-          {/* DEVICES - Cho phép chọn thêm nhưng không xóa được thiết bị ban đầu */}
-          <Form.Item 
-            name="deviceIds" 
+          {/* ... tiếp phần devices, participants, etc như cũ ... */}
+
+          <Form.Item
+            name="deviceIds"
             label="Thiết bị sử dụng"
             tooltip="Thiết bị được chọn ban đầu không thể bỏ chọn. Bạn có thể thêm các thiết bị khác."
           >
@@ -442,10 +468,9 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
               className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
               popupClassName="dark:bg-gray-700 dark:text-gray-100"
               onChange={(selectedIds) => {
-                // Đảm bảo thiết bị ban đầu luôn được chọn
                 if (!selectedIds.includes(prefilledDevice?.id)) {
-                  form.setFieldsValue({ 
-                    deviceIds: [...selectedIds, prefilledDevice?.id] 
+                  form.setFieldsValue({
+                    deviceIds: [...selectedIds, prefilledDevice?.id],
                   });
                 }
               }}
@@ -483,7 +508,7 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
             </Select>
           </Form.Item>
 
-          {/* Device Info Display - Hiển thị thiết bị bắt buộc */}
+          {/* Device Info Display */}
           <div className="mb-4 p-3 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-lg">
             <p className="text-sm text-purple-800 dark:text-purple-300">
               <span className="font-semibold">🖥️ Thiết bị bắt buộc:</span> {prefilledDevice?.name}
@@ -497,7 +522,7 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
           <Divider className="dark:border-gray-700" />
 
           {/* PARTICIPANTS */}
-          <Form.Item 
+          <Form.Item
             name="participantIds"
             label={
               <span>
@@ -538,16 +563,14 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
                     (e) => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)
                   );
                   return invalid.length
-                    ? Promise.reject(
-                        `Email không hợp lệ: ${invalid.join(", ")}`
-                      )
+                    ? Promise.reject(`Email không hợp lệ: ${invalid.join(", ")}`)
                     : Promise.resolve();
                 },
               },
             ]}
           >
-            <Select 
-              mode="tags" 
+            <Select
+              mode="tags"
               tokenSeparators={[",", ";", " "]}
               placeholder="Ví dụ: guest@email.com"
               className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
@@ -564,7 +587,7 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
             initialValue={false}
             className="mb-1"
           >
-            <Checkbox 
+            <Checkbox
               onChange={(e) => setIsRecurring(e.target.checked)}
               className="dark:text-gray-200"
             >
@@ -607,8 +630,8 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
 
           {/* DESCRIPTION */}
           <Form.Item name="description" label="Ghi chú">
-            <TextArea 
-              rows={3} 
+            <TextArea
+              rows={3}
               placeholder="Ghi chú thêm cho cuộc họp..."
               className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
             />
@@ -628,6 +651,7 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
               Đặt lịch
             </Button>
           </div>
+
         </Form>
       </Card>
     </Modal>

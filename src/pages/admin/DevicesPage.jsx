@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { getDevices, createDevice, updateDevice, deleteDevice } from "../../services/deviceService";
 import { Search, Plus, Edit2, Trash2, X, Check, AlertTriangle } from "lucide-react";
 import { toast } from "react-toastify";
+import { motion } from "framer-motion";
 import "react-toastify/dist/ReactToastify.css";
 import Pagination from "../../components/Pagination";
 const toastColors = {
@@ -124,64 +125,62 @@ const paginatedDevices = filteredDevices.slice(
 
   // Khi tạo mới thiết bị, show thiết bị lên đầu 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    // Validate tên thiết bị
-    if (!formData.name.trim()) {
-      toast.warning("⚠️ Vui lòng nhập tên thiết bị!");
-      return;
-    }
+  // Validate tên thiết bị
+  if (!formData.name.trim()) {
+    toast.warning("⚠️ Vui lòng nhập tên thiết bị!");
+    return;
+  }
 
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      // Chuẩn bị dữ liệu gửi lên server
-      const submitData = {
-        name: formData.name.trim(),
-        description: formData.description.trim(),
-        status: formData.status
-      };
+    const submitData = {
+      name: formData.name.trim(),
+      description: formData.description.trim(),
+      status: formData.status,
+    };
 
-      if (editingDevice) {
-        // Cập nhật thiết bị
-        await updateDevice(editingDevice.id, submitData);
-        toast.success("Cập nhật thiết bị thành công!");
-        // Refresh danh sách và đóng modal như cũ
-        await fetchDevices();
-        handleCloseModal();
-      } else {
-        // Thêm mới thiết bị
-        const res = await createDevice(submitData);
-        toast.success("Thêm thiết bị mới thành công!");
-        // Đảm bảo phần chèn thiết bị mới hoạt động chuẩn giống UsersPage
-        let createdDevice = res?.data;
-        // Nếu backend trả về dưới dạng { data: {...} }
-        if (createdDevice && createdDevice.data) createdDevice = createdDevice.data;
+    if (editingDevice) {
+      // Cập nhật thiết bị
+      await updateDevice(editingDevice.id, submitData);
+      toast.success("Cập nhật thiết bị thành công!");
+      await fetchDevices();
+      handleCloseModal();
+    } else {
+  // Thêm mới thiết bị
+const res = await createDevice(submitData);
+toast.success("Thêm thiết bị mới thành công!");
 
-        // Đảm bảo các trường status hợp lệ (fallback: AVAILABLE nếu thiếu)
-        createdDevice = {
-          ...createdDevice,
-          status: createdDevice.status || submitData.status || "AVAILABLE"
-        };
+let createdDevice = res?.data;
+if (createdDevice && createdDevice.data) createdDevice = createdDevice.data;
 
-        // Sắp xếp như trang User: chèn lên đầu, đồng thời đảm bảo id mới nhất lên trên
-        setDevices(prev => {
-          const newDevices = [{ ...createdDevice }, ...prev];
-          return newDevices.sort((a, b) => (b.id || 0) - (a.id || 0));
-        });
-        setFilteredDevices(prev => {
-          const newDevices = [{ ...createdDevice }, ...prev];
-          return newDevices.sort((a, b) => (b.id || 0) - (a.id || 0));
-        });
-      }
-    } catch (error) {
-      const errorMsg = error?.response?.data?.message || error?.message || "Có lỗi xảy ra";
-      toast.error(`${editingDevice ? "Cập nhật" : "Thêm"} thiết bị thất bại: ${errorMsg}`);
-      console.error("Submit error:", error?.response?.data || error);
-    } finally {
-      setLoading(false);
-    }
-  };
+createdDevice = {
+  ...createdDevice,
+  status: createdDevice.status || submitData.status || "AVAILABLE",
+};
+
+// Cập nhật list thiết bị
+setDevices(prev => {
+  const newDevices = [{ ...createdDevice }, ...prev];
+  return newDevices.sort((a, b) => (b.id || 0) - (a.id || 0));
+});
+
+// 🕒 Đợi 0.3s rồi tắt modal (mượt hơn)
+setTimeout(() => {
+  handleCloseModal();
+}, 300);
+}
+
+  } catch (error) {
+    const errorMsg = error?.response?.data?.message || error?.message || "Có lỗi xảy ra";
+    toast.error(`${editingDevice ? "Cập nhật" : "Thêm"} thiết bị thất bại: ${errorMsg}`);
+    console.error("Submit error:", error?.response?.data || error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   /**
    * Mở modal xác nhận xóa thiết bị
@@ -263,7 +262,12 @@ const paginatedDevices = filteredDevices.slice(
   return (
     <div className="p-8 min-h-screen transition-colors bg-gray-50 dark:bg-gray-900">
       {/* ==================== HEADER ==================== */}
-      <div className="flex items-center gap-2 mb-8">
+      <motion.div
+  initial={{ opacity: 0, y: -10 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.4 }}
+  className="flex items-center gap-2 mb-8"
+>
         <span>
           <svg
             width={32}
@@ -286,7 +290,7 @@ const paginatedDevices = filteredDevices.slice(
         <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
           Quản lý thiết bị
         </h1>
-      </div>
+      </motion.div>
 
       {/* ==================== FILTERS & ACTIONS ==================== */}
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 mb-7 border border-gray-100 dark:border-gray-700 transition">
@@ -382,60 +386,76 @@ const paginatedDevices = filteredDevices.slice(
             
             {/* Table body */}
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700 text-base">
-              {filteredDevices.length === 0 ? (
-                // Empty state
-                <tr>
-                  <td colSpan="5" className="p-10 text-center text-gray-500 dark:text-gray-400">
-                    <div className="flex flex-col items-center gap-2">
-                      <Search size={48} className="text-gray-300 dark:text-gray-600" />
-                      <p className="text-lg font-semibold">Không tìm thấy thiết bị nào</p>
-                      <p className="text-base">Thử thay đổi bộ lọc hoặc tìm kiếm khác</p>
-                    </div>
-                  </td>
-                </tr>
-              ) : (
-                // Danh sách thiết bị
-                paginatedDevices.map((device, i) => (
-                  <tr key={device.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition">
-                    <td className="p-4 font-semibold text-center">{(currentPage - 1) * ITEMS_PER_PAGE + i + 1}</td>
-                    <td className="p-4 font-medium text-gray-900 dark:text-white">{device.name}</td>
-                    <td className="p-4 text-gray-600 dark:text-gray-400">
-                      {device.description || (
-                        <span className="text-gray-400 dark:text-gray-600 italic">Chưa có mô tả</span>
-                      )}
-                    </td>
-                    <td className="p-4">{getStatusBadge(device.status)}</td>
-                    <td className="p-4 text-center">
-                      <div className="flex items-center justify-center gap-2">
-                        {/* Nút chỉnh sửa */}
-                        <button
-                          onClick={() => handleOpenModal(device)}
-                          disabled={loading}
-                          className="p-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300
-                            hover:bg-blue-100 dark:hover:bg-blue-900/20 rounded-md transition
-                            disabled:opacity-50 disabled:cursor-not-allowed"
-                          title="Chỉnh sửa"
-                        >
-                          <Edit2 size={18} />
-                        </button>
-                        
-                        {/* Nút xóa */}
-                        <button
-                          onClick={() => handleOpenDeleteModal(device)}
-                          disabled={loading}
-                          className="p-2 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300
-                            hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition
-                            disabled:opacity-50 disabled:cursor-not-allowed"
-                          title="Xóa"
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
+  {filteredDevices.length === 0 ? (
+    // Empty state
+    <tr>
+      <td colSpan="5" className="p-10 text-center text-gray-500 dark:text-gray-400">
+        <div className="flex flex-col items-center gap-2">
+          <Search size={48} className="text-gray-300 dark:text-gray-600" />
+          <p className="text-lg font-semibold">Không tìm thấy thiết bị nào</p>
+          <p className="text-base">Thử thay đổi bộ lọc hoặc tìm kiếm khác</p>
+        </div>
+      </td>
+    </tr>
+  ) : (
+    // Danh sách thiết bị – THÊM ANIMATION ĐÚNG CÁCH
+    paginatedDevices.map((device, i) => (
+      <motion.tr
+        key={device.id}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: i * 0.03 }}
+        className="hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+      >
+        <td className="p-4 font-semibold text-center">
+          {(currentPage - 1) * ITEMS_PER_PAGE + i + 1}
+        </td>
+
+        <td className="p-4 font-medium text-gray-900 dark:text-white">
+          {device.name}
+        </td>
+
+        <td className="p-4 text-gray-600 dark:text-gray-400">
+          {device.description || (
+            <span className="text-gray-400 dark:text-gray-600 italic">
+              Chưa có mô tả
+            </span>
+          )}
+        </td>
+
+        <td className="p-4">{getStatusBadge(device.status)}</td>
+
+        <td className="p-4 text-center">
+          <div className="flex items-center justify-center gap-2">
+            {/* Nút chỉnh sửa */}
+            <button
+              onClick={() => handleOpenModal(device)}
+              disabled={loading}
+              className="p-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300
+                hover:bg-blue-100 dark:hover:bg-blue-900/20 rounded-md transition
+                disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Chỉnh sửa"
+            >
+              <Edit2 size={18} />
+            </button>
+
+            {/* Nút xoá */}
+            <button
+              onClick={() => handleOpenDeleteModal(device)}
+              disabled={loading}
+              className="p-2 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300
+                hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition
+                disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Xóa"
+            >
+              <Trash2 size={18} />
+            </button>
+          </div>
+        </td>
+      </motion.tr>
+    ))
+  )}
+</tbody>
           </table>
         </div>
       </div>

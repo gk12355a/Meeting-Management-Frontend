@@ -55,7 +55,7 @@ const CreateMeetingPage = () => {
   const watchedDate = Form.useWatch("date", form);
   const watchedTime = Form.useWatch("time", form);
   const watchedDuration = Form.useWatch("duration", form);
-
+  const watchedCustomHour = Form.useWatch("customHour", form);
   // TIME PICKER STATE
   const [clockOpen, setClockOpen] = useState(false);
   const [clockValue, setClockValue] = useState(dayjs());
@@ -120,9 +120,12 @@ const CreateMeetingPage = () => {
           .minute(watchedTime.minute());
 
         const startTime = startTimeUTC.toISOString();
-        const endTime = startTimeUTC
-          .add(watchedDuration, "minute")
-          .toISOString();
+        // ⭐ Lấy đúng thời lượng (ưu tiên customHour)
+        const realDuration = watchedCustomHour
+        ? watchedCustomHour * 60
+        : watchedDuration;
+
+        const endTime = startTimeUTC.add(realDuration, "minute").toISOString();
 
         const res = await getAvailableDevices(startTime, endTime);
         setAvailableDevices(res.data || []);
@@ -136,7 +139,7 @@ const CreateMeetingPage = () => {
 
     const t = setTimeout(fetchDevices, 500);
     return () => clearTimeout(t);
-  }, [watchedDate, watchedTime, watchedDuration]);
+}, [watchedDate, watchedTime, watchedDuration, watchedCustomHour]);
 
   /* ===================================================
                 SEARCH INTERNAL USERS
@@ -194,33 +197,36 @@ const CreateMeetingPage = () => {
         .date(date.date())
         .hour(time.hour())
         .minute(time.minute());
-
+      // ⭐ Tính thời lượng cuối cùng
+      const finalDuration = values.customHour
+        ? values.customHour * 60
+        : values.duration;
       const payload = {
-        title: values.title.trim(),
-        description: values.description || "",
-        startTime: startUTC.toISOString(),
-        endTime: startUTC.add(values.duration, "minute").toISOString(),
-        roomId: values.roomId,
-        participantIds: Array.from(
-          new Set([user.id, ...(values.participantIds || [])])
-        ),
-        deviceIds: values.deviceIds || [],
-        guestEmails: values.guestEmails || [],
+      title: values.title.trim(),
+      description: values.description || "",
+      startTime: startUTC.toISOString(),
+      endTime: startUTC.add(finalDuration, "minute").toISOString(),
 
-        // ⭐⭐⭐ RECURRING RULE ⭐⭐⭐
-        recurrenceRule:
-          values.isRecurring === true
-            ? {
-                frequency: values.frequency,
-                interval: 1,
-                repeatUntil: dayjs(values.repeatUntil).format("YYYY-MM-DD"),
-              }
-            : null,
+      roomId: values.roomId,
+      participantIds: Array.from(
+        new Set([user.id, ...(values.participantIds || [])])
+      ),
+      deviceIds: values.deviceIds || [],
+      guestEmails: values.guestEmails || [],
 
-        onBehalfOfUserId: null,
-      };
+      recurrenceRule:
+        values.isRecurring === true
+          ? {
+              frequency: values.frequency,
+              interval: 1,
+              repeatUntil: dayjs(values.repeatUntil).format("YYYY-MM-DD"),
+            }
+          : null,
 
-      await createMeeting(payload);
+      onBehalfOfUserId: null,
+    };
+
+    await createMeeting(payload);
 
       toast.success("🎉 Tạo cuộc họp thành công!");
       form.resetFields();
@@ -276,16 +282,25 @@ const CreateMeetingPage = () => {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {/* DATE */}
               <Form.Item
-                name="date"
-                label="Ngày họp"
-                rules={[{ required: true, message: "Chọn ngày họp" }]}
-              >
-                <DatePicker
-                  className="w-full"
-                  format="DD/MM/YYYY"
-                  disabledDate={(d) => d && d < dayjs().startOf("day")}
-                />
-              </Form.Item>
+  name="date"
+  label="Ngày họp"
+  rules={[{ required: true, message: "Chọn ngày họp" }]}
+>
+  <DatePicker
+    className="w-full"
+    format="DD/MM/YYYY"
+    disabledDate={(d) => {
+      if (!d) return true;
+
+      // Không cho chọn ngày quá khứ
+      if (d < dayjs().startOf("day")) return true;
+
+      // Không cho chọn T7 (6) và CN (0)
+      const dayOfWeek = d.day();
+      return dayOfWeek === 0 || dayOfWeek === 6;
+    }}
+  />
+</Form.Item>
 
               {/* TIME PICKER */}
               <Form.Item
@@ -346,12 +361,14 @@ const CreateMeetingPage = () => {
                 </>
               </Form.Item>
 
-              {/* DURATION */}
+              {/* THỜI LƯỢNG + KHÁC (GIỜ) */}
+            <div className="flex gap-4">
+              {/* Select thời lượng cố định */}
               <Form.Item
                 name="duration"
                 label="Thời lượng"
                 initialValue={60}
-                rules={[{ required: true, message: "Chọn thời lượng" }]}
+                style={{ flex: 1 }}
               >
                 <Select>
                   <Option value={15}>15 phút</Option>
@@ -362,6 +379,36 @@ const CreateMeetingPage = () => {
                   <Option value={120}>2 giờ</Option>
                 </Select>
               </Form.Item>
+
+              {/* Nhập giờ tự do */}
+              <Form.Item
+              name="customHour"
+              label="Khác (giờ)"
+              style={{ width: 140 }}
+              rules={[
+                ({ getFieldValue }) => ({
+                  validator(_, value) {
+                    if (!value) return Promise.resolve();
+                    if (isNaN(value) || value <= 0) return Promise.reject("Giờ phải lớn hơn 0");
+                    return Promise.resolve();
+                  },
+                }),
+              ]}
+            >
+              <Input
+                type="number"
+                min={0.1}
+                step={0.1}
+                placeholder="VD: 1.5"
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val) {
+                    form.setFieldsValue({ duration: undefined }); // clear Select khi nhập khác
+                  }
+                }}
+              />
+            </Form.Item>
+            </div>
             </div>
 
             {/* ROOM */}

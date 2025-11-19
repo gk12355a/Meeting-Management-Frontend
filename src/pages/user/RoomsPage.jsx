@@ -7,6 +7,7 @@ import { HiBuildingOffice } from "react-icons/hi2";
 import BookRoomModal from "../../components/user/BookRoomModal";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import RoomCalendarModal from "../../components/user/RoomCalendarModal";
 
 const RoomsPage = () => {
   const [rooms, setRooms] = useState([]);
@@ -14,7 +15,13 @@ const RoomsPage = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("Tất cả");
-  const [bookingModal, setBookingModal] = useState({ open: false, room: null });
+  const [bookingModal, setBookingModal] = useState({
+  open: false,
+  room: null,
+  start: null,
+  end: null,
+});
+  const [calendarModal, setCalendarModal] = useState({ open: false, room: null });
 
   // Load rooms
   useEffect(() => {
@@ -61,8 +68,8 @@ const RoomsPage = () => {
   }, [searchTerm, filterStatus, rooms]);
 
   const handleBookRoom = (room) => {
-    setBookingModal({ open: true, room: room });
-  };
+  setCalendarModal({ open: true, room });
+};
 
   return (
     <div className="p-6 min-h-screen bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
@@ -194,14 +201,32 @@ const RoomsPage = () => {
 
       {/* Modal đặt phòng */}
       <BookRoomModal
-        open={bookingModal.open}
-        onCancel={() => setBookingModal({ open: false, room: null })}
-        prefilledRoom={bookingModal.room}
-        onSuccess={() => {
-          // Có thể reload rooms nếu cần
-          // fetchRooms();
-        }}
-      />
+  open={bookingModal.open}
+  onCancel={() =>
+    setBookingModal({ open: false, room: null, start: null, end: null })
+  }
+  prefilledRoom={bookingModal.room}
+  start={bookingModal.start}
+  end={bookingModal.end}
+  onSuccess={() => {
+    // có thể reload rooms nếu cần
+  }}
+/>
+
+      <RoomCalendarModal
+  open={calendarModal.open}
+  room={calendarModal.room}
+  onClose={() => setCalendarModal({ open: false, room: null })}
+  onSelectSlot={({ start, end }) => {
+    setCalendarModal({ open: false, room: null });
+    setBookingModal({
+      open: true,
+      room: calendarModal.room,
+      start,
+      end,
+    });
+  }}
+/>
     </div>
   );
 };

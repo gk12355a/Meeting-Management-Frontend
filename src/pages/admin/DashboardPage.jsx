@@ -14,14 +14,13 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import { 
-  FiUsers, 
+import {  
   FiClock, 
   FiCalendar, 
   FiCheckSquare 
 } from "react-icons/fi";
 
-import { Spin, message } from "antd"; 
+import { Spin, message, Modal, Descriptions, Tag } from "antd"; 
 import { getAllRooms } from "../../services/roomService";
 import { getAllMeetings } from "../../services/reportService";
 import dayjs from "dayjs";
@@ -39,12 +38,27 @@ dayjs.extend(isBetween);
 
 const cardTemplates = [
   { label: "Cuộc họp hôm nay", value: "0", icon: <FiCalendar /> },
-  { label: "Người tham gia (hôm nay)", value: "0", icon: <FiUsers /> },
   { label: "Thời lượng họp TB", value: "0", icon: <FiClock /> },
   { label: "Cuộc họp sắp tới", value: "0", icon: <FiCheckSquare /> },
 ];
 
-const COLORS = ["#60A5FA", "#A78BFA", "#F472B6", "#34D399", "#FBBF24"];
+const COLORS = [
+  "#60A5FA", 
+  "#A78BFA", 
+  "#F472B6", 
+  "#34D399", 
+  "#fb5a24ff",
+  "#F97316", // cam
+  "#06B6D4", // cyan
+  "#10B981", // ngọc
+  "#F43F5E", // đỏ
+  "#6366F1", // tím đậm
+  "#8B5CF6", // tím xanh
+  "#14B8A6", // xanh teal
+  "#E879F9", // hồng nhạt
+  "#4ADE80", // xanh mint
+  "#FB7185", // đỏ nhạt
+];
 
 const formatDuration = (minutes) => {
   if (!minutes || isNaN(minutes) || minutes <= 0) return "0m";
@@ -75,11 +89,21 @@ export default function DashboardPage() {
   const [todayMeetingsModalVisible, setTodayMeetingsModalVisible] = useState(false);
   const [todayMeetingsList, setTodayMeetingsList] = useState([]);
 
+  // STATE CHO MODAL CHI TIẾT CUỘC HỌP
+  const [detailModalVisible, setDetailModalVisible] = useState(false);
+  const [selectedMeeting, setSelectedMeeting] = useState(null);
+
   // === 3. HÀM MỞ MODAL ===
   const handleTodayMeetingsClick = () => {
     const meetingsToday = activeMeetingsState.filter(m => dayjs(m.startTime).isToday());
     setTodayMeetingsList(meetingsToday);
     setTodayMeetingsModalVisible(true);
+  };
+
+  // Hàm mở modal chi tiết cuộc họp
+  const handleOpenMeetingDetail = (meeting) => {
+    setSelectedMeeting(meeting);
+    setDetailModalVisible(true);
   };
 
   // === 4. TOOLTIP ===
@@ -88,6 +112,7 @@ export default function DashboardPage() {
     const endTime = dayjs(event.end).format('HH:mm');
     const dateDisplay = dayjs(event.start).format('DD/MM/YYYY');
     const durationMins = dayjs(event.end).diff(dayjs(event.start), 'minute');
+    const roomName = event.extendedProps?.roomName || "Chưa xác định";
     return `
       <div style="line-height: 1.6; min-width: 220px;">
         <div style="font-weight: 600; margin-bottom: 6px; font-size: 14px;">${event.title}</div>
@@ -97,14 +122,20 @@ export default function DashboardPage() {
         <div style="font-size: 12px; opacity: 0.9; margin-bottom: 3px;">
           <strong>Thời gian:</strong> ${startTime} - ${endTime} (${durationMins}m)
         </div>
+        <div style="font-size: 12px; opacity: 0.9; margin-bottom: 3px;">
+          <strong>Phòng:</strong> ${roomName}
+        </div>
       </div>
     `;
   };
+// === FIXED: CustomRoomTooltip lấy màu từ data.payload.color hoặc data.payload.fill, dùng fill cho Pie Cell, và CustomRoomTooltip hiển thị màu đúng ===
 const CustomRoomTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
     const data = payload[0];
+    // If using recharts Pie/Cell, the correct color is in 'payload.color' if set, or 'payload.fill'
+    // However, for a correct Pie chart, 'fill' in <Cell> should be the actual color.
     const color = data.payload.color || data.payload.fill;
-    const name = data.name || "Không có tên";
+    const name = data.payload.name || data.name || "Không có tên";
     const value = data.value;
 
     return (
@@ -116,9 +147,10 @@ const CustomRoomTooltip = ({ active, payload }) => {
           border: "none",
           boxShadow: "0 2px 10px rgba(0,0,0,0.2)",
           fontSize: 18,
+          color: isDarkMode ? "#f8fafc" : "#1e293b",
         }}
       >
-        <span style={{ color }}>{name}: {value}</span>
+        <span style={{ fontWeight: 600, color }}>{name}: {value}</span>
       </div>
     );
   }
@@ -171,6 +203,88 @@ const CustomRoomTooltip = ({ active, payload }) => {
     }
   };
 
+  // === Thêm: Hàm xử lý khi click sự kiện trên FullCalendar (MỞ POPUP CHI TIẾT CUỘC HỌP) ===
+  // Khi click event trên FullCalendar, ta lấy đúng thông tin meeting và mở popup chi tiết
+  const handleCalendarEventClick = (info) => {
+    // info.event.id là id của event, cần lấy meeting từ danh sách theo id này
+    const meetingId = info.event.id;
+    // Tìm trong danh sách meetings thực/activeMeetingsState
+    // Tìm cả trong calendarEvents hoặc activeMeetingsState hoặc meetingsRes.data?.content nếu cần
+    // Để chắc ăn, kiểm tra cả activeMeetingsState lẫn calendarEvents có id = event.id
+    const findMeeting =
+      activeMeetingsState.find(m => `${m.id}` === `${meetingId}`) ||
+      calendarEvents.find(e => `${e.id}` === `${meetingId}`);
+
+    if (findMeeting) {
+      // Nếu là bản meeting gốc thì mở luôn, nếu là event (event dạng event object của FC) thì chỉ truyền id
+      handleOpenMeetingDetail(findMeeting);
+    } else {
+      // Nếu không tìm thấy, thử tạo meeting giả từ info.event
+      const stub = {
+        id: info.event.id,
+        title: info.event.title,
+        startTime: info.event.start,
+        endTime: info.event.end,
+        room: {
+          name: info.event.extendedProps?.roomName,
+          location: info.event.extendedProps?.location,
+          status: info.event.extendedProps?.status,
+        },
+        status: info.event.extendedProps?.status || "",
+        organizer: { fullName: info.event.extendedProps?.organizer },
+        equipment: [],
+        participants: [],
+        description: "",
+      };
+      handleOpenMeetingDetail(stub);
+    }
+  };
+
+  // === HÀM RENDER NGƯỜI THAM GIA ===
+  const renderParticipants = (organizer, participants) => {
+    if (!participants && !organizer) {
+      return <span className="text-gray-500 dark:text-gray-400">Không có người tham gia.</span>;
+    }
+
+    const getTag = (status) => {
+      switch (status) {
+        case 'ACCEPTED':
+          return <Tag color="success" className="ml-2">Đã chấp nhận</Tag>;
+        case 'DECLINED':
+          return <Tag color="error" className="ml-2">Đã từ chối</Tag>;
+        case 'PENDING':
+          return <Tag color="warning" className="ml-2">Chờ phản hồi</Tag>;
+        default:
+          return null;
+      }
+    };
+
+    const allAttendees = [
+      organizer,
+      ...(participants || [])
+    ].filter(Boolean);
+
+    const uniqueAttendees = allAttendees.filter((p, index, self) =>
+      p.id && index === self.findIndex((t) => t.id === p.id)
+    );
+
+    return (
+      <ul className="list-none p-0 m-0">
+        {uniqueAttendees.map(p => (
+          <li key={p.id} className="flex justify-between items-center py-1">
+            <span className="text-gray-800 dark:text-gray-100">
+              {p.fullName}
+              {p.id === organizer?.id && (
+                <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">(Tổ chức)</span>
+              )}
+            </span>
+            {getTag(p.status)}
+          </li>
+        ))}
+      </ul>
+    );
+  };
+
   // === 5. DARK MODE OBSERVER ===
   useEffect(() => {
     const observer = new MutationObserver(() => {
@@ -215,15 +329,19 @@ const CustomRoomTooltip = ({ active, payload }) => {
 
         const resources = (roomsRes.data || []).map(room => ({
           id: room.id.toString(),
-          title: room.name
+          title: room.name,
+          status: room.status
         }));
         setCalendarResources(resources);
         // Gán màu cho từng phòng họp theo thứ tự COLORS
-const roomColors = {};
-resources.forEach((res, index) => {
-  roomColors[res.id] = COLORS[index % COLORS.length];
-});
-        
+        const roomColors = {};
+        resources.forEach((res, index) => {
+          roomColors[res.id] =
+            (res.status || "").toUpperCase() === "UNDER_MAINTENANCE"
+              ? "#94a3b8"
+              : COLORS[index % COLORS.length];
+        });
+
         const meetings = meetingsRes.data?.content || [];
         const events = meetings.map(meeting => ({
           id: meeting.id.toString(),
@@ -233,10 +351,15 @@ resources.forEach((res, index) => {
           resourceId: meeting.room?.id?.toString(),
           backgroundColor: roomColors[meeting.room?.id?.toString()] || "#60A5FA",
           borderColor: roomColors[meeting.room?.id?.toString()] || "#2563EB",
+          opacity:
+            (meeting.room?.status || "").toUpperCase() === "UNDER_MAINTENANCE"
+              ? 0.4
+              : 1,
           extendedProps: {
             organizer: meeting.organizer?.fullName || "Không rõ",
             roomName: meeting.room?.name || "Không có phòng",
-            location: meeting.room?.location || "Không có địa điểm"
+            location: meeting.room?.location || "Không có địa điểm",
+            status: meeting.room?.status
           }
         }));
         setCalendarEvents(events);
@@ -258,9 +381,8 @@ resources.forEach((res, index) => {
 
         setStats([
           { ...cardTemplates[0], value: meetingsToday.length.toString() },
-          { ...cardTemplates[1], value: participantsToday.toString() },
-          { ...cardTemplates[2], value: formatDuration(avgDuration) },
-          { ...cardTemplates[3], value: upcomingMeetings.toString() },
+          { ...cardTemplates[1], value: formatDuration(avgDuration) },
+          { ...cardTemplates[2], value: upcomingMeetings.toString() },
         ]);
 
         // Bar Chart
@@ -275,13 +397,28 @@ resources.forEach((res, index) => {
           });
         setMeetingsPerDayData(weekDays);
 
-        // Pie Chart
+        // Pie Chart - Đồng bộ màu với Calendar
         const roomUsage = {};
+        const roomColorMap = {}; // Map màu cho từng phòng
         activeMeetings.forEach(m => {
+          const roomId = m.room?.id?.toString();
           const roomName = m.room?.name || "Không có phòng";
           roomUsage[roomName] = (roomUsage[roomName] || 0) + 1;
+          // Lưu màu từ roomColors
+          if (!roomColorMap[roomName] && roomId) {
+            roomColorMap[roomName] = roomColors[roomId] || COLORS[0];
+          }
         });
-        const pieData = Object.keys(roomUsage).map(name => ({ name, value: roomUsage[name] }));
+        // Make sure color is put into both 'color' and 'fill' for each data item to fix Pie chart color.
+        const pieData = Object.keys(roomUsage).map(name => {
+          const color = roomColorMap[name] || COLORS[0];
+          return {
+            name,
+            value: roomUsage[name],
+            color,
+            fill: color,
+          };
+        });
         setRoomUsageData(pieData);
 
       } catch (err) {
@@ -298,10 +435,14 @@ resources.forEach((res, index) => {
   return (
   <div className="p-6 space-y-6 transition-all duration-500">
     {/* Header */}
-    <div className="flex items-center justify-between mb-2">
-      <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Meeting Overview</h2>
-      <p className="text-gray-500 dark:text-gray-400 text-sm">Tổng quan hệ thống cuộc họp và hoạt động</p>
-    </div>
+    <div className="flex items-center justify-between mb-6">
+  <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100">
+    Meeting Overview
+  </h2>
+  <p className="text-gray-500 dark:text-gray-400 text-sm">
+    Tổng quan hệ thống cuộc họp và hoạt động
+  </p>
+</div>
 
     {loading ? (
       <div className="flex justify-center items-center h-[70vh]">
@@ -310,7 +451,7 @@ resources.forEach((res, index) => {
     ) : (
       <>
         {/* Cards */}
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           {stats.map((card, i) => (
             <div
               key={i}
@@ -336,7 +477,12 @@ resources.forEach((res, index) => {
               <BarChart data={meetingsPerDayData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDarkMode ? "#334155" : "#e5e7eb"} />
                 <XAxis dataKey="name" stroke={isDarkMode ? "#cbd5e1" : "#475569"} />
-                <YAxis stroke={isDarkMode ? "#cbd5e1" : "#475569"} />
+                <YAxis
+  stroke={isDarkMode ? "#cbd5e1" : "#475569"}
+  allowDecimals={false}
+  tickCount={5}
+  domain={[0, 'dataMax + 1']}
+/>
                 <Tooltip contentStyle={{
                   backgroundColor: isDarkMode ? "#1e293b" : "#ffffff",
                   color: isDarkMode ? "#f8fafc" : "#1e293b",
@@ -356,8 +502,8 @@ resources.forEach((res, index) => {
                   {roomUsageData.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
-                      fill={COLORS[index % COLORS.length]}
-                      color={COLORS[index % COLORS.length]} // thêm để tooltip dùng
+                      fill={entry.fill || entry.color}
+                      color={entry.color} // dùng màu từ data
                     />
                   ))}
                 </Pie>
@@ -392,26 +538,42 @@ resources.forEach((res, index) => {
             slotLabelFormat={{ hour: "numeric", minute: "2-digit", hour12: false }}
             eventMouseEnter={handleEventMouseEnter}
             eventMouseLeave={handleEventMouseLeave}
-            resourceLabelContent={(arg) => (
-              <span className={`text-sm font-medium ${isDarkMode ? "text-gray-200" : "text-gray-800"}`}>
-                {arg.resource.title}
-              </span>
-            )}
+            eventClick={handleCalendarEventClick}
+            resourceLabelContent={(arg) => {
+  const isMaintenance = arg.resource._resource.extendedProps.status === "UNDER_MAINTENANCE";
+
+  return (
+    <span
+      className={`text-sm font-medium ${
+        isMaintenance
+          ? "text-gray-400 line-through opacity-60"
+          : isDarkMode
+          ? "text-gray-200"
+          : "text-gray-800"
+      }`}
+    >
+      {arg.resource.title}
+    </span>
+  );
+}}
+
             eventContent={(arg) => (
-              <div style={{
-                background: arg.event.backgroundColor,
-                color: "white",
-                borderRadius: 6,
-                padding: "2px 6px",
-                fontSize: 12,
-                fontWeight: 500,
-                overflow: "hidden",
-                whiteSpace: "nowrap",
-                textOverflow: "ellipsis"
-              }}>
-                {arg.event.title}
-              </div>
-            )}
+  <div style={{
+    background: arg.event.backgroundColor,
+    opacity: arg.event.extendedProps.opacity ?? 1,
+    color: "white",
+    borderRadius: 6,
+    padding: "2px 6px",
+    fontSize: 12,
+    fontWeight: 500,
+    overflow: "hidden",
+    whiteSpace: "nowrap",
+    textOverflow: "ellipsis",
+    cursor: "pointer"
+  }}>
+    {arg.event.title}
+  </div>
+)}
             views={{
               resourceTimelineDay: { slotDuration: { hours: 1 }, slotLabelFormat: [{ hour: "2-digit", minute: "2-digit", hour12: false }] },
               resourceTimelineWeek: { slotDuration: { days: 1 }, slotLabelFormat: [{ weekday: "short", day: "numeric" }] },
@@ -424,17 +586,21 @@ resources.forEach((res, index) => {
         {todayMeetingsModalVisible && (
           <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-            onClick={() => setTodayMeetingsModalVisible(false)} // click background
+            onClick={() => setTodayMeetingsModalVisible(false)}
           >
             <div
               className="bg-white dark:bg-slate-800 p-6 rounded-xl max-w-xl w-full space-y-4"
-              onClick={(e) => e.stopPropagation()} // ngăn click vào modal bị bubble ra background
+              onClick={(e) => e.stopPropagation()}
             >
               <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">📋 Cuộc họp hôm nay</h3>
               <div className="max-h-96 overflow-y-auto space-y-4">
                 {todayMeetingsList.length > 0 ? (
                   todayMeetingsList.map(m => (
-                    <div key={m.id} className="p-3 border border-gray-200 dark:border-slate-700 rounded-lg">
+                    <div
+                      key={m.id}
+                      className="p-3 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 cursor-pointer transition"
+                      onClick={() => handleOpenMeetingDetail(m)}
+                    >
                       <p className="font-semibold text-gray-700 dark:text-gray-200 text-md">{m.title}</p>
                       <p className="text-sm text-gray-500 dark:text-gray-400">
                         {dayjs(m.startTime).format("HH:mm")} - {dayjs(m.endTime).format("HH:mm")}
@@ -467,7 +633,6 @@ resources.forEach((res, index) => {
                         </ul>
                       </div>
 
-
                       {m.organizer && (
                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                           <strong>Người tổ chức:</strong> {m.organizer.fullName}
@@ -488,6 +653,56 @@ resources.forEach((res, index) => {
             </div>
           </div>
         )}
+
+        {/* Modal chi tiết cuộc họp */}
+        <Modal
+          open={detailModalVisible}
+          onCancel={() => setDetailModalVisible(false)}
+          footer={null}
+          title={<span className="dark:text-white">Chi tiết cuộc họp</span>}
+          width={600}
+          className="dark:[&_.ant-modal-content]:bg-gray-800 dark:[&_.ant-modal-content]:text-gray-200"
+        >
+          {selectedMeeting ? (
+            <Descriptions
+              bordered
+              column={1}
+              className="dark:[&_.ant-descriptions-item-label]:text-gray-300 dark:[&_.ant-descriptions-item-content]:text-gray-100"
+            >
+              <Descriptions.Item label="Tên cuộc họp">
+                {selectedMeeting.title}
+              </Descriptions.Item>
+              <Descriptions.Item label="Thời gian">
+                {`${dayjs(selectedMeeting.startTime).format("HH:mm")} - ${dayjs(selectedMeeting.endTime).format("HH:mm, DD/MM/YYYY")}`}
+              </Descriptions.Item>
+              <Descriptions.Item label="Trạng thái">
+                <Tag color={selectedMeeting.status === 'CONFIRMED' ? 'blue' : 'warning'}>
+                  {selectedMeeting.status}
+                </Tag>
+              </Descriptions.Item>
+              <Descriptions.Item label="Phòng họp">
+                {selectedMeeting.room?.name || "Chưa xác định"}
+                {selectedMeeting.room?.location && ` (${selectedMeeting.room.location})`}
+              </Descriptions.Item>
+              {selectedMeeting.equipment?.length > 0 && (
+                <Descriptions.Item label="Thiết bị">
+                  {selectedMeeting.equipment.map(eq => eq.name).join(", ")}
+                </Descriptions.Item>
+              )}
+              <Descriptions.Item label="Người tham gia">
+                {renderParticipants(selectedMeeting.organizer, selectedMeeting.participants)}
+              </Descriptions.Item>
+              <Descriptions.Item label="Ghi chú">
+                {selectedMeeting.description || "Không có"}
+              </Descriptions.Item>
+            </Descriptions>
+          ) : (
+            <div className="flex justify-center py-6">
+              <Spin size="large" />
+            </div>
+          )}
+        </Modal>
+        
       </>
     )}
   </div>

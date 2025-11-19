@@ -233,7 +233,7 @@ export default function UserLayout() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
       {/* Header */}
-      <header className="h-14 bg-[#0b132b] text-white dark:bg-slate-900 flex items-center justify-between px-5 shadow-md transition-colors z-30 relative">
+      <header className="h-14 bg-[#0b132b] text-white dark:bg-slate-900 flex items-center justify-between px-5 shadow-md transition-colors z-40 fixed top-0 left-0 right-0">
         <div className="flex items-center gap-3">
           <button
             onClick={() => setIsSidebarOpen((prev) => !prev)}
@@ -318,38 +318,42 @@ export default function UserLayout() {
             )}
           </div>
 
-          {/* NÚT CÀI ĐẶT (Đã cập nhật) */}
-          <div className="relative" ref={settingsRef}>
-            <button
-              onClick={handleSettingsClick}
-              className="w-9 h-9 rounded-lg bg-[#1c2541] flex items-center justify-center hover:bg-[#3a506b] transition"
-            >
-              <FiSettings size={20} />
-            </button>
+          {/* NÚT CÀI ĐẶT */}
+<div className="relative" ref={settingsRef}>
+  <button
+    onClick={handleSettingsClick}
+    className="w-9 h-9 rounded-lg bg-[#1c2541] flex items-center justify-center hover:bg-[#3a506b] transition"
+  >
+    <FiSettings size={20} />
+  </button>
+
             {isSettingsOpen && (
               <div className="absolute top-12 right-0 w-52 bg-white dark:bg-slate-800 rounded-lg shadow-xl border dark:border-slate-700 py-2">
                 
-                {/* === MỤC MỚI ĐƯỢC THÊM === */}
+                {/* Nút đổi chế độ sáng/tối */}
+                <ThemeToggle />
+
+                {/* Thông tin cá nhân */}
                 <NavLink
                   to="/user/profile"
                   className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700"
-                  onClick={() => setIsSettingsOpen(false)} 
+                  onClick={() => setIsSettingsOpen(false)}
                 >
-                  <FiUser size={16} /> {/* <-- Icon mới */}
+                  <FiUser size={16} />
                   <span>Thông tin cá nhân</span>
                 </NavLink>
 
-                {/* (Mục cũ - Đổi mật khẩu) */}
+                {/* Đổi mật khẩu */}
                 <NavLink
                   to="/user/change-password"
                   className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700"
-                  onClick={() => setIsSettingsOpen(false)} 
+                  onClick={() => setIsSettingsOpen(false)}
                 >
                   <FiLock size={16} />
                   <span>Đổi mật khẩu</span>
                 </NavLink>
-                
-                {/* (Mục cũ - Đăng xuất) */}
+
+                {/* Đăng xuất */}
                 <button
                   onClick={() => {
                     logout();
@@ -370,10 +374,10 @@ export default function UserLayout() {
       <div className="flex flex-1 relative">
         {/* Sidebar */}
         <aside
-          className={`fixed md:static top-14 md:top-0 left-0 bg-white dark:bg-slate-900 
-                     border-r dark:border-slate-800 shadow-md w-64 h-[calc(100%-56px)] md:h-auto 
-                     transform ${isSidebarOpen ? "translate-x-0" : "-translate-x-64"} 
-                     transition-transform duration-300 ease-in-out z-20`}
+        className={`fixed top-14 left-0 bg-white dark:bg-slate-900 
+              border-r dark:border-slate-800 shadow-md w-64 h-[calc(100%-56px)]
+              transform ${isSidebarOpen ? "translate-x-0" : "-translate-x-64"}
+              transition-transform duration-300 ease-in-out z-30`}
         >
           <div className="flex flex-col items-center py-5 border-b border-gray-100 dark:border-slate-800">
             <div className="text-center">
@@ -404,12 +408,6 @@ export default function UserLayout() {
               </NavLink>
             ))}
           </nav>
-          <div className="mt-auto px-5 py-4 border-t border-gray-100 dark:border-slate-800">
-            <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-              <span>Phiên bản 1.0</span>
-              <ThemeToggle />
-            </div>
-          </div>
         </aside>
         
         {/* Overlay cho mobile */}
@@ -421,8 +419,8 @@ export default function UserLayout() {
         )}
 
         {/* Main content */}
-        <div className="flex-1">
-          <main className="flex-1 p-6 overflow-y-auto bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-gray-100 transition-colors">
+        <div className="flex-1 ml-64 mt-14">
+          <main className="p-6 overflow-y-auto bg-gray-50 dark:bg-slate-950 transition-colors">
             <Outlet />
           </main>
         </div>

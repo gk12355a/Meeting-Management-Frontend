@@ -16,7 +16,6 @@ export default function LoginPage() {
 
   // 🟢 Fix lỗi toast bị "nuốt" sau logout
   useEffect(() => {
-    toast.dismiss();
     setUsername("");
     setPassword("");
   }, []);

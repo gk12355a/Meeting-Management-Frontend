@@ -6,3 +6,11 @@ body {
   @apply bg-gray-100 font-sans;
 }
 
+/* Tô xám đậm phần ngoài giờ hành chính trong calendar */
+.fc-non-business {
+  background-color: #e5e7eb !important; /* gray-200 */
+}
+
+.dark .fc-non-business {
+  background-color: #1f2937 !important; /* slate-800 */
+}

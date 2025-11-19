@@ -19,8 +19,7 @@ import {
   downloadRoomUsageExcel,
   downloadCancelStatsExcel,
 } from "../../services/reportService";
-//import jsPDF from "jspdf";
-//import autoTable from "jspdf-autotable"; // ở đầu file
+
 import { toast, ToastContainer } from "react-toastify";
 import { FiBarChart2, FiDownload } from "react-icons/fi";
 import "react-toastify/dist/ReactToastify.css";
@@ -38,7 +37,6 @@ const ReportPage = () => {
     document.documentElement.classList.contains("dark")
   );
 
-  // 🔄 Theo dõi thay đổi theme (dark / light)
   useEffect(() => {
     const observer = new MutationObserver(() => {
       setIsDarkMode(document.documentElement.classList.contains("dark"));
@@ -50,7 +48,6 @@ const ReportPage = () => {
     return () => observer.disconnect();
   }, []);
 
-  // 📅 Lấy dữ liệu mặc định
   useEffect(() => {
     const today = new Date();
     const start = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -80,7 +77,6 @@ const ReportPage = () => {
     }
   };
 
-  // 📊 Tải Excel từ backend
   const handleDownloadExcel = async () => {
     if (!dateRange.length) return toast.info("Vui lòng chọn ngày!");
     const from = dateRange[0].toISOString().split("T")[0];
@@ -109,7 +105,6 @@ const ReportPage = () => {
     }
   };
 
-  // ⚙️ Chart data
   const textColor = isDarkMode ? "#e2e8f0" : "#1f2937";
   const gridColor = isDarkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)";
 
@@ -147,6 +142,7 @@ const ReportPage = () => {
     ],
   };
 
+  // BAR OPTIONS (GIỮ NGUYÊN)
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -162,6 +158,22 @@ const ReportPage = () => {
     },
   };
 
+  // 🟢 PIE OPTIONS (ẨN TRỤC)
+  const pieOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: "bottom",
+        labels: { color: textColor },
+      },
+    },
+    scales: {
+      x: { display: false },
+      y: { display: false },
+    },
+  };
+
   return (
     <div
       className={`p-6 min-h-screen transition-colors duration-300 ${
@@ -170,7 +182,6 @@ const ReportPage = () => {
     >
       <ToastContainer autoClose={2000} theme={isDarkMode ? "dark" : "light"} />
 
-      {/* HEADER */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <FiBarChart2
@@ -188,7 +199,6 @@ const ReportPage = () => {
         </div>
       </div>
 
-      {/* THANH CHỌN NGÀY + NÚT XUẤT */}
       <div
         className={`p-4 rounded-2xl shadow-md border mb-6 flex flex-col md:flex-row md:items-center gap-3 ${
           isDarkMode
@@ -224,16 +234,10 @@ const ReportPage = () => {
         </div>
       </div>
 
-      {/* NỘI DUNG CHÍNH */}
       <Spin spinning={isLoading}>
         <Tabs
           activeKey={activeTab}
           onChange={setActiveTab}
-          className={`${
-            isDarkMode
-              ? "dark:[&_.ant-tabs-tab-btn]:text-gray-300 dark:[&_.ant-tabs-tab-btn:hover]:text-blue-400"
-              : ""
-          }`}
           items={[
             {
               key: "1",
@@ -271,7 +275,7 @@ const ReportPage = () => {
                 >
                   {cancelStatsData.length ? (
                     <div className="w-[400px] h-[400px]">
-                      <Pie data={cancelChartData} options={chartOptions} />
+                      <Pie data={cancelChartData} options={pieOptions} />
                     </div>
                   ) : (
                     <p className="text-gray-500">

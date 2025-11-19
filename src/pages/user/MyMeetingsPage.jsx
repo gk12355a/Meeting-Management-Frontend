@@ -218,6 +218,7 @@ function injectNoBusinessTimeStyle() {
   document.head.appendChild(style);
 }
 
+
 const MyMeetingPage = () => {
   // State quản lý lịch họp
   const [events, setEvents] = useState([]);
@@ -247,6 +248,27 @@ const [quickBooking, setQuickBooking] = useState({ open: false, start: null, end
     injectNoBusinessTimeStyle();
   }, []);
 
+  // CSS cho cuộc họp bị hủy
+useEffect(() => {
+  const style = document.createElement("style");
+  style.innerHTML = `
+    .meeting-cancelled {
+  opacity: 0.4 !important;
+  filter: grayscale(0.5);
+}
+
+.meeting-cancelled .fc-event-title,
+.meeting-cancelled .fc-event-time {
+  text-decoration: line-through !important;
+  text-decoration-color: #b91c1c !important;
+  text-decoration-thickness: 1.2px !important;
+  text-underline-offset: -4px;
+}
+  `;
+  document.head.appendChild(style);
+  return () => style.remove();
+}, []);
+
   // === TẢI LỊCH HỌP (ĐÃ SỬA LỖI LOGIC LỌC) ===
   const fetchMeetings = async () => {
     if (!user) return; // Đảm bảo user đã tải xong
@@ -258,9 +280,9 @@ const [quickBooking, setQuickBooking] = useState({ open: false, start: null, end
 
       const filteredData = data.filter(m => {
         // 1. Bỏ qua nếu cuộc họp bị HỦY (toàn bộ)
-        if (m.status === 'CANCELLED') {
-          return false;
-        }
+        // if (m.status === 'CANCELLED') {
+        //   return false;
+        // }
         // 2. Kiểm tra xem user có phải người tổ chức không
         const isOrganizer = m.organizer?.id === user.id;
         // 3. Tìm trạng thái của user (nếu là người tham gia)
@@ -280,17 +302,34 @@ const [quickBooking, setQuickBooking] = useState({ open: false, start: null, end
       });
 
       // Map từ dữ liệu ĐÃ LỌC
-      const mappedEvents = filteredData.map((m) => ({
-        id: m.id,
-        title: m.title || "Cuộc họp",
-        start: m.startTime,
-        end: m.endTime,
-        backgroundColor: m.status === 'CONFIRMED' ? "#3b82f6" : "#f59e0b",
-        borderColor: m.status === 'CONFIRMED' ? "#2563eb" : "#d97706",
-        extendedProps: {
-          roomName: m.room?.name || "Chưa xác định",
-        }
-      }));
+      const mappedEvents = filteredData.map((m) => {
+  const startLocal = dayjs(m.startTime).local().format();
+  const endLocal = dayjs(m.endTime).local().format();
+
+  return {
+    id: m.id,
+    title: m.title || "Cuộc họp",
+    start: startLocal,
+    end: endLocal,
+    backgroundColor: m.status === "CANCELLED"
+  ? "#f50c0cff" 
+  : m.status === "CONFIRMED"
+  ? "#3b82f6"
+  : "#f59e0b",
+
+borderColor: m.status === "CANCELLED"
+  ? "#b91c1c" 
+  : m.status === "CONFIRMED"
+  ? "#2563eb"
+  : "#d97706",
+    extendedProps: {
+      roomName: m.room?.name || "Chưa xác định",
+    },
+    // add class only if cancelled
+    classNames: m.status === "CANCELLED" ? ["meeting-cancelled"] : []
+  };
+});
+
       setEvents(mappedEvents);
     } catch (err) {
       console.error("Lỗi tải lịch họp:", err);

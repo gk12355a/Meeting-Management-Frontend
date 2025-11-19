@@ -19,7 +19,7 @@ export const respondToMeeting = (meetingId, status) => {
  * @param {number} page - trang (tùy chọn)
  * @param {number} size - số phần tử mỗi trang (tùy chọn)
  */
-export const getMyMeetings = (page = 0, size = 20) => {
+export const getMyMeetings = (page = 0, size = 9000) => {
   return api.get("/meetings/my-meetings", { params: { page, size } });
 };
 
