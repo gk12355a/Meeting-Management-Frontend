@@ -30,6 +30,7 @@ import "react-toastify/dist/ReactToastify.css";
 import EditMeetingModal from "../../components/user/EditMeetingModal";
 import DeleteMeetingModal from "../../components/user/DeleteMeetingModal";
 import QuickBookingModal from "../../components/user/QuickBookingModal";
+import MeetingDetailModal from "../../components/user/MeetingDetailModal";
 
 dayjs.locale("vi");
 dayjs.extend(utc);
@@ -505,50 +506,50 @@ const [quickBooking, setQuickBooking] = useState({ open: false, start: null, end
     });
   };
 
-  // === HÀM RENDER NGƯỜI THAM GIA ===
-  const renderParticipants = (organizer, participants) => {
-    if (!participants && !organizer) {
-      return <span className="text-gray-500 dark:text-gray-400">Không có người tham gia.</span>;
-    }
+  // // === HÀM RENDER NGƯỜI THAM GIA ===
+  // const renderParticipants = (organizer, participants) => {
+  //   if (!participants && !organizer) {
+  //     return <span className="text-gray-500 dark:text-gray-400">Không có người tham gia.</span>;
+  //   }
 
-    const getTag = (status) => {
-      switch (status) {
-        case 'ACCEPTED':
-          return <Tag color="success" className="ml-2">Đã chấp nhận</Tag>;
-        case 'DECLINED':
-          return <Tag color="error" className="ml-2">Đã từ chối</Tag>;
-        case 'PENDING':
-          return <Tag color="warning" className="ml-2">Chờ phản hồi</Tag>;
-        default:
-          return null;
-      }
-    };
+  //   const getTag = (status) => {
+  //     switch (status) {
+  //       case 'ACCEPTED':
+  //         return <Tag color="success" className="ml-2">Đã chấp nhận</Tag>;
+  //       case 'DECLINED':
+  //         return <Tag color="error" className="ml-2">Đã từ chối</Tag>;
+  //       case 'PENDING':
+  //         return <Tag color="warning" className="ml-2">Chờ phản hồi</Tag>;
+  //       default:
+  //         return null;
+  //     }
+  //   };
 
-    const allAttendees = [
-      organizer,
-      ...(participants || [])
-    ].filter(Boolean);
+  //   const allAttendees = [
+  //     organizer,
+  //     ...(participants || [])
+  //   ].filter(Boolean);
 
-    const uniqueAttendees = allAttendees.filter((p, index, self) =>
-      p.id && index === self.findIndex((t) => t.id === p.id)
-    );
+  //   const uniqueAttendees = allAttendees.filter((p, index, self) =>
+  //     p.id && index === self.findIndex((t) => t.id === p.id)
+  //   );
 
-    return (
-      <ul className="list-none p-0 m-0">
-        {uniqueAttendees.map(p => (
-          <li key={p.id} className="flex justify-between items-center py-1">
-            <span className="text-gray-800 dark:text-gray-100">
-              {p.fullName}
-              {p.id === organizer?.id && (
-                <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">(Tổ chức)</span>
-              )}
-            </span>
-            {getTag(p.status)}
-          </li>
-        ))}
-      </ul>
-    );
-  };
+  //   return (
+  //     <ul className="list-none p-0 m-0">
+  //       {uniqueAttendees.map(p => (
+  //         <li key={p.id} className="flex justify-between items-center py-1">
+  //           <span className="text-gray-800 dark:text-gray-100">
+  //             {p.fullName}
+  //             {p.id === organizer?.id && (
+  //               <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">(Tổ chức)</span>
+  //             )}
+  //           </span>
+  //           {getTag(p.status)}
+  //         </li>
+  //       ))}
+  //     </ul>
+  //   );
+  // };
 
   // Load lịch họp khi component mount
   useEffect(() => {
@@ -660,85 +661,6 @@ const [quickBooking, setQuickBooking] = useState({ open: false, start: null, end
         </div>
       )}
 
-      {/* Modal chi tiết cuộc họp */}
-      <Modal
-        open={isModalOpen}
-        onCancel={() => setIsModalOpen(false)}
-        footer={
-          meetingDetail && meetingDetail.organizer?.id === user?.id ? (
-            <div className="flex justify-end gap-2">
-              <Button
-                type="primary"
-                icon={<FiEdit />}
-                onClick={() => {
-                  setIsEditModalOpen(true);
-                  setIsModalOpen(false);
-                }}
-                className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500"
-              >
-                Sửa
-              </Button>
-              <Button
-                danger
-                icon={<FiAlertTriangle />}
-                onClick={() => {
-                  setIsDeleteModalOpen(true);
-                  setIsModalOpen(false);
-                }}
-              >
-                Hủy họp
-              </Button>
-            </div>
-          ) : (
-            <Button onClick={() => setIsModalOpen(false)}>Đóng</Button>
-          )
-        }
-        title={<span className="dark:text-white">Chi tiết cuộc họp</span>}
-        width={600}
-        className="dark:[&_.ant-modal-content]:bg-gray-800 dark:[&_.ant-modal-content]:text-gray-200"
-      >
-        {meetingDetail ? (
-          <Descriptions
-            bordered
-            column={1}
-            className="dark:[&_.ant-descriptions-item-label]:text-gray-300 dark:[&_.ant-descriptions-item-content]:text-gray-100"
-          >
-            <Descriptions.Item label="Tên cuộc họp">
-              {meetingDetail.title}
-            </Descriptions.Item>
-            <Descriptions.Item label="Thời gian">
-              {`${dayjs(meetingDetail.startTime).format("HH:mm")} - ${dayjs(meetingDetail.endTime).format("HH:mm, DD/MM/YYYY")}`}
-            </Descriptions.Item>
-            <Descriptions.Item label="Trạng thái">
-              <Tag 
-                color={
-                  meetingDetail.status === 'CONFIRMED' 
-                  ? 'blue' 
-                  : meetingDetail.status === 'REJECTED' 
-                  ? 'red' 
-                  : 'warning'
-                }
-              >
-                {meetingDetail.status}
-              </Tag>
-            </Descriptions.Item>
-            <Descriptions.Item label="Phòng họp">
-              {meetingDetail.room?.name || "Chưa xác định"}
-            </Descriptions.Item>
-            <Descriptions.Item label="Người tham gia">
-              {renderParticipants(meetingDetail.organizer, meetingDetail.participants)}
-            </Descriptions.Item>
-            <Descriptions.Item label="Ghi chú">
-              {meetingDetail.description || "Không có"}
-            </Descriptions.Item>
-          </Descriptions>
-        ) : (
-          <div className="flex justify-center py-6">
-            <Spin size="large" />
-          </div>
-        )}
-      </Modal>
-
       {/* Modal đặt lịch nhanh */}
       <QuickBookingModal
         open={quickBooking.open}
@@ -769,6 +691,41 @@ const [quickBooking, setQuickBooking] = useState({ open: false, start: null, end
         }}
       />
 
+      {/* Modal chi tiết cuộc họp sử dụng MeetingDetailModal */}
+      <MeetingDetailModal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        meeting={meetingDetail}
+      >
+        {/* Footer với buttons Sửa/Hủy nếu là người tổ chức */}
+        {meetingDetail && meetingDetail.organizer?.id === user?.id ? (
+          <div className="flex justify-end gap-2">
+              <Button
+                type="primary"
+                icon={<FiEdit />}
+                onClick={() => {
+                  setIsEditModalOpen(true);
+                  setIsModalOpen(false);
+                }}
+                className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500"
+              >
+                Sửa
+              </Button>
+              <Button
+                danger
+                icon={<FiAlertTriangle />}
+                onClick={() => {
+                  setIsDeleteModalOpen(true);
+                  setIsModalOpen(false);
+                }}
+              >
+                Hủy họp
+              </Button>
+            </div>
+        ) : (
+          <Button onClick={() => setIsModalOpen(false)}>Đóng</Button>
+        )}
+      </MeetingDetailModal>
     </div>
   );
 };
