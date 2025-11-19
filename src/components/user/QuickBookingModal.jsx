@@ -11,8 +11,10 @@ import {
   Divider,
   Checkbox,
   Spin,
+  Tag,
+  Alert,
 } from "antd";
-import { FiPlusCircle, FiUsers } from "react-icons/fi";
+import { FiPlusCircle, FiUsers, FiInfo } from "react-icons/fi";
 import dayjs from "dayjs";
 import "dayjs/locale/vi";
 import utc from "dayjs/plugin/utc";
@@ -37,13 +39,16 @@ const { Option } = Select;
 const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [rooms, setRooms] = useState([]);
-  
+
   const [availableDevices, setAvailableDevices] = useState([]);
   const [devicesLoading, setDevicesLoading] = useState(false);
-  
+
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isRecurring, setIsRecurring] = useState(false);
+
+  // State cho phòng VIP
+  const [selectedRoom, setSelectedRoom] = useState(null);
 
   // TIME PICKER STATE
   const [clockOpen, setClockOpen] = useState(false);
@@ -53,14 +58,15 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
   const [form] = Form.useForm();
   const { user } = useAuth();
 
-  // Watch form values để tải devices tự động
+  // Watch form values
   const watchedDate = Form.useWatch("date", form);
   const watchedTime = Form.useWatch("time", form);
   const watchedDuration = Form.useWatch("duration", form);
+  const watchedRoomId = Form.useWatch("roomId", form);
 
   /* ===================================================
                     LOAD ROOMS
-  ==================================================== */
+  ====================================================*/
   useEffect(() => {
     if (!open) return;
 
@@ -76,8 +82,19 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
   }, [open]);
 
   /* ===================================================
-              SET INITIAL FORM VALUES
-  ==================================================== */
+            THEO DÕI PHÒNG ĐÃ CHỌN (VIP)
+  ====================================================*/
+  useEffect(() => {
+    if (watchedRoomId) {
+      const room = rooms.find((r) => r.id === watchedRoomId);
+      setSelectedRoom(room);
+    } else
+      setSelectedRoom(null);
+    }, [watchedRoomId, rooms]);
+
+  /* ===================================================
+            SET INITIAL FORM VALUES
+  ====================================================*/
   useEffect(() => {
     if (open && quickBookingData?.start) {
       const { start, end } = quickBookingData;
@@ -86,7 +103,8 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
 
       setIsRecurring(false);
       setClockValue(start);
-      
+      setSelectedRoom(null);
+
       setTimeout(() => {
         form.setFieldsValue({
           title: "",
@@ -103,7 +121,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
           description: "",
         });
       }, 100);
-      
+
       setSearchResults([]);
       setAvailableDevices([]);
     }
@@ -111,7 +129,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
 
   /* ===================================================
             LOAD DEVICES WHEN TIME CHANGES
-  ==================================================== */
+  ====================================================*/
   useEffect(() => {
     const fetchDevices = async () => {
       if (!watchedDate || !watchedTime || !watchedDuration) {
@@ -131,9 +149,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
           .minute(watchedTime.minute());
 
         const startTime = startTimeUTC.toISOString();
-        const endTime = startTimeUTC
-          .add(watchedDuration, "minute")
-          .toISOString();
+        const endTime = startTimeUTC.add(watchedDuration, "minute").toISOString();
 
         const res = await getAvailableDevices(startTime, endTime);
         setAvailableDevices(res.data || []);
@@ -151,7 +167,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
 
   /* ===================================================
               SEARCH INTERNAL USERS
-  ==================================================== */
+  ====================================================*/
   const handleSearchUsers = (query) => {
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
 
@@ -175,8 +191,8 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
   };
 
   /* ===================================================
-                VALIDATE BUSINESS TIME
-  ==================================================== */
+              VALIDATE BUSINESS TIME
+  ====================================================*/
   const validateBusinessTime = (value) => {
     if (!value) return false;
     const totalMin = value.hour() * 60 + value.minute();
@@ -185,7 +201,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
 
   /* ===================================================
                   SUBMIT MEETING
-  ==================================================== */
+  ====================================================*/
   const handleCreateMeeting = async (values) => {
     try {
       setLoading(true);
@@ -217,7 +233,6 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
         ),
         deviceIds: values.deviceIds || [],
         guestEmails: values.guestEmails || [],
-
         recurrenceRule:
           values.isRecurring === true
             ? {
@@ -226,21 +241,28 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
                 repeatUntil: dayjs(values.repeatUntil).format("YYYY-MM-DD"),
               }
             : null,
-
         onBehalfOfUserId: null,
       };
 
-      await createMeeting(payload);
+      const res = await createMeeting(payload);
 
-      toast.success("🎉 Tạo cuộc họp thành công!");
-      form.resetFields();
-      setClockValue(dayjs());
-      setAvailableDevices([]);
-      setIsRecurring(false);
+      if (res.data?.status === "PENDING_APPROVAL") {
+        toast.info("📝 Yêu cầu đặt phòng đã được gửi và đang chờ Admin phê duyệt.");
+      } else {
+        toast.success("🎉 Tạo cuộc họp thành công!");
+      }
+
+      handleCancel();
       onSuccess?.();
-      onCancel();
     } catch (err) {
-      toast.error(err?.response?.data?.message || "Không thể tạo cuộc họp!");
+      const msg = err?.response?.data?.message || "Không thể tạo cuộc họp!";
+      if (msg.toLowerCase().includes("bảo trì") && msg.toLowerCase().includes("phòng")) {
+        toast.error("🚫 Phòng họp đang bảo trì, vui lòng chọn phòng khác!");
+      } else if (err.response?.status === 409) {
+        toast.error(`⚠️ ${msg}`);
+      } else {
+        toast.error(msg);
+      }
     } finally {
       setLoading(false);
     }
@@ -251,12 +273,13 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
     setClockValue(dayjs());
     setAvailableDevices([]);
     setIsRecurring(false);
+    setSelectedRoom(null);
     onCancel();
   };
 
   /* ===================================================
-                        UI
-  ==================================================== */
+                        RENDER
+  ====================================================*/
   return (
     <Modal
       open={open}
@@ -302,9 +325,8 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
             />
           </Form.Item>
 
-          {/* TIME */}
+          {/* DATE - TIME - DURATION */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {/* DATE */}
             <Form.Item
               name="date"
               label="Ngày họp"
@@ -313,85 +335,61 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
               <DatePicker
                 className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
                 format="DD/MM/YYYY"
-                disabledDate={(d) => d && (d < dayjs().startOf("day") || d.day() === 0 || d.day() === 6)}
+                disabledDate={(d) =>
+                  d && (d < dayjs().startOf("day") || d.day() === 0 || d.day() === 6)
+                }
               />
             </Form.Item>
 
-            {/* TIME PICKER */}
             <Form.Item
               name="time"
               label="Giờ bắt đầu"
               rules={[{ required: true, message: "Chọn giờ bắt đầu" }]}
             >
-              <>
-                <div className="flex gap-2">
-                  <Input
-                    readOnly
-                    value={clockValue.format("HH:mm")}
-                    onClick={() => setClockOpen(true)}
-                    className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+              <div className="flex gap-2">
+                <Input
+                  readOnly
+                  value={clockValue.format("HH:mm")}
+                  onClick={() => setClockOpen(true)}
+                  className="dark:bg-gray-700 dark:text-white dark:border-gray-600 cursor-pointer"
+                />
+                <Button onClick={() => setClockOpen(true)}>🕒 Chọn</Button>
+              </div>
+
+              <Modal
+                title="Chọn giờ họp (08:00 - 18:00)"
+                open={clockOpen}
+                onCancel={() => setClockOpen(false)}
+                onOk={() => {
+                  if (!validateBusinessTime(clockValue)) {
+                    toast.error("⏰ Chỉ được đặt 08:00 - 18:00!");
+                    return;
+                  }
+                  form.setFieldsValue({ time: clockValue });
+                  setClockOpen(false);
+                }}
+                width={350}
+                centered
+              >
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <StaticTimePicker
+                    orientation="portrait"
+                    ampm={false}
+                    value={clockValue}
+                    onChange={(v) => setClockValue(v)}
+                    slotProps={{ actionBar: { actions: [] } }}
                   />
-                  <Button 
-                    onClick={() => setClockOpen(true)}
-                    className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                  >
-                    🕒 Đồng hồ
-                  </Button>
-                </div>
-
-                <Modal
-                  title="Chọn giờ họp (08:00 - 18:00)"
-                  open={clockOpen}
-                  onCancel={() => setClockOpen(false)}
-                  onOk={() => {
-                    if (!validateBusinessTime(clockValue)) {
-                      toast.error("⏰ Chỉ được đặt 08:00 - 18:00!");
-                      return;
-                    }
-                    form.setFieldsValue({ time: clockValue });
-                    setClockOpen(false);
-                  }}
-                  width={520}
-                  style={{ overflow: "visible" }}
-                  bodyStyle={{ overflow: "visible", paddingTop: 8 }}
-                  className="dark:[&_.ant-modal-content]:bg-gray-800 dark:[&_.ant-modal-header]:bg-gray-800"
-                >
-                  <div className="text-center text-gray-500 dark:text-gray-300 mb-2 text-sm">
-                    <span className="font-medium text-indigo-600 dark:text-indigo-400">
-                      Giờ (HH)
-                    </span>{" "}
-                    :{" "}
-                    <span className="font-medium text-indigo-600 dark:text-indigo-400">
-                      Phút (MM)
-                    </span>
-                  </div>
-
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <StaticTimePicker
-                      orientation="landscape"
-                      ampm={false}
-                      value={clockValue}
-                      onChange={(v) => setClockValue(v)}
-                      slotProps={{
-                        actionBar: { actions: [] },
-                      }}
-                    />
-                  </LocalizationProvider>
-                </Modal>
-              </>
+                </LocalizationProvider>
+              </Modal>
             </Form.Item>
 
-            {/* DURATION */}
             <Form.Item
               name="duration"
               label="Thời lượng"
               initialValue={60}
               rules={[{ required: true, message: "Chọn thời lượng" }]}
             >
-              <Select
-                className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                popupClassName="dark:bg-gray-700 dark:text-gray-100"
-              >
+              <Select className="dark:bg-gray-700 dark:text-white dark:border-gray-600">
                 <Option value={15}>15 phút</Option>
                 <Option value={30}>30 phút</Option>
                 <Option value={45}>45 phút</Option>
@@ -402,14 +400,15 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
             </Form.Item>
           </div>
 
-          {/* ROOM */}
+          {/* ROOM SELECT */}
           <Form.Item
             name="roomId"
             label="Phòng họp"
             rules={[{ required: true, message: "Chọn phòng họp" }]}
           >
-            <Select 
+            <Select
               placeholder="-- Chọn phòng họp --"
+              optionLabelProp="label"
               className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
               popupClassName="dark:bg-gray-700 dark:text-gray-100"
             >
@@ -417,38 +416,50 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
                 <Option
                   key={r.id}
                   value={r.id}
+                  label={r.name}
                   disabled={r.status !== "AVAILABLE"}
                 >
                   <div className="flex justify-between items-center">
                     <span>
-                      {r.name} ({r.location || "Không rõ"})
+                      {r.name} ({r.capacity} chỗ)
+                      {r.requiresApproval && (
+                        <Tag color="gold" className="ml-2 text-[10px]">
+                          VIP
+                        </Tag>
+                      )}
                     </span>
-                    <span
-                      className={`px-2 py-1 rounded text-xs ${
-                        r.status === "AVAILABLE"
-                          ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
-                          : "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300"
-                      }`}
-                    >
+                    <Tag color={r.status === "AVAILABLE" ? "green" : "red"}>
                       {r.status === "AVAILABLE" ? "Có sẵn" : "Bảo trì"}
-                    </span>
+                    </Tag>
                   </div>
                 </Option>
               ))}
             </Select>
           </Form.Item>
 
+          {/* CẢNH BÁO PHÒNG VIP */}
+          {selectedRoom?.requiresApproval && (
+            <Alert
+              message="Lưu ý: Phòng VIP"
+              description="Phòng họp này yêu cầu sự phê duyệt từ Admin. Yêu cầu của bạn sẽ ở trạng thái 'Chờ duyệt' sau khi gửi."
+              type="warning"
+              showIcon
+              icon={<FiInfo />}
+              className="mb-4"
+            />
+          )}
+
           {/* DEVICES */}
           <Form.Item name="deviceIds" label="Thiết bị sử dụng">
             <Select
               mode="multiple"
-              disabled={!watchedDate || !watchedTime}
-              loading={devicesLoading}
               placeholder={
                 !watchedDate || !watchedTime
-                  ? "Chọn ngày và giờ trước"
+                  ? "Vui lòng chọn thời gian trước"
                   : "Chọn thiết bị khả dụng"
               }
+              loading={devicesLoading}
+              disabled={!watchedDate || !watchedTime || devicesLoading}
               className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
               popupClassName="dark:bg-gray-700 dark:text-gray-100"
             >
@@ -460,15 +471,9 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
                 >
                   <div className="flex justify-between items-center">
                     <span>{d.name}</span>
-                    <span
-                      className={`px-2 py-1 rounded text-xs ${
-                        d.status === "AVAILABLE"
-                          ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
-                          : "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300"
-                      }`}
-                    >
+                    <Tag color={d.status === "AVAILABLE" ? "green" : "red"}>
                       {d.status === "AVAILABLE" ? "Có sẵn" : "Bảo trì"}
-                    </span>
+                    </Tag>
                   </div>
                 </Option>
               ))}
@@ -478,8 +483,8 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
           <Divider className="dark:border-gray-700" />
 
           {/* PARTICIPANTS */}
-          <Form.Item 
-            name="participantIds" 
+          <Form.Item
+            name="participantIds"
             label={
               <span>
                 <FiUsers className="inline mr-2" />
@@ -490,13 +495,13 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
             <Select
               mode="multiple"
               showSearch
-              loading={isSearching}
               filterOption={false}
               onSearch={handleSearchUsers}
-              placeholder="-- Gõ tên hoặc email để tìm người tham gia --"
+              loading={isSearching}
+              placeholder="-- Gõ tên hoặc email để tìm --"
+              notFoundContent={isSearching ? <Spin size="small" /> : "Không tìm thấy"}
               className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
               popupClassName="dark:bg-gray-700 dark:text-gray-100"
-              notFoundContent={isSearching ? <Spin size="small" /> : "Không tìm thấy người dùng"}
             >
               {searchResults.map((u) => (
                 <Option key={u.id} value={u.id}>
@@ -506,46 +511,38 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
             </Select>
           </Form.Item>
 
-          {/* GUEST EMAIL */}
+          {/* GUEST EMAILS */}
           <Form.Item
             name="guestEmails"
             label="Email khách mời (bên ngoài)"
-            tooltip="Nhập email, nhấn Enter hoặc dấu phẩy để thêm."
+            tooltip="Nhập email, nhấn Enter hoặc dấu phẩy"
             rules={[
               {
-                validator(_, list) {
+                validator: (_, list) => {
                   if (!list || !list.length) return Promise.resolve();
                   const invalid = list.filter(
                     (e) => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)
                   );
                   return invalid.length
-                    ? Promise.reject(
-                        `Email không hợp lệ: ${invalid.join(", ")}`
-                      )
+                    ? Promise.reject(`Email không hợp lệ: ${invalid.join(", ")}`)
                     : Promise.resolve();
                 },
               },
             ]}
           >
-            <Select 
-              mode="tags" 
-              tokenSeparators={[",", ";", " "]}
-              placeholder="Ví dụ: guest@email.com"
+            <Select
+              mode="tags"
+              tokenSeparators={[" ", ",", ";"]}
+              placeholder="guest@example.com"
               className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-              popupClassName="dark:bg-gray-700 dark:text-gray-100"
             />
           </Form.Item>
 
           <Divider className="dark:border-gray-700" />
 
-          {/* RECURRING MEETING */}
-          <Form.Item
-            name="isRecurring"
-            valuePropName="checked"
-            initialValue={false}
-            className="mb-1"
-          >
-            <Checkbox 
+          {/* RECURRING */}
+          <Form.Item name="isRecurring" valuePropName="checked" className="mb-1">
+            <Checkbox
               onChange={(e) => setIsRecurring(e.target.checked)}
               className="dark:text-gray-200"
             >
@@ -558,12 +555,9 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
               <Form.Item
                 name="frequency"
                 label="Tần suất"
-                rules={[{ required: true, message: "Chọn tần suất lặp" }]}
+                rules={[{ required: true, message: "Chọn tần suất" }]}
               >
-                <Select
-                  className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                  popupClassName="dark:bg-gray-700 dark:text-gray-100"
-                >
+                <Select className="dark:bg-gray-700 dark:text-white dark:border-gray-600">
                   <Option value="DAILY">Hằng ngày</Option>
                   <Option value="WEEKLY">Hằng tuần</Option>
                   <Option value="MONTHLY">Hằng tháng</Option>
@@ -578,8 +572,8 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
                 <DatePicker
                   format="DD/MM/YYYY"
                   className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                  disabledDate={(current) =>
-                    current && (current <= dayjs().startOf("day") || current.day() === 0 || current.day() === 6)
+                  disabledDate={(c) =>
+                    c && (c <= dayjs().startOf("day") || c.day() === 0 || c.day() === 6)
                   }
                 />
               </Form.Item>
@@ -588,14 +582,14 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
 
           {/* DESCRIPTION */}
           <Form.Item name="description" label="Ghi chú">
-            <TextArea 
-              rows={3} 
+            <TextArea
+              rows={3}
               placeholder="Ghi chú thêm cho cuộc họp..."
               className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
             />
           </Form.Item>
 
-          {/* SUBMIT */}
+          {/* SUBMIT BUTTONS */}
           <div className="flex justify-end gap-3 mt-6">
             <Button onClick={handleCancel} disabled={loading}>
               Hủy
@@ -606,7 +600,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
               loading={loading}
               className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600"
             >
-              Tạo cuộc họp
+              {selectedRoom?.requiresApproval ? "Gửi yêu cầu duyệt" : "Tạo cuộc họp"}
             </Button>
           </div>
         </Form>

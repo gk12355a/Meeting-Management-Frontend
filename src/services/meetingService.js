@@ -93,3 +93,9 @@ export const updateRecurringSeries = (seriesId, payload) => {
 export const deleteRecurringSeries = (seriesId, payload) => {
   return api.delete(`/meetings/series/${seriesId}`, { data: payload });
 };
+export const approveMeeting = (meetingId, approved, reason = null) => {
+  return api.put(`/admin/meetings/${meetingId}/approval`, {
+    approved, // true = Duyệt, false = Từ chối
+    reason    // Bắt buộc nếu từ chối
+  });
+};
