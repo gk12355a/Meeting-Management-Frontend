@@ -13,6 +13,7 @@ import {
   Spin,
   InputNumber,       // ✅ Import InputNumber tại đây
 } from "antd";
+import { Tag } from "antd";
 import { FiPlusCircle, FiUsers } from "react-icons/fi";
 import dayjs from "dayjs";
 import "dayjs/locale/vi";
