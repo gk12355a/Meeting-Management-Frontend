@@ -347,41 +347,46 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
     </Modal>
   </Form.Item>
 
-  {/* DURATION + CUSTOM */}
-  <div className="flex gap-2">
-    <Form.Item
-      name="duration"
-      label="Thời lượng"
-      style={{ flex: 1 }}
-      initialValue={60}
-      rules={[{ required: false}]}
+  <Form.Item
+    name="duration"
+    label="Thời lượng"
+    style={{ flex: 1 }}
+    initialValue={60}
+    rules={[{ required: false }]}
+  >
+    <Select
+      className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+      onChange={() => {
+        // Khi chọn preset → clear ô khác
+        form.setFieldsValue({ customHour: undefined });
+      }}
+      placeholder="-- Chọn --"
+      allowClear
     >
-      <Select className="dark:bg-gray-700 dark:text-white dark:border-gray-600">
-        <Option value={30}>30 phút</Option>
-        <Option value={60}>1 giờ</Option>
-        <Option value={90}>1.5 giờ</Option>
-        <Option value={120}>2 giờ</Option>
-      </Select>
-    </Form.Item>
+      <Option value={30}>30 phút</Option>
+      <Option value={60}>1 giờ</Option>
+      <Option value={90}>1.5 giờ</Option>
+      <Option value={120}>2 giờ</Option>
+    </Select>
+  </Form.Item>
 
-        <Form.Item name="customHour" label="Khác (giờ)" style={{ width: 80 }}>
-          <Input
-            type="number"
-            step={0.5}
-            min={0.5}
-            max={8}
-            className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-            onChange={(e) => {
-              const hour = parseFloat(e.target.value || 0);
+  <Form.Item name="customHour" label="Khác (giờ)" style={{ width: 80 }}>
+    <Input
+      type="number"
+      step={0.5}
+      min={0.5}
+      max={8}
+      className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+      onChange={(e) => {
+        const hour = parseFloat(e.target.value || 0);
 
-              // Xóa preset duration và convert sang phút
-              form.setFieldsValue({
-                duration: hour > 0 ? hour * 60 : undefined,
-              });
-            }}
-          />
-        </Form.Item>
-  </div>
+        // Khi nhập custom → xóa preset và convert sang phút
+        form.setFieldsValue({
+          duration: hour > 0 ? hour * 60 : undefined,
+        });
+      }}
+    />
+  </Form.Item>
 </div>
 
           {/* ROOM */}
