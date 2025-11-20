@@ -346,20 +346,17 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
       </LocalizationProvider>
     </Modal>
   </Form.Item>
-
+<div className="flex gap-2 items-end">
   <Form.Item
+  
     name="duration"
     label="Thời lượng"
     style={{ flex: 1 }}
     initialValue={60}
-    rules={[{ required: false }]}
   >
     <Select
       className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-      onChange={() => {
-        // Khi chọn preset → clear ô khác
-        form.setFieldsValue({ customHour: undefined });
-      }}
+      onChange={() => form.setFieldsValue({ customHour: undefined })}
       placeholder="-- Chọn --"
       allowClear
     >
@@ -370,7 +367,11 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
     </Select>
   </Form.Item>
 
-  <Form.Item name="customHour" label="Khác (giờ)" style={{ width: 80 }}>
+  <Form.Item
+    name="customHour"
+    label="Khác (giờ)"
+    style={{ flex: '0 0 80px' }} // cố định width, không xuống dòng
+  >
     <Input
       type="number"
       step={0.5}
@@ -379,8 +380,6 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
       className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
       onChange={(e) => {
         const hour = parseFloat(e.target.value || 0);
-
-        // Khi nhập custom → xóa preset và convert sang phút
         form.setFieldsValue({
           duration: hour > 0 ? hour * 60 : undefined,
         });
@@ -388,7 +387,7 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
     />
   </Form.Item>
 </div>
-
+</div>
           {/* ROOM */}
           <Form.Item
             name="roomId"
