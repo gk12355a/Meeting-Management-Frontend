@@ -59,14 +59,27 @@ const RoomsPage = () => {
   };
 
   useEffect(() => {
-    const filtered = rooms.filter((room) => {
-      const matchesSearch = room.name.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesStatus =
-        filterStatus === "Tất cả" || room.status === filterStatus;
-      return matchesSearch && matchesStatus;
-    });
-    setProcessedRooms(filtered);
-  }, [searchTerm, filterStatus, rooms]);
+  const filtered = rooms.filter((room) => {
+    const matchesSearch = room.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+
+    let matchStatus = true;
+
+    // --- Bộ lọc trạng thái ---
+    if (filterStatus !== "Tất cả") {
+      if (filterStatus === "AVAILABLE" || filterStatus === "UNDER_MAINTENANCE") {
+        matchStatus = room.status === filterStatus;
+      } else if (filterStatus === "VIP") {
+        matchStatus = room.requiresApproval === true;
+      }
+    }
+
+    return matchesSearch && matchStatus;
+  });
+
+  setProcessedRooms(filtered);
+}, [searchTerm, filterStatus, rooms]);
 
   return (
     <div className="p-6 min-h-screen bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
@@ -112,6 +125,7 @@ const RoomsPage = () => {
           <option value="Tất cả">Tất cả</option>
           <option value="AVAILABLE">Trống</option>
           <option value="UNDER_MAINTENANCE">Đang bảo trì</option>
+          <option value="VIP">Phòng VIP</option>
         </select>
       </div>
 
