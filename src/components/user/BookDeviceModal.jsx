@@ -332,42 +332,40 @@ if (values.isRecurring) {
 
   {/* TIME PICKER */}
   <Form.Item name="time" label="Giờ bắt đầu" rules={[{ required: true }]}>
-    <div className="flex gap-2">
-      <Input
-        readOnly
-        value={clockValue?.format("HH:mm")}
-        onClick={() => setClockOpen(true)}
-        className="cursor-pointer dark:bg-gray-700 dark:text-white dark:border-gray-600"
-      />
-      <Button onClick={() => setClockOpen(true)}>🕒 Chọn</Button>
-    </div>
+  <div className="flex gap-2">
+    <Input
+      readOnly
+      value={clockValue?.format("HH:mm")}
+      onClick={() => setClockOpen(true)}
+    />
+    <Button onClick={() => setClockOpen(true)}>🕒 Chọn</Button>
+  </div>
+</Form.Item>
 
-    <Modal
-      title="Chọn giờ họp (08:00 - 18:00)"
-      open={clockOpen}
-      onCancel={() => setClockOpen(false)}
-      onOk={() => {
-        if (!validateBusinessTime(clockValue)) {
-          toast.error("⏰ Chỉ được đặt 08:00 - 18:00!");
-          return;
-        }
-        form.setFieldsValue({ time: clockValue });
-        setClockOpen(false);
-      }}
-      width={350}
-      centered
-    >
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <StaticTimePicker
-          value={clockValue}
-          onChange={setClockValue}
-          orientation="portrait"
-          ampm={false}
-          slotProps={{ actionBar: { actions: [] } }}
-        />
-      </LocalizationProvider>
-    </Modal>
-  </Form.Item>
+{/* Modal đặt ngoài Form Item */}
+<Modal
+  title="Chọn giờ họp (08:00 - 18:00)"
+  open={clockOpen}
+  onCancel={() => setClockOpen(false)}
+  onOk={() => {
+    if (!validateBusinessTime(clockValue)) {
+      toast.error("⏰ Chỉ được đặt 08:00 - 18:00!");
+      return;
+    }
+    form.setFieldsValue({ time: clockValue });
+    setClockOpen(false);
+  }}
+>
+  <LocalizationProvider dateAdapter={AdapterDayjs}>
+    <StaticTimePicker
+      value={clockValue}
+      onChange={setClockValue}
+      orientation="portrait"
+      ampm={false}
+    />
+  </LocalizationProvider>
+</Modal>
+
 <div className="flex gap-2 items-end">
   <Form.Item
   
