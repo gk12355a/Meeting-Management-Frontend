@@ -179,76 +179,86 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
 
   /* ====== SUBMIT MEETING ====== */
   const handleCreateMeeting = async (values) => {
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      const date = values.date;
-      const time = dayjs(values.time);
+    const date = values.date;
+    const time = dayjs(values.time);
 
-      if (!validateBusinessTime(time)) {
-        toast.error("⏰ Chỉ được đặt lịch từ 08:00 đến 18:00!");
-        return;
-      }
+    if (!validateBusinessTime(time)) {
+      toast.error("⏰ Chỉ được đặt lịch từ 08:00 đến 18:00!");
+      return;
+    }
 
-      const startUTC = dayjs
-        .utc()
-        .year(date.year())
-        .month(date.month())
-        .date(date.date())
-        .hour(time.hour())
-        .minute(time.minute());
-        const onFinish=async()=> {
-          const values = form.getFieldValue();
-        }
-const durationInMinutes = form.getFieldValue("customHour")
-  ? form.getFieldValue("customHour") * 60
-  : form.getFieldValue("duration");
+    const startUTC = dayjs(
+      `${date.format("YYYY-MM-DD")} ${time.format("HH:mm")}`
+    ).utc();
 
-// Nếu cả 2 đều trống, có thể báo lỗi toast
-if (!durationInMinutes) {
-  toast.error("⏰ Vui lòng nhập thời lượng cuộc họp!");
-  setLoading(false);
-  return;
-}
+    const durationInMinutes = values.customHour
+      ? values.customHour * 60
+      : values.duration;
 
-const endTime = startUTC.add(durationInMinutes, "minute").toISOString();
+    if (!durationInMinutes) {
+      toast.error("⏰ Vui lòng nhập thời lượng cuộc họp!");
+      setLoading(false);
+      return;
+    }
 
-const payload = {
+    const endTime = startUTC.add(durationInMinutes, "minute").toISOString();
+
+    // --- BUILD PAYLOAD ---
+    const payload = {
   title: values.title.trim(),
   description: values.description || "",
   startTime: startUTC.toISOString(),
-  endTime: durationInMinutes
-    ? startUTC.add(durationInMinutes, "minute").toISOString()
-    : null, // hoặc bỏ hẳn endTime nếu backend chấp nhận
+  endTime,
   roomId: values.roomId,
   participantIds: Array.from(new Set([user.id, ...(values.participantIds || [])])),
   deviceIds: values.deviceIds || [],
   guestEmails: values.guestEmails || [],
-  recurrenceRule:
-    values.isRecurring === true
-      ? {
-          frequency: values.frequency,
-          interval: 1,
-          repeatUntil: dayjs(values.repeatUntil).format("YYYY-MM-DD"),
-        }
-      : null,
   onBehalfOfUserId: null,
+
+  // ⭐ BẮT BUỘC PHẢI THÊM
+  creatorId: user.id,
+  organizerId: user.id,
 };
 
-      await createMeeting(payload);
-
-      toast.success(`🎉 Đã đặt lịch sử dụng ${prefilledDevice?.name} thành công!`);
-      form.resetFields();
-      setClockValue(dayjs().hour(9).minute(0));
-      setIsRecurring(false);
-      onSuccess?.();
-      onCancel();
-    } catch (err) {
-      toast.error(err?.response?.data?.message || "Không thể tạo cuộc họp!");
-    } finally {
-      setLoading(false);
-    }
+// ❗ CHỈ thêm recurrenceRule khi bật lặp
+if (values.isRecurring) {
+  payload.recurrenceRule = {
+    frequency: values.frequency,
+    repeatUntil: dayjs(values.repeatUntil)
+      .endOf("day")
+      .utc()
+      .toISOString(),
   };
+}
+
+    // Handle recurrence
+    if (values.isRecurring) {
+      payload.recurrenceRule = {
+        frequency: values.frequency,
+        repeatUntil: dayjs(values.repeatUntil)
+          .endOf("day")
+          .utc()
+          .toISOString(),
+      };
+    }
+
+    await createMeeting(payload);
+
+    toast.success(`🎉 Đã đặt lịch sử dụng ${prefilledDevice?.name} thành công!`);
+    form.resetFields();
+    setClockValue(dayjs().hour(9).minute(0));
+    setIsRecurring(false);
+    onSuccess?.();
+    onCancel();
+  } catch (err) {
+    toast.error(err?.response?.data?.message || "Không thể tạo cuộc họp!");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleCancel = () => {
     form.resetFields();
@@ -403,39 +413,39 @@ const payload = {
 </div>
           {/* ROOM */}
           <Form.Item
-            name="roomId"
-            label="Phòng họp"
-            rules={[{ required: true, message: "Chọn phòng họp" }]}
-          >
-            <Select 
-              placeholder="-- Chọn phòng họp --"
-              className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-              popupClassName="dark:bg-gray-700 dark:text-gray-100"
-            >
-              {rooms.map((r) => (
-                <Option
-                  key={r.id}
-                  value={r.id}
-                  disabled={r.status !== "AVAILABLE"}
-                >
-                  <div className="flex justify-between items-center">
-                    <span>
-                      {r.name} ({r.location || "Không rõ"})
-                    </span>
-                    <span
-                      className={`px-2 py-1 rounded text-xs ${
-                        r.status === "AVAILABLE"
-                          ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
-                          : "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300"
-                      }`}
-                    >
-                      {r.status === "AVAILABLE" ? "Có sẵn" : "Bảo trì"}
-                    </span>
-                  </div>
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
+  name="roomId"
+  label="Phòng họp"
+  rules={[{ required: true, message: "Chọn phòng họp" }]}
+>
+  <Select
+    placeholder="-- Chọn phòng họp --"
+    optionLabelProp="label"
+    className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+    popupClassName="dark:bg-gray-700 dark:text-gray-100"
+  >
+    {rooms.map((r) => (
+      <Option
+        key={r.id}
+        value={r.id}
+        label={r.name}
+        disabled={r.status !== "AVAILABLE"}
+      >
+        <div className="flex justify-between items-center">
+          <span>
+            {r.name} ({r.capacity} chỗ)
+            {r.requiresApproval && (
+              <Tag color="gold" className="ml-2 text-[10px]">VIP</Tag>
+            )}
+          </span>
+
+          <Tag color={r.status === "AVAILABLE" ? "green" : "red"}>
+            {r.status === "AVAILABLE" ? "Có sẵn" : "Bảo trì"}
+          </Tag>
+        </div>
+      </Option>
+    ))}
+  </Select>
+</Form.Item>
 
           {/* ... tiếp phần devices, participants, etc như cũ ... */}
 
