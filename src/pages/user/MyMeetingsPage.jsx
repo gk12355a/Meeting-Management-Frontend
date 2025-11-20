@@ -147,8 +147,8 @@ function isBusinessTime(date) {
   // Quá khứ
   if (d.isBefore(dayjs(), "minute")) return false;
   // Ngày trong tuần: 0 (CN), 6 (T7)
-  const day = d.day();
-  if (day === 0 || day === 6) return false;
+  // const day = d.day();
+  // if (day === 0 || day === 6) return false;
   // Giờ hành chính: >= 08:00 và <= 18:00
   const hour = d.hour();
   const minute = d.minute();
