@@ -200,29 +200,40 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
         const onFinish=async()=> {
           const values = form.getFieldValue();
         }
-      const payload = {
-        title: values.title.trim(),
-        description: values.description || "",
-        startTime: startUTC.toISOString(),
-        endTime: startUTC.add(values.duration, "minute").toISOString(),
-        roomId: values.roomId,
-        participantIds: Array.from(
-          new Set([user.id, ...(values.participantIds || [])])
-        ),
-        deviceIds: values.deviceIds || [],
-        guestEmails: values.guestEmails || [],
+const durationInMinutes = form.getFieldValue("customHour")
+  ? form.getFieldValue("customHour") * 60
+  : form.getFieldValue("duration");
 
-        recurrenceRule:
-          values.isRecurring === true
-            ? {
-                frequency: values.frequency,
-                interval: 1,
-                repeatUntil: dayjs(values.repeatUntil).format("YYYY-MM-DD"),
-              }
-            : null,
+// Nếu cả 2 đều trống, có thể báo lỗi toast
+if (!durationInMinutes) {
+  toast.error("⏰ Vui lòng nhập thời lượng cuộc họp!");
+  setLoading(false);
+  return;
+}
 
-        onBehalfOfUserId: null,
-      };
+const endTime = startUTC.add(durationInMinutes, "minute").toISOString();
+
+const payload = {
+  title: values.title.trim(),
+  description: values.description || "",
+  startTime: startUTC.toISOString(),
+  endTime: durationInMinutes
+    ? startUTC.add(durationInMinutes, "minute").toISOString()
+    : null, // hoặc bỏ hẳn endTime nếu backend chấp nhận
+  roomId: values.roomId,
+  participantIds: Array.from(new Set([user.id, ...(values.participantIds || [])])),
+  deviceIds: values.deviceIds || [],
+  guestEmails: values.guestEmails || [],
+  recurrenceRule:
+    values.isRecurring === true
+      ? {
+          frequency: values.frequency,
+          interval: 1,
+          repeatUntil: dayjs(values.repeatUntil).format("YYYY-MM-DD"),
+        }
+      : null,
+  onBehalfOfUserId: null,
+};
 
       await createMeeting(payload);
 
