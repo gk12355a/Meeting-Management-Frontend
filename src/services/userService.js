@@ -11,7 +11,11 @@ export const getAllUsers = () => api.get("/admin/users");
 export const getUserById = (id) => api.get(`/admin/users/${id}`);
 
 /**
- * 🆕 Tạo người dùng mới (đăng ký)
+ * 🆕 TẠO NGƯỜI DÙNG MỚI (Bởi Admin)
+ * (ĐÃ SỬA LỖI: Trỏ đến /admin/users)
+ *
+ * API này không cần mật khẩu. Backend sẽ tự tạo và gửi email.
+ * @param {object} data - { fullName, username, roles }
  */
 export const createUser = (data) => {
   // Sửa từ "/auth/register" thành "/admin/users"
@@ -35,11 +39,19 @@ export const deleteUser = (id) => api.delete(`/admin/users/${id}`);
 export const searchUsers = (query) => {
   return api.get(`/users/search`, { params: { query } });
 };
+
+/**
+ * Lấy thông tin profile của tôi
+ */
 export const getMyProfile = () => {
   return api.get('/users/profile'); 
 };
+
+/**
+ * Cập nhật thông tin profile của tôi
+ * @param {object} profileData - { fullName: "Tên Mới" }
+ */
 export const updateMyProfile = (profileData) => {
-  // profileData sẽ là { fullName: "Tên Mới" }
   return api.put('/users/profile', profileData);
 };
 
