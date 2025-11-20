@@ -12,7 +12,7 @@ export default function ChangePasswordPage() {
   const [success, setSuccess] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // 👁️ Trạng thái hiển thị mật khẩu
+  // Trạng thái hiển thị mật khẩu
   const [showOld, setShowOld] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -63,13 +63,13 @@ export default function ChangePasswordPage() {
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* 🔴 Thông báo lỗi */}
+          {/* Thông báo lỗi */}
           {error && (
             <div className="bg-red-50 border border-red-300 text-red-700 text-center rounded-lg p-3">
               {error}
             </div>
           )}
-          {/* 🟢 Thông báo thành công */}
+          {/* Thông báo thành công */}
           {success && (
             <div className="bg-green-50 border border-green-300 text-green-700 text-center rounded-lg p-3">
               {success}

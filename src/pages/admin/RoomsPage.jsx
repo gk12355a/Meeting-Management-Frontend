@@ -251,7 +251,7 @@ export default function RoomsPage() {
     setCurrentPage(page);
   };
 
-  // ====== CARD LOGIC ======
+  // CARD 
   const totalRooms = rooms.length;
   const totalAvailable = rooms.filter((room) => room.status === "AVAILABLE").length;
   const totalMaintenance = rooms.filter((room) => room.status === "UNDER_MAINTENANCE").length;
@@ -261,7 +261,7 @@ export default function RoomsPage() {
   // === Render ===
   return (
     <div className="p-8 min-h-screen transition-colors bg-gray-50 dark:bg-gray-900">
-      {/* ⭐ HEADER */}
+      {/* HEADER */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -274,7 +274,7 @@ export default function RoomsPage() {
         </h1>
       </motion.div>
 
-      {/* ⭐ FILTERS */}
+      {/* FILTERS */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -387,7 +387,7 @@ export default function RoomsPage() {
         </motion.div>
       </motion.div>
 
-      {/* ⭐ TABLE */}
+      {/* TABLE */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -501,7 +501,7 @@ export default function RoomsPage() {
         </div>
       </motion.div>
 
-      {/* ⭐ Pagination */}
+      {/* Pagination */}
       {totalPages > 1 && (
         <Pagination
           totalItems={filteredRooms.length}
@@ -511,7 +511,7 @@ export default function RoomsPage() {
         />
       )}
 
-      {/* ⭐ MODAL THÊM / SỬA */}
+      {/* MODAL THÊM / SỬA */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <motion.div
@@ -624,7 +624,7 @@ export default function RoomsPage() {
                     </select>
                   </div>
                 </div>
-                {/* === CẤU HÌNH PHÒNG VIP (MỚI) === */}
+                {/* === CẤU HÌNH PHÒNG VIP === */}
                 <div className="bg-yellow-50 dark:bg-yellow-900/10 p-4 rounded-xl border border-yellow-200 dark:border-yellow-800/30 flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-yellow-100 dark:bg-yellow-900/40 rounded-lg text-yellow-600 dark:text-yellow-400">
@@ -685,7 +685,7 @@ export default function RoomsPage() {
         </div>
       )}
 
-      {/* ⭐ MODAL XÓA — scale + fade */}
+      {/* MODAL XÓA — scale + fade */}
       {isDeleteModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <motion.div

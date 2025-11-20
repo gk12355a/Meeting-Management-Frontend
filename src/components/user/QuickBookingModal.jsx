@@ -81,9 +81,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
     loadRooms();
   }, [open]);
 
-  /* ===================================================
-            THEO DÕI PHÒNG ĐÃ CHỌN (VIP)
-  ====================================================*/
+  /* ===== THEO DÕI PHÒNG ĐÃ CHỌN (VIP) =====*/
   useEffect(() => {
     if (watchedRoomId) {
       const room = rooms.find((r) => r.id === watchedRoomId);
@@ -92,9 +90,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
       setSelectedRoom(null);
     }, [watchedRoomId, rooms]);
 
-  /* ===================================================
-            SET INITIAL FORM VALUES
-  ====================================================*/
+  /* ===== SET INITIAL FORM VALUES =====*/
   useEffect(() => {
     if (open && quickBookingData?.start) {
       const { start, end } = quickBookingData;
@@ -127,9 +123,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
     }
   }, [open, quickBookingData, form]);
 
-  /* ===================================================
-            LOAD DEVICES WHEN TIME CHANGES
-  ====================================================*/
+  /* ===== LOAD DEVICES WHEN TIME CHANGES =====*/
   useEffect(() => {
     const fetchDevices = async () => {
       if (!watchedDate || !watchedTime || !watchedDuration) {
@@ -165,9 +159,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
     return () => clearTimeout(t);
   }, [watchedDate, watchedTime, watchedDuration]);
 
-  /* ===================================================
-              SEARCH INTERNAL USERS
-  ====================================================*/
+  /* SEARCH INTERNAL USERS */
   const handleSearchUsers = (query) => {
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
 
@@ -190,18 +182,14 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
     }, 500);
   };
 
-  /* ===================================================
-              VALIDATE BUSINESS TIME
-  ====================================================*/
+  /* VALIDATE BUSINESS TIME */
   const validateBusinessTime = (value) => {
     if (!value) return false;
     const totalMin = value.hour() * 60 + value.minute();
     return totalMin >= 480 && totalMin <= 1080; // 08:00 - 18:00
   };
 
-  /* ===================================================
-                  SUBMIT MEETING
-  ====================================================*/
+  /* SUBMIT MEETING */
   const handleCreateMeeting = async (values) => {
     try {
       setLoading(true);
@@ -277,9 +265,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
     onCancel();
   };
 
-  /* ===================================================
-                        RENDER
-  ====================================================*/
+  /* RENDER */
   return (
     <Modal
       open={open}

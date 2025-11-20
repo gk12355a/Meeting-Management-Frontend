@@ -85,14 +85,14 @@ const RoomCalendarModal = ({ open, onClose, room, onSelectSlot }) => {
                  dark:[&_.ant-modal-header]:bg-slate-900 
                  dark:[&_.ant-modal-header]:border-b-slate-700"
     >
-      {/* LOADING SCREEN — luôn đẹp và sạch */}
+      {/* LOADING SCREEN */}
       {(loading || !readyToShow) && (
         <div className="flex justify-center items-center h-80">
           <Spin size="large" />
         </div>
       )}
 
-      {/* FULLCALENDAR — chỉ hiển thị khi đã sẵn sàng */}
+      {/* FULLCALENDAR */}
       {!loading && readyToShow && (
         <FullCalendar
           ref={calendarRef}

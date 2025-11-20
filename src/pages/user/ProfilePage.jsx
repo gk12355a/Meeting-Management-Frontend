@@ -25,13 +25,12 @@ const ProfilePage = () => {
       return;
     }
 
-    // === THÊM MỚI: Set dữ liệu tĩnh từ Auth Context ===
-    // Dữ liệu này không cần gọi API vì nó có sẵn trong token
+    // === Set dữ liệu tĩnh từ Auth Context ===
+    // Không cần gọi API vì nó có sẵn trong token
     form.setFieldsValue({
       username: user.username,
       role: user.roles.map(formatRole).join(', '), // Hiển thị vai trò
     });
-    // ===========================================
 
     const fetchProfile = async () => {
       setLoading(true);
@@ -97,7 +96,7 @@ const ProfilePage = () => {
             onFinish={handleSave}
             className="dark:text-gray-100"
           >
-            {/* === THÊM: Tên đăng nhập (Email) === */}
+            {/* === Tên đăng nhập (Email) === */}
             <Form.Item
               label="Email (Tên đăng nhập)"
               name="username"
@@ -110,7 +109,7 @@ const ProfilePage = () => {
               />
             </Form.Item>
 
-            {/* === THÊM: Vai trò === */}
+            {/* === Vai trò === */}
             <Form.Item
               label="Vai trò"
               name="role"

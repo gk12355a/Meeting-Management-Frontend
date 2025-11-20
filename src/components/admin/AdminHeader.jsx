@@ -98,14 +98,14 @@ const NotificationItem = ({ notification, onMarkRead }) => {
   };
 
   const handleNavigate = () => {
-    // 1. Nếu là Yêu cầu duyệt: KHÔNG LÀM GÌ CẢ (đứng yên để admin bấm nút)
+    // 1. Nếu là Yêu cầu duyệt
     if (isApprovalRequest) {
       return;
     }
 
     // 2. Nếu là thông báo thường: Điều hướng và đánh dấu đã đọc
     if (notification.meetingId) {
-      navigate("/admin"); // Hoặc '/admin/calendar' tùy bạn
+      navigate("/admin"); 
       if (!notification.read) {
         onMarkRead(notification.id);
       }

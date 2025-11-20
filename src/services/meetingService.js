@@ -14,7 +14,7 @@ export const respondToMeeting = (meetingId, status) => {
 };
 
 /**
- * 📅 Lấy danh sách các cuộc họp của người dùng
+ * Lấy danh sách các cuộc họp của người dùng
  * API: GET /api/v1/meetings/my-meetings
  * @param {number} page - trang (tùy chọn)
  * @param {number} size - số phần tử mỗi trang (tùy chọn)
@@ -24,7 +24,7 @@ export const getMyMeetings = (page = 0, size = 9000) => {
 };
 
 /**
- * 🔍 Lấy chi tiết một cuộc họp (chỉ người tham gia / tổ chức)
+ * Lấy chi tiết một cuộc họp (chỉ người tham gia / tổ chức)
  * API: GET /api/v1/meetings/{id}
  * @param {number} meetingId - ID cuộc họp
  */
@@ -32,12 +32,10 @@ export const getMeetingById = (meetingId) => {
   return api.get(`/meetings/${meetingId}`);
 };
 
-/* -------------------------------------------------------------------------- */
-/* 🆕 Bổ sung các API phục vụ tạo cuộc họp (chuẩn với backend thật)          */
-/* -------------------------------------------------------------------------- */
+/* Bổ sung các API phục vụ tạo cuộc họp */
 
 /**
- * ➕ Tạo một cuộc họp mới
+ * Tạo một cuộc họp mới
  * API: POST /api/v1/meetings
  * @param {Object} meetingData - dữ liệu cuộc họp
  */
@@ -46,7 +44,7 @@ export const createMeeting = (meetingData) => {
 };
 
 /**
- * 🏢 Lấy danh sách tất cả phòng họp (cho mọi user)
+ * Lấy danh sách tất cả phòng họp (cho mọi user)
  * API: GET /api/v1/rooms
  */
 export const getRooms = () => {
@@ -54,7 +52,7 @@ export const getRooms = () => {
 };
 
 /**
- * 💻 Lấy danh sách tất cả thiết bị (cho mọi user)
+ * Lấy danh sách tất cả thiết bị (cho mọi user)
  * API: GET /api/v1/devices
  */
 export const getDevices = () => {
@@ -62,7 +60,7 @@ export const getDevices = () => {
 };
 
 /**
- * 👥 Lấy danh sách tất cả người dùng (Admin only)
+ * Lấy danh sách tất cả người dùng (Admin only)
  * API: GET /api/v1/admin/users
  * Dùng để chọn người tham gia cuộc họp (participantIds)
  */
@@ -70,9 +68,7 @@ export const getAllUsers = () => {
   return api.get("/admin/users");
 };
 
-/* -------------------------------------------------------------------------- */
-/* 🆕 Thêm các API cập nhật và xóa cuộc họp, cập nhật/hủy chuỗi recurring     */
-/* -------------------------------------------------------------------------- */
+/* Thêm các API cập nhật và xóa cuộc họp, cập nhật/hủy chuỗi recurring     */
 
 // Cập nhật cuộc họp
 export const updateMeeting = (meetingId, payload) => {
