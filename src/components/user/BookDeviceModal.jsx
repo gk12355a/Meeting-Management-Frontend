@@ -222,52 +222,37 @@ useEffect(() => {
     const endTime = startUTC.add(durationInMinutes, "minute").toISOString();
 
     // --- BUILD PAYLOAD ---
-    const payload = {
-  title: values.title.trim(),
-  description: values.description || "",
-  startTime: startUTC.toISOString(),
-  endTime,
-  roomId: values.roomId,
-  participantIds: Array.from(new Set([user.id, ...(values.participantIds || [])])),
-  deviceIds: values.deviceIds || [],
-  guestEmails: values.guestEmails || [],
-  onBehalfOfUserId: null,
-
-  // ⭐ BẮT BUỘC PHẢI THÊM
-  creatorId: user.id,
-  organizerId: user.id,
-};
-
-// ❗ CHỈ thêm recurrenceRule khi bật lặp
-if (values.isRecurring) {
-  payload.recurrenceRule = {
-    frequency: values.frequency,
-    repeatUntil: dayjs(values.repeatUntil)
-      .endOf("day")
-      .utc()
-      .toISOString(),
-  };
-}
-
-    // Handle recurrence
-    if (values.isRecurring) {
-      payload.recurrenceRule = {
-        frequency: values.frequency,
-        repeatUntil: dayjs(values.repeatUntil)
-          .endOf("day")
-          .utc()
-          .toISOString(),
-      };
-    }
-
-    await createMeeting(payload);
-
-    toast.success(`🎉 Đã đặt lịch sử dụng ${prefilledDevice?.name} thành công!`);
-    form.resetFields();
-    setClockValue(dayjs().hour(9).minute(0));
-    setIsRecurring(false);
-    onSuccess?.();
-    onCancel();
+    const finalDuration = values.customHour ? dayjs.duration(parseFloat(values.customHour), 'hours').asMinutes() : values.duration;
+          const payload = {
+            title: values.title.trim(),
+            description: values.description || "",
+            startTime: startUTC.toISOString(),
+            endTime: startUTC.add(finalDuration, "minute").toISOString(),
+            roomId: values.roomId,
+            participantIds: Array.from(new Set([user.id, ...(values.participantIds || [])])),
+            deviceIds: values.deviceIds || [],
+            guestEmails: values.guestEmails || [],
+            recurrenceRule: values.isRecurring ? {
+              frequency: values.frequency || "DAILY",
+              interval: 1,
+              repeatUntil: dayjs(values.repeatUntil).format("YYYY-MM-DD"),
+            } : null,
+            onBehalfOfUserId: null,
+          };
+    
+          const res = await createMeeting(payload);
+    
+          if (res.data?.status === "PENDING_APPROVAL") {
+            toast.info("📝 Yêu cầu đặt phòng đã được gửi và đang chờ Admin phê duyệt.");
+          } else {
+            toast.success("🎉 Tạo cuộc họp thành công!");
+          }
+    
+          form.resetFields();
+          setClockValue(dayjs().hour(8).minute(0));
+          setIsRecurring(false);
+          setSelectedRoom(null);
+          setAvailableDevices([]);
   } catch (err) {
     toast.error(err?.response?.data?.message || "Không thể tạo cuộc họp!");
   } finally {
@@ -302,7 +287,7 @@ if (values.isRecurring) {
     >
       <Card
         className="shadow-none bg-white dark:bg-[#1e293b] border-none dark:text-gray-100"
-        bodyStyle={{ padding: 0 }}
+        styles={{ body: { padding: 0 } }}
       >
         <Form
           layout="vertical"
@@ -441,7 +426,7 @@ if (values.isRecurring) {
         key={r.id}
         value={r.id}
         label={r.name}
-        disabled={r.status !== "AVAILABLE"}
+        disabled={r.status !== "AVAILABLE" && !r.requiresApproval}
       >
         <div className="flex justify-between items-center">
           <span>
