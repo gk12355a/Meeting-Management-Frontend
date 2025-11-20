@@ -12,7 +12,7 @@ export default function ChangePasswordPage() {
   const [success, setSuccess] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // 👁️ trạng thái hiển thị mật khẩu
+  // trạng thái hiển thị mật khẩu
   const [showOld, setShowOld] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);

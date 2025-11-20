@@ -158,7 +158,7 @@ const ReportPage = () => {
     },
   };
 
-  // 🟢 PIE OPTIONS (ẨN TRỤC)
+  // PIE OPTIONS
   const pieOptions = {
     responsive: true,
     maintainAspectRatio: false,

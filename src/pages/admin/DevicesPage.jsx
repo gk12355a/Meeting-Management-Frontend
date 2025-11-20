@@ -45,17 +45,14 @@ export default function DevicesPage() {
   
   // Trạng thái loading
   const [loading, setLoading] = useState(false);
-  // ==================== PHÂN TRANG ==================== //
+  // ===== PHÂN TRANG =====//
   const ITEMS_PER_PAGE = 5; // số thiết bị mỗi trang
   const [currentPage, setCurrentPage] = useState(1);
   // Fetch danh sách thiết bị khi component mount
   useEffect(() => {
     fetchDevices();
   }, []);
-
   // Lọc thiết bị theo search term và status filter
-  
-
 useEffect(() => {
   setCurrentPage(1);
 }, [searchTerm, statusFilter]);
@@ -75,7 +72,6 @@ const paginatedDevices = filteredDevices.slice(
   (currentPage - 1) * ITEMS_PER_PAGE,
   currentPage * ITEMS_PER_PAGE
 );
-
 
   /**
    * Lấy danh sách tất cả thiết bị từ API
@@ -261,7 +257,7 @@ setTimeout(() => {
 
   return (
     <div className="p-8 min-h-screen transition-colors bg-gray-50 dark:bg-gray-900">
-      {/* ==================== HEADER ==================== */}
+      {/* ===== HEADER ===== */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -292,7 +288,7 @@ setTimeout(() => {
         </h1>
       </motion.div>
 
-      {/* ==================== FILTERS & ACTIONS ==================== */}
+      {/* ===== FILTERS & ACTIONS ===== */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -341,7 +337,7 @@ setTimeout(() => {
         </div>
       </motion.div>
 
-      {/* ==================== STATS CARDS ==================== */}
+      {/* ===== STATS CARDS ===== */}
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
@@ -395,7 +391,7 @@ setTimeout(() => {
         </motion.div>
       </motion.div>
 
-      {/* ==================== TABLE - DANH SÁCH THIẾT BỊ ==================== */}
+      {/* ===== TABLE - DANH SÁCH THIẾT BỊ ===== */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -497,7 +493,7 @@ setTimeout(() => {
         </div>
       </motion.div>
 
-      {/* 📄 Phân trang */}
+      {/* Phân trang */}
       <Pagination
         totalItems={filteredDevices.length}
         pageSize={ITEMS_PER_PAGE}
@@ -505,7 +501,7 @@ setTimeout(() => {
         onPageChange={(page) => setCurrentPage(page)}
       />
 
-      {/* ==================== MODAL THÊM/SỬA THIẾT BỊ ==================== */}
+      {/* ===== MODAL THÊM/SỬA THIẾT BỊ ===== */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
           <motion.div
@@ -634,7 +630,7 @@ setTimeout(() => {
         </div>
       )}
 
-      {/* ==================== MODAL XÁC NHẬN XÓA THIẾT BỊ ==================== */}
+      {/* ===== MODAL XÁC NHẬN XÓA THIẾT BỊ ===== */}
       {isDeleteModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
           <motion.div
