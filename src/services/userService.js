@@ -11,7 +11,7 @@ export const getAllUsers = () => api.get("/admin/users");
 export const getUserById = (id) => api.get(`/admin/users/${id}`);
 
 /**
- * 🆕 TẠO NGƯỜI DÙNG MỚI (Bởi Admin)
+ * TẠO NGƯỜI DÙNG MỚI (Bởi Admin)
  * (ĐÃ SỬA LỖI: Trỏ đến /admin/users)
  *
  * API này không cần mật khẩu. Backend sẽ tự tạo và gửi email.
@@ -23,17 +23,17 @@ export const createUser = (data) => {
 };
 
 /**
- * ✏️ Cập nhật thông tin người dùng
+ * Cập nhật thông tin người dùng
  */
 export const updateUser = (id, data) => api.put(`/admin/users/${id}`, data);
 
 /**
- * ❌ Xóa người dùng
+ * Xóa người dùng
  */
 export const deleteUser = (id) => api.delete(`/admin/users/${id}`);
 
 /**
- * 🔍 Tìm kiếm người dùng theo tên hoặc email
+ * Tìm kiếm người dùng theo tên hoặc email
  * @param {string} keyword - từ khóa tìm kiếm (ví dụ: "anh", "khoa", "nguyen@...")
  */
 export const searchUsers = (query) => {
