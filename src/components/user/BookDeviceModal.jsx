@@ -364,26 +364,23 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
       </Select>
     </Form.Item>
 
-    <Form.Item name="customHour" label="Khác (giờ)" style={{ width: 80 }}>
-      <Input
-        type="number"
-        step={0.5}
-        min={0.5}
-        max={8}
-        className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-        onChange={(e) => {
-  const hour = parseFloat(e.target.value || 0);
+        <Form.Item name="customHour" label="Khác (giờ)" style={{ width: 80 }}>
+          <Input
+            type="number"
+            step={0.5}
+            min={0.5}
+            max={8}
+            className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+            onChange={(e) => {
+              const hour = parseFloat(e.target.value || 0);
 
-  if (hour > 0) {
-    form.setFieldsValue({
-      duration: hour * 60,   // Convert giờ → phút
-    });
-  } else {
-    form.setFieldsValue({ duration: undefined });
-  }
-}}
-      />
-    </Form.Item>
+              // Xóa preset duration và convert sang phút
+              form.setFieldsValue({
+                duration: hour > 0 ? hour * 60 : undefined,
+              });
+            }}
+          />
+        </Form.Item>
   </div>
 </div>
 
