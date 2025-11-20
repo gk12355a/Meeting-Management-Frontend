@@ -13,7 +13,10 @@ export const getUserById = (id) => api.get(`/admin/users/${id}`);
 /**
  * 🆕 Tạo người dùng mới (đăng ký)
  */
-export const createUser = (data) => api.post("/auth/register", data);
+export const createUser = (data) => {
+  // Sửa từ "/auth/register" thành "/admin/users"
+  return api.post("/admin/users", data);
+};
 
 /**
  * ✏️ Cập nhật thông tin người dùng
@@ -39,3 +42,4 @@ export const updateMyProfile = (profileData) => {
   // profileData sẽ là { fullName: "Tên Mới" }
   return api.put('/users/profile', profileData);
 };
+
