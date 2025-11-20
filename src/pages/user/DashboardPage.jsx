@@ -89,9 +89,9 @@ export default function DashboardPage() {
   const [upcomingMeetings, setUpcomingMeetings] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // --- POPUP STATE (Tối ưu lại để popup mở mượt hơn) ---
-  const [selectedMeetingId, setSelectedMeetingId] = useState(null); // Chỉ lưu id khi click
-  const [selectedMeeting, setSelectedMeeting] = useState(null);     // Dữ liệu chi tiết, để truyền vào modal
+  // --- POPUP STATE ---
+  const [selectedMeetingId, setSelectedMeetingId] = useState(null); 
+  const [selectedMeeting, setSelectedMeeting] = useState(null);   
   const [loadingDetail, setLoadingDetail] = useState(false);
 
   // Dùng ref để tránh memory leak khi component bị unmount khi đang load
@@ -104,7 +104,7 @@ export default function DashboardPage() {
     };
   }, []);
 
-  // === 3. GỌI API KHI MỞ TRANG (ĐÃ SỬA LOGIC LỌC) ===
+  // === 3. GỌI API KHI MỞ TRANG ===
   useEffect(() => {
     // Cần có user.id để lọc chính xác
     if (!user) {
@@ -258,7 +258,7 @@ export default function DashboardPage() {
         </div>
       ) : (
         <>
-          {/* Stats Cards (Giữ nguyên) */}
+          {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {stats.map((stat, index) => (
               <div
@@ -282,7 +282,7 @@ export default function DashboardPage() {
             ))}
           </div>
 
-          {/* UPCOMING MEETINGS (Optimized popup) */}
+          {/* UPCOMING MEETINGS */}
           <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-gray-200 dark:border-slate-800 p-6">
             <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">
               📅 Lịch họp sắp tới
@@ -326,7 +326,7 @@ export default function DashboardPage() {
         </>
       )}
 
-      {/* Meeting Details Modal (Tối ưu - popup sẽ show luôn, loading chi tiết sau) */}
+      {/* Meeting Details Modal */}
       <MeetingDetailModal
         open={!!selectedMeetingId}
         onClose={handleCloseMeetingDetail}
@@ -335,7 +335,7 @@ export default function DashboardPage() {
       >
       </MeetingDetailModal>
 
-      {/* Loading overlay khi đang fetch dashboard (giữ nguyên cho loading trang) */}
+      {/* Loading overlay khi đang fetch dashboard */}
       {loadingDetail && false && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[9998]">
           <Spin size="large" />

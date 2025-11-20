@@ -240,8 +240,7 @@ const RoomsPage = () => {
         start={bookingModal.start}
         end={bookingModal.end}
         onSuccess={() => {
-           // Có thể thêm logic reload danh sách phòng nếu cần,
-           // nhưng thường là không cần thiết vì trạng thái phòng không đổi ngay lập tức
+           // Có thể thêm logic reload danh sách phòng nếu cần, nhưng thường là không cần thiết vì trạng thái phòng không đổi ngay lập tức
         }}
       />
 
