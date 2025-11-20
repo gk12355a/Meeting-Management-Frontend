@@ -11,9 +11,10 @@ import {
   Divider,
   Checkbox,
   Spin,
+  Tag,
+  Alert,
   InputNumber,       // ✅ Import InputNumber tại đây
 } from "antd";
-import { Tag } from "antd";
 import { FiPlusCircle, FiUsers } from "react-icons/fi";
 import dayjs from "dayjs";
 import "dayjs/locale/vi";
@@ -35,7 +36,6 @@ dayjs.extend(utc);
 
 const { TextArea } = Input;
 const { Option } = Select;
-
 const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [isRecurring, setIsRecurring] = useState(false);
@@ -53,6 +53,20 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
 
   const debounceTimer = useRef(null);
   const [form] = Form.useForm();
+  // State để theo dõi phòng được chọn
+const [selectedRoom, setSelectedRoom] = useState(null);
+
+// Watch roomId để biết phòng nào đang được chọn
+const watchedRoomId = Form.useWatch("roomId", form);
+
+useEffect(() => {
+  if (watchedRoomId) {
+    const room = rooms.find((r) => r.id === watchedRoomId);
+    setSelectedRoom(room || null);
+  } else {
+    setSelectedRoom(null);
+  }
+}, [watchedRoomId, rooms]);
   const { user } = useAuth();
 
   // Watch form values để tải devices tự động
@@ -445,7 +459,15 @@ if (values.isRecurring) {
     ))}
   </Select>
 </Form.Item>
-
+{selectedRoom?.requiresApproval && (
+  <Alert
+    message="Lưu ý: Phòng VIP"
+    description="Phòng họp này yêu cầu sự phê duyệt từ Admin. Cuộc họp sẽ ở trạng thái 'Chờ duyệt' sau khi tạo."
+    type="warning"
+    showIcon
+    className="mb-4"
+  />
+)}
           {/* ... tiếp phần devices, participants, etc như cũ ... */}
 
           <Form.Item
