@@ -197,7 +197,9 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
         .date(date.date())
         .hour(time.hour())
         .minute(time.minute());
-
+        const onFinish=async()=> {
+          const values = form.getFieldValue();
+        }
       const payload = {
         title: values.title.trim(),
         description: values.description || "",
@@ -290,129 +292,104 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
             />
           </Form.Item>
 
-          {/* TIME + DURATION + CUSTOM DURATION */}
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-            {/* DATE */}
-            <Form.Item
-              name="date"
-              label="Ngày họp"
-              rules={[{ required: true, message: "Chọn ngày họp" }]}
-            >
-              <DatePicker
-                className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                format="DD/MM/YYYY"
-                disabledDate={(d) =>
-                  d && (d < dayjs().startOf("day") || d.day() === 0 || d.day() === 6)
-                }
-              />
-            </Form.Item>
+          {/* DATE - TIME - DURATION */}
+<div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+  {/* DATE */}
+  <Form.Item name="date" label="Ngày họp" rules={[{ required: true }]}>
+    <DatePicker
+      format="DD/MM/YYYY"
+      className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
+      disabledDate={(d) =>
+        !d ||
+        d < dayjs().startOf("day") ||
+        d.day() === 0 ||
+        d.day() === 6
+      }
+    />
+  </Form.Item>
 
-            {/* TIME */}
-            <Form.Item
-              name="time"
-              label="Giờ bắt đầu"
-              rules={[{ required: true, message: "Chọn giờ bắt đầu" }]}
-            >
-              <>
-                <div className="flex gap-2">
-                  <Input
-                    readOnly
-                    value={clockValue.format("HH:mm")}
-                    onClick={() => setClockOpen(true)}
-                    className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                  />
-                  <Button
-                    onClick={() => setClockOpen(true)}
-                    className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                  >
-                    🕒 Đồng hồ
-                  </Button>
-                </div>
+  {/* TIME PICKER */}
+  <Form.Item name="time" label="Giờ bắt đầu" rules={[{ required: true }]}>
+    <div className="flex gap-2">
+      <Input
+        readOnly
+        value={clockValue?.format("HH:mm")}
+        onClick={() => setClockOpen(true)}
+        className="cursor-pointer dark:bg-gray-700 dark:text-white dark:border-gray-600"
+      />
+      <Button onClick={() => setClockOpen(true)}>🕒 Chọn</Button>
+    </div>
 
-                <Modal
-                  title="Chọn giờ họp (08:00 - 18:00)"
-                  open={clockOpen}
-                  onCancel={() => setClockOpen(false)}
-                  onOk={() => {
-                    if (!validateBusinessTime(clockValue)) {
-                      toast.error("⏰ Chỉ được đặt 08:00 - 18:00!");
-                      return;
-                    }
-                    form.setFieldsValue({ time: clockValue });
-                    setClockOpen(false);
-                  }}
-                  width={520}
-                  style={{ overflow: "visible" }}
-                  bodyStyle={{ overflow: "visible", paddingTop: 8 }}
-                  className="dark:[&_.ant-modal-content]:bg-gray-800 dark:[&_.ant-modal-header]:bg-gray-800"
-                >
-                  <div className="text-center text-gray-500 dark:text-gray-300 mb-2 text-sm">
-                    <span className="font-medium text-indigo-600 dark:text-indigo-400">
-                      Giờ (HH)
-                    </span>{" "}
-                    :{" "}
-                    <span className="font-medium text-indigo-600 dark:text-indigo-400">
-                      Phút (MM)
-                    </span>
-                  </div>
+    <Modal
+      title="Chọn giờ họp (08:00 - 18:00)"
+      open={clockOpen}
+      onCancel={() => setClockOpen(false)}
+      onOk={() => {
+        if (!validateBusinessTime(clockValue)) {
+          toast.error("⏰ Chỉ được đặt 08:00 - 18:00!");
+          return;
+        }
+        form.setFieldsValue({ time: clockValue });
+        setClockOpen(false);
+      }}
+      width={350}
+      centered
+    >
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <StaticTimePicker
+          value={clockValue}
+          onChange={setClockValue}
+          orientation="portrait"
+          ampm={false}
+          slotProps={{ actionBar: { actions: [] } }}
+        />
+      </LocalizationProvider>
+    </Modal>
+  </Form.Item>
+<div className="flex gap-2 items-end">
+  <Form.Item
+  
+    name="duration"
+    label="Thời lượng"
+    style={{ flex: 1 }}
+    initialValue={60}
+  >
+    <Select
+      className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+      onChange={() => form.setFieldsValue({ customHour: undefined })}
+      placeholder="-- Chọn --"
+      allowClear
+    >
+      <Option value={30}>30 phút</Option>
+      <Option value={60}>1 giờ</Option>
+      <Option value={90}>1.5 giờ</Option>
+      <Option value={120}>2 giờ</Option>
+    </Select>
+  </Form.Item>
 
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <StaticTimePicker
-                      orientation="landscape"
-                      ampm={false}
-                      value={clockValue}
-                      onChange={(v) => setClockValue(v)}
-                      slotProps={{
-                        actionBar: { actions: [] },
-                      }}
-                    />
-                  </LocalizationProvider>
-                </Modal>
-              </>
-            </Form.Item>
+  <Form.Item
+    name="customHour"
+    label="Khác (giờ)"
+    style={{ flex: '0 0 80px' }} // cố định width, không xuống dòng
+  >
+    <Input
+  type="number"
+  step={0.5}
+  min={0.5}
+  max={8}
+  className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+  onChange={(e) => {
+    const hour = parseFloat(e.target.value || 0);
 
-            {/* PRESET DURATION */}
-            <Form.Item
-              name="duration"
-              label="Thời lượng"
-              initialValue={60}
-            >
-              <Select
-                className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                popupClassName="dark:bg-gray-700 dark:text-gray-100"
-                onChange={() => {
-                  form.setFieldsValue({ customDuration: undefined });
-                }}
-              >
-                <Option value={15}>15 phút</Option>
-                <Option value={30}>30 phút</Option>
-                <Option value={45}>45 phút</Option>
-                <Option value={60}>1 giờ</Option>
-                <Option value={90}>1 giờ 30 phút</Option>
-                <Option value={120}>2 giờ</Option>
-              </Select>
-            </Form.Item>
-
-            {/* CUSTOM DURATION */}
-            <Form.Item
-              name="customDuration"
-              label="Khác (giờ)"
-            >
-              <InputNumber
-                min={0.5}
-                max={8}
-                step={0.5}
-                placeholder="VD: 1.5"
-                className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                onChange={(value) => {
-                  if (value) {
-                    form.setFieldsValue({ duration: undefined });
-                  }
-                }}
-              />
-            </Form.Item>
-          </div>
-
+    if (hour > 0) {
+      // nếu ô khác trống → Select cũng trống
+      form.setFieldsValue({ duration: undefined });
+    }
+  }}
+/>
+  </Form.Item>
+</div>
+</div>
           {/* ROOM */}
           <Form.Item
             name="roomId"

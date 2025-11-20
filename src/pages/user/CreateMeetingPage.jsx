@@ -281,7 +281,7 @@ const CreateMeetingPage = () => {
                     <Option value={120}>2 giờ</Option>
                   </Select>
                 </Form.Item>
-                <Form.Item name="customHour" label="Khác (h)" style={{ width: 80 }}>
+                <Form.Item name="customHour" label="Khác (giờ)" style={{ width: 80 }}>
                   <Input type="number" step={0.5} min={0.5} max={8}
                     onChange={() => form.setFieldsValue({ duration: undefined })}
                     className="dark:bg-gray-700 dark:text-white dark:border-gray-600" />
