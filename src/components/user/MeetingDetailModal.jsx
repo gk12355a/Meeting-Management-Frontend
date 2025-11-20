@@ -1,6 +1,6 @@
 // src/components/user/MeetingDetailModal.jsx
 import React, { useEffect, useRef, useState } from "react";
-import { FiX, FiCalendar, FiClock, FiMapPin, FiCpu, FiUsers } from "react-icons/fi";
+import { FiX, FiCalendar, FiClock, FiMapPin, FiCpu, FiUsers, FiInfo } from "react-icons/fi";
 import dayjs from "dayjs";
 import "dayjs/locale/vi";
 
@@ -141,6 +141,29 @@ const MeetingDetailModal = ({ open, onClose, meeting, children }) => {
     };
   };
 
+  // Helper function for meeting status
+  const getMeetingStatus = (status) => {
+    const statusMap = {
+      CONFIRMED: {
+        color: "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/50",
+        label: "Đã xác nhận"
+      },
+      CANCELLED: {
+        color: "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/50",
+        label: "Đã hủy"
+      },
+      PENDING_APPROVAL: {
+        color: "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/50",
+        label: "Chờ duyệt"
+      }
+    };
+
+    return statusMap[status] || {
+      color: "text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-slate-700",
+      label: status || "Không rõ"
+    };
+  };
+
   // Render participants list
   const renderParticipants = () => {
     let organizer = meeting.organizer;
@@ -164,7 +187,7 @@ const MeetingDetailModal = ({ open, onClose, meeting, children }) => {
         {organizer && (
           <li
             key={organizer.id || "organizer"}
-            className="flex items-center justify-between bg-gray-50 dark:bg-slate-700 p-2 rounded-lg"
+            className="flex items-center justify-between bg-gray-50 dark:bg-slate-700 p-2.5 rounded-lg"
           >
             <span className="text-gray-900 dark:text-gray-100 font-medium">
               {organizer.fullName || "Không rõ"}
@@ -188,7 +211,7 @@ const MeetingDetailModal = ({ open, onClose, meeting, children }) => {
             return (
               <li
                 key={p.id}
-                className="flex items-center justify-between bg-gray-50 dark:bg-slate-700 p-2 rounded-lg"
+                className="flex items-center justify-between bg-gray-50 dark:bg-slate-700 p-2.5 rounded-lg"
               >
                 <span className="text-gray-900 dark:text-gray-100">
                   {p.fullName || "Không rõ"}
@@ -200,13 +223,15 @@ const MeetingDetailModal = ({ open, onClose, meeting, children }) => {
             );
           })
         ) : !organizer ? (
-          <li className="italic text-gray-500 dark:text-gray-400">
+          <li className="italic text-gray-500 dark:text-gray-400 text-center py-2">
             Không có người tham gia
           </li>
         ) : null}
       </>
     );
   };
+
+  const meetingStatus = getMeetingStatus(meeting.status);
 
   return (
     <div
@@ -237,102 +262,122 @@ const MeetingDetailModal = ({ open, onClose, meeting, children }) => {
         {/* Modal content */}
         <div className="flex-1 overflow-y-auto p-7 pt-5">
           {/* Title */}
-          <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">
+          <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-gray-100 pr-8">
             {meeting.title}
           </h2>
 
-          {/* Info - Date, Time, Room */}
-          <div className="flex flex-col gap-4 mb-6">
-            <div className="flex flex-col md:flex-row md:items-center gap-4 w-full">
+          {/* Info Section - Date, Time, Room, Status */}
+          <div className="mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
               {/* Date */}
-              <div className="flex items-center gap-2 flex-1 min-w-0">
-                <div className="p-2 rounded-xl bg-blue-100 dark:bg-slate-700 shrink-0">
-                  <FiCalendar className="text-blue-600 dark:text-blue-300" />
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30 shrink-0">
+                  <FiCalendar className="text-blue-600 dark:text-blue-400" size={18} />
                 </div>
-                <div>
-                  <span className="font-medium dark:text-gray-100">Ngày</span>
-                  <p className="dark:text-gray-300">
+                <div className="min-w-0">
+                  <span className="text-xs text-gray-500 dark:text-gray-400 block">Ngày</span>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">
                     {dayjs(meeting.startTime).format("DD/MM/YYYY")}
                   </p>
                 </div>
               </div>
 
               {/* Time */}
-              <div className="flex items-center gap-2 flex-1 min-w-0">
-                <div className="p-2 rounded-xl bg-green-100 dark:bg-slate-700 shrink-0">
-                  <FiClock className="text-green-600 dark:text-green-300" />
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30 shrink-0">
+                  <FiClock className="text-green-600 dark:text-green-400" size={18} />
                 </div>
-                <div>
-                  <span className="font-medium dark:text-gray-100">Giờ</span>
-                  <p className="dark:text-gray-300">
+                <div className="min-w-0">
+                  <span className="text-xs text-gray-500 dark:text-gray-400 block">Giờ</span>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">
                     {dayjs(meeting.startTime).format("HH:mm")} – {dayjs(meeting.endTime).format("HH:mm")}
                   </p>
                 </div>
               </div>
 
               {/* Room */}
-              <div className="flex items-center gap-2 flex-1 min-w-0">
-                <div className="p-2 rounded-xl bg-purple-100 dark:bg-slate-700 shrink-0">
-                  <FiMapPin className="text-purple-600 dark:text-purple-300" />
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30 shrink-0">
+                  <FiMapPin className="text-purple-600 dark:text-purple-400" size={18} />
                 </div>
-                <div>
-                  <span className="font-medium dark:text-gray-100">Phòng</span>
-                  <p className="dark:text-gray-300">{meeting.room?.name || "Chưa xác định"}</p>
+                <div className="min-w-0">
+                  <span className="text-xs text-gray-500 dark:text-gray-400 block">Phòng</span>
+                  <p className="font-medium text-gray-900 dark:text-gray-100 truncate">
+                    {meeting.room?.name || "Chưa xác định"}
+                  </p>
+                </div>
+              </div>
+
+              {/* Meeting Status */}
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 shrink-0">
+                  <FiInfo className="text-indigo-600 dark:text-indigo-400" size={18} />
+                </div>
+                <div className="min-w-0">
+                  <span className="text-xs text-gray-500 dark:text-gray-400 block">Trạng thái</span>
+                  <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${meetingStatus.color}`}>
+                    {meetingStatus.label}
+                  </span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Devices & Participants */}
-          <div className="flex flex-col md:flex-row gap-6">
-            {/* Devices */}
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 rounded-xl bg-pink-100 dark:bg-slate-700 shrink-0">
-                  <FiCpu className="text-pink-600 dark:text-pink-300" />
-                </div>
-                <span className="font-medium dark:text-gray-100">Thiết bị sử dụng</span>
-              </div>
-              {
-                (meeting.devices && meeting.devices.length > 0) ? (
-                  <ul className="dark:text-gray-300 text-gray-800 flex flex-wrap gap-2">
-                    {meeting.devices.map((device, idx) => (
-                      <li
-                        key={device.id || idx}
-                        className="px-3 py-1 rounded bg-gray-100 dark:bg-slate-700 font-semibold text-sm break-all"
-                      >
-                        {device.name}
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="italic text-gray-500 dark:text-gray-400 mt-1">
-                    Không có thiết bị sử dụng
-                  </p>
-                )
-              }
-            </div>
+          {/* Divider */}
+          <div className="border-t border-gray-200 dark:border-slate-600 my-5"></div>
 
-            {/* Participants */}
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 rounded-xl bg-orange-100 dark:bg-slate-700 shrink-0">
-                  <FiUsers className="text-orange-600 dark:text-orange-300" />
-                </div>
-                <span className="font-medium dark:text-gray-100">
-                  Người tham gia
-                </span>
+          {/* Devices Section */}
+          <div className="mb-4">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="p-1.5 rounded-lg bg-pink-100 dark:bg-pink-900/30">
+                <FiCpu className="text-pink-600 dark:text-pink-400" size={16} />
               </div>
-              <ul className="flex flex-col gap-2">
-                {renderParticipants()}
-              </ul>
+              <span className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
+                Thiết bị sử dụng
+              </span>
             </div>
+            {
+              (meeting.devices && meeting.devices.length > 0) ? (
+                <ul className="flex flex-wrap gap-2">
+                  {meeting.devices.map((device, idx) => (
+                    <li
+                      key={device.id || idx}
+                      className="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-slate-700 text-gray-800 dark:text-gray-200 font-medium text-xs"
+                    >
+                      {device.name}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="italic text-gray-400 dark:text-gray-500 text-sm">
+                  Không có thiết bị sử dụng
+                </p>
+              )
+            }
+          </div>
+
+          {/* Divider */}
+          <div className="border-t border-gray-200 dark:border-slate-600 my-5"></div>
+
+          {/* Participants Section */}
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <div className="p-1.5 rounded-lg bg-orange-100 dark:bg-orange-900/30">
+                <FiUsers className="text-orange-600 dark:text-orange-400" size={16} />
+              </div>
+              <span className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
+                Người tham gia
+              </span>
+            </div>
+            <ul className="flex flex-col gap-2">
+              {renderParticipants()}
+            </ul>
           </div>
         </div>
 
         {/* Footer with custom buttons */}
         {children && (
-          <div className="border-t border-gray-200 dark:border-slate-700 p-4 flex justify-end gap-2">
+          <div className="border-t border-gray-200 dark:border-slate-700 p-4 flex justify-end gap-2 bg-gray-50 dark:bg-slate-800/50">
             {children}
           </div>
         )}
