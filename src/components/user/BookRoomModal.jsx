@@ -58,9 +58,7 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, start, end, onSuccess })
   const watchedTime = Form.useWatch("time", form);
   const watchedDuration = Form.useWatch("duration", form);
 
-  /* ===================================================
-          SET INITIAL FORM VALUES WITH PREFILLED ROOM
-  ==================================================== */
+  /* ===== SET INITIAL FORM VALUES WITH PREFILLED ROOM ====== */
   useEffect(() => {
   if (open && prefilledRoom) {
     setIsRecurring(false);
@@ -158,9 +156,7 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, start, end, onSuccess })
     return () => clearTimeout(t);
   }, [watchedDate, watchedTime, watchedDuration]);
 
-  /* ===================================================
-            SEARCH INTERNAL USERS
-  ==================================================== */
+  /* ===== SEARCH INTERNAL USERS ====== */
   const handleSearchUsers = (query) => {
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
 
@@ -183,18 +179,14 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, start, end, onSuccess })
     }, 500);
   };
 
-  /* ===================================================
-              VALIDATE BUSINESS TIME
-  ==================================================== */
+  /* ===== VALIDATE BUSINESS TIME ====== */
   const validateBusinessTime = (value) => {
     if (!value) return false;
     const totalMin = value.hour() * 60 + value.minute();
     return totalMin >= 480 && totalMin <= 1080; // 08:00 - 18:00
   };
 
-  /* ===================================================
-                SUBMIT MEETING
-  ==================================================== */
+  /* ===== SUBMIT MEETING ====== */
   const handleCreateMeeting = async (values) => {
     try {
       setLoading(true);
@@ -263,9 +255,7 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, start, end, onSuccess })
     onCancel();
   };
 
-  /* ===================================================
-                      UI
-  ==================================================== */
+  /* ====== UI ====== */
   return (
     <Modal
       open={open}
