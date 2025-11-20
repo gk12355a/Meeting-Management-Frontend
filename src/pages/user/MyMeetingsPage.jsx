@@ -421,35 +421,26 @@ const [quickBooking, setQuickBooking] = useState({ open: false, start: null, end
 
     while (d.isBefore(until)) {
       const dayIdx = d.day();
-      // Nếu là thứ 7 (6), CN (0) -> disable TẤT CẢ GIỜ trong ngày (0h-24h)
-      if (dayIdx === 0 || dayIdx === 6) {
-        slots.push({
-          start: d.hour(0).minute(0).second(0).format("YYYY-MM-DDTHH:mm:ss"),
-          end: d.hour(23).minute(59).second(59).format("YYYY-MM-DDTHH:mm:ss"),
-          display: "background",
-          classNames: ["fc-business-blocked"],
-        });
-      } else {
         // Slot trước giờ hành chính (0h -> 8h)
         if (WORK_HOUR_START > 0) {
-          slots.push({
-            start: d.hour(0).minute(0).second(0).format("YYYY-MM-DDTHH:mm:ss"),
-            end: d.hour(WORK_HOUR_START).minute(0).second(0).format("YYYY-MM-DDTHH:mm:ss"),
-            display: "background",
-            classNames: ["fc-business-blocked"],
-          });
-        }
-        // Slot sau giờ hành chính (18h -> 24h)
-        if (WORK_HOUR_END < 24) {
-          slots.push({
-            start: d.hour(WORK_HOUR_END).minute(0).second(0).format("YYYY-MM-DDTHH:mm:ss"),
-            end: d.hour(23).minute(59).second(59).format("YYYY-MM-DDTHH:mm:ss"),
-            display: "background",
-            classNames: ["fc-business-blocked"],
-          });
-        }
-      }
-      d = d.add(1, "day");
+  slots.push({
+    start: d.hour(0).minute(0).second(0).format("YYYY-MM-DDTHH:mm:ss"),
+    end: d.hour(WORK_HOUR_START).minute(0).second(0).format("YYYY-MM-DDTHH:mm:ss"),
+    display: "background",
+    classNames: ["fc-business-blocked"],
+  });
+}
+// Slot sau giờ hành chính (18h -> 24h)
+if (WORK_HOUR_END < 24) {
+  slots.push({
+    start: d.hour(WORK_HOUR_END).minute(0).second(0).format("YYYY-MM-DDTHH:mm:ss"),
+    end: d.hour(23).minute(59).second(59).format("YYYY-MM-DDTHH:mm:ss"),
+    display: "background",
+    classNames: ["fc-business-blocked"],
+  });
+}
+
+d = d.add(1, "day");
     }
     // Thêm các slot ở quá khứ
     const now = dayjs();
