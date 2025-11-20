@@ -651,7 +651,7 @@ const [quickBooking, setQuickBooking] = useState({ open: false, start: null, end
             }}
 
             businessHours={{
-              daysOfWeek: [1, 2, 3, 4, 5],
+              daysOfWeek: [0 , 1 , 2, 3, 4, 5, 6],
               startTime: '08:00',
               endTime: '18:00',
             }}
