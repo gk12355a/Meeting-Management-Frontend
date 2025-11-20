@@ -373,18 +373,20 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
     style={{ flex: '0 0 80px' }} // cố định width, không xuống dòng
   >
     <Input
-      type="number"
-      step={0.5}
-      min={0.5}
-      max={8}
-      className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-      onChange={(e) => {
-        const hour = parseFloat(e.target.value || 0);
-        form.setFieldsValue({
-          duration: hour > 0 ? hour * 60 : undefined,
-        });
-      }}
-    />
+  type="number"
+  step={0.5}
+  min={0.5}
+  max={8}
+  className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+  onChange={(e) => {
+    const hour = parseFloat(e.target.value || 0);
+
+    if (hour > 0) {
+      // nếu ô khác trống → Select cũng trống
+      form.setFieldsValue({ duration: undefined });
+    }
+  }}
+/>
   </Form.Item>
 </div>
 </div>
