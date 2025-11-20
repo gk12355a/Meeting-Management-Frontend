@@ -110,7 +110,7 @@ useEffect(() => {
 
         setAvailableDevices(availableList);
       } catch (err) {
-        console.error(err);
+        console.error("Error in handleCreateMeeting:", err); // <-- Thêm dòng này
         toast.error("Không thể tải thiết bị khả dụng!");
       } finally {
         setDevicesLoading(false);
@@ -187,78 +187,70 @@ useEffect(() => {
 
   /* ====== VALIDATE BUSINESS TIME ====== */
   const validateBusinessTime = (value) => {
-    if (!value) return false;
-    const totalMin = value.hour() * 60 + value.minute();
-    return totalMin >= 480 && totalMin <= 1080; // 08:00 - 18:00
-  };
-
-  /* ====== SUBMIT MEETING ====== */
-  const handleCreateMeeting = async (values) => {
-  try {
-    setLoading(true);
-
-    const date = values.date;
-    const time = dayjs(values.time);
-
-    if (!validateBusinessTime(time)) {
-      toast.error("⏰ Chỉ được đặt lịch từ 08:00 đến 18:00!");
-      return;
-    }
-
-    const startUTC = dayjs(
-      `${date.format("YYYY-MM-DD")} ${time.format("HH:mm")}`
-    ).utc();
-
-    const durationInMinutes = values.customHour
-      ? values.customHour * 60
-      : values.duration;
-
-    if (!durationInMinutes) {
-      toast.error("⏰ Vui lòng nhập thời lượng cuộc họp!");
-      setLoading(false);
-      return;
-    }
-
-    const endTime = startUTC.add(durationInMinutes, "minute").toISOString();
-
-    // --- BUILD PAYLOAD ---
-    const finalDuration = values.customHour ? dayjs.duration(parseFloat(values.customHour), 'hours').asMinutes() : values.duration;
-          const payload = {
-            title: values.title.trim(),
-            description: values.description || "",
-            startTime: startUTC.toISOString(),
-            endTime: startUTC.add(finalDuration, "minute").toISOString(),
-            roomId: values.roomId,
-            participantIds: Array.from(new Set([user.id, ...(values.participantIds || [])])),
-            deviceIds: values.deviceIds || [],
-            guestEmails: values.guestEmails || [],
-            recurrenceRule: values.isRecurring ? {
-              frequency: values.frequency || "DAILY",
-              interval: 1,
-              repeatUntil: dayjs(values.repeatUntil).format("YYYY-MM-DD"),
-            } : null,
-            onBehalfOfUserId: null,
-          };
-    
-          const res = await createMeeting(payload);
-    
-          if (res.data?.status === "PENDING_APPROVAL") {
-            toast.info("📝 Yêu cầu đặt phòng đã được gửi và đang chờ Admin phê duyệt.");
-          } else {
-            toast.success("🎉 Tạo cuộc họp thành công!");
-          }
-    
-          form.resetFields();
-          setClockValue(dayjs().hour(8).minute(0));
-          setIsRecurring(false);
-          setSelectedRoom(null);
-          setAvailableDevices([]);
-  } catch (err) {
-    toast.error(err?.response?.data?.message || "Không thể tạo cuộc họp!");
-  } finally {
-    setLoading(false);
-  }
-};
+      if (!value) return false;
+      const totalMin = value.hour() * 60 + value.minute();
+      return totalMin >= 480 && totalMin <= 1080;
+    };
+  
+    // Submit
+    const handleCreateMeeting = async (values) => {
+      try {
+        setLoading(true);
+  
+        const date = values.date;
+        const time = dayjs(values.time);
+  
+        if (!validateBusinessTime(time)) {
+          toast.error("⏰ Chỉ được đặt lịch từ 08:00 đến 18:00!");
+          return;
+        }
+  
+        const startUTC = dayjs.utc()
+          .year(date.year())
+          .month(date.month())
+          .date(date.date())
+          .hour(time.hour())
+          .minute(time.minute());
+  
+        const finalDuration = values.customHour ? dayjs.duration(parseFloat(values.customHour), 'hours').asMinutes() : values.duration;
+        const payload = {
+          title: values.title.trim(),
+          description: values.description || "",
+          startTime: startUTC.toISOString(),
+          endTime: startUTC.add(finalDuration, "minute").toISOString(),
+          roomId: values.roomId,
+          participantIds: Array.from(new Set([user.id, ...(values.participantIds || [])])),
+          deviceIds: values.deviceIds || [],
+          guestEmails: values.guestEmails || [],
+          recurrenceRule: values.isRecurring ? {
+            frequency: values.frequency || "DAILY",
+            interval: 1,
+            repeatUntil: dayjs(values.repeatUntil).format("YYYY-MM-DD"),
+          } : null,
+          onBehalfOfUserId: null,
+        };
+  
+        const res = await createMeeting(payload);
+  
+        if (res.data?.status === "PENDING_APPROVAL") {
+          toast.info("📝 Yêu cầu đặt phòng đã được gửi và đang chờ Admin phê duyệt.");
+        } else {
+          toast.success("🎉 Tạo cuộc họp thành công!");
+        }
+  
+        form.resetFields();
+        setClockValue(dayjs().hour(8).minute(0));
+        setIsRecurring(false);
+        setSelectedRoom(null);
+        setAvailableDevices([]);
+  
+      } catch (err) {
+        const msg = err?.response?.data?.message || "Không thể tạo cuộc họp!";
+        toast.error(msg);
+      } finally {
+        setLoading(false);
+      }
+    };
 
   const handleCancel = () => {
     form.resetFields();
@@ -281,10 +273,10 @@ useEffect(() => {
           <FiPlusCircle /> Đặt lịch sử dụng {prefilledDevice?.name}
         </span>
       }
-      className="dark:[&_.ant-modal-content]:bg-gray-800 dark:[&_.ant-modal-content]:text-gray-100 
-                 dark:[&_.ant-modal-header]:bg-gray-800 dark:[&_.ant-modal-header]:border-b-gray-700"
-      bodyStyle={{ paddingTop: 18, paddingBottom: 10 }}
-    >
+       className="dark:[&_.ant-modal-content]:bg-gray-800 dark:[&_.ant-modal-content]:text-gray-100 
+             dark:[&_.ant-modal-header]:bg-gray-800 dark:[&_.ant-modal-header]:border-b-gray-700"
+  styles={{ body: { paddingTop: 18, paddingBottom: 10 } }}
+  > 
       <Card
         className="shadow-none bg-white dark:bg-[#1e293b] border-none dark:text-gray-100"
         styles={{ body: { padding: 0 } }}
