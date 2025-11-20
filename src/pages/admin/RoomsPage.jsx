@@ -31,6 +31,7 @@ const toastColors = {
   info: "#3b82f6",
 };
 
+
 const setToastTheme = () => {
   const root = document.documentElement;
   root.style.setProperty("--toastify-color-success", toastColors.success);
@@ -96,8 +97,13 @@ export default function RoomsPage() {
         item.name?.toLowerCase().includes(term) ||
         item.location?.toLowerCase().includes(term);
 
-      const matchStatus =
-        statusFilter === "ALL" ? true : item.status === statusFilter;
+      let matchStatus = true;
+
+      if (statusFilter === "AVAILABLE" || statusFilter === "UNDER_MAINTENANCE") {
+        matchStatus = item.status === statusFilter;
+      } else if (statusFilter === "VIP") {
+        matchStatus = item.requiresApproval === true;
+      }
 
       return matchSearch && matchStatus;
     });
@@ -249,7 +255,7 @@ export default function RoomsPage() {
   const totalRooms = rooms.length;
   const totalAvailable = rooms.filter((room) => room.status === "AVAILABLE").length;
   const totalMaintenance = rooms.filter((room) => room.status === "UNDER_MAINTENANCE").length;
-  const totalVip = rooms.filter((room) => !!room.requiresApproval).length;
+  const totalVip = rooms.filter((room) => !!room.requiresApproval ).length;
   // const totalCapacity = rooms.reduce((acc, cur) => acc + (cur.capacity || 0), 0);
 
   // === Render ===
@@ -302,6 +308,7 @@ export default function RoomsPage() {
             <option value="ALL">Tất cả trạng thái</option>
             <option value="AVAILABLE">Có sẵn</option>
             <option value="UNDER_MAINTENANCE">Đang bảo trì</option>
+            <option value="VIP">Phòng VIP</option> {/* Thêm trạng thái mới */}
           </select>
           {/* Add button */}
           <button
