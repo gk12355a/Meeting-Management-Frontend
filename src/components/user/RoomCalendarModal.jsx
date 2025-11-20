@@ -1,22 +1,34 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Modal, Spin } from "antd";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import dayjs from "dayjs";
 import { getRoomMeetings } from "../../services/roomService";
+import { InputNumber } from "antd";
 
 const RoomCalendarModal = ({ open, onClose, room, onSelectSlot }) => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [readyToShow, setReadyToShow] = useState(false);
+  const [customDuration, setCustomDuration] = useState(null);
 
-  // detect dark mode từ html class
+  const calendarRef = useRef(null);
+
   const isDark = document.documentElement.classList.contains("dark");
 
-  // Load meeting list
+  // Khi modal mở, reset trạng thái
+  useEffect(() => {
+    if (open) {
+      setReadyToShow(false); // Ẩn calendar trong lúc chờ
+    }
+  }, [open]);
+
+  // Load danh sách cuộc họp
   useEffect(() => {
     const fetchMeetings = async () => {
-      if (!room?.id) return;
+      if (!open || !room?.id) return;
+
       setLoading(true);
       try {
         const res = await getRoomMeetings(room.id);
@@ -37,8 +49,24 @@ const RoomCalendarModal = ({ open, onClose, room, onSelectSlot }) => {
       }
     };
 
-    if (open) fetchMeetings();
+    fetchMeetings();
   }, [open, room]);
+
+  // Chờ dữ liệu + modal render xong → mới hiển thị calendar
+  useEffect(() => {
+    if (!loading && open) {
+      // delay để modal hiển thị xong layout
+      setTimeout(() => {
+        setReadyToShow(true);
+
+        // gọi updateSize() để calendar render chuẩn
+        if (calendarRef.current) {
+          const api = calendarRef.current.getApi();
+          if (api) api.updateSize();
+        }
+      }, 200);
+    }
+  }, [loading, open]);
 
   return (
     <Modal
@@ -52,17 +80,22 @@ const RoomCalendarModal = ({ open, onClose, room, onSelectSlot }) => {
           📅 Lịch phòng: {room?.name || ""}
         </span>
       }
-      className="dark:[&_.ant-modal-content]:bg-slate-900 dark:[&_.ant-modal-content]:text-gray-100 
-                 dark:[&_.ant-modal-header]:bg-slate-900 dark:[&_.ant-modal-header]:border-b-slate-700"
+      className="dark:[&_.ant-modal-content]:bg-slate-900 
+                 dark:[&_.ant-modal-content]:text-gray-100 
+                 dark:[&_.ant-modal-header]:bg-slate-900 
+                 dark:[&_.ant-modal-header]:border-b-slate-700"
     >
-      {loading && (
+      {/* LOADING SCREEN — luôn đẹp và sạch */}
+      {(loading || !readyToShow) && (
         <div className="flex justify-center items-center h-80">
           <Spin size="large" />
         </div>
       )}
 
-      {!loading && (
+      {/* FULLCALENDAR — chỉ hiển thị khi đã sẵn sàng */}
+      {!loading && readyToShow && (
         <FullCalendar
+          ref={calendarRef}
           key={room?.id}
           plugins={[timeGridPlugin, interactionPlugin]}
           initialView="timeGridWeek"
@@ -80,13 +113,11 @@ const RoomCalendarModal = ({ open, onClose, room, onSelectSlot }) => {
           events={events}
           selectable={true}
           selectMirror={true}
-          // 🔥 DARK MODE CALENDAR CLASSES
           dayHeaderClassNames={isDark ? "bg-slate-800 text-gray-200" : ""}
           slotLabelClassNames={isDark ? "bg-slate-800 text-gray-300" : ""}
           slotLaneClassNames={isDark ? "bg-slate-900 border-slate-700" : ""}
           viewClassNames={isDark ? "bg-slate-900 text-gray-100" : ""}
           nowIndicatorClassNames="bg-red-500"
-
           selectAllow={(selectInfo) => {
             const start = dayjs(selectInfo.start);
             const end = dayjs(selectInfo.end);

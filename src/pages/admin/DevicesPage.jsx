@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { getDevices, createDevice, updateDevice, deleteDevice } from "../../services/deviceService";
 import { Search, Plus, Edit2, Trash2, X, Check, AlertTriangle } from "lucide-react";
 import { toast } from "react-toastify";
+import { motion } from "framer-motion";
 import "react-toastify/dist/ReactToastify.css";
 import Pagination from "../../components/Pagination";
 const toastColors = {
@@ -261,7 +262,12 @@ setTimeout(() => {
   return (
     <div className="p-8 min-h-screen transition-colors bg-gray-50 dark:bg-gray-900">
       {/* ==================== HEADER ==================== */}
-      <div className="flex items-center gap-2 mb-8">
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="flex items-center gap-2 mb-8"
+      >
         <span>
           <svg
             width={32}
@@ -284,10 +290,14 @@ setTimeout(() => {
         <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
           Quản lý thiết bị
         </h1>
-      </div>
+      </motion.div>
 
       {/* ==================== FILTERS & ACTIONS ==================== */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 mb-7 border border-gray-100 dark:border-gray-700 transition">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 mb-7 border border-gray-100 dark:border-gray-700 transition"
+      >
         <div className="flex flex-col md:flex-row gap-4">
           {/* Ô tìm kiếm */}
           <div className="flex-1 relative">
@@ -329,35 +339,69 @@ setTimeout(() => {
             Thêm thiết bị
           </button>
         </div>
-      </div>
+      </motion.div>
 
       {/* ==================== STATS CARDS ==================== */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-7">
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          duration: 0.55,
+          ease: [0.18, 0.71, 0.35, 0.98],
+        }}
+        className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-7"
+      >
         {/* Tổng số thiết bị */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow transition">
-          <div className="text-gray-500 dark:text-gray-400 text-base mb-0.5">Tổng số thiết bị</div>
-          <div className="text-2xl font-bold text-gray-800 dark:text-white">{devices.length}</div>
-        </div>
-
+        <motion.div
+          initial={false}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow transition"
+        >
+          <div className="text-gray-500 dark:text-gray-400 text-base mb-0.5">
+            Tổng số thiết bị
+          </div>
+          <div className="text-2xl font-bold text-gray-800 dark:text-white">
+            {devices.length}
+          </div>
+        </motion.div>
         {/* Số thiết bị có sẵn */}
-        <div className="bg-green-50 dark:bg-green-900/20 rounded-2xl p-6 border border-green-200 dark:border-green-800 shadow transition">
-          <div className="text-green-700 dark:text-green-400 text-base mb-0.5">Có sẵn</div>
+        <motion.div
+          initial={false}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="bg-green-50 dark:bg-green-900/20 rounded-2xl p-6 border border-green-200 dark:border-green-800 shadow transition"
+        >
+          <div className="text-green-700 dark:text-green-400 text-base mb-0.5">
+            Có sẵn
+          </div>
           <div className="text-2xl font-bold text-green-700 dark:text-green-200">
             {getStatsByStatus("AVAILABLE")}
           </div>
-        </div>
-
+        </motion.div>
         {/* Số thiết bị đang bảo trì */}
-        <div className="bg-orange-50 dark:bg-orange-900/20 rounded-2xl p-6 border border-orange-200 dark:border-orange-800 shadow transition">
-          <div className="text-orange-700 dark:text-orange-400 text-base mb-0.5">Đang bảo trì</div>
+        <motion.div
+          initial={false}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="bg-orange-50 dark:bg-orange-900/20 rounded-2xl p-6 border border-orange-200 dark:border-orange-800 shadow transition"
+        >
+          <div className="text-orange-700 dark:text-orange-400 text-base mb-0.5">
+            Đang bảo trì
+          </div>
           <div className="text-2xl font-bold text-orange-700 dark:text-orange-100">
             {getStatsByStatus("UNDER_MAINTENANCE")}
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* ==================== TABLE - DANH SÁCH THIẾT BỊ ==================== */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden border border-gray-100 dark:border-gray-700 relative">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden border border-gray-100 dark:border-gray-700 relative"
+      >
         {/* Loading overlay */}
         {loading && (
           <div className="absolute inset-0 bg-white/80 dark:bg-gray-900/80 flex items-center justify-center z-10">
@@ -392,17 +436,32 @@ setTimeout(() => {
                   </td>
                 </tr>
               ) : (
-                // Danh sách thiết bị
                 paginatedDevices.map((device, i) => (
-                  <tr key={device.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition">
-                    <td className="p-4 font-semibold text-center">{(currentPage - 1) * ITEMS_PER_PAGE + i + 1}</td>
-                    <td className="p-4 font-medium text-gray-900 dark:text-white">{device.name}</td>
+                  <motion.tr
+                    key={device.id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: i * 0.03 }}
+                    className="hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                  >
+                    <td className="p-4 font-semibold text-center">
+                      {(currentPage - 1) * ITEMS_PER_PAGE + i + 1}
+                    </td>
+
+                    <td className="p-4 font-medium text-gray-900 dark:text-white">
+                      {device.name}
+                    </td>
+
                     <td className="p-4 text-gray-600 dark:text-gray-400">
                       {device.description || (
-                        <span className="text-gray-400 dark:text-gray-600 italic">Chưa có mô tả</span>
+                        <span className="text-gray-400 dark:text-gray-600 italic">
+                          Chưa có mô tả
+                        </span>
                       )}
                     </td>
+
                     <td className="p-4">{getStatusBadge(device.status)}</td>
+
                     <td className="p-4 text-center">
                       <div className="flex items-center justify-center gap-2">
                         {/* Nút chỉnh sửa */}
@@ -416,8 +475,8 @@ setTimeout(() => {
                         >
                           <Edit2 size={18} />
                         </button>
-                        
-                        {/* Nút xóa */}
+
+                        {/* Nút xoá */}
                         <button
                           onClick={() => handleOpenDeleteModal(device)}
                           disabled={loading}
@@ -430,26 +489,31 @@ setTimeout(() => {
                         </button>
                       </div>
                     </td>
-                  </tr>
+                  </motion.tr>
                 ))
               )}
             </tbody>
           </table>
         </div>
-      </div>
+      </motion.div>
 
       {/* 📄 Phân trang */}
       <Pagination
-  totalItems={filteredDevices.length}
-  pageSize={ITEMS_PER_PAGE}
-  currentPage={currentPage}
-  onPageChange={(page) => setCurrentPage(page)}
-/>
+        totalItems={filteredDevices.length}
+        pageSize={ITEMS_PER_PAGE}
+        currentPage={currentPage}
+        onPageChange={(page) => setCurrentPage(page)}
+      />
 
       {/* ==================== MODAL THÊM/SỬA THIẾT BỊ ==================== */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border border-gray-200 dark:border-gray-700 animate-slide-up">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.25 }}
+            className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border border-gray-200 dark:border-gray-700 animate-slide-up"
+          >
             {/* Modal Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -566,14 +630,19 @@ setTimeout(() => {
                 </button>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       )}
 
       {/* ==================== MODAL XÁC NHẬN XÓA THIẾT BỊ ==================== */}
       {isDeleteModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border border-gray-200 dark:border-gray-700 animate-slide-up">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.25 }}
+            className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border border-gray-200 dark:border-gray-700 animate-slide-up"
+          >
             {/* Modal Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-center gap-3">
@@ -657,7 +726,7 @@ setTimeout(() => {
                 )}
               </button>
             </div>
-          </div>
+          </motion.div>
         </div>
       )}
     </div>

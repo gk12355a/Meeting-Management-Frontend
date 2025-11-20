@@ -280,7 +280,7 @@ export default function UsersPage() {
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between mb-6"
+        className="flex items-center justify-between mb-8"
       >
         <div className="flex items-center gap-2">
           <FiUsers className="text-3xl text-blue-600 dark:text-blue-400" />
@@ -335,32 +335,56 @@ export default function UsersPage() {
         </button>
       </motion.div>
 
-      {/* Thống kê người dùng */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-7">
+      {/* Thống kê người dùng - motion cùng lúc */}
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          duration: 0.55,
+          ease: [0.18, 0.71, 0.35, 0.98],
+        }}
+        className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-7"
+      >
         {/* Tổng số người dùng */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow transition">
+        <motion.div
+          initial={false}
+          animate={false}
+          className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow transition"
+        >
           <div className="text-gray-500 dark:text-gray-400 text-base mb-0.5">
             Tổng số người dùng
           </div>
           <div className="text-2xl font-bold text-gray-800 dark:text-white">
             {users.length}
           </div>
-        </div>
+        </motion.div>
         {/* Số đang hoạt động */}
-        <div className="bg-green-50 dark:bg-green-900/20 rounded-2xl p-6 border border-green-200 dark:border-green-800 shadow transition">
-          <div className="text-green-700 dark:text-green-400 text-base mb-0.5">Đang hoạt động</div>
+        <motion.div
+          initial={false}
+          animate={false}
+          className="bg-green-50 dark:bg-green-900/20 rounded-2xl p-6 border border-green-200 dark:border-green-800 shadow transition"
+        >
+          <div className="text-green-700 dark:text-green-400 text-base mb-0.5">
+            Đang hoạt động
+          </div>
           <div className="text-2xl font-bold text-green-700 dark:text-green-200">
             {users.filter((u) => u.active).length}
           </div>
-        </div>
+        </motion.div>
         {/* Số vô hiệu hoá */}
-        <div className="bg-orange-50 dark:bg-orange-900/20 rounded-2xl p-6 border border-orange-200 dark:border-orange-800 shadow transition">
-          <div className="text-orange-700 dark:text-orange-400 text-base mb-0.5">Vô hiệu hoá</div>
+        <motion.div
+          initial={false}
+          animate={false}
+          className="bg-orange-50 dark:bg-orange-900/20 rounded-2xl p-6 border border-orange-200 dark:border-orange-800 shadow transition"
+        >
+          <div className="text-orange-700 dark:text-orange-400 text-base mb-0.5">
+            Vô hiệu hoá
+          </div>
           <div className="text-2xl font-bold text-orange-700 dark:text-orange-100">
             {users.filter((u) => !u.active).length}
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* TABLE - DANH SÁCH NGƯỜI DÙNG */}
       <motion.div
@@ -384,6 +408,7 @@ export default function UsersPage() {
                 <th className="p-4 text-base font-semibold w-16 text-center">STT</th>
                 <th className="p-4 text-base font-semibold">Họ và tên</th>
                 <th className="p-4 text-base font-semibold">Email</th>
+                <th className="p-4 text-base font-semibold">Vai trò</th>
                 <th className="p-4 text-base font-semibold text-center">Trạng thái</th>
                 <th className="p-4 text-base font-semibold text-center">Hành động</th>
               </tr>

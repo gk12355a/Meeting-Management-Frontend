@@ -1,10 +1,11 @@
 // src/pages/user/HistoryPage.jsx
 import React, { useEffect, useState } from "react";
-import { FiCalendar, FiMapPin, FiClock, FiUsers, FiX } from "react-icons/fi";
+import { FiCalendar, FiMapPin, FiClock } from "react-icons/fi";
 import { Spin, message } from "antd";
 import { getMyMeetings } from "../../services/meetingService";
 import dayjs from "dayjs";
 import "dayjs/locale/vi";
+import MeetingDetailModal from "../../components/user/MeetingDetailModal";
 dayjs.locale("vi");
 
 /* ===============================
@@ -201,112 +202,11 @@ const HistoryPage = () => {
       </div>
 
       {/* ================== MODAL ================== */}
-      {selectedMeeting && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-slate-800 p-7 rounded-2xl w-full max-w-lg shadow-2xl relative">
-
-            <button
-              onClick={() => setSelectedMeeting(null)}
-              className="absolute top-4 right-4 text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-            >
-              <FiX size={22} />
-            </button>
-
-            <h2 className="text-2xl font-bold mb-5 text-gray-900 dark:text-gray-100">
-              {selectedMeeting.title}
-            </h2>
-
-            <div className="space-y-4">
-              {/* Ngày */}
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-blue-100 dark:bg-slate-700">
-                  <FiCalendar className="text-blue-600 dark:text-blue-300" />
-                </div>
-                <div>
-                  <span className="font-medium dark:text-gray-100">Ngày</span>
-                  <p className="dark:text-gray-300">
-                    {dayjs(selectedMeeting.startTime).format("DD/MM/YYYY")}
-                  </p>
-                </div>
-              </div>
-
-              {/* Giờ */}
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-green-100 dark:bg-slate-700">
-                  <FiClock className="text-green-600 dark:text-green-300" />
-                </div>
-                <div>
-                  <span className="font-medium dark:text-gray-100">Giờ</span>
-                  <p className="dark:text-gray-300">
-                    {dayjs(selectedMeeting.startTime).format("HH:mm")} –{" "}
-                    {dayjs(selectedMeeting.endTime).format("HH:mm")}
-                  </p>
-                </div>
-              </div>
-
-              {/* Phòng */}
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-purple-100 dark:bg-slate-700">
-                  <FiMapPin className="text-purple-600 dark:text-purple-300" />
-                </div>
-                <div>
-                  <span className="font-medium dark:text-gray-100">Phòng</span>
-                  <p className="dark:text-gray-300">{selectedMeeting.room?.name}</p>
-                </div>
-              </div>
-
-              {/* Người tham gia */}
-              {selectedMeeting.participants && (
-                <div className="mt-4">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="p-2 rounded-xl bg-orange-100 dark:bg-slate-700">
-                      <FiUsers className="text-orange-600 dark:text-orange-300" />
-                    </div>
-                    <span className="font-medium dark:text-gray-100">
-                      Người tham gia
-                    </span>
-                  </div>
-
-                  <ul className="space-y-2">
-                    {selectedMeeting.participants.map((p) => {
-                      const statusColor = {
-                        PENDING: "text-yellow-600 dark:text-yellow-400",
-                        ACCEPTED: "text-green-600 dark:text-green-400",
-                        REJECTED: "text-red-600 dark:text-red-400",
-                        ATTENDED: "text-blue-600 dark:text-blue-400",
-                        CANCELLED: "text-gray-500 dark:text-gray-400",
-                      }[p.status] || "text-gray-600 dark:text-gray-300";
-
-                      const statusLabel = {
-                        PENDING: "Chờ xác nhận",
-                        ACCEPTED: "Đã chấp nhận",
-                        REJECTED: "Từ chối",
-                        ATTENDED: "Đã tham dự",
-                        CANCELLED: "Đã hủy",
-                      }[p.status] || p.status;
-
-                      return (
-                        <li
-                          key={p.id}
-                          className="flex items-center justify-between bg-gray-50 dark:bg-slate-700 p-2 rounded-lg"
-                        >
-                          <span className="text-gray-900 dark:text-gray-100">
-                            {p.fullName}
-                          </span>
-
-                          <span className={`text-sm font-medium ${statusColor}`}>
-                            {statusLabel}
-                          </span>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      <MeetingDetailModal
+        open={!!selectedMeeting}
+        onClose={() => setSelectedMeeting(null)}
+        meeting={selectedMeeting}
+      />
 
     </div>
   );
