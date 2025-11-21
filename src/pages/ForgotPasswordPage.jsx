@@ -8,7 +8,7 @@ export default function ForgotPasswordPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState(null); // Hiển thị thông báo
 
-  // 🎯 Gửi yêu cầu quên mật khẩu
+  // Gửi yêu cầu quên mật khẩu
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -28,7 +28,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-blue-100 via-blue-50 to-indigo-100">
-      {/* 🧑‍💻 Hình minh họa bên trái */}
+      {/* Hình minh họa bên trái */}
       <div className="hidden md:flex w-1/2 items-center justify-center p-10">
         <motion.img
           src="https://cdn.dribbble.com/users/1162077/screenshots/3848914/programmer.gif"
@@ -40,7 +40,7 @@ export default function ForgotPasswordPage() {
         />
       </div>
 
-      {/* 📋 Form bên phải */}
+      {/* Form bên phải */}
       <div className="flex w-full md:w-1/2 items-center justify-center p-6">
         <motion.div
           className="bg-white shadow-2xl p-10 rounded-3xl w-full max-w-md border border-blue-100"

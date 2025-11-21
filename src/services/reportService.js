@@ -23,7 +23,6 @@ export const getVisitorReport = (date) => {
   });
 };
 
-// ------------------ MỚI ------------------
 // Tải Excel từ backend
 export const downloadRoomUsageExcel = (from, to) =>
   api.get("/reports/room-usage", {

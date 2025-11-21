@@ -41,7 +41,7 @@ export default function App() {
   return (
     <>
       <Routes>
-        {/* === 1️⃣ PUBLIC ROUTES === */}
+        {/* === PUBLIC ROUTES === */}
         <Route element={<PublicLayout />}>
           <Route
             path="/login"
@@ -72,7 +72,7 @@ export default function App() {
           <Route path="/reset-password" element={<ResetPasswordPage />} />
         </Route>
 
-        {/* === 2️⃣ ADMIN ROUTES === */}
+        {/* === ADMIN ROUTES === */}
         <Route
           path="/admin"
           element={
@@ -92,7 +92,7 @@ export default function App() {
           <Route path="change-password" element={<ChangePasswordPageAdmin />} />
         </Route>
 
-        {/* === 3️⃣ USER ROUTES === */}
+        {/* === USER ROUTES === */}
         <Route
           path="/user"
           element={
@@ -112,7 +112,7 @@ export default function App() {
           <Route path="change-password" element={<ChangePasswordPageUser />} />
         </Route>
 
-        {/* === 4️⃣ ROOT REDIRECT === */}
+        {/* === ROOT REDIRECT === */}
         <Route
           path="/"
           element={
@@ -127,7 +127,7 @@ export default function App() {
           }
         />
 
-        {/* === 5️⃣ CATCH-ALL (404) === */}
+        {/* === CATCH-ALL (404) === */}
         <Route
           path="*"
           element={
@@ -145,7 +145,7 @@ export default function App() {
         />
       </Routes>
 
-      {/* 🚀 ToastContainer thêm vào đây, không ảnh hưởng route */}
+      {/* ToastContainer */}
       <ToastContainer
         position="top-right"
         autoClose={2000}

@@ -14,7 +14,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  // 🟢 Fix lỗi toast bị "nuốt" sau logout
+  // Fix lỗi toast bị "nuốt" sau logout
   useEffect(() => {
     setUsername("");
     setPassword("");

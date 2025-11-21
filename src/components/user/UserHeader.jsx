@@ -37,7 +37,7 @@ const NotificationItem = ({ notification, onMarkRead }) => {
     }
   };
 
-  // === 1. SỬA LOGIC CLICK (QUAN TRỌNG) ===
+  // === 1. LOGIC CLICK ===
   const handleNavigate = () => {
     // Luôn đánh dấu là đã đọc khi click vào nội dung
     if (!notification.read) {
@@ -83,7 +83,7 @@ const NotificationItem = ({ notification, onMarkRead }) => {
         </div>
       )}
 
-      {/* === 2. SỬA LOGIC HIỂN THỊ TRẠNG THÁI (QUAN TRỌNG) === */}
+      {/* === 2. LOGIC HIỂN THỊ TRẠNG THÁI === */}
       {/* Hiển thị "Đã xem" nếu không có nút hành động VÀ đã đọc (Bỏ điều kiện check meetingId) */}
       {(!showActions && notification.read) && (
          <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 font-medium">

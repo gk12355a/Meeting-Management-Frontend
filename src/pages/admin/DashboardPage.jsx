@@ -203,7 +203,7 @@ const CustomRoomTooltip = ({ active, payload }) => {
     }
   };
 
-  // === Thêm: Hàm xử lý khi click sự kiện trên FullCalendar (MỞ POPUP CHI TIẾT CUỘC HỌP) ===
+  // === Hàm xử lý khi click sự kiện trên FullCalendar (MỞ POPUP CHI TIẾT CUỘC HỌP) ===
   // Khi click event trên FullCalendar, ta lấy đúng thông tin meeting và mở popup chi tiết
   const handleCalendarEventClick = (info) => {
     // info.event.id là id của event, cần lấy meeting từ danh sách theo id này
@@ -478,11 +478,11 @@ const CustomRoomTooltip = ({ active, payload }) => {
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDarkMode ? "#334155" : "#e5e7eb"} />
                 <XAxis dataKey="name" stroke={isDarkMode ? "#cbd5e1" : "#475569"} />
                 <YAxis
-  stroke={isDarkMode ? "#cbd5e1" : "#475569"}
-  allowDecimals={false}
-  tickCount={5}
-  domain={[0, 'dataMax + 1']}
-/>
+                stroke={isDarkMode ? "#cbd5e1" : "#475569"}
+                allowDecimals={false}
+                tickCount={5}
+                domain={[0, 'dataMax + 1']}
+                />
                 <Tooltip contentStyle={{
                   backgroundColor: isDarkMode ? "#1e293b" : "#ffffff",
                   color: isDarkMode ? "#f8fafc" : "#1e293b",
@@ -702,7 +702,6 @@ const CustomRoomTooltip = ({ active, payload }) => {
             </div>
           )}
         </Modal>
-        
       </>
     )}
   </div>

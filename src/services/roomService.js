@@ -17,7 +17,7 @@ export const getAllRooms = () => {
 };
 
 /**
- * 🆕 LẤY DANH SÁCH CUỘC HỌP CỦA MỘT PHÒNG
+ * LẤY DANH SÁCH CUỘC HỌP CỦA MỘT PHÒNG
  * API: GET /api/v1/rooms/{id}/meetings
  * Trả về: [{ id, title, startTime, endTime, organizerName }]
  */

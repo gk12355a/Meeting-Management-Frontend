@@ -146,9 +146,6 @@ function isBusinessTime(date) {
   const d = dayjs(date);
   // Quá khứ
   if (d.isBefore(dayjs(), "minute")) return false;
-  // Ngày trong tuần: 0 (CN), 6 (T7)
-  const day = d.day();
-  if (day === 0 || day === 6) return false;
   // Giờ hành chính: >= 08:00 và <= 18:00
   const hour = d.hour();
   const minute = d.minute();
@@ -415,60 +412,49 @@ const [quickBooking, setQuickBooking] = useState({ open: false, start: null, end
 
   // ---- GENERATE NON-BUSINESS HOURS SLOTS (for day/week view vertical grid coloring) ----
   function getNonBusinessHourBackgroundEvents(viewStart, viewEnd) {
-    const slots = [];
-    let d = dayjs(viewStart).startOf("day");
-    const until = dayjs(viewEnd).startOf("day");
+  const slots = [];
+  let d = dayjs(viewStart).startOf("day");
+  const until = dayjs(viewEnd).startOf("day");
 
-    while (d.isBefore(until)) {
-      const dayIdx = d.day();
-      // Nếu là thứ 7 (6), CN (0) -> disable TẤT CẢ GIỜ trong ngày (0h-24h)
-      if (dayIdx === 0 || dayIdx === 6) {
-        slots.push({
-          start: d.hour(0).minute(0).second(0).format("YYYY-MM-DDTHH:mm:ss"),
-          end: d.hour(23).minute(59).second(59).format("YYYY-MM-DDTHH:mm:ss"),
-          display: "background",
-          classNames: ["fc-business-blocked"],
-        });
-      } else {
-        // Slot trước giờ hành chính (0h -> 8h)
-        if (WORK_HOUR_START > 0) {
-          slots.push({
-            start: d.hour(0).minute(0).second(0).format("YYYY-MM-DDTHH:mm:ss"),
-            end: d.hour(WORK_HOUR_START).minute(0).second(0).format("YYYY-MM-DDTHH:mm:ss"),
-            display: "background",
-            classNames: ["fc-business-blocked"],
-          });
-        }
-        // Slot sau giờ hành chính (18h -> 24h)
-        if (WORK_HOUR_END < 24) {
-          slots.push({
-            start: d.hour(WORK_HOUR_END).minute(0).second(0).format("YYYY-MM-DDTHH:mm:ss"),
-            end: d.hour(23).minute(59).second(59).format("YYYY-MM-DDTHH:mm:ss"),
-            display: "background",
-            classNames: ["fc-business-blocked"],
-          });
-        }
-      }
-      d = d.add(1, "day");
-    }
-    // Thêm các slot ở quá khứ
-    const now = dayjs();
-    let dPast = dayjs(viewStart).startOf("day");
-    while (dPast.isSameOrBefore(now, "day")) {
-      let endOfPast =
-        dPast.isSame(now, "day")
-          ? now.format("YYYY-MM-DDTHH:mm:ss")
-          : dPast.hour(23).minute(59).second(59).format("YYYY-MM-DDTHH:mm:ss");
-      slots.push({
-        start: dPast.hour(0).minute(0).second(0).format("YYYY-MM-DDTHH:mm:ss"),
-        end: endOfPast,
-        display: "background",
-        classNames: ["fc-nonbusiness"],
-      });
-      dPast = dPast.add(1, "day");
-    }
-    return slots;
+  while (d.isBefore(until)) {
+    // Block thời gian trước giờ hành chính
+    slots.push({
+      start: d.hour(0).minute(0).second(0).format(),
+      end: d.hour(WORK_HOUR_START).minute(0).second(0).format(),
+      display: "background",
+      classNames: ["fc-nonbusiness"],
+    });
+
+    // Block thời gian sau giờ hành chính
+    slots.push({
+      start: d.hour(WORK_HOUR_END).minute(0).second(0).format(),
+      end: d.hour(23).minute(59).second(59).format(),
+      display: "background",
+      classNames: ["fc-nonbusiness"],
+    });
+
+    d = d.add(1, "day");
   }
+
+  // Block quá khứ
+  const now = dayjs();
+  let dPast = dayjs(viewStart).startOf("day");
+  while (dPast.isSameOrBefore(now, "day")) {
+    let endOfPast =
+      dPast.isSame(now, "day")
+        ? now.format()
+        : dPast.hour(23).minute(59).second(59).format();
+    slots.push({
+      start: dPast.hour(0).minute(0).second(0).format(),
+      end: endOfPast,
+      display: "background",
+      classNames: ["fc-nonbusiness"], // block quá khứ
+    });
+    dPast = dPast.add(1, "day");
+  }
+
+  return slots;
+}
 
   // RED LINE NOW-INDICATOR
   useEffect(() => {
@@ -651,7 +637,7 @@ const [quickBooking, setQuickBooking] = useState({ open: false, start: null, end
             }}
 
             businessHours={{
-              daysOfWeek: [1, 2, 3, 4, 5],
+              daysOfWeek: [0 , 1 , 2, 3, 4, 5, 6],
               startTime: '08:00',
               endTime: '18:00',
             }}

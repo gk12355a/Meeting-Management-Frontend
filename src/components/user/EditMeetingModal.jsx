@@ -69,9 +69,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
   const watchedDuration = Form.useWatch("duration", form);
   const watchedRoomId = Form.useWatch("roomId", form); // Theo dõi phòng đã chọn
 
-  /* ===================================================
-                    LOAD ROOMS
-  ==================================================== */
+  /* ====== LOAD ROOMS ====== */
   useEffect(() => {
     if (!open || !meetingDetail) return;
 
@@ -86,9 +84,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
     fetchData();
   }, [open, meetingDetail]);
 
-  /* ===================================================
-            THEO DÕI PHÒNG ĐÃ CHỌN (VIP)
-  ==================================================== */
+  /* ===== THEO DÕI PHÒNG ĐÃ CHỌN (VIP) ====== */
   useEffect(() => {
     // Ưu tiên lấy từ form (khi user đổi phòng), nếu không thì lấy từ meetingDetail
     const currentRoomId = watchedRoomId || meetingDetail?.room?.id;
@@ -101,9 +97,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
     }
   }, [watchedRoomId, rooms, meetingDetail]);
 
-  /* ===================================================
-          POPULATE FORM WITH MEETING DETAILS
-  ==================================================== */
+  /* ====== POPULATE FORM WITH MEETING DETAILS ====== */
   useEffect(() => {
     if (!meetingDetail || !open) return;
 
@@ -146,9 +140,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
     }
   }, [meetingDetail, open, form, user]);
 
-  /* ===================================================
-          LOAD DEVICES (giữ nguyên + merge current devices)
-  ==================================================== */
+  /* ===== LOAD DEVICES (giữ nguyên + merge current devices) ====== */
   const loadDevicesForTime = async (date, time, duration) => {
     if (!date || !time || !duration) {
       setAvailableDevices([]);
@@ -200,9 +192,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
     return () => clearTimeout(t);
   }, [watchedDate, watchedTime, watchedDuration]);
 
-  /* ===================================================
-              SEARCH USERS
-  ==================================================== */
+  /* ===== SEARCH USERS ====== */
   const handleSearchUsers = (query) => {
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
 
@@ -224,18 +214,14 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
     }, 500);
   };
 
-  /* ===================================================
-              VALIDATE BUSINESS TIME
-  ==================================================== */
+  /* ===== VALIDATE BUSINESS TIME ====== */
   const validateBusinessTime = (value) => {
     if (!value) return false;
     const totalMin = value.hour() * 60 + value.minute();
     return totalMin >= 480 && totalMin <= 1080; // 08:00 - 18:00
   };
 
-  /* ===================================================
-                  UPDATE MEETING
-  ==================================================== */
+  /* ===== UPDATE MEETING ======= */
   const handleUpdate = async (values) => {
     try {
       setLoading(true);
@@ -305,7 +291,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
         // Xử lý Họp đơn lẻ
         const res = await updateMeeting(meetingDetail.id, payload);
 
-        // === 🎯 CẬP NHẬT LOGIC PHẢN HỒI (THEO YÊU CẦU BACKEND) ===
+        // LOGIC PHẢN HỒI
         if (res.data?.status === "PENDING_APPROVAL") {
           toast.info("Đã cập nhật cuộc họp. Do thay đổi phòng/giờ sang khu vực cần duyệt, yêu cầu của bạn đang chờ Admin phê duyệt lại.", { autoClose: 5000 });
         } else {
@@ -539,7 +525,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
              />
           </Form.Item>
 
-          {/* RECURRING OPTIONS - giữ nguyên */}
+          {/* RECURRING OPTIONS */}
           {meetingDetail?.recurrenceSeriesId && (
             <>
               <Form.Item name="isRecurring" valuePropName="checked" className="mb-1">

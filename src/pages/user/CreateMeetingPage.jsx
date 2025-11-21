@@ -13,7 +13,7 @@ import {
   Modal,
   Alert,
   Tag,
-  Spin, // <-- THÊM Spin để loading khi search
+  Spin, 
 } from "antd";
 import { FiPlusCircle, FiUsers, FiInfo } from "react-icons/fi";
 import dayjs from "dayjs";
@@ -129,7 +129,7 @@ const CreateMeetingPage = () => {
     return () => clearTimeout(t);
   }, [watchedDate, watchedTime, watchedDuration, watchedCustomHour, form]);
 
-  // SEARCH USERS - ĐÃ ĐƯỢC CẢI THIỆN GIỐNG HỆT 2 MODAL
+  // SEARCH USERS 
   const handleSearchUsers = (query) => {
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
 
@@ -281,7 +281,7 @@ const CreateMeetingPage = () => {
                     <Option value={120}>2 giờ</Option>
                   </Select>
                 </Form.Item>
-                <Form.Item name="customHour" label="Khác (h)" style={{ width: 80 }}>
+                <Form.Item name="customHour" label="Khác (giờ)" style={{ width: 80 }}>
                   <Input type="number" step={0.5} min={0.5} max={8}
                     onChange={() => form.setFieldsValue({ duration: undefined })}
                     className="dark:bg-gray-700 dark:text-white dark:border-gray-600" />
@@ -343,7 +343,7 @@ const CreateMeetingPage = () => {
 
             <Divider className="dark:border-gray-700" />
 
-            {/* === NGƯỜI THAM GIA NỘI BỘ - GIỐNG HỆT 2 MODAL === */}
+            {/* === NGƯỜI THAM GIA NỘI BỘ  === */}
             <Form.Item
               name="participantIds"
               label={
