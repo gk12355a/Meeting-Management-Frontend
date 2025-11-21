@@ -9,7 +9,7 @@ import MeetingDetailModal from "../../components/user/MeetingDetailModal";
 dayjs.locale("vi");
 
 /* ===============================
-   🎨 Màu LIGHT MODE
+   Màu LIGHT MODE
 ================================ */
 const roomColors = [
   { bg: "#FFE0E9", border: "#FF99B2" },
@@ -21,7 +21,7 @@ const roomColors = [
 ];
 
 /* ===============================
-   🌙 Màu DARK MODE (đậm hơn)
+   Màu DARK MODE (đậm hơn)
 ================================ */
 const roomColorsDark = [
   { bg: "#3B2631", border: "#FF7FA5" },
@@ -33,7 +33,7 @@ const roomColorsDark = [
 ];
 
 /* ===============================
-   🎨 getRoomColor xử lý theme
+   getRoomColor xử lý theme
 ================================ */
 const getRoomColor = (roomName, isDark) => {
   const palette = isDark ? roomColorsDark : roomColors;
@@ -56,7 +56,7 @@ const HistoryPage = () => {
   const [loading, setLoading] = useState(true);
 
   /* ======================================================
-     🌙 Theo dõi theme real-time (KHÔNG còn lỗi màu)
+     Theo dõi theme real-time (KHÔNG còn lỗi màu)
   ======================================================== */
   const [isDark, setIsDark] = useState(
     document.documentElement.classList.contains("dark")
