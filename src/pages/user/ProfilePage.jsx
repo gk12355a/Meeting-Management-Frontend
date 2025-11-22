@@ -90,7 +90,7 @@ const ProfilePage = () => {
               <Form.Item
                 label={
                   <span className="flex items-center gap-2 font-medium text-gray-700 dark:text-gray-300">
-                    <FiMail /> Email (Tên đăng nhập)
+                    <FiMail /> Email
                   </span>
                 }
                 name="username"
