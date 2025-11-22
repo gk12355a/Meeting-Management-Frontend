@@ -233,7 +233,7 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, start, end, onSuccess })
 
       await createMeeting(payload);
 
-      toast.success(`🎉 Đã đặt phòng ${prefilledRoom?.name} thành công!`);
+      toast.success(`Đã đặt phòng ${prefilledRoom?.name} thành công!`);
       form.resetFields();
       setClockValue(dayjs().hour(9).minute(0));
       setAvailableDevices([]);
@@ -241,8 +241,37 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, start, end, onSuccess })
       onSuccess?.();
       onCancel();
     } catch (err) {
-      toast.error(err?.response?.data?.message || "Không thể tạo cuộc họp!");
-    } finally {
+  console.error("ERROR:", err?.response?.data);
+
+  const backendMsg =
+    err?.response?.data?.error ||
+    err?.response?.data?.message ||
+    "Không thể tạo cuộc họp!";
+
+  const raw = backendMsg.toLowerCase();
+  let msg = "Không thể tạo cuộc họp!";
+
+  // === 1️⃣ Phòng họp trùng lịch ===
+  if (raw.includes("phòng") && raw.includes("đã bị đặt")) {
+    msg = "Phòng họp đã được đặt trong khung giờ này";
+  }
+
+  // === 2️⃣ Người tham dự trùng lịch ===
+  else if (raw.includes("người tham dự") && raw.includes("trùng lịch")) {
+    msg = "Người tham gia bị trùng lịch trong khung giờ này";
+  }
+
+  // fallback chung nếu BE trả lỗi khác
+  else {
+    msg = `⚠️ ${backendMsg}`;
+  }
+
+  toast.error(msg, {
+    position: "top-right",
+    autoClose: 3500,
+  });
+}
+ finally {
       setLoading(false);
     }
   };
