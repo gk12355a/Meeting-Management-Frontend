@@ -569,7 +569,7 @@ const [quickBooking, setQuickBooking] = useState({ open: false, start: null, end
     return () => document.head.removeChild(style);
   }, []);
 
-  // =========== KÉO THẢ CHỈ CHO KÉO TRONG CÙNG 1 NGÀY ===============
+  // ===== KÉO THẢ CHỈ CHO KÉO TRONG CÙNG 1 NGÀY =====
   function isSameDay(d1, d2) {
     return (
       dayjs(d1).year() === dayjs(d2).year() &&
@@ -577,7 +577,7 @@ const [quickBooking, setQuickBooking] = useState({ open: false, start: null, end
       dayjs(d1).date() === dayjs(d2).date()
     );
   }
-  // ---------- RENDER ----------
+  // RENDER 
   return (
     <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-500">
       <ToastContainer position="top-right" autoClose={2500} />
@@ -625,7 +625,6 @@ const [quickBooking, setQuickBooking] = useState({ open: false, start: null, end
             locale="vi"
             selectable={true}
             selectMirror={true}
-            // ---------
             select={handleDateSelect}
             
             selectAllow={function(selectInfo) {
@@ -633,7 +632,7 @@ const [quickBooking, setQuickBooking] = useState({ open: false, start: null, end
               const end = dayjs(selectInfo.end);
               const validStart = isBusinessTime(start);
               const validEnd = isBusinessTime(end);
-              // THÊM: chỉ cho phép chọn nếu trong cùng 1 ngày
+              // chỉ cho phép chọn nếu trong cùng 1 ngày
               const sameDay = isSameDay(start, end.subtract(1, "minute")); // subtract 1 minute to avoid end 00:00 of next day
               return validStart && validEnd && sameDay;
             }}
