@@ -89,12 +89,18 @@ const QRCheckInModal = ({ open, onClose, checkinCode, meetingTitle }) => {
             className="bg-white p-6 rounded-2xl shadow-lg border-4 border-gray-100 dark:border-gray-700"
           >
             {checkinCode ? (
-              <QRCodeSVG
+                <QRCodeSVG
                 value={checkinCode}
                 size={240}
                 level="H"
                 includeMargin={true}
-              />
+                imageSettings={{
+                    src: "/logo-meetflow.png",
+                    height: 40,
+                    width: 60,
+                    excavate: true,
+                }}
+                />
             ) : (
               <div className="w-[240px] h-[240px] flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-lg">
                 <span className="text-gray-400 text-sm">Không có mã check-in</span>
