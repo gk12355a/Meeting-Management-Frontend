@@ -36,6 +36,17 @@ dayjs.extend(utc);
 const { TextArea } = Input;
 const { Option } = Select;
 
+// Thêm constant DAYS_OF_WEEK TRƯỚC COMPONENT
+const DAYS_OF_WEEK = [
+  { value: "MONDAY", label: "Thứ 2" },
+  { value: "TUESDAY", label: "Thứ 3" },
+  { value: "WEDNESDAY", label: "Thứ 4" },
+  { value: "THURSDAY", label: "Thứ 5" },
+  { value: "FRIDAY", label: "Thứ 6" },
+  { value: "SATURDAY", label: "Thứ 7" },
+  { value: "SUNDAY", label: "Chủ nhật" },
+];
+
 const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [rooms, setRooms] = useState([]);
@@ -46,9 +57,10 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isRecurring, setIsRecurring] = useState(false);
-
-  // State cho phòng VIP
   const [selectedRoom, setSelectedRoom] = useState(null);
+
+  // ← THÊM 2 DÒNG NÀY
+  const [selectedDays, setSelectedDays] = useState([]);
 
   // TIME PICKER STATE
   const [clockOpen, setClockOpen] = useState(false);
@@ -63,6 +75,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
   const watchedTime = Form.useWatch("time", form);
   const watchedDuration = Form.useWatch("duration", form);
   const watchedRoomId = Form.useWatch("roomId", form);
+  const watchedFrequency = Form.useWatch("frequency", form); // ← THÊM DÒNG NÀY
 
   /* ===================================================
                     LOAD ROOMS
@@ -86,9 +99,8 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
     if (watchedRoomId) {
       const room = rooms.find((r) => r.id === watchedRoomId);
       setSelectedRoom(room);
-    } else
-      setSelectedRoom(null);
-    }, [watchedRoomId, rooms]);
+    } else setSelectedRoom(null);
+  }, [watchedRoomId, rooms]);
 
   /* ===== SET INITIAL FORM VALUES =====*/
   useEffect(() => {
@@ -98,6 +110,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
       if (duration <= 0) duration = 60;
 
       setIsRecurring(false);
+      setSelectedDays([]); // ← THÊM dòng này
       setClockValue(start);
       setSelectedRoom(null);
 
@@ -114,6 +127,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
           isRecurring: false,
           frequency: "DAILY",
           repeatUntil: undefined,
+          daysOfWeek: [], // ← THÊM dòng này
           description: "",
         });
       }, 100);
@@ -210,6 +224,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
         .hour(time.hour())
         .minute(time.minute());
 
+      // Cập nhật payload: Nếu weekly thì thêm daysOfWeek nếu có
       const payload = {
         title: values.title.trim(),
         description: values.description || "",
@@ -227,6 +242,10 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
                 frequency: values.frequency,
                 interval: 1,
                 repeatUntil: dayjs(values.repeatUntil).format("YYYY-MM-DD"),
+                // ← THÊM ĐOẠN NÀY
+                ...(values.frequency === "WEEKLY" && values.daysOfWeek?.length > 0
+                  ? { daysOfWeek: values.daysOfWeek }
+                  : {}),
               }
             : null,
         onBehalfOfUserId: null,
@@ -256,11 +275,13 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
     }
   };
 
+  // Cập nhật hàm handleCancel: reset selectedDays
   const handleCancel = () => {
     form.resetFields();
     setClockValue(dayjs());
     setAvailableDevices([]);
     setIsRecurring(false);
+    setSelectedDays([]); // ← Thêm dòng này
     setSelectedRoom(null);
     onCancel();
   };
@@ -536,6 +557,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
             </Checkbox>
           </Form.Item>
 
+          {/* Recurring UI */}
           {isRecurring && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Form.Item
@@ -543,7 +565,16 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
                 label="Tần suất"
                 rules={[{ required: true, message: "Chọn tần suất" }]}
               >
-                <Select className="dark:bg-gray-700 dark:text-white dark:border-gray-600">
+                <Select
+                  className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                  onChange={(value) => {
+                    // Reset daysOfWeek khi đổi frequency
+                    if (value !== "WEEKLY") {
+                      setSelectedDays([]);
+                      form.setFieldsValue({ daysOfWeek: [] });
+                    }
+                  }}
+                >
                   <Option value="DAILY">Hằng ngày</Option>
                   <Option value="WEEKLY">Hằng tuần</Option>
                   <Option value="MONTHLY">Hằng tháng</Option>
@@ -564,6 +595,46 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
                 />
               </Form.Item>
             </div>
+          )}
+
+          {/* ← ============ THÊM TOÀN BỘ ĐOẠN NÀY VÀO NGAY SAU {isRecurring && (...)} ============ */}
+          {isRecurring && watchedFrequency === "WEEKLY" && (
+            <Form.Item
+              name="daysOfWeek"
+              label="Chọn các thứ trong tuần"
+              rules={[
+                {
+                  validator: (_, value) => {
+                    if (!value || value.length === 0) {
+                      return Promise.reject("Vui lòng chọn ít nhất 1 thứ");
+                    }
+                    return Promise.resolve();
+                  },
+                },
+              ]}
+              className="mt-4"
+            >
+              <Checkbox.Group
+                value={selectedDays}
+                onChange={(checkedValues) => {
+                  setSelectedDays(checkedValues);
+                  form.setFieldsValue({ daysOfWeek: checkedValues });
+                }}
+                className="w-full"
+              >
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {DAYS_OF_WEEK.map((day) => (
+                    <Checkbox
+                      key={day.value}
+                      value={day.value}
+                      className="dark:text-gray-200"
+                    >
+                      {day.label}
+                    </Checkbox>
+                  ))}
+                </div>
+              </Checkbox.Group>
+            </Form.Item>
           )}
 
           {/* DESCRIPTION */}
