@@ -19,6 +19,7 @@ import {
   message,
 } from "antd";
 import { FiCalendar, FiPlusCircle, FiUsers, FiEdit, FiAlertTriangle } from "react-icons/fi";
+import { QrCode } from "lucide-react";
 import dayjs from "dayjs";
 import "dayjs/locale/vi";
 import utc from "dayjs/plugin/utc";
@@ -31,6 +32,7 @@ import EditMeetingModal from "../../components/user/EditMeetingModal";
 import DeleteMeetingModal from "../../components/user/DeleteMeetingModal";
 import QuickBookingModal from "../../components/user/QuickBookingModal";
 import MeetingDetailModal from "../../components/user/MeetingDetailModal";
+import QRCheckInModal from "../../components/user/QRCheckInModal";
 
 dayjs.locale("vi");
 dayjs.extend(utc);
@@ -233,6 +235,9 @@ const [quickBooking, setQuickBooking] = useState({ open: false, start: null, end
   // Thêm state mới cho modal sửa/xoá
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  // State mới cho QR Check-in Modal
+  const [isQRModalOpen, setIsQRModalOpen] = useState(false);
 
   // State form data
   const { user } = useAuth();
@@ -697,32 +702,52 @@ const [quickBooking, setQuickBooking] = useState({ open: false, start: null, end
         {/* Footer với buttons Sửa/Hủy nếu là người tổ chức */}
         {meetingDetail && meetingDetail.organizer?.id === user?.id ? (
           <div className="flex justify-end gap-2">
-              <Button
-                type="primary"
-                icon={<FiEdit />}
-                onClick={() => {
-                  setIsEditModalOpen(true);
-                  setIsModalOpen(false);
-                }}
-                className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500"
-              >
-                Sửa
-              </Button>
-              <Button
-                danger
-                icon={<FiAlertTriangle />}
-                onClick={() => {
-                  setIsDeleteModalOpen(true);
-                  setIsModalOpen(false);
-                }}
-              >
-                Hủy họp
-              </Button>
-            </div>
+            {/* Nút Hiển thị QR Check-in */}
+            <Button
+              type="default"
+              icon={<QrCode size={16} />}
+              onClick={() => {
+                setIsQRModalOpen(true);
+                setIsModalOpen(false);
+              }}
+              className="bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/30 dark:hover:bg-purple-800/40 border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300"
+            >
+              QR Check-in
+            </Button>
+            <Button
+              type="primary"
+              icon={<FiEdit />}
+              onClick={() => {
+                setIsEditModalOpen(true);
+                setIsModalOpen(false);
+              }}
+              className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500"
+            >
+              Sửa
+            </Button>
+            <Button
+              danger
+              icon={<FiAlertTriangle />}
+              onClick={() => {
+                setIsDeleteModalOpen(true);
+                setIsModalOpen(false);
+              }}
+            >
+              Hủy họp
+            </Button>
+          </div>
         ) : (
           <Button onClick={() => setIsModalOpen(false)}>Đóng</Button>
         )}
       </MeetingDetailModal>
+
+      {/* Modal hiển thị QR Check-in */}
+      <QRCheckInModal
+        open={isQRModalOpen}
+        onClose={() => setIsQRModalOpen(false)}
+        checkinCode={meetingDetail?.checkinCode}
+        meetingTitle={meetingDetail?.title}
+      />
     </div>
   );
 };
