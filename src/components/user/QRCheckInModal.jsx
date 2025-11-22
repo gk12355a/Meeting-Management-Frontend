@@ -64,7 +64,7 @@ const QRCheckInModal = ({ open, onClose, checkinCode, meetingTitle }) => {
       open={open}
       onCancel={onClose}
       footer={null}
-      width={480}
+      width={800}
       centered
       title={
         <div className="text-center">
@@ -78,95 +78,116 @@ const QRCheckInModal = ({ open, onClose, checkinCode, meetingTitle }) => {
       }
       className="qr-checkin-modal"
     >
-      <div className="flex flex-col items-center py-6">
-        {/* QR Code Container */}
-        <div 
-          ref={qrRef}
-          className="bg-white p-6 rounded-2xl shadow-lg mb-6 border-4 border-gray-100 dark:border-gray-700"
-        >
-          {checkinCode ? (
-            <QRCodeSVG
-              value={checkinCode}
-              size={280}
-              level="H"
-              includeMargin={true}
-              imageSettings={{
-                src: "/logo.png", // Bạn có thể thêm logo vào giữa QR
-                height: 40,
-                width: 40,
-                excavate: true,
-              }}
-            />
-          ) : (
-            <div className="w-[280px] h-[280px] flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-lg">
-              <span className="text-gray-400">Không có mã check-in</span>
+        {/* Divider */}
+          <div className="border-t border-gray-200 dark:border-slate-600 my-5"></div>
+      {/* Main Content: 2 columns layout */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        {/* Left Column: QR Code */}
+        <div className="flex flex-col items-center justify-center">
+          <div 
+            ref={qrRef}
+            className="bg-white p-6 rounded-2xl shadow-lg border-4 border-gray-100 dark:border-gray-700"
+          >
+            {checkinCode ? (
+              <QRCodeSVG
+                value={checkinCode}
+                size={240}
+                level="H"
+                includeMargin={true}
+              />
+            ) : (
+              <div className="w-[240px] h-[240px] flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-lg">
+                <span className="text-gray-400 text-sm">Không có mã check-in</span>
+              </div>
+            )}
+          </div>
+
+          {/* Meeting Title under QR */}
+          {meetingTitle && (
+            <div className="text-center mt-4 mb-2">
+              <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
+                {meetingTitle}
+              </h4>
             </div>
           )}
-        </div>
 
-        {/* Meeting Title */}
-        {meetingTitle && (
-          <div className="text-center mb-4">
-            <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
-              {meetingTitle}
-            </h4>
-          </div>
-        )}
-
-        {/* Check-in Code Display */}
-        <div className="w-full bg-gray-50 dark:bg-gray-800 rounded-xl p-4 mb-6 border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-                Mã check-in:
-              </p>
-              <p className="text-sm font-mono font-semibold text-gray-800 dark:text-gray-100 break-all">
-                {checkinCode || "N/A"}
-              </p>
-            </div>
-            <Button
-              icon={<FiCopy />}
-              onClick={handleCopyCode}
-              className="ml-3"
-              disabled={!checkinCode}
-            >
-              Sao chép
-            </Button>
-          </div>
-        </div>
-
-        {/* Instructions */}
-        <div className="w-full bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 mb-6 border border-blue-200 dark:border-blue-800">
-          <h5 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2">
-            Hướng dẫn sử dụng:
-          </h5>
-          <ul className="text-xs text-blue-700 dark:text-blue-400 space-y-1 list-disc list-inside">
-            <li>Hiển thị mã QR này cho người tham gia quét</li>
-            <li>Người tham gia có thể quét mã bằng ứng dụng camera hoặc QR reader</li>
-            <li>Sau khi quét, họ sẽ được check-in vào cuộc họp</li>
-            <li>Bạn cũng có thể chia sẻ mã check-in trực tiếp</li>
-          </ul>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex gap-3 w-full">
+          {/* Download Button under QR */}
           <Button
             type="primary"
             icon={<FiDownload />}
             onClick={handleDownloadQR}
             disabled={!checkinCode}
-            className="flex-1 h-10 bg-blue-600 hover:bg-blue-700"
+            className="mt-2 bg-blue-600 hover:bg-blue-700 max-w-[280px]"
           >
             Tải xuống QR
           </Button>
-          <Button
-            onClick={onClose}
-            className="flex-1 h-10"
-          >
-            Đóng
-          </Button>
+        </div>
+
+        {/* Right Column: Info & Instructions */}
+        <div className="flex flex-col gap-4">
+          {/* Check-in Code Display */}
+          <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3.5 border border-gray-200 dark:border-gray-700">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 font-semibold">
+              Mã check-in:
+            </p>
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-xs font-mono font-semibold text-gray-800 dark:text-gray-100 break-all flex-1">
+                {checkinCode || "N/A"}
+              </p>
+              <Button
+                icon={<FiCopy />}
+                onClick={handleCopyCode}
+                disabled={!checkinCode}
+                size="small"
+                className="!px-1 !py-0.5 !min-w-0 !h-7 text-xs"
+                style={{ borderRadius: 5, fontSize: 12, height: 22, lineHeight: "18px" }}
+              />
+            </div>
+          </div>
+
+          {/* Instructions */}
+          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800">
+            <h5 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-3 flex items-center gap-2">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Hướng dẫn sử dụng
+            </h5>
+            <ul className="text-xs text-blue-700 dark:text-blue-400 space-y-2">
+              <li className="flex items-start gap-2">
+                <span className="text-blue-600 dark:text-blue-400 mt-0.5">•</span>
+                <span><strong>Thời gian check-in:</strong> Từ 30 phút trước đến khi cuộc họp bắt đầu</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-blue-600 dark:text-blue-400 mt-0.5">•</span>
+                <span><strong>Cách sử dụng:</strong> Hiển thị mã QR cho người tham gia quét bằng camera điện thoại hoặc ứng dụng QR reader</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-blue-600 dark:text-blue-400 mt-0.5">•</span>
+                <span><strong>Chia sẻ mã:</strong> Bạn có thể sao chép và gửi mã check-in cho người tham gia để họ nhập thủ công</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-red-600 dark:text-red-400 mt-0.5">⚠</span>
+                <span className="text-red-700 dark:text-red-400"><strong>Lưu ý:</strong> Nếu không có người check-in trong thời gian quy định, cuộc họp sẽ tự động bị hủy</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* Tips */}
+          <div className="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-3 border border-amber-200 dark:border-amber-800">
+            <p className="text-xs text-amber-800 dark:text-amber-300">
+              <strong>💡 Mẹo:</strong> In hoặc tải mã QR để dán tại cửa phòng họp, giúp việc check-in nhanh chóng hơn!
+            </p>
+          </div>
         </div>
       </div>
+
+      {/* Footer: Close Button */}
+      {/* <div className="flex justify-end pt-4 border-t border-gray-200 dark:border-gray-700">
+        <Button onClick={onClose} size="large">
+          Đóng
+        </Button>
+      </div> */}
 
       <style jsx global>{`
         .qr-checkin-modal .ant-modal-header {
