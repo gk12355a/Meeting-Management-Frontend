@@ -201,7 +201,7 @@ const CreateMeetingPage = () => {
       if (res.data?.status === "PENDING_APPROVAL") {
         toast.info("📝 Yêu cầu đặt phòng đã được gửi và đang chờ Admin phê duyệt.");
       } else {
-        toast.success("🎉 Tạo cuộc họp thành công!");
+        toast.success("Tạo cuộc họp thành công!");
       }
 
       form.resetFields();
