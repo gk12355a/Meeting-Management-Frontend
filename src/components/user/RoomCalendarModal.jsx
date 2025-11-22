@@ -112,15 +112,23 @@ const RoomCalendarModal = ({ open, onClose, room, onSelectSlot }) => {
           }}
           events={events}
           selectable={true}
+          editable={true}
           selectMirror={true}
           dayHeaderClassNames={isDark ? "bg-slate-800 text-gray-200" : ""}
           slotLabelClassNames={isDark ? "bg-slate-800 text-gray-300" : ""}
           slotLaneClassNames={isDark ? "bg-slate-900 border-slate-700" : ""}
           viewClassNames={isDark ? "bg-slate-900 text-gray-100" : ""}
+          nowIndicator={true}
           nowIndicatorClassNames="bg-red-500"
           selectAllow={(selectInfo) => {
             const start = dayjs(selectInfo.start);
             const end = dayjs(selectInfo.end);
+
+            // Chặn ngày quá khứ
+            if (start.isBefore(dayjs().startOf("day"))) return false;
+
+            // Chặn giờ quá khứ trong hôm nay
+            if (start.isSame(dayjs(), "day") && start.isBefore(dayjs())) return false;
 
             const day = start.day();
             if (day === 0 || day === 6) return false;
