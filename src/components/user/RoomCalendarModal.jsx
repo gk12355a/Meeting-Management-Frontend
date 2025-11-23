@@ -104,9 +104,9 @@ const RoomCalendarModal = ({ open, onClose, room, onSelectSlot }) => {
           slotMinTime="08:00:00"
           slotMaxTime="18:00:00"
           allDaySlot={false}
-          weekends={false}
+          weekends={true}
           businessHours={{
-            daysOfWeek: [1, 2, 3, 4, 5],
+            daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
             startTime: "08:00",
             endTime: "18:00",
           }}
@@ -130,8 +130,8 @@ const RoomCalendarModal = ({ open, onClose, room, onSelectSlot }) => {
             // Chặn giờ quá khứ trong hôm nay
             if (start.isSame(dayjs(), "day") && start.isBefore(dayjs())) return false;
 
-            const day = start.day();
-            if (day === 0 || day === 6) return false;
+            // const day = start.day();
+            // if (day === 0 || day === 6) return false;
 
             const minsStart = start.hour() * 60 + start.minute();
             const minsEnd = end.hour() * 60 + end.minute();
