@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Form, Input, Button, Card, Spin, message } from "antd";
+import { Form, Input, Button, Card, Spin, message, Tag } from "antd";
 import { FiUser, FiSave, FiMail, FiShield } from "react-icons/fi";
 import { useAuth } from "../../context/AuthContext";
 import { getMyProfile, updateMyProfile } from "../../services/userService";
+import { getGoogleAuthorizeUrl } from "../../services/googleService";   // ✅ THÊM
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -18,6 +19,17 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const { user } = useAuth();
+
+  // ⭐ THÊM HÀM KẾT NỐI GOOGLE
+  const handleConnectGoogle = async () => {
+    try {
+      const res = await getGoogleAuthorizeUrl();
+      const url = res.data.url;
+      window.location.href = url; // Redirect → Google OAuth
+    } catch {
+      toast.error("Không thể kết nối Google Calendar.");
+    }
+  };
 
   useEffect(() => {
     if (!user) {
@@ -61,7 +73,7 @@ const ProfilePage = () => {
     <div className="p-6 min-h-screen bg-white dark:bg-[#0f172a]">
       <ToastContainer position="top-right" autoClose={2500} />
 
-      {/* Header giữ nguyên */}
+      {/* Header */}
       <div className="flex items-center gap-3 mb-6 pb-3 border-b border-gray-300 dark:border-gray-700">
         <div className="p-3 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-500 shadow-md">
           <FiUser className="text-white text-2xl" />
@@ -72,7 +84,7 @@ const ProfilePage = () => {
         </div>
       </div>
 
-      {/* FORM đẹp hơn */}
+      {/* FORM */}
       <div className="max-w-lg mx-auto">
         <Card className="rounded-2xl shadow-xl bg-white dark:bg-[#1e293b] dark:text-gray-100 border-none p-6">
           {loading ? (
@@ -80,12 +92,8 @@ const ProfilePage = () => {
               <Spin size="large" />
             </div>
           ) : (
-            <Form
-              form={form}
-              layout="vertical"
-              onFinish={handleSave}
-              className="space-y-4"
-            >
+            <Form form={form} layout="vertical" onFinish={handleSave} className="space-y-4">
+
               {/* EMAIL */}
               <Form.Item
                 label={
@@ -143,7 +151,20 @@ const ProfilePage = () => {
                 />
               </Form.Item>
 
-              {/* BUTTON */}
+              {/* GOOGLE CALENDAR */}
+              <Form.Item label="Google Calendar">
+                {user?.isGoogleLinked ? (
+                  <Tag color="green" className="px-3 py-1 text-base">
+                    ✔ Đã liên kết Google Calendar
+                  </Tag>
+                ) : (
+                  <Button type="primary" danger onClick={handleConnectGoogle}>
+                    Kết nối Google Calendar
+                  </Button>
+                )}
+              </Form.Item>
+
+              {/* SAVE BUTTON */}
               <Form.Item className="pt-4">
                 <Button
                   type="primary"
@@ -162,6 +183,7 @@ const ProfilePage = () => {
                   Lưu thay đổi
                 </Button>
               </Form.Item>
+
             </Form>
           )}
         </Card>
