@@ -1,10 +1,10 @@
 // src/pages/user/RoomsPage.jsx
 import React, { useEffect, useState } from "react";
 import { FiSearch, FiTool, FiMonitor, FiUsers } from "react-icons/fi";
-import { Spin, message, Tag, Tooltip } from "antd"; // <-- THÊM Tag, Tooltip
+import { Spin, message, Tag, Tooltip } from "antd"; // Đã có Tag, Tooltip
 import { getAllRooms } from "../../services/roomService";
 import { HiBuildingOffice } from "react-icons/hi2";
-import { FaCrown } from "react-icons/fa"; // <-- Icon VIP (cần cài react-icons/fa)
+import { FaCrown } from "react-icons/fa";
 import BookRoomModal from "../../components/user/BookRoomModal";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -22,7 +22,10 @@ const RoomsPage = () => {
     start: null,
     end: null,
   });
-  const [calendarModal, setCalendarModal] = useState({ open: false, room: null });
+  const [calendarModal, setCalendarModal] = useState({
+    open: false,
+    room: null,
+  });
 
   // Load rooms
   useEffect(() => {
@@ -59,27 +62,30 @@ const RoomsPage = () => {
   };
 
   useEffect(() => {
-  const filtered = rooms.filter((room) => {
-    const matchesSearch = room.name
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
+    const filtered = rooms.filter((room) => {
+      const matchesSearch = room.name
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
 
-    let matchStatus = true;
+      let matchStatus = true;
 
-    // --- Bộ lọc trạng thái ---
-    if (filterStatus !== "Tất cả") {
-      if (filterStatus === "AVAILABLE" || filterStatus === "UNDER_MAINTENANCE") {
-        matchStatus = room.status === filterStatus;
-      } else if (filterStatus === "VIP") {
-        matchStatus = room.requiresApproval === true;
+      // --- Bộ lọc trạng thái ---
+      if (filterStatus !== "Tất cả") {
+        if (
+          filterStatus === "AVAILABLE" ||
+          filterStatus === "UNDER_MAINTENANCE"
+        ) {
+          matchStatus = room.status === filterStatus;
+        } else if (filterStatus === "VIP") {
+          matchStatus = room.requiresApproval === true;
+        }
       }
-    }
 
-    return matchesSearch && matchStatus;
-  });
+      return matchesSearch && matchStatus;
+    });
 
-  setProcessedRooms(filtered);
-}, [searchTerm, filterStatus, rooms]);
+    setProcessedRooms(filtered);
+  }, [searchTerm, filterStatus, rooms]);
 
   return (
     <div className="p-6 min-h-screen bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
@@ -140,8 +146,7 @@ const RoomsPage = () => {
             processedRooms.map((room) => {
               const statusDisplay = getStatusDisplay(room.status);
               const isAvailable = room.status === "AVAILABLE";
-              // Kiểm tra xem phòng có cần duyệt không
-              const isVip = room.requiresApproval; 
+              const isVip = room.requiresApproval;
 
               return (
                 <div
@@ -160,10 +165,12 @@ const RoomsPage = () => {
                       <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
                         {room.name}
                       </h2>
-                      {/* === HIỂN THỊ BADGE VIP === */}
                       {isVip && (
                         <Tooltip title="Phòng này cần Admin phê duyệt">
-                          <Tag color="gold" className="flex items-center gap-1 ml-2 px-2 py-0.5 text-xs font-bold border-none shadow-sm">
+                          <Tag
+                            color="gold"
+                            className="flex items-center gap-1 ml-2 px-2 py-0.5 text-xs font-bold border-none shadow-sm"
+                          >
                             <FaCrown size={10} /> VIP
                           </Tag>
                         </Tooltip>
@@ -181,12 +188,39 @@ const RoomsPage = () => {
                     <FiUsers size={14} /> Sức chứa: {room.capacity} người
                   </p>
 
-                  <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300 mt-1">
-                    <FiMonitor size={14} /> Thiết bị:{" "}
-                    {room.fixedDevices?.length > 0
-                      ? room.fixedDevices.join(", ")
-                      : "Không có"}
-                  </p>
+                  {/* === CHỈNH SỬA PHẦN NÀY ĐỂ XỬ LÝ TRÀN THIẾT BỊ === */}
+                  <div className="flex items-start gap-2 text-gray-700 dark:text-gray-300 mt-2">
+                    <FiMonitor size={14} className="mt-1.5 flex-shrink-0" />
+                    <div className="flex flex-wrap gap-1 items-center">
+                      <span className="mr-1">Thiết bị:</span>
+                      {room.fixedDevices && room.fixedDevices.length > 0 ? (
+                        <>
+                          {/* Chỉ hiện tối đa 3 thiết bị */}
+                          {room.fixedDevices.slice(0, 3).map((device, idx) => (
+                            <Tag
+                              key={idx}
+                              className="mr-0 text-xs border-blue-200 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 dark:border-blue-800"
+                            >
+                              {device}
+                            </Tag>
+                          ))}
+                          {/* Nếu > 3 thì hiện +X */}
+                          {room.fixedDevices.length > 3 && (
+                            <Tooltip
+                              title={room.fixedDevices.slice(3).join(", ")}
+                            >
+                              <Tag className="mr-0 text-xs cursor-pointer border-gray-300 bg-gray-100">
+                                +{room.fixedDevices.length - 3}
+                              </Tag>
+                            </Tooltip>
+                          )}
+                        </>
+                      ) : (
+                        <span>Không có</span>
+                      )}
+                    </div>
+                  </div>
+                  {/* ================================================= */}
 
                   <div className="flex items-center justify-between mt-3">
                     <p className="text-gray-700 dark:text-gray-300 text-sm">
@@ -197,7 +231,6 @@ const RoomsPage = () => {
                     </p>
                   </div>
 
-                  {/* Lưu ý cho phòng VIP */}
                   {isVip && isAvailable && (
                     <p className="text-xs text-yellow-600 dark:text-yellow-500 mt-2 italic">
                       * Yêu cầu phê duyệt từ Admin
@@ -210,8 +243,8 @@ const RoomsPage = () => {
                       onClick={() => setCalendarModal({ open: true, room })}
                       className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                         isAvailable
-                          ? isVip 
-                            ? "bg-yellow-600 hover:bg-yellow-700 text-white shadow-sm" // Nút màu vàng cho VIP
+                          ? isVip
+                            ? "bg-yellow-600 hover:bg-yellow-700 text-white shadow-sm"
                             : "bg-green-600 hover:bg-green-700 text-white shadow-sm"
                           : "bg-gray-400 text-gray-700 cursor-not-allowed"
                       }`}
@@ -239,9 +272,7 @@ const RoomsPage = () => {
         prefilledRoom={bookingModal.room}
         start={bookingModal.start}
         end={bookingModal.end}
-        onSuccess={() => {
-           // Có thể thêm logic reload danh sách phòng nếu cần, nhưng thường là không cần thiết vì trạng thái phòng không đổi ngay lập tức
-        }}
+        onSuccess={() => {}}
       />
 
       <RoomCalendarModal
