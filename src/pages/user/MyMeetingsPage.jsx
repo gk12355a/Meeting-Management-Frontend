@@ -19,6 +19,7 @@ import {
   message,
 } from "antd";
 import { FiCalendar, FiPlusCircle, FiUsers, FiEdit, FiAlertTriangle } from "react-icons/fi";
+import { QrCode } from "lucide-react";
 import dayjs from "dayjs";
 import "dayjs/locale/vi";
 import utc from "dayjs/plugin/utc";
@@ -31,6 +32,7 @@ import EditMeetingModal from "../../components/user/EditMeetingModal";
 import DeleteMeetingModal from "../../components/user/DeleteMeetingModal";
 import QuickBookingModal from "../../components/user/QuickBookingModal";
 import MeetingDetailModal from "../../components/user/MeetingDetailModal";
+import QRCheckInModal from "../../components/user/QRCheckInModal";
 
 dayjs.locale("vi");
 dayjs.extend(utc);
@@ -234,6 +236,9 @@ const [quickBooking, setQuickBooking] = useState({ open: false, start: null, end
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
+  // State mới cho QR Check-in Modal
+  const [isQRModalOpen, setIsQRModalOpen] = useState(false);
+
   // State form data
   const { user } = useAuth();
 
@@ -412,49 +417,49 @@ const [quickBooking, setQuickBooking] = useState({ open: false, start: null, end
 
   // ---- GENERATE NON-BUSINESS HOURS SLOTS (for day/week view vertical grid coloring) ----
   function getNonBusinessHourBackgroundEvents(viewStart, viewEnd) {
-  const slots = [];
-  let d = dayjs(viewStart).startOf("day");
-  const until = dayjs(viewEnd).startOf("day");
+    const slots = [];
+    let d = dayjs(viewStart).startOf("day");
+    const until = dayjs(viewEnd).startOf("day");
 
-  while (d.isBefore(until)) {
-    // Block thời gian trước giờ hành chính
-    slots.push({
-      start: d.hour(0).minute(0).second(0).format(),
-      end: d.hour(WORK_HOUR_START).minute(0).second(0).format(),
-      display: "background",
-      classNames: ["fc-nonbusiness"],
-    });
+    while (d.isBefore(until)) {
+      // Block thời gian trước giờ hành chính
+      slots.push({
+        start: d.hour(0).minute(0).second(0).format(),
+        end: d.hour(WORK_HOUR_START).minute(0).second(0).format(),
+        display: "background",
+        classNames: ["fc-nonbusiness"],
+      });
 
-    // Block thời gian sau giờ hành chính
-    slots.push({
-      start: d.hour(WORK_HOUR_END).minute(0).second(0).format(),
-      end: d.hour(23).minute(59).second(59).format(),
-      display: "background",
-      classNames: ["fc-nonbusiness"],
-    });
+      // Block thời gian sau giờ hành chính
+      slots.push({
+        start: d.hour(WORK_HOUR_END).minute(0).second(0).format(),
+        end: d.hour(23).minute(59).second(59).format(),
+        display: "background",
+        classNames: ["fc-nonbusiness"],
+      });
 
-    d = d.add(1, "day");
+      d = d.add(1, "day");
+    }
+
+    // Block quá khứ
+    const now = dayjs();
+    let dPast = dayjs(viewStart).startOf("day");
+    while (dPast.isSameOrBefore(now, "day")) {
+      let endOfPast =
+        dPast.isSame(now, "day")
+          ? now.format()
+          : dPast.hour(23).minute(59).second(59).format();
+      slots.push({
+        start: dPast.hour(0).minute(0).second(0).format(),
+        end: endOfPast,
+        display: "background",
+        classNames: ["fc-nonbusiness"], // block quá khứ
+      });
+      dPast = dPast.add(1, "day");
+    }
+
+    return slots;
   }
-
-  // Block quá khứ
-  const now = dayjs();
-  let dPast = dayjs(viewStart).startOf("day");
-  while (dPast.isSameOrBefore(now, "day")) {
-    let endOfPast =
-      dPast.isSame(now, "day")
-        ? now.format()
-        : dPast.hour(23).minute(59).second(59).format();
-    slots.push({
-      start: dPast.hour(0).minute(0).second(0).format(),
-      end: endOfPast,
-      display: "background",
-      classNames: ["fc-nonbusiness"], // block quá khứ
-    });
-    dPast = dPast.add(1, "day");
-  }
-
-  return slots;
-}
 
   // RED LINE NOW-INDICATOR
   useEffect(() => {
@@ -569,7 +574,15 @@ const [quickBooking, setQuickBooking] = useState({ open: false, start: null, end
     return () => document.head.removeChild(style);
   }, []);
 
-  // ---------- RENDER ----------
+  // ===== KÉO THẢ CHỈ CHO KÉO TRONG CÙNG 1 NGÀY =====
+  function isSameDay(d1, d2) {
+    return (
+      dayjs(d1).year() === dayjs(d2).year() &&
+      dayjs(d1).month() === dayjs(d2).month() &&
+      dayjs(d1).date() === dayjs(d2).date()
+    );
+  }
+  // RENDER 
   return (
     <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-500">
       <ToastContainer position="top-right" autoClose={2500} />
@@ -617,7 +630,6 @@ const [quickBooking, setQuickBooking] = useState({ open: false, start: null, end
             locale="vi"
             selectable={true}
             selectMirror={true}
-            // ---------
             select={handleDateSelect}
             
             selectAllow={function(selectInfo) {
@@ -625,7 +637,9 @@ const [quickBooking, setQuickBooking] = useState({ open: false, start: null, end
               const end = dayjs(selectInfo.end);
               const validStart = isBusinessTime(start);
               const validEnd = isBusinessTime(end);
-              return validStart && validEnd;
+              // chỉ cho phép chọn nếu trong cùng 1 ngày
+              const sameDay = isSameDay(start, end.subtract(1, "minute")); // subtract 1 minute to avoid end 00:00 of next day
+              return validStart && validEnd && sameDay;
             }}
 
             eventAllow={function(dropInfo, draggedEvent) {
@@ -633,7 +647,9 @@ const [quickBooking, setQuickBooking] = useState({ open: false, start: null, end
               const end = dayjs(dropInfo.end);
               const validStart = isBusinessTime(start);
               const validEnd = isBusinessTime(end);
-              return validStart && validEnd;
+              // CHỈ CHO KÉO THẢ TRONG 1 NGÀY
+              const sameDay = isSameDay(start, end.subtract(1, "minute"));
+              return validStart && validEnd && sameDay;
             }}
 
             businessHours={{
@@ -686,32 +702,52 @@ const [quickBooking, setQuickBooking] = useState({ open: false, start: null, end
         {/* Footer với buttons Sửa/Hủy nếu là người tổ chức */}
         {meetingDetail && meetingDetail.organizer?.id === user?.id ? (
           <div className="flex justify-end gap-2">
-              <Button
-                type="primary"
-                icon={<FiEdit />}
-                onClick={() => {
-                  setIsEditModalOpen(true);
-                  setIsModalOpen(false);
-                }}
-                className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500"
-              >
-                Sửa
-              </Button>
-              <Button
-                danger
-                icon={<FiAlertTriangle />}
-                onClick={() => {
-                  setIsDeleteModalOpen(true);
-                  setIsModalOpen(false);
-                }}
-              >
-                Hủy họp
-              </Button>
-            </div>
+            {/* Nút Hiển thị QR Check-in */}
+            <Button
+              type="default"
+              icon={<QrCode size={16} />}
+              onClick={() => {
+                setIsQRModalOpen(true);
+                setIsModalOpen(false);
+              }}
+              className="bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/30 dark:hover:bg-purple-800/40 border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300"
+            >
+              QR Check-in
+            </Button>
+            <Button
+              type="primary"
+              icon={<FiEdit />}
+              onClick={() => {
+                setIsEditModalOpen(true);
+                setIsModalOpen(false);
+              }}
+              className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500"
+            >
+              Sửa
+            </Button>
+            <Button
+              danger
+              icon={<FiAlertTriangle />}
+              onClick={() => {
+                setIsDeleteModalOpen(true);
+                setIsModalOpen(false);
+              }}
+            >
+              Hủy họp
+            </Button>
+          </div>
         ) : (
           <Button onClick={() => setIsModalOpen(false)}>Đóng</Button>
         )}
       </MeetingDetailModal>
+
+      {/* Modal hiển thị QR Check-in */}
+      <QRCheckInModal
+        open={isQRModalOpen}
+        onClose={() => setIsQRModalOpen(false)}
+        checkinCode={meetingDetail?.checkinCode}
+        meetingTitle={meetingDetail?.title}
+      />
     </div>
   );
 };

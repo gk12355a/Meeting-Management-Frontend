@@ -201,7 +201,7 @@ const CreateMeetingPage = () => {
       if (res.data?.status === "PENDING_APPROVAL") {
         toast.info("📝 Yêu cầu đặt phòng đã được gửi và đang chờ Admin phê duyệt.");
       } else {
-        toast.success("🎉 Tạo cuộc họp thành công!");
+        toast.success("Tạo cuộc họp thành công!");
       }
 
       form.resetFields();
@@ -211,9 +211,37 @@ const CreateMeetingPage = () => {
       setAvailableDevices([]);
 
     } catch (err) {
-      const msg = err?.response?.data?.message || "Không thể tạo cuộc họp!";
-      toast.error(msg);
-    } finally {
+  console.error("ERROR:", err?.response?.data);
+
+  const backendMsg =
+    err?.response?.data?.error ||
+    err?.response?.data?.message ||
+    "Không thể tạo cuộc họp!";
+
+  const raw = backendMsg.toLowerCase();
+  let msg = "Không thể tạo cuộc họp!";
+
+  // === 1️⃣ Phòng họp trùng lịch ===
+  if (raw.includes("phòng") && raw.includes("đã bị đặt")) {
+    msg = "Phòng họp đã được đặt trong khung giờ này";
+  }
+
+  // === 2️⃣ Người tham dự trùng lịch ===
+  else if (raw.includes("người tham dự") && raw.includes("trùng lịch")) {
+    msg = "Người tham gia bị trùng lịch trong khung giờ này";
+  }
+
+  // fallback chung nếu BE trả lỗi khác
+  else {
+    msg = `⚠️ ${backendMsg}`;
+  }
+
+  toast.error(msg, {
+    position: "top-right",
+    autoClose: 3500,
+  });
+}
+ finally {
       setLoading(false);
     }
   };
@@ -246,7 +274,7 @@ const CreateMeetingPage = () => {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <Form.Item name="date" label="Ngày họp" rules={[{ required: true }]}>
                 <DatePicker className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600" format="DD/MM/YYYY"
-                  disabledDate={(d) => !d || d < dayjs().startOf("day") || d.day() === 0 || d.day() === 6} />
+                  disabledDate={(d) => !d || d < dayjs().startOf("day")} />
               </Form.Item>
 
               <Form.Item name="time" label="Giờ bắt đầu" rules={[{ required: true }]}>

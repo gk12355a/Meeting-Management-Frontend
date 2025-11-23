@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Form, Input, Button, Card, Spin, message } from "antd";
+import { Form, Input, Button, Card, Spin, message, Tag } from "antd";
 import { FiUser, FiSave, FiMail, FiShield } from "react-icons/fi";
 import { useAuth } from "../../context/AuthContext";
 import { getMyProfile, updateMyProfile } from "../../services/userService";
+import { getGoogleAuthorizeUrl } from "../../services/googleService";   // ✅ THÊM
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -18,6 +19,17 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const { user } = useAuth();
+
+  // ⭐ THÊM HÀM KẾT NỐI GOOGLE
+  const handleConnectGoogle = async () => {
+    try {
+      const res = await getGoogleAuthorizeUrl();
+      const url = res.data.url;
+      window.location.href = url; // Redirect → Google OAuth
+    } catch {
+      toast.error("Không thể kết nối Google Calendar.");
+    }
+  };
 
   useEffect(() => {
     if (!user) {
@@ -36,7 +48,7 @@ const ProfilePage = () => {
         form.setFieldsValue({
           fullName: res.data.fullName,
         });
-      } catch (err) {
+      } catch {
         message.error("Không thể tải thông tin cá nhân.");
       } finally {
         setLoading(false);
@@ -48,10 +60,9 @@ const ProfilePage = () => {
   const handleSave = async (values) => {
     setSaving(true);
     try {
-      const payload = { fullName: values.fullName };
-      await updateMyProfile(payload);
+      await updateMyProfile({ fullName: values.fullName });
       toast.success("🎉 Cập nhật thông tin thành công!");
-    } catch (err) {
+    } catch {
       toast.error("Cập nhật thất bại. Vui lòng thử lại.");
     } finally {
       setSaving(false);
@@ -61,6 +72,7 @@ const ProfilePage = () => {
   return (
     <div className="p-6 min-h-screen bg-white dark:bg-[#0f172a]">
       <ToastContainer position="top-right" autoClose={2500} />
+
       {/* Header */}
       <div className="flex items-center gap-3 mb-6 pb-3 border-b border-gray-300 dark:border-gray-700">
         <div className="p-3 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-500 shadow-md">
@@ -72,66 +84,88 @@ const ProfilePage = () => {
         </div>
       </div>
 
+      {/* FORM */}
       <div className="max-w-lg mx-auto">
-        <Card className="shadow-lg bg-white dark:bg-[#1e293b] dark:text-gray-100 border-none">
+        <Card className="rounded-2xl shadow-xl bg-white dark:bg-[#1e293b] dark:text-gray-100 border-none p-6">
           {loading ? (
             <div className="flex justify-center items-center h-40">
               <Spin size="large" />
             </div>
           ) : (
-            <Form
-              form={form}
-              layout="vertical"
-              onFinish={handleSave}
-              className="dark:text-gray-100"
-            >
+            <Form form={form} layout="vertical" onFinish={handleSave} className="space-y-4">
+
+              {/* EMAIL */}
               <Form.Item
                 label={
-                  <span>
-                    <FiMail className="inline mr-2" />
-                    Email (Tên đăng nhập)
+                  <span className="flex items-center gap-2 font-medium text-gray-700 dark:text-gray-300">
+                    <FiMail /> Email
                   </span>
                 }
                 name="username"
-                className="dark:[&_.ant-form-item-label>label]:text-gray-300"
               >
                 <Input
                   disabled
-                  className="dark:bg-gray-700 dark:text-gray-400 dark:border-gray-600"
+                  className="
+                    rounded-xl py-2 bg-gray-50 border-gray-300 
+                    dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600
+                  "
                 />
               </Form.Item>
+
+              {/* ROLE */}
               <Form.Item
                 label={
-                  <span>
-                    <FiShield className="inline mr-2" />
-                    Vai trò
+                  <span className="flex items-center gap-2 font-medium text-gray-700 dark:text-gray-300">
+                    <FiShield /> Vai trò
                   </span>
                 }
                 name="role"
-                className="dark:[&_.ant-form-item-label>label]:text-gray-300"
               >
                 <Input
                   disabled
-                  className="dark:bg-gray-700 dark:text-gray-400 dark:border-gray-600"
+                  className="
+                    rounded-xl py-2 bg-gray-50 border-gray-300 
+                    dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600
+                  "
                 />
               </Form.Item>
+
+              {/* FULL NAME */}
               <Form.Item
                 label={
-                  <span>
-                    <FiUser className="inline mr-2" />
-                    Họ và tên
+                  <span className="flex items-center gap-2 font-medium text-gray-700 dark:text-gray-300">
+                    <FiUser /> Họ và tên
                   </span>
                 }
                 name="fullName"
                 rules={[{ required: true, message: "Vui lòng nhập họ và tên!" }]}
-                className="dark:[&_.ant-form-item-label>label]:text-gray-300"
               >
                 <Input
                   placeholder="Nhập họ và tên đầy đủ của bạn"
-                  className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                  className="
+                    rounded-xl py-2 bg-white border-gray-300
+                    focus:ring-2 focus:ring-blue-500 focus:border-blue-500 
+                    dark:bg-gray-700 dark:text-white dark:border-gray-600 
+                    dark:focus:ring-blue-400 dark:focus:border-blue-400
+                  "
                 />
               </Form.Item>
-              <Form.Item className="mt-6">
+
+              {/* GOOGLE CALENDAR */}
+              <Form.Item label="Google Calendar">
+                {user?.isGoogleLinked ? (
+                  <Tag color="green" className="px-3 py-1 text-base">
+                    ✔ Đã liên kết Google Calendar
+                  </Tag>
+                ) : (
+                  <Button type="primary" danger onClick={handleConnectGoogle}>
+                    Kết nối Google Calendar
+                  </Button>
+                )}
+              </Form.Item>
+
+              {/* SAVE BUTTON */}
+              <Form.Item className="pt-4">
                 <Button
                   type="primary"
                   htmlType="submit"
@@ -139,11 +173,17 @@ const ProfilePage = () => {
                   icon={<FiSave />}
                   size="large"
                   block
-                  className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
+                  className="
+                    rounded-xl py-2 text-lg font-semibold 
+                    bg-gradient-to-r from-blue-600 to-indigo-600 
+                    hover:opacity-90 shadow-md
+                    dark:from-blue-500 dark:to-indigo-500
+                  "
                 >
                   Lưu thay đổi
                 </Button>
               </Form.Item>
+
             </Form>
           )}
         </Card>

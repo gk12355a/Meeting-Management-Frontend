@@ -104,26 +104,34 @@ const RoomCalendarModal = ({ open, onClose, room, onSelectSlot }) => {
           slotMinTime="08:00:00"
           slotMaxTime="18:00:00"
           allDaySlot={false}
-          weekends={false}
+          weekends={true}
           businessHours={{
-            daysOfWeek: [1, 2, 3, 4, 5],
+            daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
             startTime: "08:00",
             endTime: "18:00",
           }}
           events={events}
           selectable={true}
+          editable={true}
           selectMirror={true}
           dayHeaderClassNames={isDark ? "bg-slate-800 text-gray-200" : ""}
           slotLabelClassNames={isDark ? "bg-slate-800 text-gray-300" : ""}
           slotLaneClassNames={isDark ? "bg-slate-900 border-slate-700" : ""}
           viewClassNames={isDark ? "bg-slate-900 text-gray-100" : ""}
+          nowIndicator={true}
           nowIndicatorClassNames="bg-red-500"
           selectAllow={(selectInfo) => {
             const start = dayjs(selectInfo.start);
             const end = dayjs(selectInfo.end);
 
-            const day = start.day();
-            if (day === 0 || day === 6) return false;
+            // Chặn ngày quá khứ
+            if (start.isBefore(dayjs().startOf("day"))) return false;
+
+            // Chặn giờ quá khứ trong hôm nay
+            if (start.isSame(dayjs(), "day") && start.isBefore(dayjs())) return false;
+
+            // const day = start.day();
+            // if (day === 0 || day === 6) return false;
 
             const minsStart = start.hour() * 60 + start.minute();
             const minsEnd = end.hour() * 60 + end.minute();
