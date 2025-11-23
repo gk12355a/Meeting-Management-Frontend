@@ -35,6 +35,9 @@ import DevicePage from "./pages/user/DevicePage";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import AdminOnlyRoute from "./routes/AdminOnlyRoute";
 
+// ===== Google OAuth Callback Page =====
+import GoogleCallbackPage from "./pages/GoogleCallbackPage";
+
 export default function App() {
   const { isAuthenticated, isAdmin } = useAuth();
 
@@ -111,6 +114,9 @@ export default function App() {
           <Route path="profile" element={<ProfilePage />} />
           <Route path="change-password" element={<ChangePasswordPageUser />} />
         </Route>
+
+        {/* === GOOGLE OAUTH CALLBACK === */}
+        <Route path="/google-callback" element={<GoogleCallbackPage />} />
 
         {/* === ROOT REDIRECT === */}
         <Route
