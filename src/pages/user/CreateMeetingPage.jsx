@@ -274,7 +274,7 @@ const CreateMeetingPage = () => {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <Form.Item name="date" label="Ngày họp" rules={[{ required: true }]}>
                 <DatePicker className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600" format="DD/MM/YYYY"
-                  disabledDate={(d) => !d || d < dayjs().startOf("day") || d.day() === 0 || d.day() === 6} />
+                  disabledDate={(d) => !d || d < dayjs().startOf("day")} />
               </Form.Item>
 
               <Form.Item name="time" label="Giờ bắt đầu" rules={[{ required: true }]}>
