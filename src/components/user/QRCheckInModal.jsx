@@ -102,8 +102,8 @@ const QRCheckInModal = ({ open, onClose, checkinCode, meetingTitle }) => {
                   imageSettings={{
                       // Đảm bảo bạn có file logo này trong thư mục public
                       src: "/logo-meetflow.png", 
-                      height: 40,
-                      width: 40,
+                      height: 30,
+                      width: 47,
                       excavate: true,
                   }}
                 />
@@ -147,11 +147,11 @@ const QRCheckInModal = ({ open, onClose, checkinCode, meetingTitle }) => {
           
           {/* Box hiển thị Mã Text */}
           <div className="bg-gray-50 dark:bg-slate-800/50 rounded-xl p-4 border border-gray-200 dark:border-slate-700">
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 uppercase font-bold tracking-wider">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 font-bold tracking-wider">
               Mã nhập thủ công
             </p>
             <div className="flex items-center gap-2">
-              <code className="flex-1 text-sm font-mono font-bold text-blue-600 dark:text-blue-400 bg-white dark:bg-slate-900 px-3 py-2 rounded border border-gray-200 dark:border-slate-600 break-all">
+              <code className="flex-1 text-xs font-mono font-bold text-blue-600 dark:text-blue-400 bg-white dark:bg-slate-900 px-3 py-2 rounded border border-gray-200 dark:border-slate-600 break-all">
                 {checkinCode || "..."}
               </code>
               <Tooltip title="Sao chép mã">
