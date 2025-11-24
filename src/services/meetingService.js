@@ -95,3 +95,7 @@ export const approveMeeting = (meetingId, approved, reason = null) => {
     reason    // Bắt buộc nếu từ chối
   });
 };
+
+export const checkInWithQRCode = (qrCode) => {
+  return api.post("/meetings/check-in/qr", { qrCode });
+};

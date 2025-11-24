@@ -30,11 +30,11 @@ import HistoryPage from "./pages/user/HistoryPage";
 import ProfilePage from "./pages/user/ProfilePage";
 import ChangePasswordPageUser from './pages/user/ChangePasswordPage';
 import DevicePage from "./pages/user/DevicePage";
+import CheckInProcessingPage from "./pages/user/CheckInProcessingPage";
 
 // ===== Guards =====
 import ProtectedRoute from "./routes/ProtectedRoute";
 import AdminOnlyRoute from "./routes/AdminOnlyRoute";
-
 // ===== Google OAuth Callback Page =====
 import GoogleCallbackPage from "./pages/GoogleCallbackPage";
 
@@ -149,6 +149,7 @@ export default function App() {
             />
           }
         />
+        <Route path="/check-in/:code" element={<CheckInProcessingPage />} />
       </Routes>
 
       {/* ToastContainer */}
