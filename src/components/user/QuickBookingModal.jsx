@@ -77,9 +77,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
   const watchedRoomId = Form.useWatch("roomId", form);
   const watchedFrequency = Form.useWatch("frequency", form); // ← THÊM DÒNG NÀY
 
-  /* ===================================================
-                    LOAD ROOMS
-  ====================================================*/
+  /* LOAD ROOMS */
   useEffect(() => {
     if (!open) return;
 
@@ -94,7 +92,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
     loadRooms();
   }, [open]);
 
-  /* ===== THEO DÕI PHÒNG ĐÃ CHỌN (VIP) =====*/
+  /* THEO DÕI PHÒNG ĐÃ CHỌN */
   useEffect(() => {
     if (watchedRoomId) {
       const room = rooms.find((r) => r.id === watchedRoomId);
@@ -110,7 +108,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
       if (duration <= 0) duration = 60;
 
       setIsRecurring(false);
-      setSelectedDays([]); // ← THÊM dòng này
+      setSelectedDays([]);
       setClockValue(start);
       setSelectedRoom(null);
 
@@ -127,7 +125,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
           isRecurring: false,
           frequency: "DAILY",
           repeatUntil: undefined,
-          daysOfWeek: [], // ← THÊM dòng này
+          daysOfWeek: [],
           description: "",
         });
       }, 100);
@@ -281,7 +279,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
     setClockValue(dayjs());
     setAvailableDevices([]);
     setIsRecurring(false);
-    setSelectedDays([]); // ← Thêm dòng này
+    setSelectedDays([]); 
     setSelectedRoom(null);
     onCancel();
   };
@@ -597,7 +595,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
             </div>
           )}
 
-          {/* ← ============ THÊM TOÀN BỘ ĐOẠN NÀY VÀO NGAY SAU {isRecurring && (...)} ============ */}
+          {/* Chọn riêng được các ngày trong tuần */}
           {isRecurring && watchedFrequency === "WEEKLY" && (
             <Form.Item
               name="daysOfWeek"
