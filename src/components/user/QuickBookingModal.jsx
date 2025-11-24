@@ -240,7 +240,6 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
                 frequency: values.frequency,
                 interval: 1,
                 repeatUntil: dayjs(values.repeatUntil).format("YYYY-MM-DD"),
-                // ← THÊM ĐOẠN NÀY
                 ...(values.frequency === "WEEKLY" && values.daysOfWeek?.length > 0
                   ? { daysOfWeek: values.daysOfWeek }
                   : {}),
