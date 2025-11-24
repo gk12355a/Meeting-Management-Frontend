@@ -61,9 +61,12 @@ const RoomCalendarModal = ({ open, onClose, room, onSelectSlot }) => {
 
         // gọi updateSize() để calendar render chuẩn
         if (calendarRef.current) {
-          const api = calendarRef.current.getApi();
-          if (api) api.updateSize();
-        }
+  const api = calendarRef.current.getApi();
+  if (api) {
+    api.updateSize();       // cập nhật layout
+    api.updateNow();        // ⭐ cập nhật thanh đỏ ngay lập tức (FIX)
+  }
+}
       }, 200);
     }
   }, [loading, open]);
@@ -95,57 +98,71 @@ const RoomCalendarModal = ({ open, onClose, room, onSelectSlot }) => {
       {/* FULLCALENDAR */}
       {!loading && readyToShow && (
         <FullCalendar
-          ref={calendarRef}
-          key={room?.id}
-          plugins={[timeGridPlugin, interactionPlugin]}
-          initialView="timeGridWeek"
-          locale="vi"
-          height={600}
-          slotMinTime="08:00:00"
-          slotMaxTime="18:00:00"
-          allDaySlot={false}
-          weekends={true}
-          businessHours={{
-            daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
-            startTime: "08:00",
-            endTime: "18:00",
-          }}
-          events={events}
-          selectable={true}
-          editable={true}
-          selectMirror={true}
-          dayHeaderClassNames={isDark ? "bg-slate-800 text-gray-200" : ""}
-          slotLabelClassNames={isDark ? "bg-slate-800 text-gray-300" : ""}
-          slotLaneClassNames={isDark ? "bg-slate-900 border-slate-700" : ""}
-          viewClassNames={isDark ? "bg-slate-900 text-gray-100" : ""}
-          nowIndicator={true}
-          nowIndicatorClassNames="bg-red-500"
-          selectAllow={(selectInfo) => {
-            const start = dayjs(selectInfo.start);
-            const end = dayjs(selectInfo.end);
+  ref={calendarRef}
+  key={room?.id}
+  plugins={[timeGridPlugin, interactionPlugin]}
+  initialView="timeGridWeek"
+  locale="vi"
+  height={600}
+  slotMinTime="08:00:00"
+  slotMaxTime="18:00:00"
+  allDaySlot={false}
+  weekends={true}
+  businessHours={{
+    daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
+    startTime: "08:00",
+    endTime: "18:00",
+  }}
+  events={events}
+  selectable={true}
+  editable={true}
+  selectMirror={true}
 
-            // Chặn ngày quá khứ
-            if (start.isBefore(dayjs().startOf("day"))) return false;
+  /* === CHẶN CHỌN RANGE TIẾP TỤC (selectAllow) === */
+  selectAllow={(selectInfo) => {
+    const start = dayjs(selectInfo.start);
+    const end = dayjs(selectInfo.end);
 
-            // Chặn giờ quá khứ trong hôm nay
-            if (start.isSame(dayjs(), "day") && start.isBefore(dayjs())) return false;
+    if (start.isBefore(dayjs().startOf("day"))) return false;
 
-            // const day = start.day();
-            // if (day === 0 || day === 6) return false;
+    if (start.isSame(dayjs(), "day") && start.isBefore(dayjs())) return false;
 
-            const minsStart = start.hour() * 60 + start.minute();
-            const minsEnd = end.hour() * 60 + end.minute();
+    const minsStart = start.hour() * 60 + start.minute();
+    const minsEnd = end.hour() * 60 + end.minute();
 
-            return minsStart >= 8 * 60 && minsEnd <= 18 * 60;
-          }}
-          select={(info) => {
-            onSelectSlot({
-              start: info.start,
-              end: info.end,
-            });
-            onClose();
-          }}
-        />
+    return minsStart >= 8 * 60 && minsEnd <= 18 * 60;
+  }}
+
+  /* === CHẶN KÉO THẢ QUA NGÀY (MỚI THÊM) === */
+  eventAllow={(dropInfo) => {
+    const start = dayjs(dropInfo.start);
+    const end = dayjs(dropInfo.end);
+
+    const sameDay = isSameDay(start, end.subtract(1, "minute"));
+    if (!sameDay) return false;
+
+    const minsStart = start.hour() * 60 + start.minute();
+    const minsEnd = end.hour() * 60 + end.minute();
+
+    return minsStart >= 8 * 60 && minsEnd <= 18 * 60;
+  }}
+
+  nowIndicator={true}
+  nowIndicatorClassNames="bg-red-500"
+
+  dayHeaderClassNames={isDark ? "bg-slate-800 text-gray-200" : ""}
+  slotLabelClassNames={isDark ? "bg-slate-800 text-gray-300" : ""}
+  slotLaneClassNames={isDark ? "bg-slate-900 border-slate-700" : ""}
+  viewClassNames={isDark ? "bg-slate-900 text-gray-100" : ""}
+
+  select={(info) => {
+    onSelectSlot({
+      start: info.start,
+      end: info.end,
+    });
+    onClose();
+  }}
+/>
       )}
     </Modal>
   );
