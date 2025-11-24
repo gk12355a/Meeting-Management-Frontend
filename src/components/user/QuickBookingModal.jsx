@@ -259,15 +259,51 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
       handleCancel();
       onSuccess?.();
     } catch (err) {
-      const msg = err?.response?.data?.message || "Không thể tạo cuộc họp!";
-      if (msg.toLowerCase().includes("bảo trì") && msg.toLowerCase().includes("phòng")) {
-        toast.error("🚫 Phòng họp đang bảo trì, vui lòng chọn phòng khác!");
-      } else if (err.response?.status === 409) {
-        toast.error(`⚠️ ${msg}`);
-      } else {
-        toast.error(msg);
-      }
-    } finally {
+  console.error("ERROR:", err?.response?.data);
+
+  const backendMsg =
+    err?.response?.data?.error ||
+    err?.response?.data?.message ||
+    "Không thể tạo cuộc họp!";
+
+  const raw = backendMsg.toLowerCase();
+  let msg = "Không thể tạo cuộc họp!";
+
+  // === 1️⃣ Phòng họp trùng lịch ===
+  if (raw.includes("phòng") && raw.includes("đã bị đặt")) {
+    msg = "Phòng họp đã được đặt trong khung giờ này";
+  }
+
+  // === 2️⃣ Người tham dự trùng lịch ===
+  else if (raw.includes("người tham dự") && raw.includes("trùng lịch")) {
+    msg = "Người tham gia bị trùng lịch trong khung giờ này";
+  }
+
+  // === 3️⃣ Phòng họp đang bảo trì ===
+  else if (raw.includes("bảo trì") && raw.includes("phòng")) {
+    msg = "🚫 Phòng họp đang bảo trì, vui lòng chọn phòng khác!";
+  }
+
+  // === 4️⃣ Thiết bị đang bảo trì ===
+  else if (raw.includes("thiết bị") && raw.includes("bảo trì")) {
+    msg = "Một thiết bị bạn chọn đang bảo trì • vui lòng bỏ chọn thiết bị đó.";
+  }
+
+  // === 5️⃣ Xung đột lịch định kỳ ===
+  else if (raw.includes("recurrence") || raw.includes("định kỳ")) {
+    msg = "❌ Lịch họp định kỳ bị trùng lịch • vui lòng kiểm tra lại.";
+  }
+
+  // === 6️⃣ Fallback chung ===
+  else {
+    msg = `⚠️ ${backendMsg}`;
+  }
+
+  toast.error(msg, {
+    position: "top-right",
+    autoClose: 3500,
+  });
+} finally {
       setLoading(false);
     }
   };
