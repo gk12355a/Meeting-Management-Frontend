@@ -307,40 +307,39 @@ const [quickBooking, setQuickBooking] = useState({ open: false, start: null, end
 
       // Map từ dữ liệu ĐÃ LỌC
       const mappedEvents = filteredData.map((m) => {
-        const startLocal = dayjs(m.startTime).local().format();
-        const endLocal = dayjs(m.endTime).local().format();
+  const startLocal = dayjs(m.startTime).local().format();
+  const endLocal = dayjs(m.endTime).local().format();
 
-        // === LOGIC MỚI: Nhóm CANCELLED và REJECTED ===
-        const isNegativeStatus = m.status === "CANCELLED" || m.status === "REJECTED";
+  const isNegativeStatus = m.status === "CANCELLED" || m.status === "REJECTED";
 
-        let bgColor, borderColor;
-        
-        if (isNegativeStatus) {
-          bgColor = "#ef4444"; // Đỏ
-          borderColor = "#b91c1c"; // Đỏ đậm
-        } else if (m.status === "CONFIRMED") {
-          bgColor = "#3b82f6"; // Xanh dương
-          borderColor = "#2563eb";
-        } else {
-          // PENDING_APPROVAL
-          bgColor = "#f59e0b"; // Vàng cam
-          borderColor = "#d97706";
-        }
+  let bgColor, borderColor;
+  
+  if (isNegativeStatus) {
+    bgColor = "#ef4444"; // đỏ
+    borderColor = "#b91c1c"; // đỏ đậm
+  } else if (m.status === "CONFIRMED") {
+    bgColor = "#3b82f6";
+    borderColor = "#2563eb";
+  } else {
+    bgColor = "#f59e0b";
+    borderColor = "#d97706";
+  }
 
-        return {
-          id: m.id,
-          title: m.title || "Cuộc họp",
-          start: startLocal,
-          end: endLocal,
-          backgroundColor: bgColor,
-          borderColor: borderColor,
-          extendedProps: {
-            roomName: m.room?.name || "Chưa xác định",
-          },
-          // Áp dụng class gạch ngang nếu là CANCELLED hoặc REJECTED
-          classNames: isNegativeStatus ? ["meeting-cancelled"] : []
-        };
-      });
+  return {
+    id: m.id,
+    title: m.title || "Cuộc họp",
+    start: startLocal,
+    end: endLocal,
+    backgroundColor: bgColor,
+    borderColor: borderColor,
+    extendedProps: {
+      roomName: m.room?.name || "Chưa xác định",
+      status: m.status,  // <-- thêm status vào extendedProps
+    },
+    classNames: isNegativeStatus ? ["meeting-cancelled"] : [],
+    hiddenInWeekDayView: isNegativeStatus, // <-- thêm cờ này
+  };
+});
 
       setEvents(mappedEvents);
     } catch (err) {
@@ -610,6 +609,19 @@ const [quickBooking, setQuickBooking] = useState({ open: false, start: null, end
       ) : (
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 transition-colors duration-500">
           <FullCalendar
+          eventDidMount={(info) => {
+            const viewType = info.view.type; // Loại view hiện tại: dayGridMonth, timeGridWeek, timeGridDay
+            const event = info.event;
+
+            // Nếu event bị hủy
+            if (event.extendedProps.status === "CANCELLED" || event.extendedProps.status === "REJECTED") {
+              if (viewType === "timeGridWeek" || viewType === "timeGridDay") {
+                // Ẩn hẳn sự kiện trong day/week view
+                info.el.style.display = "none";
+              }
+              // Month view thì vẫn giữ, sẽ áp dụng class "meeting-cancelled" gạch đỏ
+            }
+          }}
             ref={calendarRef}
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
             initialView="timeGridWeek"
