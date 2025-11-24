@@ -584,7 +584,7 @@ export default function UsersPage() {
                   />
                 </div>
                 {/* Vai trò cho thêm mới */}
-                 <div>
+                 {/* <div>
                    <label className="block text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
                      Vai trò <span className="text-red-500">*</span>
                    </label>
@@ -601,7 +601,7 @@ export default function UsersPage() {
                      <option value="ROLE_USER">User</option>
                      <option value="ROLE_ADMIN">Admin</option>
                    </select>
-                 </div>
+                 </div> */}
               </div>
               <div className="flex justify-end gap-3 mt-8">
                 <button
