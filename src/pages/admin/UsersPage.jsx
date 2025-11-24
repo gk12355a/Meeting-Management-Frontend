@@ -1,3 +1,4 @@
+// src/pages/admin/UsersPage.jsx
 import { useEffect, useState } from "react";
 import {
   getAllUsers,
@@ -10,12 +11,13 @@ import { FiUsers, FiPlus, FiTrash2, FiEdit2, FiSearch } from "react-icons/fi";
 import { motion } from "framer-motion";
 import "react-toastify/dist/ReactToastify.css";
 import Pagination from "../../components/Pagination";
+
 /* Tuỳ chỉnh màu cho Toast theo theme */
 const toastColors = {
-  success: "#079830ff", // xanh ngọc dịu
-  error: "#ef4444", // đỏ ấm
-  warning: "#e4650aff", // vàng dịu
-  info: "#3b82f6", // xanh dương nhạt
+  success: "#079830ff",
+  error: "#ef4444",
+  warning: "#e4650aff",
+  info: "#3b82f6",
 };
 
 const setToastTheme = () => {
@@ -152,17 +154,17 @@ export default function UsersPage() {
         roles: [selectedUser.role],
         isActive: selectedUser.active,
       });
-      toast.success("Cập nhật quyền/trạng thái thành công!");
+      toast.success("Cập nhật thông tin thành công!");
       setShowEditModal(false);
       setSelectedUser(null);
       fetchUsers();
     } catch (err) {
       console.error("Lỗi cập nhật người dùng:", err);
-      toast.error("Không thể cập nhật quyền/trạng thái!");
+      toast.error("Không thể cập nhật thông tin!");
     }
   };
 
-  /* Xoá người dùng – giữ nguyên logic toast confirm */
+  /* Xoá người dùng */
   const handleDeleteUser = async (id) => {
     if (!id) {
       toast.error("Không xác định được ID người dùng!");
@@ -269,7 +271,7 @@ export default function UsersPage() {
     startIndex,
     startIndex + pageSize
   );
-  
+
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, statusFilter]);
@@ -581,25 +583,25 @@ export default function UsersPage() {
                       transition-all duration-200 text-base"
                   />
                 </div>
-                {/* Vai trò */}
-                {/* <div>
-                  <label className="block text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Vai trò <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    value={newUser.role}
-                    onChange={(e) =>
-                      setNewUser({ ...newUser, role: e.target.value })
-                    }
-                    disabled={creating}
-                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-gray-900
-                        focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-400 focus:border-transparent
-                        transition-all duration-200 text-base"
-                  >
-                    <option value="ROLE_USER">User</option>
-                    <option value="ROLE_ADMIN">Admin</option>
-                  </select>
-                </div> */}
+                {/* Vai trò cho thêm mới */}
+                 <div>
+                   <label className="block text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
+                     Vai trò <span className="text-red-500">*</span>
+                   </label>
+                   <select
+                     value={newUser.role}
+                     onChange={(e) =>
+                       setNewUser({ ...newUser, role: e.target.value })
+                     }
+                     disabled={creating}
+                     className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-gray-900
+                         focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-400 focus:border-transparent
+                         transition-all duration-200 text-base"
+                   >
+                     <option value="ROLE_USER">User</option>
+                     <option value="ROLE_ADMIN">Admin</option>
+                   </select>
+                 </div>
               </div>
               <div className="flex justify-end gap-3 mt-8">
                 <button
@@ -657,6 +659,28 @@ export default function UsersPage() {
                 </p>
               </div>
               <div className="space-y-4">
+                {/* Vai trò - THÊM MỚI */}
+                <div>
+                  <label className="block text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Vai trò <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={selectedUser.role}
+                    onChange={(e) =>
+                      setSelectedUser({
+                        ...selectedUser,
+                        role: e.target.value,
+                      })
+                    }
+                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-gray-900
+                      focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-400 focus:border-transparent
+                      transition-all duration-200 text-base"
+                  >
+                    <option value="ROLE_USER">User</option>
+                    <option value="ROLE_ADMIN">Admin</option>
+                  </select>
+                </div>
+
                 {/* Trạng thái */}
                 <div>
                   <label className="block text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
