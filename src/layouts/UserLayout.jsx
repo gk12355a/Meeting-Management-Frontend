@@ -5,7 +5,7 @@ import { Outlet } from "react-router-dom";
 // Import Components
 import UserHeader from "../components/user/UserHeader";
 import Sidebar from "../components/user/Sidebar";
-import Chatbot from "../components/Chatbot"; // <--- SỬA TÊN IMPORT TẠI ĐÂY
+import Chatbot from "../components/user/Chatbot";
 
 export default function UserLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
