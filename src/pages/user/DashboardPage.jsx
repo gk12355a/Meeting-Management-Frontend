@@ -401,7 +401,7 @@ const handleOpenStat = (type) => {
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <button
-          className="bg-blue-500 text-white rounded-xl p-6 text-left hover:bg-blue-600 transition shadow-md"
+          className="bg-blue-600 text-white rounded-xl p-6 text-left hover:bg-blue-700 transition shadow-md"
           onClick={handleCreateMeeting}
         >
           <h3 className="font-semibold text-lg mb-2">Tạo lịch họp mới</h3>
@@ -411,7 +411,7 @@ const handleOpenStat = (type) => {
         </button>
 
         <button
-          className="bg-green-500 text-white rounded-xl p-6 text-left hover:bg-green-600 transition shadow-md"
+          className="bg-green-600 text-white rounded-xl p-6 text-left hover:bg-green-700 transition shadow-md"
           onClick={handleViewRooms}
         >
           <h3 className="font-semibold text-lg mb-2">Xem phòng trống</h3>
@@ -420,7 +420,7 @@ const handleOpenStat = (type) => {
           </p>
         </button>
         <button
-          className="bg-purple-500 text-white rounded-xl p-6 text-left hover:bg-purple-600 transition shadow-md"
+          className="bg-purple-600 text-white rounded-xl p-6 text-left hover:bg-purple-700 transition shadow-md"
           onClick={handleViewDevices}
         >
           <h3 className="font-semibold text-lg mb-2">Xem thiết bị</h3>
