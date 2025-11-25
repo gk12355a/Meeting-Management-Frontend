@@ -93,12 +93,24 @@ export default function DashboardPage() {
   const [detailModalVisible, setDetailModalVisible] = useState(false);
   const [selectedMeeting, setSelectedMeeting] = useState(null);
 
+  const [upcomingMeetingsModalVisible, setUpcomingMeetingsModalVisible] = useState(false);
+  const [upcomingMeetingsList, setUpcomingMeetingsList] = useState([]);
+
   // === 3. HÀM MỞ MODAL ===
-  const handleTodayMeetingsClick = () => {
-    const meetingsToday = activeMeetingsState.filter(m => dayjs(m.startTime).isToday());
-    setTodayMeetingsList(meetingsToday);
-    setTodayMeetingsModalVisible(true);
-  };
+const handleTodayMeetingsClick = () => {
+  const today = dayjs();
+  const meetingsToday = activeMeetingsState.filter(m => dayjs(m.startTime).isToday());
+  setTodayMeetingsList(meetingsToday);
+  setTodayMeetingsModalVisible(true);
+};
+
+
+  const handleUpcomingMeetingsClick = () => {
+  const now = dayjs();
+  const upcomingMeetings = activeMeetingsState.filter(m => dayjs(m.startTime).isSameOrAfter(now));
+  setUpcomingMeetingsList(upcomingMeetings);
+  setUpcomingMeetingsModalVisible(true);
+};
 
   // Hàm mở modal chi tiết cuộc họp
   const handleOpenMeetingDetail = (meeting) => {
@@ -452,21 +464,27 @@ const CustomRoomTooltip = ({ active, payload }) => {
       <>
         {/* Cards */}
         <div className="grid grid-cols-3 gap-4">
-          {stats.map((card, i) => (
-            <div
-              key={i}
-              onClick={card.label === "Cuộc họp hôm nay" ? handleTodayMeetingsClick : undefined}
-              className="flex items-center gap-3 bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all cursor-pointer"
-            >
-              <div className="p-3 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-lg">
-                {card.icon}
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">{card.label}</p>
-                <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">{card.value}</h3>
-              </div>
-            </div>
-          ))}
+          {stats.map((card, i) => {
+  let onClickFunc;
+  if (card.label === "Cuộc họp hôm nay") onClickFunc = handleTodayMeetingsClick;
+  else if (card.label === "Cuộc họp sắp tới") onClickFunc = handleUpcomingMeetingsClick;
+
+  return (
+    <div
+      key={i}
+      onClick={onClickFunc}
+      className="flex items-center gap-3 bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all cursor-pointer"
+    >
+      <div className="p-3 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-lg">
+        {card.icon}
+      </div>
+      <div>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{card.label}</p>
+        <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">{card.value}</h3>
+      </div>
+    </div>
+  );
+})}
         </div>
 
         {/* Charts */}
@@ -556,7 +574,6 @@ const CustomRoomTooltip = ({ active, payload }) => {
     </span>
   );
 }}
-
             eventContent={(arg) => (
   <div style={{
     background: arg.event.backgroundColor,
@@ -653,7 +670,49 @@ const CustomRoomTooltip = ({ active, payload }) => {
             </div>
           </div>
         )}
-
+        {/* Modal cuộc họp sắp tới */}
+{upcomingMeetingsModalVisible && (
+  <div
+    className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+    onClick={() => setUpcomingMeetingsModalVisible(false)}
+  >
+    <div
+      className="bg-white dark:bg-slate-800 p-6 rounded-xl max-w-xl w-full space-y-4"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">📋 Cuộc họp sắp tới</h3>
+      <div className="max-h-96 overflow-y-auto space-y-4">
+        {upcomingMeetingsList.length > 0 ? (
+          upcomingMeetingsList.map(m => (
+            <div
+              key={m.id}
+              className="p-3 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 cursor-pointer transition"
+              onClick={() => handleOpenMeetingDetail(m)}
+            >
+              <p className="font-semibold text-gray-700 dark:text-gray-200 text-md">{m.title}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {dayjs(m.startTime).format("HH:mm")} - {dayjs(m.endTime).format("HH:mm")}
+              </p>
+              {m.room && (
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  <strong>Phòng họp:</strong> {m.room?.name || "Chưa xác định"} {m.room?.location ? `(${m.room.location})` : ""}
+                </p>
+              )}
+            </div>
+          ))
+        ) : (
+          <p className="text-gray-500 dark:text-gray-400">Không có cuộc họp sắp tới.</p>
+        )}
+      </div>
+      <button
+        className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        onClick={() => setUpcomingMeetingsModalVisible(false)}
+      >
+        Đóng
+      </button>
+    </div>
+  </div>
+)}
         {/* Modal chi tiết cuộc họp */}
         <Modal
           open={detailModalVisible}
