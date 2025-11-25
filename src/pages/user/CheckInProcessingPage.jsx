@@ -89,7 +89,7 @@ const CheckInProcessingPage = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-900 p-4">
-      <Card className="w-full max-w-md shadow-xl rounded-2xl dark:bg-slate-800 dark:border-slate-700">
+<Card className="w-full max-w-md shadow-xl rounded-2xl dark:bg-slate-800 dark:border-slate-700">
 
         {/* ❌ ĐÃ XOÁ ICON TICK PHÍA TRÊN HOÀN TOÀN */}
 
