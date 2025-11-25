@@ -269,9 +269,14 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {stats.map((stat, index) => (
               <div
-                key={index}
-                className="bg-white dark:bg-slate-900 rounded-xl p-5 shadow-sm border border-gray-200 dark:border-slate-800 transition-transform hover:scale-105"
-              >
+                onClick={() => {
+                  if (index === 0) handleOpenStat("today");
+                  if (index === 1) handleOpenStat("week");
+                  if (index === 2) handleOpenStat("upcoming");
+                  if (index === 3) handleOpenStat("total");
+                }}
+                className="cursor-pointer bg-white dark:bg-slate-900 rounded-xl p-5 shadow-sm border ... hover:scale-105"
+                >
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
