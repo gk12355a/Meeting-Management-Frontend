@@ -82,6 +82,10 @@ const statTemplates = [
 // }
 
 export default function DashboardPage() {
+  const [listModalOpen, setListModalOpen] = useState(false);
+  const [listModalTitle, setListModalTitle] = useState("");
+  const [listModalData, setListModalData] = useState([]);
+  
   const { user } = useAuth(); // <-- Cần user.id để lọc
   const navigate = useNavigate();
 
