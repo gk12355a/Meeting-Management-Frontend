@@ -40,10 +40,16 @@ const CheckInProcessingPage = () => {
         setSubTitle("Bạn đã được ghi nhận tham gia cuộc họp.");
       } catch (err) {
         const statusCode = err?.response?.status;
-        const backendMsg =
-          err?.response?.data?.message ||
-          err?.response?.data?.error ||
-          "Lỗi không xác định";
+        let backendMsg =
+  err?.response?.data?.message ||
+  err?.response?.data?.error ||
+  "Lỗi không xác định";
+
+// ✨ Nếu chuỗi có dạng HH:mm:ss.xxxxxx → cắt về HH:mm:ss
+backendMsg = backendMsg.replace(
+  /(\d{2}:\d{2}:\d{2})\.\d+/,
+  "$1"
+);
 
         setStatus("error");
         setTitle("Check-in không thành công");
