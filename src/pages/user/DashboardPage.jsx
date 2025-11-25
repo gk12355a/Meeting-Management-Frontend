@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { FiCalendar, FiClock, FiUsers, FiCheckSquare } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
-import { Spin, message } from "antd";
+import { Spin, message, Modal } from "antd";
 import { getMyMeetings, getMeetingById } from "../../services/meetingService";
 import dayjs from "dayjs";
 import "dayjs/locale/vi";
@@ -243,7 +243,39 @@ export default function DashboardPage() {
   const handleViewDevices = () => {
     navigate("/user/devices");
   };
+const handleOpenStat = (type) => {
+  if (type === "today") {
+    setListModalTitle("Lịch họp hôm nay");
+    setListModalData(
+      activeMeetingsAll.filter(m => dayjs(m.startTime).isToday())
+    );
+  }
 
+  if (type === "week") {
+    setListModalTitle("Lịch họp tuần này");
+    setListModalData(
+      activeMeetingsAll.filter(m =>
+        dayjs(m.startTime).isBetween(
+          dayjs().startOf("isoWeek"),
+          dayjs().endOf("isoWeek")
+        )
+      )
+    );
+  }
+
+  if (type === "upcoming") {
+    setListModalTitle("Các cuộc họp sắp tới");
+    // dùng danh sách đầy đủ, không phải bản preview 3 cuộc
+    setListModalData(upcomingMeetingsAll);
+  }
+
+  if (type === "total") {
+    setListModalTitle("Tổng số cuộc họp");
+    setListModalData(activeMeetingsAll);
+  }
+
+  setListModalOpen(true);
+};
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -346,6 +378,37 @@ export default function DashboardPage() {
         loading={loadingDetail}
       >
       </MeetingDetailModal>
+        <Modal
+        title={listModalTitle}
+        open={listModalOpen}
+        onCancel={() => setListModalOpen(false)}
+        footer={null}
+        width={600}
+      >
+        {listModalData.length === 0 ? (
+          <p className="text-gray-500">Không có cuộc họp nào.</p>
+        ) : (
+          <div className="space-y-3">
+            {listModalData.map((m) => (
+              <div
+                key={m.id}
+                className="p-3 rounded-lg bg-gray-50 dark:bg-slate-800 cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-700"
+                onClick={() => {
+                  setListModalOpen(false);
+                  handleShowMeetingDetail(m);
+                }}
+              >
+                <p className="font-semibold text-gray-800 dark:text-gray-100">
+                  {m.title}
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {dayjs(m.startTime).format("DD/MM HH:mm")} · {m.room?.name}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
+      </Modal>
 
       {/* Loading overlay khi đang fetch dashboard */}
       {loadingDetail && false && (
@@ -388,29 +451,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-const handleOpenStat = (type) => {
-  if (type === "today") {
-    setListModalTitle("Lịch họp hôm nay");
-    setListModalData(
-      upcomingMeetingsAll.filter(m => dayjs(m.startTime).isToday())
-    );
-  }
-  if (type === "week") {
-    setListModalTitle("Lịch họp tuần này");
-    setListModalData(
-      upcomingMeetingsAll.filter(m =>
-        dayjs(m.startTime).isBetween(dayjs().startOf("isoWeek"), dayjs().endOf("isoWeek"))
-      )
-    );
-  }
-  if (type === "upcoming") {
-    setListModalTitle("Các cuộc họp sắp tới");
-    setListModalData(upcomingMeetings);
-  }
-  if (type === "total") {
-    setListModalTitle("Tổng số cuộc họp");
-    setListModalData(activeMeetingsAll);
-  }
-
-  setListModalOpen(true);
-};
