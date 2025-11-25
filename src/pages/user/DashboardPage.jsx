@@ -12,7 +12,7 @@ import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import isBetween from "dayjs/plugin/isBetween"; // <-- THÊM PLUGIN
 import isoWeek from "dayjs/plugin/isoWeek";
 import MeetingDetailModal from "../../components/user/MeetingDetailModal";
-
+import MeetingListModal from "../../components/admin/MeetingListModal";
 // --- dayjs config ---
 dayjs.locale("vi");
 dayjs.extend(isToday);
@@ -82,18 +82,12 @@ const statTemplates = [
 // }
 
 export default function DashboardPage() {
-const [listModalOpen, setListModalOpen] = useState(false);
-const [listModalTitle, setListModalTitle] = useState("");
-const [listModalData, setListModalData] = useState([]);
-const [activeMeetingsAll, setActiveMeetingsAll] = useState([]);
-const [upcomingMeetingsAll, setUpcomingMeetingsAll] = useState([]);
-const [page, setPage] = useState(1);
-const pageSize = 5;
+  const [listModalOpen, setListModalOpen] = useState(false);
+  const [listModalTitle, setListModalTitle] = useState("");
+  const [listModalData, setListModalData] = useState([]);
+  const [activeMeetingsAll, setActiveMeetingsAll] = useState([]);
+  const [upcomingMeetingsAll, setUpcomingMeetingsAll] = useState([]);
 
-const pagedData = listModalData.slice((page - 1) * pageSize, page * pageSize);
-
-
-  
   const { user } = useAuth(); // <-- Cần user.id để lọc
   const navigate = useNavigate();
 
@@ -385,47 +379,17 @@ const handleOpenStat = (type) => {
         loading={loadingDetail}
       >
       </MeetingDetailModal>
-        <Modal
+      {/* Meeting List Modal */}
+        <MeetingListModal
+  visible={listModalOpen}
+  onClose={() => setListModalOpen(false)}
   title={listModalTitle}
-  open={listModalOpen}
-  onCancel={() => setListModalOpen(false)}
-  footer={null}
-  width={600}
->
-  {listModalData.length === 0 ? (
-    <p className="text-gray-500">Không có cuộc họp nào.</p>
-  ) : (
-    <>
-      <div className="space-y-3">
-        {pagedData.map((m) => (
-          <div
-            key={m.id}
-            className="p-3 rounded-lg bg-gray-50 dark:bg-slate-800 cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-700"
-            onClick={() => {
-              setListModalOpen(false);
-              handleShowMeetingDetail(m);
-            }}
-          >
-            <p className="font-semibold text-gray-800 dark:text-gray-100">
-              {m.title}
-            </p>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              {dayjs(m.startTime).format("DD/MM HH:mm")} · {m.room?.name}
-            </p>
-          </div>
-        ))}
-      </div>
-
-      <Pagination
-        current={page}
-        pageSize={pageSize}
-        total={listModalData.length}
-        onChange={(p) => setPage(p)}
-        style={{ marginTop: 16, textAlign: "center" }}
-      />
-    </>
-  )}
-</Modal>
+  meetings={listModalData} // toàn bộ dữ liệu, không phân trang
+  onMeetingClick={(m) => {
+    setListModalOpen(false);
+    handleShowMeetingDetail(m);
+  }}
+/>
 
       {/* Loading overlay khi đang fetch dashboard */}
       {loadingDetail && false && (
