@@ -2,77 +2,77 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Result, Button, Spin, Card } from "antd";
-import { FiCheckCircle, FiXCircle, FiLogIn } from "react-icons/fi";
 import { useAuth } from "../../context/AuthContext";
 import { checkInWithQRCode } from "../../services/meetingService";
 
 const CheckInProcessingPage = () => {
-  const { code } = useParams(); // Lấy mã từ URL /check-in/:code
+  const { code } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, isAuthenticated } = useAuth(); // Giả sử AuthContext có isAuthenticated
+  const { isAuthenticated } = useAuth();
 
   const [status, setStatus] = useState("loading"); // loading | success | error
-  const [message, setMessage] = useState("Đang xử lý check-in...");
-  const [subMessage, setSubMessage] = useState("");
+  const [title, setTitle] = useState("Đang xử lý check-in...");
+  const [subTitle, setSubTitle] = useState("");
 
   useEffect(() => {
-    // 1. Kiểm tra Login [cite: 12]
-    // Lưu ý: Kiểm tra token trong localStorage nếu isAuthenticated chưa kịp cập nhật
-    const token = localStorage.getItem("token"); 
-    
+    // Kiểm tra login
+    const token = localStorage.getItem("token");
     if (!token) {
-      // Chưa đăng nhập -> Redirect sang Login kèm URL để quay lại
-      const returnUrl = encodeURIComponent(location.pathname);
+      const returnUrl = encodeURIComponent(location.pathname + location.search);
       navigate(`/login?redirect=${returnUrl}`);
       return;
     }
 
-    // 2. Gọi API Check-in [cite: 13]
     const handleCheckIn = async () => {
+      if (!code) {
+        setStatus("error");
+        setTitle("Check-in không thành công");
+        setSubTitle("Mã QR bị thiếu. Vui lòng quét lại hoặc liên hệ người tổ chức.");
+        return;
+      }
+
       try {
         await checkInWithQRCode(code);
-        
-        // [cite: 8] Check-in thành công
-        setStatus("success");
-        setMessage("Check-in thành công!");
-        setSubMessage("Bạn đã được ghi nhận tham gia cuộc họp.");
-      } catch (err) {
-        // [cite: 14] Xử lý lỗi
-        setStatus("error");
-        const errorMsg = err.response?.data?.message || "Lỗi không xác định";
-        const statusCode = err.response?.status;
 
-        if (statusCode === 400) {
-            // [cite: 19] Chưa đến giờ hoặc đã check-in
-            setMessage("Không thể check-in");
-            setSubMessage(errorMsg); // VD: "Chưa đến giờ điểm danh"
-        } else if (statusCode === 403) {
-            // [cite: 20] Không có trong danh sách
-            setMessage("Không có quyền tham gia");
-            setSubMessage("Bạn không có tên trong danh sách khách mời của cuộc họp này.");
-        } else if (statusCode === 404) {
-            // [cite: 21] Mã sai
-            setMessage("Mã QR không hợp lệ");
-            setSubMessage("Vui lòng kiểm tra lại mã QR hoặc liên hệ người tổ chức.");
-        } else {
-            setMessage("Lỗi hệ thống");
-            setSubMessage(errorMsg);
+        setStatus("success");
+        setTitle("Check-in thành công!");
+        setSubTitle("Bạn đã được ghi nhận tham gia cuộc họp.");
+      } catch (err) {
+        const statusCode = err?.response?.status;
+        const backendMsg =
+          err?.response?.data?.message ||
+          err?.response?.data?.error ||
+          "Lỗi không xác định";
+
+        setStatus("error");
+        setTitle("Check-in không thành công");
+
+        switch (statusCode) {
+          case 400:
+            setSubTitle(backendMsg);
+            break;
+
+          case 403:
+            setSubTitle(
+              backendMsg || "Bạn không nằm trong danh sách khách mời của cuộc họp này."
+            );
+            break;
+
+          case 404:
+            setSubTitle("Mã QR không hợp lệ. Vui lòng kiểm tra lại hoặc liên hệ người tổ chức.");
+            break;
+
+          default:
+            setSubTitle(backendMsg);
         }
       }
     };
 
-    if (code) {
-      handleCheckIn();
-    } else {
-      setStatus("error");
-      setMessage("Mã QR bị thiếu");
-    }
-  }, [code, navigate, location]);
+    handleCheckIn();
+  }, [code, navigate, location, isAuthenticated]);
 
-  // --- RENDER UI [cite: 14] ---
-
-  // 1. Màn hình Loading
+  // UI Loading
   if (status === "loading") {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-slate-900 p-4">
@@ -85,28 +85,24 @@ const CheckInProcessingPage = () => {
     );
   }
 
-  // 2. Màn hình Kết quả (Thành công hoặc Lỗi)
+  const isSuccess = status === "success";
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-900 p-4">
       <Card className="w-full max-w-md shadow-xl rounded-2xl dark:bg-slate-800 dark:border-slate-700">
+
+        {/* ❌ ĐÃ XOÁ ICON TICK PHÍA TRÊN HOÀN TOÀN */}
+
         <Result
-          status={status === "success" ? "success" : "error"}
-          title={
-            <span className="dark:text-white">
-              {message}
-            </span>
-          }
-          subTitle={
-            <span className="dark:text-gray-400 text-base">
-              {subMessage}
-            </span>
-          }
+          status={isSuccess ? "success" : "error"}
+          title={<span className="dark:text-white">{title}</span>}
+          subTitle={<span className="dark:text-gray-400 text-base">{subTitle}</span>}
           extra={[
-            <Button 
-              type="primary" 
-              key="home" 
+            <Button
+              type="primary"
+              key="home"
               size="large"
-              onClick={() => navigate('/user/my-meetings')}
+              onClick={() => navigate("/user/my-meetings")}
               className="bg-blue-600 hover:bg-blue-700 w-full"
             >
               Về trang Lịch họp của tôi
