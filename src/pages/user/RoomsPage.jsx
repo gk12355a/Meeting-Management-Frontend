@@ -15,7 +15,7 @@ const RoomsPage = () => {
   const [processedRooms, setProcessedRooms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterStatus, setFilterStatus] = useState("Tất cả");
+  const [filterStatus, setFilterStatus] = useState([]);
   const [bookingModal, setBookingModal] = useState({
     open: false,
     room: null,
@@ -66,14 +66,22 @@ const RoomsPage = () => {
 
     let matchStatus = true;
 
-    // --- Bộ lọc trạng thái ---
-    if (filterStatus !== "Tất cả") {
-      if (filterStatus === "AVAILABLE" || filterStatus === "UNDER_MAINTENANCE") {
-        matchStatus = room.status === filterStatus;
-      } else if (filterStatus === "VIP") {
-        matchStatus = room.requiresApproval === true;
-      }
-    }
+// Nếu có tick filter thì bắt buộc phải match ít nhất một cái
+if (filterStatus.length > 0) {
+  matchStatus = false;
+
+  if (filterStatus.includes("AVAILABLE") && room.status === "AVAILABLE") {
+    matchStatus = true;
+  }
+
+  if (filterStatus.includes("UNDER_MAINTENANCE") && room.status === "UNDER_MAINTENANCE") {
+    matchStatus = true;
+  }
+
+  if (filterStatus.includes("VIP") && room.requiresApproval === true) {
+    matchStatus = true;
+  }
+}
 
     return matchesSearch && matchStatus;
   });
@@ -116,17 +124,63 @@ const RoomsPage = () => {
           />
         </div>
 
-        <select
-          value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value)}
-          className="border border-gray-300 dark:border-slate-700 rounded-lg px-3 py-2
-          bg-white dark:bg-slate-800 text-gray-800 dark:text-gray-100"
-        >
-          <option value="Tất cả">Tất cả</option>
-          <option value="AVAILABLE">Trống</option>
-          <option value="UNDER_MAINTENANCE">Đang bảo trì</option>
-          <option value="VIP">Phòng VIP</option>
-        </select>
+        {/* NEW CHECKBOX FILTER */}
+<div className="flex flex-wrap items-center gap-4 bg-white dark:bg-slate-800 
+  p-3 rounded-lg border border-gray-300 dark:border-slate-700 shadow-sm">
+
+  <label className="flex items-center gap-2 cursor-pointer">
+    <input
+      type="checkbox"
+      checked={filterStatus.includes("AVAILABLE")}
+      onChange={() => {
+        setFilterStatus((prev) =>
+          prev.includes("AVAILABLE")
+            ? prev.filter((f) => f !== "AVAILABLE")
+            : [...prev, "AVAILABLE"]
+        );
+      }}
+    />
+    <span className="text-gray-700 dark:text-gray-200">Trống</span>
+  </label>
+
+  <label className="flex items-center gap-2 cursor-pointer">
+    <input
+      type="checkbox"
+      checked={filterStatus.includes("UNDER_MAINTENANCE")}
+      onChange={() => {
+        setFilterStatus((prev) =>
+          prev.includes("UNDER_MAINTENANCE")
+            ? prev.filter((f) => f !== "UNDER_MAINTENANCE")
+            : [...prev, "UNDER_MAINTENANCE"]
+        );
+      }}
+    />
+    <span className="text-gray-700 dark:text-gray-200">Đang bảo trì</span>
+  </label>
+
+  <label className="flex items-center gap-2 cursor-pointer">
+    <input
+      type="checkbox"
+      checked={filterStatus.includes("VIP")}
+      onChange={() => {
+        setFilterStatus((prev) =>
+          prev.includes("VIP")
+            ? prev.filter((f) => f !== "VIP")
+            : [...prev, "VIP"]
+        );
+      }}
+    />
+    <span className="text-gray-700 dark:text-gray-200">Phòng VIP</span>
+  </label>
+
+  {/* SELECT ALL */}
+  <button
+    onClick={() => setFilterStatus(["AVAILABLE", "UNDER_MAINTENANCE", "VIP"])}
+    className="ml-auto px-3 py-1 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700"
+  >
+    Chọn tất cả
+  </button>
+</div>
       </div>
 
       {/* ROOM LIST */}
@@ -181,12 +235,12 @@ const RoomsPage = () => {
                     <FiUsers size={14} /> Sức chứa: {room.capacity} người
                   </p>
 
-                  <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300 mt-1">
+                  {/* <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300 mt-1">
                     <FiMonitor size={14} /> Thiết bị:{" "}
                     {room.fixedDevices?.length > 0
                       ? room.fixedDevices.join(", ")
                       : "Không có"}
-                  </p>
+                  </p> */}
 
                   <div className="flex items-center justify-between mt-3">
                     <p className="text-gray-700 dark:text-gray-300 text-sm">
