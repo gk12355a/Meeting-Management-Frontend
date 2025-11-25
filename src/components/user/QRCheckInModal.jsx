@@ -4,14 +4,17 @@ import { Modal, Button, message, Tooltip } from "antd";
 import { QRCodeSVG } from "qrcode.react";
 import { FiDownload, FiCopy, FiLink } from "react-icons/fi";
 
+
 const QRCheckInModal = ({ open, onClose, checkinCode, meetingTitle }) => {
   const qrRef = useRef();
 
+
   // 1. Tạo Magic Link (URL đầy đủ để quét là mở luôn)
   // Ví dụ: http://localhost:5173/check-in/550e8400-e29b...
-  const checkInUrl = checkinCode 
-    ? `${window.location.origin}/check-in/${checkinCode}` 
+  const checkInUrl = checkinCode
+    ? `${window.location.origin}/check-in/${checkinCode}`
     : "";
+
 
   // Hàm tải xuống QR code
   const handleDownloadQR = () => {
@@ -24,14 +27,17 @@ const QRCheckInModal = ({ open, onClose, checkinCode, meetingTitle }) => {
       canvas.width = 300 * scale;
       canvas.height = 300 * scale;
 
+
       // Vẽ nền trắng (để tránh trong suốt khi in)
       ctx.fillStyle = "white";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
+
 
       const svgData = new XMLSerializer().serializeToString(svg);
       const img = new Image();
       const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
       const url = URL.createObjectURL(svgBlob);
+
 
       img.onload = () => {
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
@@ -51,6 +57,7 @@ const QRCheckInModal = ({ open, onClose, checkinCode, meetingTitle }) => {
     }
   };
 
+
   // Copy mã code (để nhập thủ công)
   const handleCopyCode = () => {
     navigator.clipboard.writeText(checkinCode).then(() => {
@@ -58,12 +65,14 @@ const QRCheckInModal = ({ open, onClose, checkinCode, meetingTitle }) => {
     });
   };
 
+
   // Copy đường dẫn (để gửi cho người khác)
   const handleCopyLink = () => {
     navigator.clipboard.writeText(checkInUrl).then(() => {
       message.success("Đã sao chép đường dẫn check-in!");
     });
   };
+
 
   return (
     <Modal
@@ -85,11 +94,11 @@ const QRCheckInModal = ({ open, onClose, checkinCode, meetingTitle }) => {
       className="qr-checkin-modal"
     >
       <div className="border-t border-gray-200 dark:border-slate-600 my-5"></div>
-      
+     
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
         {/* Cột trái: Mã QR */}
         <div className="flex flex-col items-center justify-center">
-          <div 
+          <div
             ref={qrRef}
             className="bg-white p-4 rounded-2xl shadow-lg border-2 border-gray-100 dark:border-gray-700"
           >
@@ -101,7 +110,7 @@ const QRCheckInModal = ({ open, onClose, checkinCode, meetingTitle }) => {
                   includeMargin={true}
                   imageSettings={{
                       // Đảm bảo bạn có file logo này trong thư mục public
-                      src: "/logo-meetflow.png", 
+                      src: "/logo-meetflow.png",
                       height: 30,
                       width: 47,
                       excavate: true,
@@ -114,6 +123,7 @@ const QRCheckInModal = ({ open, onClose, checkinCode, meetingTitle }) => {
             )}
           </div>
 
+
           {meetingTitle && (
             <div className="text-center mt-4 mb-3 px-4">
               <h4 className="text-base font-semibold text-gray-800 dark:text-gray-100 line-clamp-2">
@@ -122,17 +132,18 @@ const QRCheckInModal = ({ open, onClose, checkinCode, meetingTitle }) => {
             </div>
           )}
 
+
           <div className="flex gap-2">
-            <Button 
-                onClick={handleDownloadQR} 
+            <Button
+                onClick={handleDownloadQR}
                 disabled={!checkinCode}
                 icon={<FiDownload />}
             >
                 Lưu ảnh
             </Button>
             <Tooltip title="Sao chép đường dẫn check-in">
-                <Button 
-                    onClick={handleCopyLink} 
+                <Button
+                    onClick={handleCopyLink}
                     disabled={!checkinCode}
                     icon={<FiLink />}
                 >
@@ -142,9 +153,10 @@ const QRCheckInModal = ({ open, onClose, checkinCode, meetingTitle }) => {
           </div>
         </div>
 
+
         {/* Cột phải: Thông tin & Hướng dẫn */}
         <div className="flex flex-col gap-5 justify-center">
-          
+         
           {/* Box hiển thị Mã Text */}
           <div className="bg-gray-50 dark:bg-slate-800/50 rounded-xl p-4 border border-gray-200 dark:border-slate-700">
             <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 font-bold tracking-wider">
@@ -163,6 +175,7 @@ const QRCheckInModal = ({ open, onClose, checkinCode, meetingTitle }) => {
               </Tooltip>
             </div>
           </div>
+
 
           {/* Hướng dẫn */}
           <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-100 dark:border-blue-800">
@@ -184,12 +197,13 @@ const QRCheckInModal = ({ open, onClose, checkinCode, meetingTitle }) => {
               </li>
             </ul>
           </div>
-          
-          <p className="text-xs text-center text-gray-400 italic">
-             Mã này chỉ hiệu lực trong thời gian diễn ra cuộc họp.
+         
+          <p className="text-xs text-center text-red-400 italic">
+             Mã này chỉ hiệu lực trong 30 phút trước thời gian diễn ra cuộc họp.
           </p>
         </div>
       </div>
+
 
       <style jsx global>{`
         .qr-checkin-modal .ant-modal-content {
@@ -217,4 +231,6 @@ const QRCheckInModal = ({ open, onClose, checkinCode, meetingTitle }) => {
   );
 };
 
+
 export default QRCheckInModal;
+
