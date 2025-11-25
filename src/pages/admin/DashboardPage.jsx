@@ -20,7 +20,7 @@ import {
   FiCheckSquare 
 } from "react-icons/fi";
 
-import MeetingListModal from "../../components/admin/MeetingListModal";
+import MeetingListModal from "../../components/MeetingListModal";
 import { Spin, message, Modal, Descriptions, Tag } from "antd"; 
 import { getAllRooms } from "../../services/roomService";
 import { getAllMeetings } from "../../services/reportService";

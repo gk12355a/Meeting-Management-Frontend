@@ -12,7 +12,7 @@ import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import isBetween from "dayjs/plugin/isBetween"; // <-- THÊM PLUGIN
 import isoWeek from "dayjs/plugin/isoWeek";
 import MeetingDetailModal from "../../components/user/MeetingDetailModal";
-import MeetingListModal from "../../components/admin/MeetingListModal";
+import MeetingListModal from "../../components/MeetingListModal";
 // --- dayjs config ---
 dayjs.locale("vi");
 dayjs.extend(isToday);
