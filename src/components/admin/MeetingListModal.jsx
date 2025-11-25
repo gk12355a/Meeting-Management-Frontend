@@ -1,4 +1,3 @@
-// src/components/admin/MeetingListModal.jsx
 import React from "react";
 import dayjs from "dayjs";
 
@@ -23,41 +22,31 @@ export default function MeetingListModal({ visible, onClose, title, meetings, on
                 className="p-3 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 cursor-pointer transition"
                 onClick={() => onMeetingClick(m)}
               >
-                <p className="font-semibold text-gray-700 dark:text-gray-200 text-md">{m.title}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {dayjs(m.startTime).format("HH:mm")} - {dayjs(m.endTime).format("HH:mm")}
+                <p className="font-semibold text-gray-700 dark:text-gray-200 text-md">
+                  {m.title}
                 </p>
 
                 {m.room && (
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    <strong>Phòng họp:</strong> {m.room?.name || "Chưa xác định"} {m.room?.location ? `(${m.room.location})` : ""}
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {m.room?.name || "Chưa xác định"}
                   </p>
                 )}
 
-                {m.equipment?.length > 0 && (
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    <strong>Thiết bị:</strong> {m.equipment.map(eq => eq.name).join(", ")}
+                {m.startTime && (
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Ngày họp: {dayjs(m.startTime).format("DD/MM/YYYY")}
                   </p>
                 )}
 
-                <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  <strong>Người tham gia:</strong>
-                  <ul className="list-disc ml-5 mt-1">
-                    {m.participants && m.participants.length > 0 ? (
-                      m.participants.map((p, index) => (
-                        <li key={p.id || index}>
-                          {p.fullName || "Chưa có tên"} - {p.status || "Chưa xác nhận"}
-                        </li>
-                      ))
-                    ) : (
-                      <li>Chưa có người tham gia</li>
-                    )}
-                  </ul>
-                </div>
+                {m.startTime && m.endTime && (
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Giờ họp: {dayjs(m.startTime).format("HH:mm")} - {dayjs(m.endTime).format("HH:mm")}
+                  </p>
+                )}
 
                 {m.organizer && (
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    <strong>Người tổ chức:</strong> {m.organizer.fullName}
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Người tổ chức: {m.organizer.fullName || "Chưa xác định"}
                   </p>
                 )}
               </div>
@@ -66,6 +55,7 @@ export default function MeetingListModal({ visible, onClose, title, meetings, on
             <p className="text-gray-500 dark:text-gray-400">Không có cuộc họp.</p>
           )}
         </div>
+
         <button
           className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
           onClick={onClose}
