@@ -154,7 +154,8 @@ export default function DashboardPage() {
           );
 
         setUpcomingMeetings(upcoming.slice(0, 3)); // Chỉ lấy 3 cuộc họp
-
+        setActiveMeetingsAll(activeMeetings);
+        setUpcomingMeetingsAll(upcoming);
         // Thống kê
         const meetingsToday = activeMeetings.filter((m) =>
           dayjs(m.startTime).isToday()
