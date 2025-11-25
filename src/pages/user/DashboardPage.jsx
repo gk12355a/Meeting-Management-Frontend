@@ -281,6 +281,7 @@ const handleOpenStat = (type) => {
   }
 
   setListModalOpen(true);
+  setPage(1); // Reset về trang 1 mỗi lần mở
 };
   return (
     <div className="space-y-6">
