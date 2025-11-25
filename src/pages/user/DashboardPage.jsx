@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { FiCalendar, FiClock, FiUsers, FiCheckSquare } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
-import { Spin, message, Modal } from "antd";
+import { Spin, message, Modal, Pagination } from "antd";
 import { getMyMeetings, getMeetingById } from "../../services/meetingService";
 import dayjs from "dayjs";
 import "dayjs/locale/vi";
@@ -82,11 +82,17 @@ const statTemplates = [
 // }
 
 export default function DashboardPage() {
-  const [listModalOpen, setListModalOpen] = useState(false);
-  const [listModalTitle, setListModalTitle] = useState("");
-  const [listModalData, setListModalData] = useState([]);
-  const [activeMeetingsAll, setActiveMeetingsAll] = useState([]);
-  const [upcomingMeetingsAll, setUpcomingMeetingsAll] = useState([]);
+const [listModalOpen, setListModalOpen] = useState(false);
+const [listModalTitle, setListModalTitle] = useState("");
+const [listModalData, setListModalData] = useState([]);
+const [activeMeetingsAll, setActiveMeetingsAll] = useState([]);
+const [upcomingMeetingsAll, setUpcomingMeetingsAll] = useState([]);
+const [page, setPage] = useState(1);
+const pageSize = 5;
+
+const pagedData = listModalData.slice((page - 1) * pageSize, page * pageSize);
+
+
   
   const { user } = useAuth(); // <-- Cần user.id để lọc
   const navigate = useNavigate();
@@ -379,36 +385,46 @@ const handleOpenStat = (type) => {
       >
       </MeetingDetailModal>
         <Modal
-        title={listModalTitle}
-        open={listModalOpen}
-        onCancel={() => setListModalOpen(false)}
-        footer={null}
-        width={600}
-      >
-        {listModalData.length === 0 ? (
-          <p className="text-gray-500">Không có cuộc họp nào.</p>
-        ) : (
-          <div className="space-y-3">
-            {listModalData.map((m) => (
-              <div
-                key={m.id}
-                className="p-3 rounded-lg bg-gray-50 dark:bg-slate-800 cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-700"
-                onClick={() => {
-                  setListModalOpen(false);
-                  handleShowMeetingDetail(m);
-                }}
-              >
-                <p className="font-semibold text-gray-800 dark:text-gray-100">
-                  {m.title}
-                </p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {dayjs(m.startTime).format("DD/MM HH:mm")} · {m.room?.name}
-                </p>
-              </div>
-            ))}
+  title={listModalTitle}
+  open={listModalOpen}
+  onCancel={() => setListModalOpen(false)}
+  footer={null}
+  width={600}
+>
+  {listModalData.length === 0 ? (
+    <p className="text-gray-500">Không có cuộc họp nào.</p>
+  ) : (
+    <>
+      <div className="space-y-3">
+        {pagedData.map((m) => (
+          <div
+            key={m.id}
+            className="p-3 rounded-lg bg-gray-50 dark:bg-slate-800 cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-700"
+            onClick={() => {
+              setListModalOpen(false);
+              handleShowMeetingDetail(m);
+            }}
+          >
+            <p className="font-semibold text-gray-800 dark:text-gray-100">
+              {m.title}
+            </p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              {dayjs(m.startTime).format("DD/MM HH:mm")} · {m.room?.name}
+            </p>
           </div>
-        )}
-      </Modal>
+        ))}
+      </div>
+
+      <Pagination
+        current={page}
+        pageSize={pageSize}
+        total={listModalData.length}
+        onChange={(p) => setPage(p)}
+        style={{ marginTop: 16, textAlign: "center" }}
+      />
+    </>
+  )}
+</Modal>
 
       {/* Loading overlay khi đang fetch dashboard */}
       {loadingDetail && false && (
