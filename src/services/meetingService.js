@@ -81,13 +81,13 @@ export const deleteMeeting = (meetingId, payload) => {
 };
 
 // Cập nhật toàn bộ chuỗi lịch định kỳ
-export const updateRecurringSeries = (seriesId, payload) => {
-  return api.put(`/meetings/series/${seriesId}`, payload);
+export const updateRecurringSeries = (seriesId, data) => {
+  return api.put(`/meetings/series/${seriesId}`, data);
 };
 
 // Hủy toàn bộ chuỗi lịch định kỳ
-export const deleteRecurringSeries = (seriesId, payload) => {
-  return api.delete(`/meetings/series/${seriesId}`, { data: payload });
+export const deleteRecurringSeries = (seriesId, data) => {
+   return api.delete(`/meetings/series/${seriesId}`, { data });
 };
 export const approveMeeting = (meetingId, approved, reason = null) => {
   return api.put(`/admin/meetings/${meetingId}/approval`, {
