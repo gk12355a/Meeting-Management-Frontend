@@ -1,6 +1,6 @@
 // src/components/user/DeleteMeetingModal.jsx
 import React, { useState } from "react";
-import { Modal, Form, Input, Button, Alert } from "antd";
+import { Modal, Form, Input, Button, Alert, Radio } from "antd";
 import { FiAlertTriangle } from "react-icons/fi";
 import { deleteMeeting, deleteRecurringSeries } from "../../services/meetingService";
 import { toast } from "react-toastify";
@@ -10,36 +10,50 @@ const { TextArea } = Input;
 const DeleteMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-  const [deleteType, setDeleteType] = useState("single"); // "single" hoặc "series"
 
+  const [deleteType, setDeleteType] = useState("single");
+  const [reasonType, setReasonType] = useState("schedule");
+  
   const isRecurring = !!meetingDetail?.recurrenceSeriesId;
+
+  const REASON_OPTIONS = [
+    { value: "schedule", label: "Thay đổi lịch trình" },
+    { value: "missing", label: "Không đủ người tham gia" },
+    { value: "device", label: "Lỗi thiết bị / phòng họp" },
+    { value: "not_needed", label: "Cuộc họp không còn cần thiết" },
+    { value: "custom", label: "Khác (Nhập lý do)" },
+  ];
 
   const handleDelete = async (values) => {
     try {
       setLoading(true);
-      
-      const payload = {
-        reason: values.reason || "Không có lý do"
-      };
 
-      // Nếu là cuộc họp định kỳ và chọn xóa toàn bộ chuỗi
+      let reasonText = "";
+      if (reasonType === "custom") {
+        reasonText = values.reason;
+      } else {
+        reasonText = REASON_OPTIONS.find((r) => r.value === reasonType)?.label || "Không có lý do";
+      }
+
+      const payload = { reason: reasonText };
+
       if (isRecurring && deleteType === "series") {
         await deleteRecurringSeries(meetingDetail.recurrenceSeriesId, payload);
-        toast.success("Đã hủy toàn bộ chuỗi cuộc họp định kỳ thành công!");
+        toast.success("Đã hủy toàn bộ chuỗi cuộc họp định kỳ!");
       } else {
-        // Xóa cuộc họp đơn lẻ hoặc chỉ 1 cuộc trong chuỗi
         await deleteMeeting(meetingDetail.id, payload);
-        toast.success(isRecurring ? "Đã hủy cuộc họp này thành công!" : "Đã hủy cuộc họp thành công!");
+        toast.success("Đã hủy cuộc họp thành công!");
       }
-      
+
       form.resetFields();
+      setReasonType("schedule");
       setDeleteType("single");
       onSuccess();
       onCancel();
+
     } catch (err) {
-      console.error("Lỗi khi hủy cuộc họp:", err);
-      const msg = err?.response?.data?.message || "Không thể hủy cuộc họp!";
-      toast.error(msg);
+      console.error("Lỗi khi hủy:", err);
+      toast.error(err?.response?.data?.message || "Không thể hủy cuộc họp!");
     } finally {
       setLoading(false);
     }
@@ -47,6 +61,7 @@ const DeleteMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
 
   const handleCancel = () => {
     form.resetFields();
+    setReasonType("schedule");
     setDeleteType("single");
     onCancel();
   };
@@ -56,7 +71,7 @@ const DeleteMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
       open={open}
       onCancel={handleCancel}
       footer={null}
-      width={500}
+      width={520}
       closable={!loading}
       maskClosable={!loading}
       title={
@@ -68,6 +83,7 @@ const DeleteMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
                  dark:[&_.ant-modal-header]:bg-gray-800 dark:[&_.ant-modal-header]:border-b-gray-700"
     >
       <div className="py-2">
+
         <Alert
           message="Cảnh báo"
           description={
@@ -77,7 +93,7 @@ const DeleteMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
                 "{meetingDetail?.title}"
               </p>
               <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                Tất cả người tham gia sẽ nhận được thông báo về việc hủy cuộc họp này.
+                Tất cả người tham gia sẽ nhận được thông báo về việc hủy.
               </p>
             </div>
           }
@@ -86,68 +102,62 @@ const DeleteMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
           className="mb-4 dark:bg-yellow-900/20 dark:border-yellow-700"
         />
 
-        {/* Hiển thị tùy chọn nếu là cuộc họp định kỳ */}
         {isRecurring && (
           <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
             <p className="text-sm font-medium text-blue-800 dark:text-blue-300 mb-3">
               Đây là cuộc họp định kỳ. Bạn muốn hủy:
             </p>
-            <div className="space-y-2">
-              <label className="flex items-center cursor-pointer">
-                <input
-                  type="radio"
-                  name="deleteType"
-                  value="single"
-                  checked={deleteType === "single"}
-                  onChange={(e) => setDeleteType(e.target.value)}
-                  className="mr-2"
-                  disabled={loading}
-                />
-                <span className="text-sm dark:text-gray-200">
-                  Chỉ cuộc họp này
-                </span>
-              </label>
-              <label className="flex items-center cursor-pointer">
-                <input
-                  type="radio"
-                  name="deleteType"
-                  value="series"
-                  checked={deleteType === "series"}
-                  onChange={(e) => setDeleteType(e.target.value)}
-                  className="mr-2"
-                  disabled={loading}
-                />
-                <span className="text-sm dark:text-gray-200">
-                  Toàn bộ chuỗi cuộc họp định kỳ
-                </span>
-              </label>
-            </div>
+
+            <Radio.Group
+              value={deleteType}
+              onChange={(e) => setDeleteType(e.target.value)}
+              disabled={loading}
+              className="flex flex-col gap-2"
+            >
+              <Radio value="single">Chỉ cuộc họp này</Radio>
+              <Radio value="series">Toàn bộ chuỗi cuộc họp</Radio>
+            </Radio.Group>
           </div>
         )}
 
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleDelete}
-          disabled={loading}
-        >
-          <Form.Item
-            label="Lý do hủy cuộc họp"
-            name="reason"
-            rules={[
-              { required: true, message: "Vui lòng nhập lý do hủy cuộc họp!" },
-              { min: 10, message: "Lý do phải có ít nhất 10 ký tự!" }
-            ]}
-          >
-            <TextArea
-              rows={4}
-              placeholder="Nhập lý do hủy cuộc họp (tối thiểu 10 ký tự)..."
-              className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-              maxLength={500}
-              showCount
-            />
+        {/* FORM */}
+        <Form form={form} layout="vertical" onFinish={handleDelete} disabled={loading}>
+
+          {/* Reason selector */}
+          <Form.Item label="Lý do hủy cuộc họp" required>
+            <Radio.Group
+              value={reasonType}
+              onChange={(e) => setReasonType(e.target.value)}
+              className="flex flex-col gap-2"
+            >
+              {REASON_OPTIONS.map((item) => (
+                <Radio key={item.value} value={item.value}>
+                  {item.label}
+                </Radio>
+              ))}
+            </Radio.Group>
           </Form.Item>
 
+          {/* Custom reason input */}
+          {reasonType === "custom" && (
+            <Form.Item
+              name="reason"
+              rules={[
+                { required: true, message: "Vui lòng nhập lý do!" },
+                { min: 10, message: "Lý do phải ít nhất 10 ký tự!" },
+              ]}
+            >
+              <TextArea
+                rows={4}
+                placeholder="Nhập lý do hủy cuộc họp..."
+                className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                maxLength={500}
+                showCount
+              />
+            </Form.Item>
+          )}
+
+          {/* Footer buttons */}
           <div className="flex justify-end gap-3 mt-4">
             <Button onClick={handleCancel} disabled={loading}>
               Không, giữ lại
