@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { FiCalendar, FiClock, FiUsers, FiCheckSquare } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
-import { Spin, message } from "antd";
+import { Spin, message, Modal, Pagination } from "antd";
 import { getMyMeetings, getMeetingById } from "../../services/meetingService";
 import dayjs from "dayjs";
 import "dayjs/locale/vi";
@@ -12,7 +12,7 @@ import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import isBetween from "dayjs/plugin/isBetween"; // <-- THÊM PLUGIN
 import isoWeek from "dayjs/plugin/isoWeek";
 import MeetingDetailModal from "../../components/user/MeetingDetailModal";
-
+import MeetingListModal from "../../components/MeetingListModal";
 // --- dayjs config ---
 dayjs.locale("vi");
 dayjs.extend(isToday);
@@ -82,6 +82,12 @@ const statTemplates = [
 // }
 
 export default function DashboardPage() {
+  const [listModalOpen, setListModalOpen] = useState(false);
+  const [listModalTitle, setListModalTitle] = useState("");
+  const [listModalData, setListModalData] = useState([]);
+  const [activeMeetingsAll, setActiveMeetingsAll] = useState([]);
+  const [upcomingMeetingsAll, setUpcomingMeetingsAll] = useState([]);
+
   const { user } = useAuth(); // <-- Cần user.id để lọc
   const navigate = useNavigate();
 
@@ -150,7 +156,8 @@ export default function DashboardPage() {
           );
 
         setUpcomingMeetings(upcoming.slice(0, 3)); // Chỉ lấy 3 cuộc họp
-
+        setActiveMeetingsAll(activeMeetings);
+        setUpcomingMeetingsAll(upcoming);
         // Thống kê
         const meetingsToday = activeMeetings.filter((m) =>
           dayjs(m.startTime).isToday()
@@ -236,7 +243,40 @@ export default function DashboardPage() {
   const handleViewDevices = () => {
     navigate("/user/devices");
   };
+const handleOpenStat = (type) => {
+  if (type === "today") {
+    setListModalTitle("Lịch họp hôm nay");
+    setListModalData(
+      activeMeetingsAll.filter(m => dayjs(m.startTime).isToday())
+    );
+  }
 
+  if (type === "week") {
+    setListModalTitle("Lịch họp tuần này");
+    setListModalData(
+      activeMeetingsAll.filter(m =>
+        dayjs(m.startTime).isBetween(
+          dayjs().startOf("isoWeek"),
+          dayjs().endOf("isoWeek")
+        )
+      )
+    );
+  }
+
+  if (type === "upcoming") {
+    setListModalTitle("Các cuộc họp sắp tới");
+    // dùng danh sách đầy đủ, không phải bản preview 3 cuộc
+    setListModalData(upcomingMeetingsAll);
+  }
+
+  if (type === "total") {
+    setListModalTitle("Tổng số cuộc họp");
+    setListModalData(activeMeetingsAll);
+  }
+
+  setListModalOpen(true);
+  setPage(1); // Reset về trang 1 mỗi lần mở
+};
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -262,9 +302,14 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {stats.map((stat, index) => (
               <div
-                key={index}
-                className="bg-white dark:bg-slate-900 rounded-xl p-5 shadow-sm border border-gray-200 dark:border-slate-800 transition-transform hover:scale-105"
-              >
+                onClick={() => {
+                  if (index === 0) handleOpenStat("today");
+                  if (index === 1) handleOpenStat("week");
+                  if (index === 2) handleOpenStat("upcoming");
+                  if (index === 3) handleOpenStat("total");
+                }}
+                className="cursor-pointer bg-white dark:bg-slate-900 rounded-xl p-5 shadow-sm border ... hover:scale-105"
+                >
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
@@ -334,6 +379,17 @@ export default function DashboardPage() {
         loading={loadingDetail}
       >
       </MeetingDetailModal>
+      {/* Meeting List Modal */}
+        <MeetingListModal
+  visible={listModalOpen}
+  onClose={() => setListModalOpen(false)}
+  title={listModalTitle}
+  meetings={listModalData} // toàn bộ dữ liệu, không phân trang
+  onMeetingClick={(m) => {
+    setListModalOpen(false);
+    handleShowMeetingDetail(m);
+  }}
+/>
 
       {/* Loading overlay khi đang fetch dashboard */}
       {loadingDetail && false && (
