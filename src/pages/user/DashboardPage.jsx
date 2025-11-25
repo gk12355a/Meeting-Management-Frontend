@@ -380,3 +380,29 @@ export default function DashboardPage() {
     </div>
   );
 }
+const handleOpenStat = (type) => {
+  if (type === "today") {
+    setListModalTitle("Lịch họp hôm nay");
+    setListModalData(
+      upcomingMeetingsAll.filter(m => dayjs(m.startTime).isToday())
+    );
+  }
+  if (type === "week") {
+    setListModalTitle("Lịch họp tuần này");
+    setListModalData(
+      upcomingMeetingsAll.filter(m =>
+        dayjs(m.startTime).isBetween(dayjs().startOf("isoWeek"), dayjs().endOf("isoWeek"))
+      )
+    );
+  }
+  if (type === "upcoming") {
+    setListModalTitle("Các cuộc họp sắp tới");
+    setListModalData(upcomingMeetings);
+  }
+  if (type === "total") {
+    setListModalTitle("Tổng số cuộc họp");
+    setListModalData(activeMeetingsAll);
+  }
+
+  setListModalOpen(true);
+};
