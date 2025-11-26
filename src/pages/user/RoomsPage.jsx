@@ -61,29 +61,41 @@ const RoomsPage = () => {
     return { text: apiStatus, color: "text-gray-500" };
   };
 
-  useEffect(() => {
-    const filtered = rooms.filter((room) => {
-      const matchesSearch = room.name
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase());
+  // FILTER ROOMS
+useEffect(() => {
+  const filtered = rooms.filter((room) => {
+    const matchesSearch = room.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
 
-      let matchStatus = true;
-      // --- Bộ lọc trạng thái ---
-      if (filterStatus !== "Tất cả") {
-        if (
-          filterStatus === "AVAILABLE" ||
-          filterStatus === "UNDER_MAINTENANCE"
-        ) {
-          matchStatus = room.status === filterStatus;
-        } else if (filterStatus === "VIP") {
-          matchStatus = room.requiresApproval === true;
-        }
-      }
-      return matchesSearch && matchStatus;
-    });
+    // Nếu không tick gì → coi như "Tất cả"
+    if (filterStatus.length === 0) return matchesSearch;
 
-    setProcessedRooms(filtered);
-  }, [searchTerm, filterStatus, rooms]);
+    let matchStatus = false;
+
+    // 1) Trống
+    if (filterStatus.includes("AVAILABLE") && room.status === "AVAILABLE") {
+      matchStatus = true;
+    }
+
+    // 2) Đang bảo trì
+    if (
+      filterStatus.includes("UNDER_MAINTENANCE") &&
+      room.status === "UNDER_MAINTENANCE"
+    ) {
+      matchStatus = true;
+    }
+
+    // 3) VIP
+    if (filterStatus.includes("VIP") && room.requiresApproval === true) {
+      matchStatus = true;
+    }
+
+    return matchesSearch && matchStatus;
+  });
+
+  setProcessedRooms(filtered);
+}, [searchTerm, filterStatus, rooms]);
 
   return (
     <div className="p-6 min-h-screen bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
