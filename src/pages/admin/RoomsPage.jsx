@@ -148,7 +148,7 @@ export default function RoomsPage() {
         capacity: room.capacity,
         location: room.location,
         status: room.status,
-        requiresApproval: room.requiresApproval || false,
+        requiresApproval: true || room.requiresApproval ,
         fixedDevices: room.fixedDevices || [], // Load thiết bị cũ hoặc mảng rỗng
       });
     } else {
