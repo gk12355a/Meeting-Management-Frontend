@@ -46,7 +46,7 @@ const DAYS_OF_WEEK = [
   { value: "SUNDAY", label: "Chủ nhật" },
 ];
 
-const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
+const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLockViewDate }) => {
   const [loading, setLoading] = useState(false);
   const [rooms, setRooms] = useState([]);
 
@@ -242,9 +242,14 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
       const res = await createMeeting(payload);
 
       if (res.data?.status === "PENDING_APPROVAL") {
-        toast.info("📝 Yêu cầu đặt phòng đã được gửi và đang chờ Admin phê duyệt.");
+        toast.info("Yêu cầu đặt phòng đã được gửi và đang chờ Admin phê duyệt.");
       } else {
-        toast.success("🎉 Tạo cuộc họp thành công!");
+        toast.success("Tạo cuộc họp thành công!");
+
+        if (onLockViewDate && quickBookingData?.start) {
+  onLockViewDate(quickBookingData.start.toDate());
+}
+
       }
 
       handleCancel();
