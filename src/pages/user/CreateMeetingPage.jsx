@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import {
   DatePicker,
+  TimePicker,
   Select,
   Input,
   Button,
@@ -60,8 +61,22 @@ const CreateMeetingPage = () => {
   const watchedCustomHour = Form.useWatch("customHour", form);
 
   // TIME PICKER STATE
-  const [clockOpen, setClockOpen] = useState(false);
-  const [clockValue, setClockValue] = useState(dayjs().hour(8).minute(0));
+  const [hour, setHour] = useState(8);
+  const [minute, setMinute] = useState(0);
+
+  const generateTimeOptions = () => {
+  const options = [];
+  for (let h = 8; h <= 18; h++) {
+    for (let m = 0; m < 60; m++) { // tất cả phút
+      if (h === 18 && m > 0) continue; // không vượt quá 18:00
+      const label = `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
+      options.push({ label, value: label });
+    }
+  }
+  return options;
+};
+
+const timeOptions = generateTimeOptions();
 
   // Load Rooms
   useEffect(() => {
@@ -149,7 +164,13 @@ const CreateMeetingPage = () => {
       setLoading(true);
 
       const date = values.date;
-      const time = dayjs(values.time);
+      const [hour, minute] = values.time.split(":").map(Number);
+      const time = dayjs()
+        .year(date.year())
+        .month(date.month())
+        .date(date.date())
+        .hour(hour)
+        .minute(minute);
 
       if (!validateBusinessTime(time)) {
         toast.error("⏰ Chỉ được đặt lịch từ 08:00 đến 18:00!");
@@ -254,52 +275,71 @@ const CreateMeetingPage = () => {
             </Form.Item>
 
             {/* DATE - TIME - DURATION */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <Form.Item name="date" label="Ngày họp" rules={[{ required: true }]}>
-                <DatePicker className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600" format="DD/MM/YYYY"
-                  disabledDate={(d) => !d || d < dayjs().startOf("day")} />
-              </Form.Item>
+<div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
 
-              <Form.Item name="time" label="Giờ bắt đầu" rules={[{ required: true }]}>
-                <div className="flex gap-2">
-                  <Input readOnly value={clockValue.format("HH:mm")} onClick={() => setClockOpen(true)}
-                    className="cursor-pointer dark:bg-gray-700 dark:text-white dark:border-gray-600" />
-                  <Button onClick={() => setClockOpen(true)}>🕒 Chọn</Button>
-                </div>
+  {/* DATE */}
+  <Form.Item
+    name="date"
+    label="Ngày họp"
+    rules={[{ required: true }]}
+  >
+    <DatePicker
+      className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
+      format="DD/MM/YYYY"
+      disabledDate={(d) => !d || d < dayjs().startOf("day")}
+    />
+  </Form.Item>
 
-                <Modal title="Chọn giờ họp (08:00 - 18:00)" open={clockOpen} onCancel={() => setClockOpen(false)}
-                  onOk={() => {
-                    if (!validateBusinessTime(clockValue)) {
-                      toast.error("⏰ Chỉ được đặt 08:00 - 18:00!");
-                      return;
-                    }
-                    form.setFieldsValue({ time: clockValue });
-                    setClockOpen(false);
-                  }} width={350} centered>
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <StaticTimePicker orientation="portrait" ampm={false} value={clockValue} onChange={(v) => setClockValue(v)}
-                      slotProps={{ actionBar: { actions: [] } }} />
-                  </LocalizationProvider>
-                </Modal>
-              </Form.Item>
+  {/* TIME */}
+  <Form.Item
+    name="time"
+    label="Giờ bắt đầu"
+    rules={[{ required: true, message: "Chọn giờ bắt đầu" }]}
+  >
+    <TimePicker
+      className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
+      format="HH:mm"
+      minuteStep={1} // chọn từng phút
+      disabledHours={() => []} // không disable giờ
+    />
+  </Form.Item>
 
-              <div className="flex gap-2">
-                <Form.Item name="duration" label="Thời lượng" initialValue={60} style={{ flex: 1 }}>
-                  <Select className="dark:bg-gray-700 dark:text-white dark:border-gray-600">
-                    <Option value={30}>30 phút</Option>
-                    <Option value={60}>1 giờ</Option>
-                    <Option value={90}>1.5 giờ</Option>
-                    <Option value={120}>2 giờ</Option>
-                  </Select>
-                </Form.Item>
-                <Form.Item name="customHour" label="Khác (giờ)" style={{ width: 80 }}>
-                  <Input type="number" step={0.5} min={0.5} max={8}
-                    onChange={() => form.setFieldsValue({ duration: undefined })}
-                    className="dark:bg-gray-700 dark:text-white dark:border-gray-600" />
-                </Form.Item>
-              </div>
-            </div>
+  {/* DURATION + CUSTOM HOUR */}
+  <div className="flex gap-2">
+    <Form.Item
+      name="duration"
+      label="Thời lượng"
+      style={{ flex: 1 }}
+      initialValue={60}
+    >
+      <Select
+        onChange={() => form.setFieldsValue({ customHour: undefined })}
+        className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
+      >
+        <Option value={30}>30 phút</Option>
+        <Option value={60}>1 giờ</Option>
+        <Option value={90}>1.5 giờ</Option>
+        <Option value={120}>2 giờ</Option>
+      </Select>
+    </Form.Item>
 
+    <Form.Item
+      name="customHour"
+      label="Khác (giờ)"
+      style={{ width: 90 }}
+    >
+      <Input
+        type="number"
+        step={0.5}
+        min={0.5}
+        max={8}
+        onChange={() => form.setFieldsValue({ duration: undefined })}
+        className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+      />
+    </Form.Item>
+  </div>
+
+</div>
             {/* ROOM SELECT */}
             <Form.Item name="roomId" label="Phòng họp" rules={[{ required: true, message: "Chọn phòng họp" }]}>
               <Select placeholder="-- Chọn phòng họp --" optionLabelProp="label"
