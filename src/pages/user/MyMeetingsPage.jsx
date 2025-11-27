@@ -18,7 +18,14 @@ import {
   Button,
   message,
 } from "antd";
-import { FiCalendar, FiPlusCircle, FiUsers, FiEdit, FiAlertTriangle } from "react-icons/fi";
+import {
+  FiCalendar,
+  FiPlusCircle,
+  FiUsers,
+  FiEdit,
+  FiAlertTriangle,
+} from "react-icons/fi";
+import { QrCode } from "lucide-react";
 import dayjs from "dayjs";
 import "dayjs/locale/vi";
 import utc from "dayjs/plugin/utc";
@@ -31,101 +38,174 @@ import EditMeetingModal from "../../components/user/EditMeetingModal";
 import DeleteMeetingModal from "../../components/user/DeleteMeetingModal";
 import QuickBookingModal from "../../components/user/QuickBookingModal";
 import MeetingDetailModal from "../../components/user/MeetingDetailModal";
+import QRCheckInModal from "../../components/user/QRCheckInModal";
 
 dayjs.locale("vi");
 dayjs.extend(utc);
 
 // ---- GIỜ HÀNH CHÍNH ----
 const WORK_HOUR_START = 8; // 8h sáng
-const WORK_HOUR_END = 18;  // 18h chiều (6PM), kết thúc lúc 18:00
+const WORK_HOUR_END = 18; // 18h chiều (6PM), kết thúc lúc 18:00
 
 // Helper functions để xử lý error messages
 const parseErrorMessage = (error) => {
   const msg = error?.response?.data?.message || error?.message || "";
   const status = error?.response?.status;
-  
+
   return {
     message: msg,
     status: status,
-    data: error?.response?.data
+    data: error?.response?.data,
   };
 };
 
 const getErrorToastConfig = (errorInfo) => {
   const { message: msg, status } = errorInfo;
   const lowerMsg = msg.toLowerCase();
-  
+
   // Xử lý các trường hợp lỗi cụ thể
   const errorHandlers = [
     {
-      condition: () => lowerMsg.includes("phòng") && (lowerMsg.includes("bảo trì") || lowerMsg.includes("maintenance")),
-      toast: () => toast.error("Phòng họp đang bảo trì, vui lòng chọn phòng khác!", { autoClose: 4000 })
+      condition: () =>
+        lowerMsg.includes("phòng") &&
+        (lowerMsg.includes("bảo trì") || lowerMsg.includes("maintenance")),
+      toast: () =>
+        toast.error("Phòng họp đang bảo trì, vui lòng chọn phòng khác!", {
+          autoClose: 4000,
+        }),
     },
     {
-      condition: () => lowerMsg.includes("phòng") && (lowerMsg.includes("bận") || lowerMsg.includes("không khả dụng") || lowerMsg.includes("đã được đặt")),
-      toast: () => toast.error("Phòng họp đã có người đặt trong khung giờ này. Vui lòng chọn thời gian hoặc phòng khác!", { autoClose: 4000 })
+      condition: () =>
+        lowerMsg.includes("phòng") &&
+        (lowerMsg.includes("bận") ||
+          lowerMsg.includes("không khả dụng") ||
+          lowerMsg.includes("đã được đặt")),
+      toast: () =>
+        toast.error(
+          "Phòng họp đã có người đặt trong khung giờ này. Vui lòng chọn thời gian hoặc phòng khác!",
+          { autoClose: 4000 }
+        ),
     },
     {
-      condition: () => lowerMsg.includes("thiết bị") && (lowerMsg.includes("bảo trì") || lowerMsg.includes("maintenance")),
-      toast: () => toast.error("Thiết bị đang bảo trì, vui lòng bỏ chọn hoặc chọn thiết bị khác!", { autoClose: 4000 })
+      condition: () =>
+        lowerMsg.includes("thiết bị") &&
+        (lowerMsg.includes("bảo trì") || lowerMsg.includes("maintenance")),
+      toast: () =>
+        toast.error(
+          "Thiết bị đang bảo trì, vui lòng bỏ chọn hoặc chọn thiết bị khác!",
+          { autoClose: 4000 }
+        ),
     },
     {
-      condition: () => lowerMsg.includes("thiết bị") && (lowerMsg.includes("bận") || lowerMsg.includes("không khả dụng") || lowerMsg.includes("đang được sử dụng")),
-      toast: () => toast.error("Thiết bị đang được sử dụng trong khung giờ này. Vui lòng chọn thiết bị khác!", { autoClose: 4000 })
+      condition: () =>
+        lowerMsg.includes("thiết bị") &&
+        (lowerMsg.includes("bận") ||
+          lowerMsg.includes("không khả dụng") ||
+          lowerMsg.includes("đang được sử dụng")),
+      toast: () =>
+        toast.error(
+          "Thiết bị đang được sử dụng trong khung giờ này. Vui lòng chọn thiết bị khác!",
+          { autoClose: 4000 }
+        ),
     },
     {
-      condition: () => lowerMsg.includes("người dùng") && lowerMsg.includes("bận"),
-      toast: () => toast.warning("Một hoặc nhiều người được mời đã có lịch họp trùng. Họ vẫn sẽ nhận được lời mời nhưng có thể từ chối.", { autoClose: 5000 })
+      condition: () =>
+        lowerMsg.includes("người dùng") && lowerMsg.includes("bận"),
+      toast: () =>
+        toast.warning(
+          "Một hoặc nhiều người được mời đã có lịch họp trùng. Họ vẫn sẽ nhận được lời mời nhưng có thể từ chối.",
+          { autoClose: 5000 }
+        ),
     },
     {
-      condition: () => lowerMsg.includes("người dùng") && (lowerMsg.includes("vô hiệu") || lowerMsg.includes("inactive") || lowerMsg.includes("không hoạt động")),
-      toast: () => toast.warning("Một hoặc nhiều người được mời có tài khoản đã bị vô hiệu hóa. Vui lòng kiểm tra lại danh sách!", { autoClose: 5000 })
+      condition: () =>
+        lowerMsg.includes("người dùng") &&
+        (lowerMsg.includes("vô hiệu") ||
+          lowerMsg.includes("inactive") ||
+          lowerMsg.includes("không hoạt động")),
+      toast: () =>
+        toast.warning(
+          "Một hoặc nhiều người được mời có tài khoản đã bị vô hiệu hóa. Vui lòng kiểm tra lại danh sách!",
+          { autoClose: 5000 }
+        ),
     },
     {
-      condition: () => lowerMsg.includes("thời gian") && (lowerMsg.includes("quá khứ") || lowerMsg.includes("past") || lowerMsg.includes("phải ở tương lai")),
-      toast: () => toast.error("Thời gian họp phải là thời điểm trong tương lai!", { autoClose: 3500 })
+      condition: () =>
+        lowerMsg.includes("thời gian") &&
+        (lowerMsg.includes("quá khứ") ||
+          lowerMsg.includes("past") ||
+          lowerMsg.includes("phải ở tương lai")),
+      toast: () =>
+        toast.error("Thời gian họp phải là thời điểm trong tương lai!", {
+          autoClose: 3500,
+        }),
     },
     {
-      condition: () => lowerMsg.includes("thời gian") && (lowerMsg.includes("trùng") || lowerMsg.includes("conflict")),
-      toast: () => toast.error("Khung giờ họp bị trùng với lịch khác. Vui lòng chọn thời gian khác!", { autoClose: 4000 })
+      condition: () =>
+        lowerMsg.includes("thời gian") &&
+        (lowerMsg.includes("trùng") || lowerMsg.includes("conflict")),
+      toast: () =>
+        toast.error(
+          "Khung giờ họp bị trùng với lịch khác. Vui lòng chọn thời gian khác!",
+          { autoClose: 4000 }
+        ),
     },
     {
-      condition: () => lowerMsg.includes("quyền") || lowerMsg.includes("permission") || status === 403,
-      toast: () => toast.error("Bạn không có quyền đặt phòng này hoặc tài nguyên không khả dụng!", { autoClose: 4000 })
+      condition: () =>
+        lowerMsg.includes("quyền") ||
+        lowerMsg.includes("permission") ||
+        status === 403,
+      toast: () =>
+        toast.error(
+          "Bạn không có quyền đặt phòng này hoặc tài nguyên không khả dụng!",
+          { autoClose: 4000 }
+        ),
     },
     {
-      condition: () => lowerMsg.includes("email") && lowerMsg.includes("không hợp lệ"),
-      toast: () => toast.error("Email khách mời không hợp lệ. Vui lòng kiểm tra lại!", { autoClose: 3500 })
+      condition: () =>
+        lowerMsg.includes("email") && lowerMsg.includes("không hợp lệ"),
+      toast: () =>
+        toast.error("Email khách mời không hợp lệ. Vui lòng kiểm tra lại!", {
+          autoClose: 3500,
+        }),
     },
     {
       condition: () => status === 400,
-      toast: () => toast.error(`Dữ liệu không hợp lệ: ${msg}`, { autoClose: 4000 })
+      toast: () =>
+        toast.error(`Dữ liệu không hợp lệ: ${msg}`, { autoClose: 4000 }),
     },
     {
       condition: () => status === 404,
-      toast: () => toast.error("Không tìm thấy tài nguyên (phòng/thiết bị/người dùng)", { autoClose: 3500 })
+      toast: () =>
+        toast.error("Không tìm thấy tài nguyên (phòng/thiết bị/người dùng)", {
+          autoClose: 3500,
+        }),
     },
     {
       condition: () => status === 409,
-      toast: () => toast.error("Xung đột dữ liệu: " + msg, { autoClose: 4000 })
-    }
+      toast: () => toast.error("Xung đột dữ liệu: " + msg, { autoClose: 4000 }),
+    },
   ];
-  
+
   // Tìm handler phù hợp
-  const handler = errorHandlers.find(h => h.condition());
-  
+  const handler = errorHandlers.find((h) => h.condition());
+
   if (handler) {
     handler.toast();
   } else {
     // Fallback: hiển thị message gốc
-    toast.error(msg || "Không thể tạo cuộc họp. Vui lòng thử lại!", { autoClose: 3500 });
+    toast.error(msg || "Không thể tạo cuộc họp. Vui lòng thử lại!", {
+      autoClose: 3500,
+    });
   }
 };
 
 // Tooltip: Tên cuộc họp, Thời gian, Địa điểm
 function getEventTooltipContent(event) {
   const { title, start, end, extendedProps } = event;
-  const time = `${dayjs(start).format("HH:mm")} - ${dayjs(end).format("HH:mm, DD/MM/YYYY")}`;
+  const time = `${dayjs(start).format("HH:mm")} - ${dayjs(end).format(
+    "HH:mm, DD/MM/YYYY"
+  )}`;
   const room = extendedProps?.roomName || "Chưa xác định";
   return `
     <div style="line-height: 1.6; min-width: 220px;">
@@ -150,17 +230,17 @@ function isBusinessTime(date) {
   const hour = d.hour();
   const minute = d.minute();
   return (
-    hour > WORK_HOUR_START && hour < WORK_HOUR_END
-    || (hour === WORK_HOUR_START)
-    || (hour === WORK_HOUR_END && minute === 0)
+    (hour > WORK_HOUR_START && hour < WORK_HOUR_END) ||
+    hour === WORK_HOUR_START ||
+    (hour === WORK_HOUR_END && minute === 0)
   );
 }
 
 // CSS cho các slot không hợp lệ (không dùng được)
 function injectNoBusinessTimeStyle() {
-  const styleId = 'no-business-time-slot-style';
+  const styleId = "no-business-time-slot-style";
   if (document.getElementById(styleId)) return;
-  const style = document.createElement('style');
+  const style = document.createElement("style");
   style.id = styleId;
   style.innerHTML = `
     /* Slot không hợp lệ (không đặt được): màu #f1f5f9, chéo "not allowed" khi hover */
@@ -217,22 +297,33 @@ function injectNoBusinessTimeStyle() {
   document.head.appendChild(style);
 }
 
-
 const MyMeetingPage = () => {
   // State quản lý lịch họp
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // ⭐ LƯU NGÀY HIỆN TẠI ĐANG XEM TRÊN CALENDAR
+  const [currentViewDate, setCurrentViewDate] = useState(new Date());
+  // ⭐ LOCK NGÀY SAU KHI ĐẶT LỊCH NHANH ĐỂ KHÔNG BỊ NHẢY VỀ HÔM NAY
+  const [lockedViewDate, setLockedViewDate] = useState(null);
+
   // State modal chi tiết
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [meetingDetail, setMeetingDetail] = useState(null);
 
-// State modal đặt lịch nhanh
-const [quickBooking, setQuickBooking] = useState({ open: false, start: null, end: null });
+  // State modal đặt lịch nhanh
+  const [quickBooking, setQuickBooking] = useState({
+    open: false,
+    start: null,
+    end: null,
+  });
 
   // Thêm state mới cho modal sửa/xoá
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  // State mới cho QR Check-in Modal
+  const [isQRModalOpen, setIsQRModalOpen] = useState(false);
 
   // State form data
   const { user } = useAuth();
@@ -277,23 +368,23 @@ const [quickBooking, setQuickBooking] = useState({ open: false, start: null, end
       const res = await getMyMeetings();
       const data = res.data?.content || [];
 
-      const filteredData = data.filter(m => {
+      const filteredData = data.filter((m) => {
         // Logic lọc cũ: Bỏ qua meeting đã hủy nếu muốn (hiện tại đang comment lại để hiển thị cả hủy)
         // if (m.status === 'CANCELLED') return false;
-        
+
         // 2. Kiểm tra xem user có phải người tổ chức không
         const isOrganizer = m.organizer?.id === user.id;
         // 3. Tìm trạng thái của user (nếu là người tham gia)
-        const userParticipant = m.participants?.find(p => p.id === user.id);
-        
+        const userParticipant = m.participants?.find((p) => p.id === user.id);
+
         // 4. LOGIC QUYẾT ĐỊNH:
         // NẾU TÔI LÀ NGƯỜI TỔ CHỨC: Luôn hiển thị
         if (isOrganizer) {
-          return true; 
+          return true;
         }
         // NẾU TÔI CHỈ LÀ NGƯỜI THAM GIA: Chỉ hiển thị nếu không từ chối
         if (userParticipant) {
-          return userParticipant.status !== 'DECLINED';
+          return userParticipant.status !== "DECLINED";
         }
 
         // Nếu không phải organizer và không có trong participants → Ẩn
@@ -305,20 +396,19 @@ const [quickBooking, setQuickBooking] = useState({ open: false, start: null, end
         const startLocal = dayjs(m.startTime).local().format();
         const endLocal = dayjs(m.endTime).local().format();
 
-        // === LOGIC MỚI: Nhóm CANCELLED và REJECTED ===
-        const isNegativeStatus = m.status === "CANCELLED" || m.status === "REJECTED";
+        const isNegativeStatus =
+          m.status === "CANCELLED" || m.status === "REJECTED";
 
         let bgColor, borderColor;
-        
+
         if (isNegativeStatus) {
-          bgColor = "#ef4444"; // Đỏ
-          borderColor = "#b91c1c"; // Đỏ đậm
+          bgColor = "#ef4444"; // đỏ
+          borderColor = "#b91c1c"; // đỏ đậm
         } else if (m.status === "CONFIRMED") {
-          bgColor = "#3b82f6"; // Xanh dương
+          bgColor = "#3b82f6";
           borderColor = "#2563eb";
         } else {
-          // PENDING_APPROVAL
-          bgColor = "#f59e0b"; // Vàng cam
+          bgColor = "#f59e0b";
           borderColor = "#d97706";
         }
 
@@ -331,13 +421,28 @@ const [quickBooking, setQuickBooking] = useState({ open: false, start: null, end
           borderColor: borderColor,
           extendedProps: {
             roomName: m.room?.name || "Chưa xác định",
+            status: m.status, // <-- thêm status vào extendedProps
           },
-          // Áp dụng class gạch ngang nếu là CANCELLED hoặc REJECTED
-          classNames: isNegativeStatus ? ["meeting-cancelled"] : []
+          classNames: isNegativeStatus ? ["meeting-cancelled"] : [],
+          hiddenInWeekDayView: isNegativeStatus, // <-- thêm cờ này
         };
       });
 
       setEvents(mappedEvents);
+
+      // ⭐ GIỮ NGÀY USER ĐANG ĐỨNG (KHÔNG JUMP VỀ TODAY)
+      setTimeout(() => {
+        const api = calendarRef.current?.getApi?.();
+        if (!api) return;
+
+        if (lockedViewDate) {
+          api.gotoDate(lockedViewDate);
+          // reset để chỉ dùng 1 lần sau khi đặt nhanh
+          setLockedViewDate(null);
+        } else if (currentViewDate) {
+          api.gotoDate(currentViewDate);
+        }
+      }, 0);
     } catch (err) {
       console.error("Lỗi tải lịch họp:", err);
       toast.error("Không thể tải danh sách lịch họp!");
@@ -353,7 +458,7 @@ const [quickBooking, setQuickBooking] = useState({ open: false, start: null, end
       setMeetingDetail(null);
       setIsModalOpen(true);
       const res = await getMeetingById(id);
-      setMeetingDetail(res.data); 
+      setMeetingDetail(res.data);
     } catch (err) {
       console.error("Lỗi khi lấy chi tiết:", err);
       toast.error("Không thể tải chi tiết cuộc họp!");
@@ -396,65 +501,66 @@ const [quickBooking, setQuickBooking] = useState({ open: false, start: null, end
     function onMove(ev) {
       positionTooltip(ev);
     }
-    document.addEventListener('mousemove', onMove);
+    document.addEventListener("mousemove", onMove);
     tooltip._removeMousemove = () => {
-      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener("mousemove", onMove);
     };
   };
 
   const handleEventMouseLeave = () => {
     if (tooltipRef.current) {
-      if (tooltipRef.current._removeMousemove) tooltipRef.current._removeMousemove();
-      if (tooltipRef.current.parentNode) tooltipRef.current.parentNode.removeChild(tooltipRef.current);
+      if (tooltipRef.current._removeMousemove)
+        tooltipRef.current._removeMousemove();
+      if (tooltipRef.current.parentNode)
+        tooltipRef.current.parentNode.removeChild(tooltipRef.current);
       tooltipRef.current = null;
     }
   };
 
   // ---- GENERATE NON-BUSINESS HOURS SLOTS (for day/week view vertical grid coloring) ----
   function getNonBusinessHourBackgroundEvents(viewStart, viewEnd) {
-  const slots = [];
-  let d = dayjs(viewStart).startOf("day");
-  const until = dayjs(viewEnd).startOf("day");
+    const slots = [];
+    let d = dayjs(viewStart).startOf("day");
+    const until = dayjs(viewEnd).startOf("day");
 
-  while (d.isBefore(until)) {
-    // Block thời gian trước giờ hành chính
-    slots.push({
-      start: d.hour(0).minute(0).second(0).format(),
-      end: d.hour(WORK_HOUR_START).minute(0).second(0).format(),
-      display: "background",
-      classNames: ["fc-nonbusiness"],
-    });
+    while (d.isBefore(until)) {
+      // Block thời gian trước giờ hành chính
+      slots.push({
+        start: d.hour(0).minute(0).second(0).format(),
+        end: d.hour(WORK_HOUR_START).minute(0).second(0).format(),
+        display: "background",
+        classNames: ["fc-nonbusiness"],
+      });
 
-    // Block thời gian sau giờ hành chính
-    slots.push({
-      start: d.hour(WORK_HOUR_END).minute(0).second(0).format(),
-      end: d.hour(23).minute(59).second(59).format(),
-      display: "background",
-      classNames: ["fc-nonbusiness"],
-    });
+      // Block thời gian sau giờ hành chính
+      slots.push({
+        start: d.hour(WORK_HOUR_END).minute(0).second(0).format(),
+        end: d.hour(23).minute(59).second(59).format(),
+        display: "background",
+        classNames: ["fc-nonbusiness"],
+      });
 
-    d = d.add(1, "day");
-  }
+      d = d.add(1, "day");
+    }
 
-  // Block quá khứ
-  const now = dayjs();
-  let dPast = dayjs(viewStart).startOf("day");
-  while (dPast.isSameOrBefore(now, "day")) {
-    let endOfPast =
-      dPast.isSame(now, "day")
+    // Block quá khứ
+    const now = dayjs();
+    let dPast = dayjs(viewStart).startOf("day");
+    while (dPast.isSameOrBefore(now, "day")) {
+      let endOfPast = dPast.isSame(now, "day")
         ? now.format()
         : dPast.hour(23).minute(59).second(59).format();
-    slots.push({
-      start: dPast.hour(0).minute(0).second(0).format(),
-      end: endOfPast,
-      display: "background",
-      classNames: ["fc-nonbusiness"], // block quá khứ
-    });
-    dPast = dPast.add(1, "day");
-  }
+      slots.push({
+        start: dPast.hour(0).minute(0).second(0).format(),
+        end: endOfPast,
+        display: "background",
+        classNames: ["fc-nonbusiness"], // block quá khứ
+      });
+      dPast = dPast.add(1, "day");
+    }
 
-  return slots;
-}
+    return slots;
+  }
 
   // RED LINE NOW-INDICATOR
   useEffect(() => {
@@ -464,7 +570,7 @@ const [quickBooking, setQuickBooking] = useState({ open: false, start: null, end
           calendarRef.current.getApi().updateNow();
         }
       } catch (e) {}
-    }, 20000); 
+    }, 20000);
     return () => clearInterval(interval);
   }, []);
 
@@ -473,69 +579,29 @@ const [quickBooking, setQuickBooking] = useState({ open: false, start: null, end
     let start = selection?.startStr ? dayjs(selection.startStr) : null;
     let end = selection?.endStr ? dayjs(selection.endStr) : null;
     if (!start || !end) return;
-    
+
     const isStartOk = isBusinessTime(start);
     const isEndOk = isBusinessTime(end);
-    
+
     if (!isStartOk || !isEndOk) {
-      toast.warn("Chỉ được tạo lịch trong giờ hành chính từ thứ 2 đến thứ 6 và không chọn quá khứ!");
+      toast.warn(
+        "Chỉ được tạo lịch trong giờ hành chính từ thứ 2 đến thứ 6 và không chọn quá khứ!"
+      );
       return;
     }
-    
+
     let duration = end.diff(start, "minute");
     if (duration <= 0) duration = 60;
-    
+
+    // ⭐ LOCK NGÀY USER VỪA CHỌN ĐỂ SAU KHI ĐẶT XONG KHÔNG NHẢY VỀ TODAY
+    setLockedViewDate(start.toDate());
+
     setQuickBooking({
       open: true,
       start: start,
       end: start.add(duration, "minute"),
     });
   };
-
-  // // === HÀM RENDER NGƯỜI THAM GIA ===
-  // const renderParticipants = (organizer, participants) => {
-  //   if (!participants && !organizer) {
-  //     return <span className="text-gray-500 dark:text-gray-400">Không có người tham gia.</span>;
-  //   }
-
-  //   const getTag = (status) => {
-  //     switch (status) {
-  //       case 'ACCEPTED':
-  //         return <Tag color="success" className="ml-2">Đã chấp nhận</Tag>;
-  //       case 'DECLINED':
-  //         return <Tag color="error" className="ml-2">Đã từ chối</Tag>;
-  //       case 'PENDING':
-  //         return <Tag color="warning" className="ml-2">Chờ phản hồi</Tag>;
-  //       default:
-  //         return null;
-  //     }
-  //   };
-
-  //   const allAttendees = [
-  //     organizer,
-  //     ...(participants || [])
-  //   ].filter(Boolean);
-
-  //   const uniqueAttendees = allAttendees.filter((p, index, self) =>
-  //     p.id && index === self.findIndex((t) => t.id === p.id)
-  //   );
-
-  //   return (
-  //     <ul className="list-none p-0 m-0">
-  //       {uniqueAttendees.map(p => (
-  //         <li key={p.id} className="flex justify-between items-center py-1">
-  //           <span className="text-gray-800 dark:text-gray-100">
-  //             {p.fullName}
-  //             {p.id === organizer?.id && (
-  //               <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">(Tổ chức)</span>
-  //             )}
-  //           </span>
-  //           {getTag(p.status)}
-  //         </li>
-  //       ))}
-  //     </ul>
-  //   );
-  // };
 
   // Load lịch họp khi component mount
   useEffect(() => {
@@ -569,7 +635,16 @@ const [quickBooking, setQuickBooking] = useState({ open: false, start: null, end
     return () => document.head.removeChild(style);
   }, []);
 
-  // ---------- RENDER ----------
+  // ===== KÉO THẢ CHỈ CHO KÉO TRONG CÙNG 1 NGÀY =====
+  function isSameDay(d1, d2) {
+    return (
+      dayjs(d1).year() === dayjs(d2).year() &&
+      dayjs(d1).month() === dayjs(d2).month() &&
+      dayjs(d1).date() === dayjs(d2).date()
+    );
+  }
+
+  // RENDER
   return (
     <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-500">
       <ToastContainer position="top-right" autoClose={2500} />
@@ -597,9 +672,32 @@ const [quickBooking, setQuickBooking] = useState({ open: false, start: null, end
       ) : (
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 transition-colors duration-500">
           <FullCalendar
+            eventDidMount={(info) => {
+              const viewType = info.view.type; // Loại view hiện tại: dayGridMonth, timeGridWeek, timeGridDay
+              const event = info.event;
+
+              // Nếu event bị hủy
+              if (
+                event.extendedProps.status === "CANCELLED" ||
+                event.extendedProps.status === "REJECTED"
+              ) {
+                if (
+                  viewType === "timeGridWeek" ||
+                  viewType === "timeGridDay"
+                ) {
+                  // Ẩn hẳn sự kiện trong day/week view
+                  info.el.style.display = "none";
+                }
+                // Month view thì vẫn giữ, sẽ áp dụng class "meeting-cancelled" gạch đỏ
+              }
+            }}
             ref={calendarRef}
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
             initialView="timeGridWeek"
+            // ⭐ BẮT SỰ KIỆN THAY ĐỔI VIEW (CHUYỂN TUẦN / THÁNG / NGÀY)
+            datesSet={(arg) => {
+              setCurrentViewDate(arg.start);
+            }}
             headerToolbar={{
               left: "prev,next today",
               center: "title",
@@ -609,7 +707,6 @@ const [quickBooking, setQuickBooking] = useState({ open: false, start: null, end
             slotMinTime="06:00:00"
             slotMaxTime="19:30:00"
             events={events}
-
             eventClick={handleEventClick}
             eventMouseEnter={handleEventMouseEnter}
             eventMouseLeave={handleEventMouseLeave}
@@ -617,31 +714,39 @@ const [quickBooking, setQuickBooking] = useState({ open: false, start: null, end
             locale="vi"
             selectable={true}
             selectMirror={true}
-            // ---------
             select={handleDateSelect}
-            
-            selectAllow={function(selectInfo) {
+            selectAllow={function (selectInfo) {
               const start = dayjs(selectInfo.start);
               const end = dayjs(selectInfo.end);
               const validStart = isBusinessTime(start);
               const validEnd = isBusinessTime(end);
-              return validStart && validEnd;
+              // chỉ cho phép chọn nếu trong cùng 1 ngày
+              const sameDay = isSameDay(
+                start,
+                end.subtract(1, "minute")
+              ); // subtract 1 minute to avoid end 00:00 of next day
+              return validStart && validEnd && sameDay;
             }}
-
-            eventAllow={function(dropInfo, draggedEvent) {
+            eventAllow={function (dropInfo, draggedEvent) {
               const start = dayjs(dropInfo.start);
               const end = dayjs(dropInfo.end);
               const validStart = isBusinessTime(start);
               const validEnd = isBusinessTime(end);
-              return validStart && validEnd;
+              // CHỈ CHO KÉO THẢ TRONG 1 NGÀY
+              const sameDay = isSameDay(
+                start,
+                end.subtract(1, "minute")
+              );
+              return validStart && validEnd && sameDay;
             }}
-
             businessHours={{
-              daysOfWeek: [0 , 1 , 2, 3, 4, 5, 6],
-              startTime: '08:00',
-              endTime: '18:00',
+              daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
+              startTime: "08:00",
+              endTime: "18:00",
             }}
-            backgroundEvents={(arg) => getNonBusinessHourBackgroundEvents(arg.start, arg.end)}
+            backgroundEvents={(arg) =>
+              getNonBusinessHourBackgroundEvents(arg.start, arg.end)
+            }
             nowIndicator={true}
           />
         </div>
@@ -650,7 +755,9 @@ const [quickBooking, setQuickBooking] = useState({ open: false, start: null, end
       {/* Modal đặt lịch nhanh */}
       <QuickBookingModal
         open={quickBooking.open}
-        onCancel={() => setQuickBooking({ open: false, start: null, end: null })}
+        onCancel={() =>
+          setQuickBooking({ open: false, start: null, end: null })
+        }
         quickBookingData={quickBooking}
         onSuccess={fetchMeetings}
       />
@@ -686,32 +793,52 @@ const [quickBooking, setQuickBooking] = useState({ open: false, start: null, end
         {/* Footer với buttons Sửa/Hủy nếu là người tổ chức */}
         {meetingDetail && meetingDetail.organizer?.id === user?.id ? (
           <div className="flex justify-end gap-2">
-              <Button
-                type="primary"
-                icon={<FiEdit />}
-                onClick={() => {
-                  setIsEditModalOpen(true);
-                  setIsModalOpen(false);
-                }}
-                className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500"
-              >
-                Sửa
-              </Button>
-              <Button
-                danger
-                icon={<FiAlertTriangle />}
-                onClick={() => {
-                  setIsDeleteModalOpen(true);
-                  setIsModalOpen(false);
-                }}
-              >
-                Hủy họp
-              </Button>
-            </div>
+            {/* Nút Hiển thị QR Check-in */}
+            <Button
+              type="default"
+              icon={<QrCode size={16} />}
+              onClick={() => {
+                setIsQRModalOpen(true);
+                setIsModalOpen(false);
+              }}
+              className="bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/30 dark:hover:bg-purple-800/40 border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300"
+            >
+              QR Check-in
+            </Button>
+            <Button
+              type="primary"
+              icon={<FiEdit />}
+              onClick={() => {
+                setIsEditModalOpen(true);
+                setIsModalOpen(false);
+              }}
+              className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500"
+            >
+              Sửa
+            </Button>
+            <Button
+              danger
+              icon={<FiAlertTriangle />}
+              onClick={() => {
+                setIsDeleteModalOpen(true);
+                setIsModalOpen(false);
+              }}
+            >
+              Hủy họp
+            </Button>
+          </div>
         ) : (
           <Button onClick={() => setIsModalOpen(false)}>Đóng</Button>
         )}
       </MeetingDetailModal>
+
+      {/* Modal hiển thị QR Check-in */}
+      <QRCheckInModal
+        open={isQRModalOpen}
+        onClose={() => setIsQRModalOpen(false)}
+        checkinCode={meetingDetail?.checkinCode}
+        meetingTitle={meetingDetail?.title}
+      />
     </div>
   );
 };
