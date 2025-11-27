@@ -11,11 +11,10 @@ import {
   Divider,
   Checkbox,
   Modal,
-  Alert,
   Tag,
   Spin, 
 } from "antd";
-import { FiPlusCircle, FiUsers, FiInfo } from "react-icons/fi";
+import { FiPlusCircle, FiUsers } from "react-icons/fi";
 import dayjs from "dayjs";
 import "dayjs/locale/vi";
 import utc from "dayjs/plugin/utc";
@@ -49,9 +48,6 @@ const CreateMeetingPage = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
 
-  // State phòng VIP
-  const [selectedRoom, setSelectedRoom] = useState(null);
-
   const debounceTimer = useRef(null);
   const [form] = Form.useForm();
   const { user } = useAuth();
@@ -62,7 +58,6 @@ const CreateMeetingPage = () => {
   const watchedTime = Form.useWatch("time", form);
   const watchedDuration = Form.useWatch("duration", form);
   const watchedCustomHour = Form.useWatch("customHour", form);
-  const watchedRoomId = Form.useWatch("roomId", form);
 
   // TIME PICKER STATE
   const [clockOpen, setClockOpen] = useState(false);
@@ -80,16 +75,6 @@ const CreateMeetingPage = () => {
     };
     loadRooms();
   }, []);
-
-  // Theo dõi phòng VIP
-  useEffect(() => {
-    if (watchedRoomId) {
-      const room = rooms.find((r) => r.id === watchedRoomId);
-      setSelectedRoom(room);
-    } else {
-      setSelectedRoom(null);
-    }
-  }, [watchedRoomId, rooms]);
 
   // Load Devices khi thời gian thay đổi
   useEffect(() => {
@@ -207,41 +192,39 @@ const CreateMeetingPage = () => {
       form.resetFields();
       setClockValue(dayjs().hour(8).minute(0));
       setIsRecurring(false);
-      setSelectedRoom(null);
       setAvailableDevices([]);
 
     } catch (err) {
-  console.error("ERROR:", err?.response?.data);
+      console.error("ERROR:", err?.response?.data);
 
-  const backendMsg =
-    err?.response?.data?.error ||
-    err?.response?.data?.message ||
-    "Không thể tạo cuộc họp!";
+      const backendMsg =
+        err?.response?.data?.error ||
+        err?.response?.data?.message ||
+        "Không thể tạo cuộc họp!";
 
-  const raw = backendMsg.toLowerCase();
-  let msg = "Không thể tạo cuộc họp!";
+      const raw = backendMsg.toLowerCase();
+      let msg = "Không thể tạo cuộc họp!";
 
-  // === 1️⃣ Phòng họp trùng lịch ===
-  if (raw.includes("phòng") && raw.includes("đã bị đặt")) {
-    msg = "Phòng họp đã được đặt trong khung giờ này";
-  }
+      // === 1️⃣ Phòng họp trùng lịch ===
+      if (raw.includes("phòng") && raw.includes("đã bị đặt")) {
+        msg = "Phòng họp đã được đặt trong khung giờ này";
+      }
 
-  // === 2️⃣ Người tham dự trùng lịch ===
-  else if (raw.includes("người tham dự") && raw.includes("trùng lịch")) {
-    msg = "Người tham gia bị trùng lịch trong khung giờ này";
-  }
+      // === 2️⃣ Người tham dự trùng lịch ===
+      else if (raw.includes("người tham dự") && raw.includes("trùng lịch")) {
+        msg = "Người tham gia bị trùng lịch trong khung giờ này";
+      }
 
-  // fallback chung nếu BE trả lỗi khác
-  else {
-    msg = `⚠️ ${backendMsg}`;
-  }
+      // fallback chung nếu BE trả lỗi khác
+      else {
+        msg = `⚠️ ${backendMsg}`;
+      }
 
-  toast.error(msg, {
-    position: "top-right",
-    autoClose: 3500,
-  });
-}
- finally {
+      toast.error(msg, {
+        position: "top-right",
+        autoClose: 3500,
+      });
+    } finally {
       setLoading(false);
     }
   };
@@ -317,7 +300,7 @@ const CreateMeetingPage = () => {
               </div>
             </div>
 
-            {/* ROOM SELECT + VIP */}
+            {/* ROOM SELECT */}
             <Form.Item name="roomId" label="Phòng họp" rules={[{ required: true, message: "Chọn phòng họp" }]}>
               <Select placeholder="-- Chọn phòng họp --" optionLabelProp="label"
                 className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
@@ -327,7 +310,6 @@ const CreateMeetingPage = () => {
                     <div className="flex justify-between items-center">
                       <span>
                         {r.name} ({r.capacity} chỗ)
-                        {r.requiresApproval && <Tag color="gold" className="ml-2 text-[10px]">VIP</Tag>}
                       </span>
                       <Tag color={r.status === "AVAILABLE" ? "green" : "red"}>
                         {r.status === "AVAILABLE" ? "Có sẵn" : "Bảo trì"}
@@ -338,16 +320,7 @@ const CreateMeetingPage = () => {
               </Select>
             </Form.Item>
 
-            {selectedRoom?.requiresApproval && (
-              <Alert
-                message="Lưu ý: Phòng VIP"
-                description="Phòng họp này yêu cầu sự phê duyệt từ Admin. Cuộc họp sẽ ở trạng thái 'Chờ duyệt' sau khi tạo."
-                type="warning"
-                showIcon
-                icon={<FiInfo />}
-                className="mb-4"
-              />
-            )}
+            {/* Đã xóa Alert VIP */}
 
             {/* DEVICES */}
             <Form.Item name="deviceIds" label="Thiết bị sử dụng">
@@ -466,7 +439,7 @@ const CreateMeetingPage = () => {
                 size="large"
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600"
               >
-                {selectedRoom?.requiresApproval ? "Gửi yêu cầu duyệt" : "Tạo cuộc họp"}
+                Tạo cuộc họp
               </Button>
             </Form.Item>
           </Form>
