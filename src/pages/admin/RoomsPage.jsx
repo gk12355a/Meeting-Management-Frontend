@@ -15,9 +15,7 @@ import {
   Check,
   AlertTriangle,
   Building,
-  Crown,
   Monitor, // Icon cho thiết bị
-  Tag, // Icon cho tag
 } from "lucide-react";
 import { toast } from "react-toastify";
 import Pagination from "../../components/Pagination";
@@ -70,7 +68,7 @@ export default function RoomsPage() {
     capacity: 0,
     location: "",
     status: "AVAILABLE",
-    requiresApproval: false,
+    requiresApproval: true, // Mặc định luôn là true
     fixedDevices: [], // Mảng chứa danh sách thiết bị
   });
 
@@ -120,9 +118,8 @@ export default function RoomsPage() {
         statusFilter === "UNDER_MAINTENANCE"
       ) {
         matchStatus = item.status === statusFilter;
-      } else if (statusFilter === "VIP") {
-        matchStatus = item.requiresApproval === true;
       }
+      // Đã bỏ logic lọc VIP tại đây
 
       return matchSearch && matchStatus;
     });
@@ -148,8 +145,8 @@ export default function RoomsPage() {
         capacity: room.capacity,
         location: room.location,
         status: room.status,
-        requiresApproval: true || room.requiresApproval ,
-        fixedDevices: room.fixedDevices || [], // Load thiết bị cũ hoặc mảng rỗng
+        requiresApproval: true, // Luôn đảm bảo là true khi sửa (hoặc giữ room.requiresApproval nếu muốn)
+        fixedDevices: room.fixedDevices || [],
       });
     } else {
       setEditingRoom(null);
@@ -158,7 +155,7 @@ export default function RoomsPage() {
         capacity: 0,
         location: "",
         status: "AVAILABLE",
-        requiresApproval: false,
+        requiresApproval: true, // Mặc định là true khi tạo mới
         fixedDevices: [],
       });
     }
@@ -222,8 +219,8 @@ export default function RoomsPage() {
         location: formData.location.trim(),
         capacity: capacityValue,
         status: formData.status,
-        requiresApproval: formData.requiresApproval,
-        fixedDevices: formData.fixedDevices, // Gửi mảng thiết bị lên server
+        requiresApproval: true, // HARDCODE: Luôn yêu cầu duyệt
+        fixedDevices: formData.fixedDevices,
       };
 
       if (editingRoom) {
@@ -306,7 +303,7 @@ export default function RoomsPage() {
   const totalMaintenance = rooms.filter(
     (room) => room.status === "UNDER_MAINTENANCE"
   ).length;
-  const totalVip = rooms.filter((room) => !!room.requiresApproval).length;
+  // Đã bỏ totalVip
 
   return (
     <div className="p-8 min-h-screen transition-colors bg-gray-50 dark:bg-gray-900">
@@ -352,7 +349,7 @@ export default function RoomsPage() {
             <option value="ALL">Tất cả trạng thái</option>
             <option value="AVAILABLE">Có sẵn</option>
             <option value="UNDER_MAINTENANCE">Đang bảo trì</option>
-            <option value="VIP">Phòng VIP</option>
+            {/* Đã xóa option VIP */}
           </select>
           <button
             onClick={() => handleOpenModal()}
@@ -366,7 +363,8 @@ export default function RoomsPage() {
       </motion.div>
 
       {/* STATS */}
-      <motion.div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-7">
+      {/* Đã điều chỉnh grid thành 3 cột vì bỏ 1 thẻ VIP */}
+      <motion.div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-7">
         {[
           {
             label: "Tổng số phòng",
@@ -385,12 +383,6 @@ export default function RoomsPage() {
             val: totalMaintenance,
             color: "text-orange-700",
             bg: "bg-orange-50",
-          },
-          {
-            label: "Phòng VIP",
-            val: totalVip,
-            color: "text-yellow-700",
-            bg: "bg-yellow-50",
           },
         ].map((item, idx) => (
           <motion.div
@@ -431,7 +423,7 @@ export default function RoomsPage() {
                 <th className="p-4">Phòng họp</th>
                 <th className="p-4">Vị trí</th>
                 <th className="p-4">Sức chứa</th>
-                <th className="p-4 w-64">Thiết bị</th> {/* Cột mới */}
+                <th className="p-4 w-64">Thiết bị</th>
                 <th className="p-4">Trạng thái</th>
                 <th className="p-4 text-center">Tác vụ</th>
               </tr>
@@ -460,11 +452,7 @@ export default function RoomsPage() {
                       <div className="font-semibold text-gray-900 dark:text-white">
                         {room.name}
                       </div>
-                      {room.requiresApproval && (
-                        <span className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 text-[10px] font-bold bg-yellow-100 text-yellow-700 rounded border border-yellow-200">
-                          <Crown size={10} /> VIP
-                        </span>
-                      )}
+                      {/* Đã xóa nhãn VIP ở đây */}
                     </td>
                     <td className="p-4 text-gray-600 dark:text-gray-400">
                       {room.location || (
@@ -475,7 +463,7 @@ export default function RoomsPage() {
                       {room.capacity} người
                     </td>
 
-                    {/* CỘT THIẾT BỊ - HIỂN THỊ TAGS */}
+                    {/* CỘT THIẾT BỊ */}
                     <td className="p-4">
                       {room.fixedDevices && room.fixedDevices.length > 0 ? (
                         <div className="flex flex-wrap gap-1">
@@ -577,7 +565,7 @@ export default function RoomsPage() {
                   />
                 </div>
 
-                {/* Grid: Location & Capacity (Tiết kiệm chỗ) */}
+                {/* Grid: Location & Capacity */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -710,36 +698,7 @@ export default function RoomsPage() {
                   </div>
                 </div>
 
-                {/* VIP Toggle */}
-                <div className="flex items-center justify-between bg-yellow-50 dark:bg-yellow-900/10 p-4 rounded-xl border border-yellow-200 dark:border-yellow-800/30">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-yellow-100 dark:bg-yellow-900/40 rounded-lg text-yellow-600 dark:text-yellow-400">
-                      <Crown size={20} />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-gray-900 dark:text-white text-sm">
-                        Phòng VIP
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        Yêu cầu Admin phê duyệt.
-                      </p>
-                    </div>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      className="sr-only peer"
-                      checked={formData.requiresApproval}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          requiresApproval: e.target.checked,
-                        })
-                      }
-                    />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                  </label>
-                </div>
+                {/* Đã xóa phần VIP Toggle */}
               </form>
             </div>
 
