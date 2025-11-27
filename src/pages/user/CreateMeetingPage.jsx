@@ -290,19 +290,25 @@ const timeOptions = generateTimeOptions();
     />
   </Form.Item>
 
-  {/* TIME */}
   <Form.Item
-    name="time"
-    label="Giờ bắt đầu"
-    rules={[{ required: true, message: "Chọn giờ bắt đầu" }]}
-  >
-    <TimePicker
-      className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
-      format="HH:mm"
-      minuteStep={1} // chọn từng phút
-      disabledHours={() => []} // không disable giờ
-    />
-  </Form.Item>
+  name="time"
+  label="Giờ bắt đầu"
+  rules={[{ required: true, message: "Chọn giờ bắt đầu" }]}
+>
+  <TimePicker
+    className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
+    format="HH:mm"
+    minuteStep={1}
+    disabledHours={() => {
+      const hours = [];
+      for (let i = 0; i < 24; i++) {
+        if (i < 8 || i > 18) hours.push(i);
+      }
+      return hours;
+    }}
+    hideDisabledOptions={true} // ẩn hẳn các giờ đã disabled
+  />
+</Form.Item>
 
   {/* DURATION + CUSTOM HOUR */}
   <div className="flex gap-2">
