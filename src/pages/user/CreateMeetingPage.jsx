@@ -27,10 +27,7 @@ import { getAvailableDevices } from "../../services/deviceService";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-// MUI STATIC TIME PICKER
-import { LocalizationProvider } from "@mui/x-date-pickers";
-import { StaticTimePicker } from "@mui/x-date-pickers/StaticTimePicker";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+
 
 dayjs.locale("vi");
 dayjs.extend(utc);
@@ -59,9 +56,7 @@ const CreateMeetingPage = () => {
   const watchedDuration = Form.useWatch("duration", form);
   const watchedCustomHour = Form.useWatch("customHour", form);
 
-  // TIME PICKER STATE
-  const [clockOpen, setClockOpen] = useState(false);
-  const [clockValue, setClockValue] = useState(dayjs().hour(8).minute(0));
+
 
   // Load Rooms
   useEffect(() => {
@@ -149,7 +144,7 @@ const CreateMeetingPage = () => {
       setLoading(true);
 
       const date = values.date;
-      const time = dayjs(values.time);
+      const time = values.time;
 
       if (!validateBusinessTime(time)) {
         toast.error("⏰ Chỉ được đặt lịch từ 08:00 đến 18:00!");
@@ -190,7 +185,6 @@ const CreateMeetingPage = () => {
       }
 
       form.resetFields();
-      setClockValue(dayjs().hour(8).minute(0));
       setIsRecurring(false);
       setAvailableDevices([]);
 
@@ -260,28 +254,46 @@ const CreateMeetingPage = () => {
                   disabledDate={(d) => !d || d < dayjs().startOf("day")} />
               </Form.Item>
 
-              <Form.Item name="time" label="Giờ bắt đầu" rules={[{ required: true }]}>
-                <div className="flex gap-2">
-                  <Input readOnly value={clockValue.format("HH:mm")} onClick={() => setClockOpen(true)}
-                    className="cursor-pointer dark:bg-gray-700 dark:text-white dark:border-gray-600" />
-                  <Button onClick={() => setClockOpen(true)}>🕒 Chọn</Button>
-                </div>
+              <Form.Item name="hour" hidden><Input /></Form.Item>
+              <Form.Item name="minute" hidden><Input /></Form.Item>
 
-                <Modal title="Chọn giờ họp (08:00 - 18:00)" open={clockOpen} onCancel={() => setClockOpen(false)}
-                  onOk={() => {
-                    if (!validateBusinessTime(clockValue)) {
-                      toast.error("⏰ Chỉ được đặt 08:00 - 18:00!");
-                      return;
-                    }
-                    form.setFieldsValue({ time: clockValue });
-                    setClockOpen(false);
-                  }} width={350} centered>
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <StaticTimePicker orientation="portrait" ampm={false} value={clockValue} onChange={(v) => setClockValue(v)}
-                      slotProps={{ actionBar: { actions: [] } }} />
-                  </LocalizationProvider>
-                </Modal>
-              </Form.Item>
+              <Form.Item name="time" label="Giờ bắt đầu" rules={[{ required: true }]}>
+              <div className="grid grid-cols-2 gap-2">
+
+              {/* Chọn giờ */}
+              <Select
+            placeholder="Giờ"
+            onChange={(h) => {
+              const m = form.getFieldValue("minute") || 0;
+              const time = dayjs().hour(h).minute(m);
+              form.setFieldsValue({ time, hour: h });
+            }}
+            className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+            options={Array.from({ length: 11 }, (_, i) => {
+              const hour = i + 8; // 8 → 18
+              return {
+                label: hour.toString().padStart(2, "0"),
+                value: hour,
+              };
+            })}
+          />
+
+              <Select
+            placeholder="Phút"
+            onChange={(m) => {
+              const h = form.getFieldValue("hour") || 8;
+              const time = dayjs().hour(h).minute(m);
+              form.setFieldsValue({ time, minute: m });
+            }}
+            className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+            options={Array.from({ length: 60 }, (_, i) => ({
+              label: i.toString().padStart(2, "0"),
+              value: i,
+            }))}
+          />
+
+            </div>
+          </Form.Item>
 
               <div className="flex gap-2">
                 <Form.Item name="duration" label="Thời lượng" initialValue={60} style={{ flex: 1 }}>
