@@ -302,10 +302,13 @@ const MyMeetingPage = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // ⭐ LƯU NGÀY HIỆN TẠI ĐANG XEM TRÊN CALENDAR
+  // LƯU NGÀY HIỆN TẠI ĐANG XEM TRÊN CALENDAR
   const [currentViewDate, setCurrentViewDate] = useState(new Date());
-  // ⭐ LOCK NGÀY SAU KHI ĐẶT LỊCH NHANH ĐỂ KHÔNG BỊ NHẢY VỀ HÔM NAY
+  // LOCK NGÀY SAU KHI ĐẶT LỊCH NHANH ĐỂ KHÔNG BỊ NHẢY VỀ HÔM NAY
   const [lockedViewDate, setLockedViewDate] = useState(null);
+
+  // VIEW HIỆN TẠI (month/week/day) để xử lý ẩn meeting bị hủy
+const [currentViewType, setCurrentViewType] = useState("timeGridWeek");
 
   // State modal chi tiết
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -343,17 +346,29 @@ const MyMeetingPage = () => {
     const style = document.createElement("style");
     style.innerHTML = `
       .meeting-cancelled {
-        opacity: 0.4 !important;
-        filter: grayscale(0.5);
-      }
+  background-color: #e5e7eb !important;     /* gray-200 */
+  border-color: #d1d5db !important;         /* gray-300 */
+  color: #374151 !important;                /* gray-700 */
+  opacity: 1 !important;
+  filter: none !important;
+  position: relative;
+}
 
-      .meeting-cancelled .fc-event-title,
-      .meeting-cancelled .fc-event-time {
-        text-decoration: line-through !important;
-        text-decoration-color: #b91c1c !important;
-        text-decoration-thickness: 1.2px !important;
-        text-underline-offset: -4px;
-      }
+.meeting-cancelled .fc-event-title,
+.meeting-cancelled .fc-event-time {
+  text-decoration: line-through !important;
+  text-decoration-color: #ef4444 !important; /* tailwind red-500 */
+  text-decoration-thickness: 1.5px !important;
+}
+
+.meeting-cancelled::before {
+  content: "✖"; /* icon dấu X */
+  font-size: 12px;
+  color: #ef4444; /* đỏ */
+  position: absolute;
+  left: 6px;
+  top: 4px;
+}
     `;
     document.head.appendChild(style);
     return () => style.remove();
@@ -392,7 +407,15 @@ const MyMeetingPage = () => {
       });
 
       // Map từ dữ liệu ĐÃ LỌC
-      const mappedEvents = filteredData.map((m) => {
+      let cleanedData = filteredData;
+
+// ❌ Ẩn cuộc họp bị hủy trong Week/Day view (để không bị lỗi layout)
+if (currentViewType === "timeGridWeek" || currentViewType === "timeGridDay") {
+  cleanedData = cleanedData.filter(m => m.status !== "CANCELLED" && m.status !== "REJECTED");
+}
+
+const mappedEvents = cleanedData.map((m) => {
+
         const startLocal = dayjs(m.startTime).local().format();
         const endLocal = dayjs(m.endTime).local().format();
 
@@ -430,19 +453,17 @@ const MyMeetingPage = () => {
 
       setEvents(mappedEvents);
 
-      // ⭐ GIỮ NGÀY USER ĐANG ĐỨNG (KHÔNG JUMP VỀ TODAY)
+      // GIỮ NGÀY USER ĐANG ĐỨNG (KHÔNG JUMP VỀ TODAY)
       setTimeout(() => {
-        const api = calendarRef.current?.getApi?.();
-        if (!api) return;
+  const api = calendarRef.current?.getApi?.();
+  if (!api) return;
 
-        if (lockedViewDate) {
-          api.gotoDate(lockedViewDate);
-          // reset để chỉ dùng 1 lần sau khi đặt nhanh
-          setLockedViewDate(null);
-        } else if (currentViewDate) {
-          api.gotoDate(currentViewDate);
-        }
-      }, 0);
+  if (lockedViewDate) {
+    api.gotoDate(lockedViewDate);
+  } else if (currentViewDate) {
+    api.gotoDate(currentViewDate);
+  }
+}, 50);
     } catch (err) {
       console.error("Lỗi tải lịch họp:", err);
       toast.error("Không thể tải danh sách lịch họp!");
@@ -672,31 +693,32 @@ const MyMeetingPage = () => {
       ) : (
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 transition-colors duration-500">
           <FullCalendar
-            eventDidMount={(info) => {
-              const viewType = info.view.type; // Loại view hiện tại: dayGridMonth, timeGridWeek, timeGridDay
-              const event = info.event;
+            // eventDidMount={(info) => {
+            //   const viewType = info.view.type; // Loại view hiện tại: dayGridMonth, timeGridWeek, timeGridDay
+            //   const event = info.event;
 
-              // Nếu event bị hủy
-              if (
-                event.extendedProps.status === "CANCELLED" ||
-                event.extendedProps.status === "REJECTED"
-              ) {
-                if (
-                  viewType === "timeGridWeek" ||
-                  viewType === "timeGridDay"
-                ) {
-                  // Ẩn hẳn sự kiện trong day/week view
-                  info.el.style.display = "none";
-                }
-                // Month view thì vẫn giữ, sẽ áp dụng class "meeting-cancelled" gạch đỏ
-              }
-            }}
+            //   // Nếu event bị hủy
+            //   if (
+            //     event.extendedProps.status === "CANCELLED" ||
+            //     event.extendedProps.status === "REJECTED"
+            //   ) {
+            //     if (
+            //       viewType === "timeGridWeek" ||
+            //       viewType === "timeGridDay"
+            //     ) {
+            //       // Ẩn hẳn sự kiện trong day/week view
+            //       info.el.style.display = "none";
+            //     }
+            //     // Month view thì vẫn giữ, sẽ áp dụng class "meeting-cancelled" gạch đỏ
+            //   }
+            // }}
             ref={calendarRef}
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
             initialView="timeGridWeek"
-            // ⭐ BẮT SỰ KIỆN THAY ĐỔI VIEW (CHUYỂN TUẦN / THÁNG / NGÀY)
+            // BẮT SỰ KIỆN THAY ĐỔI VIEW (CHUYỂN TUẦN / THÁNG / NGÀY)
             datesSet={(arg) => {
               setCurrentViewDate(arg.start);
+              setCurrentViewType(arg.view.type);
             }}
             headerToolbar={{
               left: "prev,next today",
@@ -754,13 +776,14 @@ const MyMeetingPage = () => {
 
       {/* Modal đặt lịch nhanh */}
       <QuickBookingModal
-        open={quickBooking.open}
-        onCancel={() =>
-          setQuickBooking({ open: false, start: null, end: null })
-        }
-        quickBookingData={quickBooking}
-        onSuccess={fetchMeetings}
-      />
+  open={quickBooking.open}
+  onCancel={() =>
+    setQuickBooking({ open: false, start: null, end: null })
+  }
+  quickBookingData={quickBooking}
+  onSuccess={fetchMeetings}
+  onLockViewDate={(date) => setLockedViewDate(date)}
+/>
 
       {/* Modal chỉnh sửa cuộc họp */}
       <EditMeetingModal

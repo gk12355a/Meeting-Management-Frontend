@@ -130,54 +130,76 @@ const RoomsPage = () => {
         </div>
 
         {/* NEW CHECKBOX FILTER */}
-        <div
-          className="flex flex-wrap items-center gap-4 bg-white dark:bg-slate-800 
+        {/* NEW CHECKBOX FILTER - MATCH STYLE OF IMAGE 1 */}
+<div
+  className="flex flex-wrap items-center gap-4 bg-white dark:bg-slate-800 
   p-3 rounded-lg border border-gray-300 dark:border-slate-700 shadow-sm"
-        >
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={filterStatus.includes("AVAILABLE")}
-              onChange={() => {
-                setFilterStatus((prev) =>
-                  prev.includes("AVAILABLE")
-                    ? prev.filter((f) => f !== "AVAILABLE")
-                    : [...prev, "AVAILABLE"]
-                );
-              }}
-            />
-            <span className="text-gray-700 dark:text-gray-200">Trống</span>
-          </label>
+>
+  {/* --- FILTER: AVAILABLE --- */}
+  <label className="flex items-center gap-2 cursor-pointer">
+    <input
+      type="checkbox"
+      checked={filterStatus.includes("AVAILABLE")}
+      onChange={() => {
+        setFilterStatus((prev) =>
+          prev.includes("AVAILABLE")
+            ? prev.filter((f) => f !== "AVAILABLE")
+            : [...prev, "AVAILABLE"]
+        );
+      }}
+      className="
+        w-4 h-4 rounded 
+        border-2 border-gray-400 
+        checked:bg-purple-600 checked:border-purple-600 
+        dark:border-gray-500 dark:checked:bg-purple-500 
+        cursor-pointer
+        appearance-none
+        checked:appearance-auto
+      "
+    />
+    <span className="text-gray-700 dark:text-gray-200">Trống</span>
+  </label>
 
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={filterStatus.includes("UNDER_MAINTENANCE")}
-              onChange={() => {
-                setFilterStatus((prev) =>
-                  prev.includes("UNDER_MAINTENANCE")
-                    ? prev.filter((f) => f !== "UNDER_MAINTENANCE")
-                    : [...prev, "UNDER_MAINTENANCE"]
-                );
-              }}
-            />
-            <span className="text-gray-700 dark:text-gray-200">
-              Đang bảo trì
-            </span>
-          </label>
+  {/* --- FILTER: UNDER MAINTENANCE --- */}
+  <label className="flex items-center gap-2 cursor-pointer">
+    <input
+      type="checkbox"
+      checked={filterStatus.includes("UNDER_MAINTENANCE")}
+      onChange={() => {
+        setFilterStatus((prev) =>
+          prev.includes("UNDER_MAINTENANCE")
+            ? prev.filter((f) => f !== "UNDER_MAINTENANCE")
+            : [...prev, "UNDER_MAINTENANCE"]
+        );
+      }}
+      className="
+        w-4 h-4 rounded 
+        border-2 border-gray-400 
+        checked:bg-purple-600 checked:border-purple-600 
+        dark:border-gray-500 dark:checked:bg-purple-500 
+        cursor-pointer
+        appearance-none
+        checked:appearance-auto
+      "
+    />
+    <span className="text-gray-700 dark:text-gray-200">Đang bảo trì</span>
+  </label>
 
-          {/* Đã xóa Checkbox Phòng VIP */}
-
-          {/* SELECT ALL */}
-          <button
-            onClick={() =>
-              setFilterStatus(["AVAILABLE", "UNDER_MAINTENANCE"])
-            }
-            className="ml-auto px-3 py-1 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700"
-          >
-            Chọn tất cả
-          </button>
-        </div>
+  {/* SELECT ALL Button */}
+  <button
+    onClick={() =>
+      setFilterStatus(["AVAILABLE", "UNDER_MAINTENANCE"])
+    }
+    className="
+      ml-auto px-4 py-1.5 
+      text-sm rounded-md font-medium 
+      bg-green-600 hover:bg-green-700 
+      text-white shadow-sm transition
+    "
+  >
+    Chọn tất cả
+  </button>
+</div>
       </div>
 
       {/* ROOM LIST */}
