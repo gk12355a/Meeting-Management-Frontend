@@ -1,9 +1,11 @@
-// src/pages/user/ProfilePage.jsx
 import React, { useEffect, useState } from "react";
-import { Form, Input, Button, message, Card, Spin } from "antd";
-import { FiUser, FiSave, FiMail, FiShield } from "react-icons/fi"; // <-- Thêm icon
+import { Form, Input, Button, Card, Spin, message, Tag } from "antd";
+import { FiUser, FiSave, FiMail, FiShield } from "react-icons/fi";
 import { useAuth } from "../../context/AuthContext";
 import { getMyProfile, updateMyProfile } from "../../services/userService";
+import { getGoogleAuthorizeUrl } from "../../services/googleService";   // ✅ THÊM
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 // Hàm trợ giúp để dịch Role
 const formatRole = (role) => {
@@ -14,143 +16,178 @@ const formatRole = (role) => {
 
 const ProfilePage = () => {
   const [form] = Form.useForm();
-  const [loading, setLoading] = useState(true); // Bắt đầu là true để tải
-  const [saving, setSaving] = useState(false); // Loading cho nút Lưu
-  const { user } = useAuth(); // <-- Lấy dữ liệu user từ Context
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const { user } = useAuth();
 
-  // 1. Tải thông tin động (fullName) VÀ set thông tin tĩnh (email, role)
+  // ⭐ THÊM HÀM KẾT NỐI GOOGLE
+  const handleConnectGoogle = async () => {
+    try {
+      const res = await getGoogleAuthorizeUrl();
+      const url = res.data.url;
+      window.location.href = url; // Redirect → Google OAuth
+    } catch {
+      toast.error("Không thể kết nối Google Calendar.");
+    }
+  };
+
   useEffect(() => {
     if (!user) {
       setLoading(false);
       return;
     }
-
-    // === Set dữ liệu tĩnh từ Auth Context ===
-    // Không cần gọi API vì nó có sẵn trong token
     form.setFieldsValue({
       username: user.username,
-      role: user.roles.map(formatRole).join(', '), // Hiển thị vai trò
+      role: user.roles.map(formatRole).join(", "),
     });
 
     const fetchProfile = async () => {
       setLoading(true);
       try {
-        // Gọi API GET /api/v1/users/profile (chỉ để lấy fullName)
-        const res = await getMyProfile(); 
-        
-        // Gán fullName (dữ liệu có thể thay đổi)
+        const res = await getMyProfile();
         form.setFieldsValue({
           fullName: res.data.fullName,
         });
-      } catch (err) {
-        console.error("Lỗi tải thông tin cá nhân:", err);
+      } catch {
         message.error("Không thể tải thông tin cá nhân.");
       } finally {
         setLoading(false);
       }
     };
-
     fetchProfile();
-  }, [user, form]); // Chạy lại nếu user thay đổi
+  }, [user, form]);
 
-  // 2. Xử lý khi nhấn nút Lưu (Giữ nguyên)
   const handleSave = async (values) => {
     setSaving(true);
     try {
-      // Chỉ gửi đi fullName theo yêu cầu của API
-      const payload = {
-        fullName: values.fullName,
-      };
-
-      // Gọi API PUT /api/v1/users/profile
-      await updateMyProfile(payload);
-      message.success("Cập nhật thông tin thành công!");
-
-    } catch (err) {
-      console.error("Lỗi cập nhật thông tin:", err);
-      message.error("Cập nhật thất bại. Vui lòng thử lại.");
+      await updateMyProfile({ fullName: values.fullName });
+      toast.success("🎉 Cập nhật thông tin thành công!");
+    } catch {
+      toast.error("Cập nhật thất bại. Vui lòng thử lại.");
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100 flex items-center gap-2">
-        <FiUser />
-        Thông tin cá nhân
-      </h1>
-      
-      <Card 
-        className="shadow-lg bg-white dark:bg-[#1e293b] border dark:border-gray-700"
-        variant="borderless"
-      >
-        {loading ? (
-          <div className="flex justify-center items-center h-40">
-            <Spin size="large" />
-          </div>
-        ) : (
-          <Form 
-            form={form} 
-            layout="vertical" 
-            onFinish={handleSave}
-            className="dark:text-gray-100"
-          >
-            {/* === Tên đăng nhập (Email) === */}
-            <Form.Item
-              label="Email (Tên đăng nhập)"
-              name="username"
-              className="dark:[&_.ant-form-item-label>label]:text-gray-300"
-            >
-              <Input 
-                prefix={<FiMail className="text-gray-400" />}
-                disabled // Không cho phép sửa
-                className="dark:bg-slate-700 dark:text-gray-400 dark:border-slate-600"
-              />
-            </Form.Item>
+    <div className="p-6 min-h-screen bg-white dark:bg-[#0f172a]">
+      <ToastContainer position="top-right" autoClose={2500} />
 
-            {/* === Vai trò === */}
-            <Form.Item
-              label="Vai trò"
-              name="role"
-              className="dark:[&_.ant-form-item-label>label]:text-gray-300"
-            >
-              <Input 
-                prefix={<FiShield className="text-gray-400" />}
-                disabled // Không cho phép sửa
-                className="dark:bg-slate-700 dark:text-gray-400 dark:border-slate-600"
-              />
-            </Form.Item>
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-6 pb-3 border-b border-gray-300 dark:border-gray-700">
+        <div className="p-3 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-500 shadow-md">
+          <FiUser className="text-white text-2xl" />
+        </div>
+        <div>
+          <h2 className="text-3xl font-bold dark:text-gray-100">Thông tin cá nhân</h2>
+          <p className="text-gray-500 dark:text-gray-400">Xem và chỉnh sửa hồ sơ của bạn</p>
+        </div>
+      </div>
 
-            {/* Họ và tên (Cho phép sửa) */}
-            <Form.Item
-              label="Họ và tên"
-              name="fullName"
-              rules={[{ required: true, message: "Vui lòng nhập họ và tên!" }]}
-              className="dark:[&_.ant-form-item-label>label]:text-gray-300"
-            >
-              <Input 
-                prefix={<FiUser className="text-gray-400" />}
-                placeholder="Nhập họ và tên đầy đủ của bạn"
-                className="dark:bg-slate-700 dark:text-white dark:border-slate-600"
-              />
-            </Form.Item>
+      {/* FORM */}
+      <div className="max-w-lg mx-auto">
+        <Card className="rounded-2xl shadow-xl bg-white dark:bg-[#1e293b] dark:text-gray-100 border-none p-6">
+          {loading ? (
+            <div className="flex justify-center items-center h-40">
+              <Spin size="large" />
+            </div>
+          ) : (
+            <Form form={form} layout="vertical" onFinish={handleSave} className="space-y-4">
 
-            {/* Nút Lưu */}
-            <Form.Item className="mt-4">
-              <Button
-                type="primary"
-                htmlType="submit"
-                loading={saving}
-                icon={<FiSave />}
-                className="bg-blue-600 hover:bg-blue-700"
+              {/* EMAIL */}
+              <Form.Item
+                label={
+                  <span className="flex items-center gap-2 font-medium text-gray-700 dark:text-gray-300">
+                    <FiMail /> Email
+                  </span>
+                }
+                name="username"
               >
-                Lưu thay đổi
-              </Button>
-            </Form.Item>
-          </Form>
-        )}
-      </Card>
+                <Input
+                  disabled
+                  className="
+                    rounded-xl py-2 bg-gray-50 border-gray-300 
+                    dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600
+                  "
+                />
+              </Form.Item>
+
+              {/* ROLE */}
+              <Form.Item
+                label={
+                  <span className="flex items-center gap-2 font-medium text-gray-700 dark:text-gray-300">
+                    <FiShield /> Vai trò
+                  </span>
+                }
+                name="role"
+              >
+                <Input
+                  disabled
+                  className="
+                    rounded-xl py-2 bg-gray-50 border-gray-300 
+                    dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600
+                  "
+                />
+              </Form.Item>
+
+              {/* FULL NAME */}
+              <Form.Item
+                label={
+                  <span className="flex items-center gap-2 font-medium text-gray-700 dark:text-gray-300">
+                    <FiUser /> Họ và tên
+                  </span>
+                }
+                name="fullName"
+                rules={[{ required: true, message: "Vui lòng nhập họ và tên!" }]}
+              >
+                <Input
+                  placeholder="Nhập họ và tên đầy đủ của bạn"
+                  className="
+                    rounded-xl py-2 bg-white border-gray-300
+                    focus:ring-2 focus:ring-blue-500 focus:border-blue-500 
+                    dark:bg-gray-700 dark:text-white dark:border-gray-600 
+                    dark:focus:ring-blue-400 dark:focus:border-blue-400
+                  "
+                />
+              </Form.Item>
+
+              {/* GOOGLE CALENDAR */}
+              <Form.Item label="Google Calendar">
+                {user?.isGoogleLinked ? (
+                  <Tag color="green" className="px-3 py-1 text-base">
+                    ✔ Đã liên kết Google Calendar
+                  </Tag>
+                ) : (
+                  <Button type="primary" danger onClick={handleConnectGoogle}>
+                    Kết nối Google Calendar
+                  </Button>
+                )}
+              </Form.Item>
+
+              {/* SAVE BUTTON */}
+              <Form.Item className="pt-4">
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={saving}
+                  icon={<FiSave />}
+                  size="large"
+                  block
+                  className="
+                    rounded-xl py-2 text-lg font-semibold 
+                    bg-gradient-to-r from-blue-600 to-indigo-600 
+                    hover:opacity-90 shadow-md
+                    dark:from-blue-500 dark:to-indigo-500
+                  "
+                >
+                  Lưu thay đổi
+                </Button>
+              </Form.Item>
+
+            </Form>
+          )}
+        </Card>
+      </div>
     </div>
   );
 };

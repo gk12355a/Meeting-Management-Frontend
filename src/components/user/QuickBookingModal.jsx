@@ -12,9 +12,8 @@ import {
   Checkbox,
   Spin,
   Tag,
-  Alert,
 } from "antd";
-import { FiPlusCircle, FiUsers, FiInfo } from "react-icons/fi";
+import { FiPlusCircle, FiUsers } from "react-icons/fi";
 import dayjs from "dayjs";
 import "dayjs/locale/vi";
 import utc from "dayjs/plugin/utc";
@@ -36,6 +35,17 @@ dayjs.extend(utc);
 const { TextArea } = Input;
 const { Option } = Select;
 
+// Thêm constant DAYS_OF_WEEK TRƯỚC COMPONENT
+const DAYS_OF_WEEK = [
+  { value: "MONDAY", label: "Thứ 2" },
+  { value: "TUESDAY", label: "Thứ 3" },
+  { value: "WEDNESDAY", label: "Thứ 4" },
+  { value: "THURSDAY", label: "Thứ 5" },
+  { value: "FRIDAY", label: "Thứ 6" },
+  { value: "SATURDAY", label: "Thứ 7" },
+  { value: "SUNDAY", label: "Chủ nhật" },
+];
+
 const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [rooms, setRooms] = useState([]);
@@ -47,8 +57,8 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
   const [isSearching, setIsSearching] = useState(false);
   const [isRecurring, setIsRecurring] = useState(false);
 
-  // State cho phòng VIP
-  const [selectedRoom, setSelectedRoom] = useState(null);
+  // ← THÊM 2 DÒNG NÀY
+  const [selectedDays, setSelectedDays] = useState([]);
 
   // TIME PICKER STATE
   const [clockOpen, setClockOpen] = useState(false);
@@ -62,11 +72,10 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
   const watchedDate = Form.useWatch("date", form);
   const watchedTime = Form.useWatch("time", form);
   const watchedDuration = Form.useWatch("duration", form);
-  const watchedRoomId = Form.useWatch("roomId", form);
+  const watchedRoomId = Form.useWatch("roomId", form); // Vẫn watch để logic form hoạt động, nhưng không set state VIP nữa
+  const watchedFrequency = Form.useWatch("frequency", form);
 
-  /* ===================================================
-                    LOAD ROOMS
-  ====================================================*/
+  /* LOAD ROOMS */
   useEffect(() => {
     if (!open) return;
 
@@ -81,14 +90,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
     loadRooms();
   }, [open]);
 
-  /* ===== THEO DÕI PHÒNG ĐÃ CHỌN (VIP) =====*/
-  useEffect(() => {
-    if (watchedRoomId) {
-      const room = rooms.find((r) => r.id === watchedRoomId);
-      setSelectedRoom(room);
-    } else
-      setSelectedRoom(null);
-    }, [watchedRoomId, rooms]);
+  // Đã xóa useEffect theo dõi selectedRoom VIP
 
   /* ===== SET INITIAL FORM VALUES =====*/
   useEffect(() => {
@@ -98,8 +100,8 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
       if (duration <= 0) duration = 60;
 
       setIsRecurring(false);
+      setSelectedDays([]);
       setClockValue(start);
-      setSelectedRoom(null);
 
       setTimeout(() => {
         form.setFieldsValue({
@@ -114,6 +116,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
           isRecurring: false,
           frequency: "DAILY",
           repeatUntil: undefined,
+          daysOfWeek: [],
           description: "",
         });
       }, 100);
@@ -210,6 +213,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
         .hour(time.hour())
         .minute(time.minute());
 
+      // Cập nhật payload: Nếu weekly thì thêm daysOfWeek nếu có
       const payload = {
         title: values.title.trim(),
         description: values.description || "",
@@ -227,6 +231,9 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
                 frequency: values.frequency,
                 interval: 1,
                 repeatUntil: dayjs(values.repeatUntil).format("YYYY-MM-DD"),
+                ...(values.frequency === "WEEKLY" && values.daysOfWeek?.length > 0
+                  ? { daysOfWeek: values.daysOfWeek }
+                  : {}),
               }
             : null,
         onBehalfOfUserId: null,
@@ -243,25 +250,62 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
       handleCancel();
       onSuccess?.();
     } catch (err) {
-      const msg = err?.response?.data?.message || "Không thể tạo cuộc họp!";
-      if (msg.toLowerCase().includes("bảo trì") && msg.toLowerCase().includes("phòng")) {
-        toast.error("🚫 Phòng họp đang bảo trì, vui lòng chọn phòng khác!");
-      } else if (err.response?.status === 409) {
-        toast.error(`⚠️ ${msg}`);
-      } else {
-        toast.error(msg);
+      console.error("ERROR:", err?.response?.data);
+
+      const backendMsg =
+        err?.response?.data?.error ||
+        err?.response?.data?.message ||
+        "Không thể tạo cuộc họp!";
+
+      const raw = backendMsg.toLowerCase();
+      let msg = "Không thể tạo cuộc họp!";
+
+      // === 1️⃣ Phòng họp trùng lịch ===
+      if (raw.includes("phòng") && raw.includes("đã bị đặt")) {
+        msg = "Phòng họp đã được đặt trong khung giờ này";
       }
+
+      // === 2️⃣ Người tham dự trùng lịch ===
+      else if (raw.includes("người tham dự") && raw.includes("trùng lịch")) {
+        msg = "Người tham gia bị trùng lịch trong khung giờ này";
+      }
+
+      // === 3️⃣ Phòng họp đang bảo trì ===
+      else if (raw.includes("bảo trì") && raw.includes("phòng")) {
+        msg = "🚫 Phòng họp đang bảo trì, vui lòng chọn phòng khác!";
+      }
+
+      // === 4️⃣ Thiết bị đang bảo trì ===
+      else if (raw.includes("thiết bị") && raw.includes("bảo trì")) {
+        msg = "Một thiết bị bạn chọn đang bảo trì • vui lòng bỏ chọn thiết bị đó.";
+      }
+
+      // === 5️⃣ Xung đột lịch định kỳ ===
+      else if (raw.includes("recurrence") || raw.includes("định kỳ")) {
+        msg = "❌ Lịch họp định kỳ bị trùng lịch • vui lòng kiểm tra lại.";
+      }
+
+      // === 6️⃣ Fallback chung ===
+      else {
+        msg = `⚠️ ${backendMsg}`;
+      }
+
+      toast.error(msg, {
+        position: "top-right",
+        autoClose: 3500,
+      });
     } finally {
       setLoading(false);
     }
   };
 
+  // Cập nhật hàm handleCancel: reset selectedDays
   const handleCancel = () => {
     form.resetFields();
     setClockValue(dayjs());
     setAvailableDevices([]);
     setIsRecurring(false);
-    setSelectedRoom(null);
+    setSelectedDays([]); 
     onCancel();
   };
 
@@ -408,11 +452,6 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
                   <div className="flex justify-between items-center">
                     <span>
                       {r.name} ({r.capacity} chỗ)
-                      {r.requiresApproval && (
-                        <Tag color="gold" className="ml-2 text-[10px]">
-                          VIP
-                        </Tag>
-                      )}
                     </span>
                     <Tag color={r.status === "AVAILABLE" ? "green" : "red"}>
                       {r.status === "AVAILABLE" ? "Có sẵn" : "Bảo trì"}
@@ -423,17 +462,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
             </Select>
           </Form.Item>
 
-          {/* CẢNH BÁO PHÒNG VIP */}
-          {selectedRoom?.requiresApproval && (
-            <Alert
-              message="Lưu ý: Phòng VIP"
-              description="Phòng họp này yêu cầu sự phê duyệt từ Admin. Yêu cầu của bạn sẽ ở trạng thái 'Chờ duyệt' sau khi gửi."
-              type="warning"
-              showIcon
-              icon={<FiInfo />}
-              className="mb-4"
-            />
-          )}
+          {/* Đã xóa Alert VIP */}
 
           {/* DEVICES */}
           <Form.Item name="deviceIds" label="Thiết bị sử dụng">
@@ -536,6 +565,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
             </Checkbox>
           </Form.Item>
 
+          {/* Recurring UI */}
           {isRecurring && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Form.Item
@@ -543,7 +573,16 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
                 label="Tần suất"
                 rules={[{ required: true, message: "Chọn tần suất" }]}
               >
-                <Select className="dark:bg-gray-700 dark:text-white dark:border-gray-600">
+                <Select
+                  className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                  onChange={(value) => {
+                    // Reset daysOfWeek khi đổi frequency
+                    if (value !== "WEEKLY") {
+                      setSelectedDays([]);
+                      form.setFieldsValue({ daysOfWeek: [] });
+                    }
+                  }}
+                >
                   <Option value="DAILY">Hằng ngày</Option>
                   <Option value="WEEKLY">Hằng tuần</Option>
                   <Option value="MONTHLY">Hằng tháng</Option>
@@ -566,6 +605,46 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
             </div>
           )}
 
+          {/* Chọn riêng được các ngày trong tuần */}
+          {isRecurring && watchedFrequency === "WEEKLY" && (
+            <Form.Item
+              name="daysOfWeek"
+              label="Chọn các thứ trong tuần"
+              rules={[
+                {
+                  validator: (_, value) => {
+                    if (!value || value.length === 0) {
+                      return Promise.reject("Vui lòng chọn ít nhất 1 thứ");
+                    }
+                    return Promise.resolve();
+                  },
+                },
+              ]}
+              className="mt-4"
+            >
+              <Checkbox.Group
+                value={selectedDays}
+                onChange={(checkedValues) => {
+                  setSelectedDays(checkedValues);
+                  form.setFieldsValue({ daysOfWeek: checkedValues });
+                }}
+                className="w-full"
+              >
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {DAYS_OF_WEEK.map((day) => (
+                    <Checkbox
+                      key={day.value}
+                      value={day.value}
+                      className="dark:text-gray-200"
+                    >
+                      {day.label}
+                    </Checkbox>
+                  ))}
+                </div>
+              </Checkbox.Group>
+            </Form.Item>
+          )}
+
           {/* DESCRIPTION */}
           <Form.Item name="description" label="Ghi chú">
             <TextArea
@@ -586,7 +665,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess }) => {
               loading={loading}
               className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600"
             >
-              {selectedRoom?.requiresApproval ? "Gửi yêu cầu duyệt" : "Tạo cuộc họp"}
+              Tạo cuộc họp
             </Button>
           </div>
         </Form>

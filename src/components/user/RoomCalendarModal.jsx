@@ -5,26 +5,41 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import dayjs from "dayjs";
 import { getRoomMeetings } from "../../services/roomService";
-import { InputNumber } from "antd";
+
+const WORK_START = 8 * 60; // 08:00
+const WORK_END = 18 * 60; // 18:00
+
+const isSameDay = (d1, d2) => dayjs(d1).isSame(dayjs(d2), "day");
 
 const RoomCalendarModal = ({ open, onClose, room, onSelectSlot }) => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [readyToShow, setReadyToShow] = useState(false);
-  const [customDuration, setCustomDuration] = useState(null);
 
   const calendarRef = useRef(null);
 
   const isDark = document.documentElement.classList.contains("dark");
 
-  // Khi modal mở, reset trạng thái
+  /* CSS chặn drag ngang */
   useEffect(() => {
-    if (open) {
-      setReadyToShow(false); // Ẩn calendar trong lúc chờ
-    }
-  }, [open]);
+    const style = document.createElement("style");
+    style.innerHTML = `
+      /* Giữ icon cấm nhưng bỏ hiệu ứng trắng mờ */
+      .fc-not-allowed {
+        cursor: not-allowed !important;
+        opacity: 1 !important;
+      }
+      
+      /* Chặn kéo ngang không đổi */
+      .fc-event-draggable {
+        touch-action: pan-y !important;
+      }
+    `;
+    document.head.appendChild(style);
+    return () => document.head.removeChild(style);
+  }, []);
 
-  // Load danh sách cuộc họp
+  /* Load meetings */
   useEffect(() => {
     const fetchMeetings = async () => {
       if (!open || !room?.id) return;
@@ -41,6 +56,7 @@ const RoomCalendarModal = ({ open, onClose, room, onSelectSlot }) => {
           borderColor: "#3b82f6",
           textColor: "#fff",
         }));
+
         setEvents(mapped);
       } catch {
         setEvents([]);
@@ -52,17 +68,15 @@ const RoomCalendarModal = ({ open, onClose, room, onSelectSlot }) => {
     fetchMeetings();
   }, [open, room]);
 
-  // Chờ dữ liệu + modal render xong → mới hiển thị calendar
+  /* Chờ modal render xong */
   useEffect(() => {
     if (!loading && open) {
-      // delay để modal hiển thị xong layout
       setTimeout(() => {
         setReadyToShow(true);
-
-        // gọi updateSize() để calendar render chuẩn
         if (calendarRef.current) {
           const api = calendarRef.current.getApi();
-          if (api) api.updateSize();
+          api.updateSize();
+          api.updateNow();
         }
       }, 200);
     }
@@ -85,14 +99,12 @@ const RoomCalendarModal = ({ open, onClose, room, onSelectSlot }) => {
                  dark:[&_.ant-modal-header]:bg-slate-900 
                  dark:[&_.ant-modal-header]:border-b-slate-700"
     >
-      {/* LOADING SCREEN */}
       {(loading || !readyToShow) && (
         <div className="flex justify-center items-center h-80">
           <Spin size="large" />
         </div>
       )}
 
-      {/* FULLCALENDAR */}
       {!loading && readyToShow && (
         <FullCalendar
           ref={calendarRef}
@@ -104,32 +116,66 @@ const RoomCalendarModal = ({ open, onClose, room, onSelectSlot }) => {
           slotMinTime="08:00:00"
           slotMaxTime="18:00:00"
           allDaySlot={false}
-          weekends={false}
+          weekends={true}
           businessHours={{
-            daysOfWeek: [1, 2, 3, 4, 5],
+            daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
             startTime: "08:00",
             endTime: "18:00",
           }}
           events={events}
+
+          /* ====== Drag event (kéo lên xuống) ====== */
+          editable={true}
+          eventStartEditable={true}
+          eventDurationEditable={false}
+          eventResizableFromStart={false}
+          eventResize={false}
+
+          /* CHẶN KÉO EVENT SANG NGÀY KHÁC */
+          eventAllow={(dropInfo, draggedEvent) => {
+            if (!draggedEvent) return false;
+
+            const oldStart = draggedEvent.start;
+            const newStart = dropInfo.start;
+
+            // ❌ Chặn cross-day event drag
+            if (!isSameDay(oldStart, newStart)) return false;
+
+            const s = dayjs(newStart);
+            const e = dayjs(dropInfo.end);
+
+            const startMin = s.hour() * 60 + s.minute();
+            const endMin = e.hour() * 60 + e.minute();
+
+            // ❌ Chặn ngoài giờ hành chính
+            return startMin >= WORK_START && endMin <= WORK_END;
+          }}
+
+          /* ======= CHẶN SELECT SANG NGÀY KHÁC ======= */
+          selectAllow={(info) => {
+            const start = dayjs(info.start);
+            const end = dayjs(info.end).subtract(1, "minute");
+
+            // ❌ Không cho select sang ngày sau — FIX QUAN TRỌNG NHẤT
+            if (!start.isSame(end, "day")) return false;
+
+            const startMin = start.hour() * 60 + start.minute();
+            const endMin = end.hour() * 60 + end.minute();
+
+            return startMin >= WORK_START && endMin <= WORK_END;
+          }}
+
           selectable={true}
           selectMirror={true}
+
+          nowIndicator={true}
+          nowIndicatorClassNames="bg-red-500"
+
           dayHeaderClassNames={isDark ? "bg-slate-800 text-gray-200" : ""}
           slotLabelClassNames={isDark ? "bg-slate-800 text-gray-300" : ""}
           slotLaneClassNames={isDark ? "bg-slate-900 border-slate-700" : ""}
           viewClassNames={isDark ? "bg-slate-900 text-gray-100" : ""}
-          nowIndicatorClassNames="bg-red-500"
-          selectAllow={(selectInfo) => {
-            const start = dayjs(selectInfo.start);
-            const end = dayjs(selectInfo.end);
 
-            const day = start.day();
-            if (day === 0 || day === 6) return false;
-
-            const minsStart = start.hour() * 60 + start.minute();
-            const minsEnd = end.hour() * 60 + end.minute();
-
-            return minsStart >= 8 * 60 && minsEnd <= 18 * 60;
-          }}
           select={(info) => {
             onSelectSlot({
               start: info.start,

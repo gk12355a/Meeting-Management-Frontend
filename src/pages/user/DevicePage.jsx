@@ -1,6 +1,6 @@
 // src/pages/user/DevicePage.jsx
 import React, { useEffect, useState } from "react";
-import { FiSearch, FiTool, FiLock } from "react-icons/fi";
+import { FiSearch, FiTool } from "react-icons/fi";
 import { HiComputerDesktop } from "react-icons/hi2";
 import { Spin } from "antd";
 import { getDevices } from "../../services/deviceService";
@@ -13,20 +13,10 @@ export default function DevicePage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("Tất cả");
-  const [bookingModal, setBookingModal] = useState({ open: false, device: null });
-
-  // Dùng cho reload thiết bị sau khi đặt phòng (có thể bật khi cần)
-  // const fetchDevices = async () => {
-  //   setLoading(true);
-  //   try {
-  //     const res = await getDevices();
-  //     setDevices(res.data || []);
-  //   } catch (err) {
-  //     console.error("Lỗi tải thiết bị:", err);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+  const [bookingModal, setBookingModal] = useState({
+    open: false,
+    device: null,
+  });
 
   useEffect(() => {
     const fetch = async () => {
@@ -62,10 +52,20 @@ export default function DevicePage() {
 
   // ===== LỌC THIẾT BỊ =====
   const filteredDevices = devices.filter((d) => {
-    const matchSearch = d.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchStatus = filterStatus === "Tất cả" || d.status === filterStatus;
+    const matchSearch = d.name
+      ?.toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const matchStatus =
+      filterStatus === "Tất cả" || d.status === filterStatus;
     return matchSearch && matchStatus;
   });
+
+  // Danh sách option cho tickbox filter
+  const STATUS_FILTERS = [
+    { value: "Tất cả", label: "Tất cả" },
+    { value: "AVAILABLE", label: "Sẵn sàng" },
+    { value: "UNDER_MAINTENANCE", label: "Bảo trì" },
+  ];
 
   return (
     <div className="p-6 min-h-screen bg-gray-50 dark:bg-slate-900 transition-all duration-300">
@@ -89,6 +89,7 @@ export default function DevicePage() {
 
       {/* ===== SEARCH + FILTER ===== */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
+        {/* Ô tìm kiếm */}
         <div className="relative w-full md:w-1/2">
           <FiSearch className="absolute top-3 left-3 text-gray-500 dark:text-gray-400" />
           <input
@@ -102,16 +103,48 @@ export default function DevicePage() {
           />
         </div>
 
-        <select
-          value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value)}
-          className="border border-gray-300 dark:border-slate-700 rounded-lg px-3 py-2
-          bg-white dark:bg-slate-800 text-gray-800 dark:text-gray-100"
-        >
-          <option value="Tất cả">Tất cả</option>
-          <option value="AVAILABLE">Sẵn sàng</option>
-          <option value="UNDER_MAINTENANCE">Bảo trì</option>
-        </select>
+        {/* Tickbox filter trạng thái */}
+        <div className="w-full md:w-auto flex flex-wrap items-center gap-2">
+          <span className="text-sm font-medium text-gray-600 dark:text-gray-300 mr-1">
+            Trạng thái:
+          </span>
+          {STATUS_FILTERS.map((opt) => {
+            const active = filterStatus === opt.value;
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setFilterStatus(opt.value)}
+                className={`
+                  flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm
+                  transition-all duration-150
+                  ${
+                    active
+                      ? "bg-purple-600 border-purple-600 text-white shadow-md"
+                      : "bg-white dark:bg-slate-800 border-gray-300 dark:border-slate-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700"
+                  }
+                `}
+              >
+                {/* ô tick */}
+                <span
+                  className={`
+                    w-4 h-4 rounded-sm border flex items-center justify-center
+                    ${
+                      active
+                        ? "border-white bg-white"
+                        : "border-gray-400 dark:border-gray-500 bg-transparent"
+                    }
+                  `}
+                >
+                  {active && (
+                    <span className="w-2.5 h-2.5 rounded-sm bg-purple-600" />
+                  )}
+                </span>
+                <span>{opt.label}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* ===== DEVICE LIST ===== */}
@@ -150,8 +183,10 @@ export default function DevicePage() {
                 >
                   {/* ICON BẢO TRÌ */}
                   {!isAvailable && (
-                    <div className="absolute top-4 right-4 flex items-center gap-1 text-sm 
-                      text-amber-600 dark:text-amber-400 font-semibold">
+                    <div
+                      className="absolute top-4 right-4 flex items-center gap-1 text-sm 
+                      text-amber-600 dark:text-amber-400 font-semibold"
+                    >
                       <FiTool size={14} /> Bảo trì
                     </div>
                   )}
@@ -170,7 +205,9 @@ export default function DevicePage() {
                   {/* TRẠNG THÁI */}
                   <p className="mt-2 text-gray-700 dark:text-gray-300">
                     <span className="font-semibold">Trạng thái: </span>
-                    <span className={statusDisplay.color}>{statusDisplay.text}</span>
+                    <span className={statusDisplay.color}>
+                      {statusDisplay.text}
+                    </span>
                   </p>
 
                   {/* BUTTON */}
@@ -204,6 +241,7 @@ export default function DevicePage() {
           )}
         </div>
       )}
+
       {/* Modal đặt lịch thiết bị */}
       <BookDeviceModal
         open={bookingModal.open}
