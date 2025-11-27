@@ -10,11 +10,9 @@ import {
   Card,
   Divider,
   Checkbox,
-  Spin,
   Tag,
-  Alert,
 } from "antd";
-import { FiEdit, FiUsers, FiInfo, FiMail, FiCalendar } from "react-icons/fi";
+import { FiEdit, FiMail, FiCalendar } from "react-icons/fi";
 import dayjs from "dayjs";
 import "dayjs/locale/vi";
 import utc from "dayjs/plugin/utc";
@@ -61,7 +59,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
 
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
-  
+
   // --- STATE QUAN TRỌNG: isRecurring ---
   const [isRecurring, setIsRecurring] = useState(false); 
   const [showRecurringOptions, setShowRecurringOptions] = useState(false);
@@ -69,8 +67,6 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
   // State cho Modal Xác nhận (Chọn sửa 1 hay sửa chuỗi)
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [pendingValues, setPendingValues] = useState(null);
-
-  const [selectedRoom, setSelectedRoom] = useState(null);
 
   // TIME PICKER STATE
   const [clockOpen, setClockOpen] = useState(false);
@@ -83,9 +79,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
   const watchedDate = Form.useWatch("date", form);
   const watchedTime = Form.useWatch("time", form);
   const watchedDuration = Form.useWatch("duration", form);
-  const watchedRoomId = Form.useWatch("roomId", form);
-  const watchedFrequency = Form.useWatch("frequency", form); // Theo dõi tần suất
-
+  
   /* ===================================================
                     LOAD ROOMS
   ==================================================== */
@@ -104,19 +98,6 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
   }, [open, meetingDetail]);
 
   /* ===================================================
-            THEO DÕI PHÒNG VIP
-  ==================================================== */
-  useEffect(() => {
-    const currentRoomId = watchedRoomId || meetingDetail?.room?.id;
-    if (currentRoomId && rooms.length > 0) {
-      const room = rooms.find((r) => r.id === currentRoomId);
-      setSelectedRoom(room || null);
-    } else {
-      setSelectedRoom(null);
-    }
-  }, [watchedRoomId, rooms, meetingDetail]);
-
-  /* ===================================================
           POPULATE FORM
   ==================================================== */
   useEffect(() => {
@@ -129,10 +110,10 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
     // Kiểm tra xem có phải cuộc họp định kỳ không
     const isSeries = !!meetingDetail.seriesId;
     setIsRecurring(isSeries); // Cập nhật state
-    
+
     // Mặc định ẩn tùy chọn lặp lại cho gọn, user check vào mới hiện
     setShowRecurringOptions(false); 
-    
+
     setClockValue(startTime);
 
     form.setFieldsValue({
@@ -147,7 +128,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
         .filter((id) => id !== user?.id) || [],
       guestEmails: meetingDetail.guestEmails || [],
       description: meetingDetail.description || "",
-      
+
       // Recurrence fields
       isRecurring: isSeries, // Set giá trị cho checkbox
       frequency: meetingDetail.recurrenceRule?.frequency || "DAILY",
@@ -297,7 +278,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
       };
 
       let res;
-      
+
       // --- TRƯỜNG HỢP 1: CHỈ SỬA CUỘC HỌP NÀY ---
       if (mode === 'SINGLE') {
         res = await updateMeeting(meetingDetail.id, payload);
@@ -318,7 +299,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
           repeatUntil: dayjs(values.repeatUntil).format("YYYY-MM-DD"),
           daysOfWeek: values.frequency === 'WEEKLY' ? values.daysOfWeek : null
         };
-        
+
         // Gọi API seriesId
         res = await updateRecurringSeries(meetingDetail.seriesId, payload);
       }
@@ -483,9 +464,6 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
                     <div className="flex justify-between items-center">
                       <span>
                         {r.name} ({r.capacity} chỗ)
-                        {r.requiresApproval && (
-                          <Tag color="gold" className="ml-2 text-[10px]">VIP</Tag>
-                        )}
                       </span>
                       <Tag color={r.status === "AVAILABLE" ? "green" : "red"}>
                         {r.status === "AVAILABLE" ? "Có sẵn" : "Bảo trì"}
@@ -496,17 +474,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
               </Select>
             </Form.Item>
 
-            {/* VIP ALERT */}
-            {selectedRoom?.requiresApproval && (
-              <Alert
-                message="Phòng họp VIP - Yêu cầu phê duyệt"
-                description="Việc thay đổi sang phòng này sẽ gửi yêu cầu đến Admin để phê duyệt. Cuộc họp sẽ chuyển sang trạng thái 'Chờ duyệt'."
-                type="warning"
-                showIcon
-                icon={<FiInfo />}
-                className="mb-4"
-              />
-            )}
+            {/* Đã xóa Alert VIP */}
 
             {/* DEVICES */}
             <Form.Item name="deviceIds" label="Thiết bị sử dụng">
@@ -633,7 +601,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
                 loading={loading}
                 className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600"
               >
-                {selectedRoom?.requiresApproval ? "Gửi yêu cầu duyệt" : "Cập nhật"}
+                Cập nhật
               </Button>
             </div>
           </Form>

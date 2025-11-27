@@ -1,10 +1,10 @@
 // src/pages/user/RoomsPage.jsx
 import React, { useEffect, useState } from "react";
 import { FiSearch, FiTool, FiMonitor, FiUsers } from "react-icons/fi";
-import { Spin, message, Tag, Tooltip } from "antd"; // Đã có Tag, Tooltip
+import { Spin, message, Tag, Tooltip } from "antd";
 import { getAllRooms } from "../../services/roomService";
 import { HiBuildingOffice } from "react-icons/hi2";
-import { FaCrown } from "react-icons/fa";
+// Đã xóa import FaCrown
 import BookRoomModal from "../../components/user/BookRoomModal";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -62,40 +62,37 @@ const RoomsPage = () => {
   };
 
   // FILTER ROOMS
-useEffect(() => {
-  const filtered = rooms.filter((room) => {
-    const matchesSearch = room.name
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
+  useEffect(() => {
+    const filtered = rooms.filter((room) => {
+      const matchesSearch = room.name
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
 
-    // Nếu không tick gì → coi như "Tất cả"
-    if (filterStatus.length === 0) return matchesSearch;
+      // Nếu không tick gì → coi như "Tất cả"
+      if (filterStatus.length === 0) return matchesSearch;
 
-    let matchStatus = false;
+      let matchStatus = false;
 
-    // 1) Trống
-    if (filterStatus.includes("AVAILABLE") && room.status === "AVAILABLE") {
-      matchStatus = true;
-    }
+      // 1) Trống
+      if (filterStatus.includes("AVAILABLE") && room.status === "AVAILABLE") {
+        matchStatus = true;
+      }
 
-    // 2) Đang bảo trì
-    if (
-      filterStatus.includes("UNDER_MAINTENANCE") &&
-      room.status === "UNDER_MAINTENANCE"
-    ) {
-      matchStatus = true;
-    }
+      // 2) Đang bảo trì
+      if (
+        filterStatus.includes("UNDER_MAINTENANCE") &&
+        room.status === "UNDER_MAINTENANCE"
+      ) {
+        matchStatus = true;
+      }
 
-    // 3) VIP
-    if (filterStatus.includes("VIP") && room.requiresApproval === true) {
-      matchStatus = true;
-    }
+      // Đã xóa phần lọc VIP ở đây
 
-    return matchesSearch && matchStatus;
-  });
+      return matchesSearch && matchStatus;
+    });
 
-  setProcessedRooms(filtered);
-}, [searchTerm, filterStatus, rooms]);
+    setProcessedRooms(filtered);
+  }, [searchTerm, filterStatus, rooms]);
 
   return (
     <div className="p-6 min-h-screen bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
@@ -169,25 +166,12 @@ useEffect(() => {
             </span>
           </label>
 
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={filterStatus.includes("VIP")}
-              onChange={() => {
-                setFilterStatus((prev) =>
-                  prev.includes("VIP")
-                    ? prev.filter((f) => f !== "VIP")
-                    : [...prev, "VIP"]
-                );
-              }}
-            />
-            <span className="text-gray-700 dark:text-gray-200">Phòng VIP</span>
-          </label>
+          {/* Đã xóa Checkbox Phòng VIP */}
 
           {/* SELECT ALL */}
           <button
             onClick={() =>
-              setFilterStatus(["AVAILABLE", "UNDER_MAINTENANCE", "VIP"])
+              setFilterStatus(["AVAILABLE", "UNDER_MAINTENANCE"])
             }
             className="ml-auto px-3 py-1 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700"
           >
@@ -207,7 +191,7 @@ useEffect(() => {
             processedRooms.map((room) => {
               const statusDisplay = getStatusDisplay(room.status);
               const isAvailable = room.status === "AVAILABLE";
-              const isVip = room.requiresApproval;
+              // Đã xóa biến isVip
 
               return (
                 <div
@@ -226,16 +210,7 @@ useEffect(() => {
                       <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
                         {room.name}
                       </h2>
-                      {isVip && (
-                        <Tooltip title="Phòng này cần Admin phê duyệt">
-                          <Tag
-                            color="gold"
-                            className="flex items-center gap-1 ml-2 px-2 py-0.5 text-xs font-bold border-none shadow-sm"
-                          >
-                            <FaCrown size={10} /> VIP
-                          </Tag>
-                        </Tooltip>
-                      )}
+                      {/* Đã xóa hiển thị Tag VIP */}
                     </div>
 
                     {room.status === "UNDER_MAINTENANCE" && (
@@ -248,7 +223,8 @@ useEffect(() => {
                   <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300 mt-2">
                     <FiUsers size={14} /> Sức chứa: {room.capacity} người
                   </p>
-                  {/* === CHỈNH SỬA PHẦN NÀY ĐỂ XỬ LÝ TRÀN THIẾT BỊ === */}
+                  
+                  {/* === HIỂN THỊ THIẾT BỊ === */}
                   <div className="flex items-start gap-2 text-gray-700 dark:text-gray-300 mt-2">
                     <FiMonitor size={14} className="mt-1.5 flex-shrink-0" />
                     <div className="flex flex-wrap gap-1 items-center">
@@ -291,11 +267,7 @@ useEffect(() => {
                     </p>
                   </div>
 
-                  {isVip && isAvailable && (
-                    <p className="text-xs text-yellow-600 dark:text-yellow-500 mt-2 italic">
-                      * Yêu cầu phê duyệt từ Admin
-                    </p>
-                  )}
+                  {/* Đã xóa dòng chú thích yêu cầu phê duyệt VIP */}
 
                   <div className="mt-4 flex justify-end">
                     <button
@@ -303,13 +275,11 @@ useEffect(() => {
                       onClick={() => setCalendarModal({ open: true, room })}
                       className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                         isAvailable
-                          ? isVip
-                            ? "bg-yellow-600 hover:bg-yellow-700 text-white shadow-sm"
-                            : "bg-green-600 hover:bg-green-700 text-white shadow-sm"
+                          ? "bg-green-600 hover:bg-green-700 text-white shadow-sm"
                           : "bg-gray-400 text-gray-700 cursor-not-allowed"
                       }`}
                     >
-                      {isVip ? "Đăng ký duyệt" : "Đặt phòng"}
+                      Đặt phòng
                     </button>
                   </div>
                 </div>
