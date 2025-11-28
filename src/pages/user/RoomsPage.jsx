@@ -129,78 +129,59 @@ const RoomsPage = () => {
           />
         </div>
 
-        {/* NEW CHECKBOX FILTER */}
-        {/* NEW CHECKBOX FILTER - MATCH STYLE OF IMAGE 1 */}
-<div
-  className="flex flex-wrap items-center gap-4 bg-white dark:bg-slate-800 
-  p-3 rounded-lg border border-gray-300 dark:border-slate-700 shadow-sm"
->
-  {/* --- FILTER: AVAILABLE --- */}
-  <label className="flex items-center gap-2 cursor-pointer">
-    <input
-      type="checkbox"
-      checked={filterStatus.includes("AVAILABLE")}
-      onChange={() => {
-        setFilterStatus((prev) =>
-          prev.includes("AVAILABLE")
-            ? prev.filter((f) => f !== "AVAILABLE")
-            : [...prev, "AVAILABLE"]
-        );
-      }}
-      className="
-        w-4 h-4 rounded 
-        border-2 border-gray-400 
-        checked:bg-purple-600 checked:border-purple-600 
-        dark:border-gray-500 dark:checked:bg-purple-500 
-        cursor-pointer
-        appearance-none
-        checked:appearance-auto
-      "
-    />
-    <span className="text-gray-700 dark:text-gray-200">Trống</span>
-  </label>
+       {/* FILTER SECTION - UI GIỐNG ẢNH MẪU */}
+<div className="flex items-center gap-3">
+  <span className="font-medium text-gray-700 dark:text-gray-300">
+    Trạng thái:
+  </span>
 
-  {/* --- FILTER: UNDER MAINTENANCE --- */}
-  <label className="flex items-center gap-2 cursor-pointer">
-    <input
-      type="checkbox"
-      checked={filterStatus.includes("UNDER_MAINTENANCE")}
-      onChange={() => {
-        setFilterStatus((prev) =>
-          prev.includes("UNDER_MAINTENANCE")
-            ? prev.filter((f) => f !== "UNDER_MAINTENANCE")
-            : [...prev, "UNDER_MAINTENANCE"]
-        );
-      }}
-      className="
-        w-4 h-4 rounded 
-        border-2 border-gray-400 
-        checked:bg-purple-600 checked:border-purple-600 
-        dark:border-gray-500 dark:checked:bg-purple-500 
-        cursor-pointer
-        appearance-none
-        checked:appearance-auto
-      "
-    />
-    <span className="text-gray-700 dark:text-gray-200">Đang bảo trì</span>
-  </label>
+  {[
+    { key: "ALL", label: "Tất cả" },
+    { key: "AVAILABLE", label: "Sẵn sàng" },
+    { key: "UNDER_MAINTENANCE", label: "Bảo trì" },
+  ].map((btn) => {
+    const isAll = btn.key === "ALL";
+    const isActive =
+      (isAll && filterStatus.length === 0) ||
+      (!isAll && filterStatus[0] === btn.key);
 
-  {/* SELECT ALL Button */}
-  <button
-    onClick={() =>
-      setFilterStatus(["AVAILABLE", "UNDER_MAINTENANCE"])
-    }
-    className="
-      ml-auto px-4 py-1.5 
-      text-sm rounded-md font-medium 
-      bg-green-600 hover:bg-green-700 
-      text-white shadow-sm transition
-    "
-  >
-    Chọn tất cả
-  </button>
+    const handleClick = () => {
+      if (isAll) {
+        setFilterStatus([]);
+      } else {
+        setFilterStatus([btn.key]);  // CHỈ GIỮ 1 GIÁ TRỊ
+      }
+    };
+
+    return (
+      <button
+        key={btn.key}
+        onClick={handleClick}
+        className={`
+          flex items-center gap-2 px-4 py-1.5 rounded-xl border text-sm font-medium transition-all
+          ${
+            isActive
+              ? "bg-green-600 border-green-600 text-white shadow"
+              : "bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700"
+          }
+        `}
+      >
+        <span
+          className={`
+            w-3.5 h-3.5 rounded-sm border-2 flex-shrink-0
+            ${
+              isActive
+                ? "border-white bg-green-300"
+                : "border-gray-400 dark:border-gray-500"
+            }
+          `}
+        />
+        {btn.label}
+      </button>
+    );
+  })}
 </div>
-      </div>
+</div>
 
       {/* ROOM LIST */}
       {loading ? (
