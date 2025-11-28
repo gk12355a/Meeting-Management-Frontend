@@ -23,8 +23,6 @@ import { createMeeting, getRooms } from "../../services/meetingService";
 import { searchUsers } from "../../services/userService";
 import { getAvailableDevices } from "../../services/deviceService";
 import { useAuth } from "../../context/AuthContext";
-import { time } from "framer-motion";
-import { duration } from "@mui/material/styles";
 
 dayjs.locale("vi");
 dayjs.extend(utc);
