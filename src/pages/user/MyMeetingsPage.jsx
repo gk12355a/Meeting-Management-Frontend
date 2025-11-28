@@ -308,7 +308,7 @@ const MyMeetingPage = () => {
   const [lockedViewDate, setLockedViewDate] = useState(null);
 
   // VIEW HIỆN TẠI (month/week/day) để xử lý ẩn meeting bị hủy
-const [currentViewType, setCurrentViewType] = useState("timeGridWeek");
+  const [currentViewType, setCurrentViewType] = useState("timeGridWeek");
 
   // State modal chi tiết
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -341,34 +341,34 @@ const [currentViewType, setCurrentViewType] = useState("timeGridWeek");
     injectNoBusinessTimeStyle();
   }, []);
 
-  // CSS cho cuộc họp bị hủy VÀ TỪ CHỐI
+  // CSS cho cuộc họp bị hủy VÀ TỪ CHỐI (hiện tại sẽ không dùng nữa vì đã ẩn hẳn)
   useEffect(() => {
     const style = document.createElement("style");
     style.innerHTML = `
       .meeting-cancelled {
-  background-color: #e5e7eb !important;     /* gray-200 */
-  border-color: #d1d5db !important;         /* gray-300 */
-  color: #374151 !important;                /* gray-700 */
-  opacity: 1 !important;
-  filter: none !important;
-  position: relative;
-}
+        background-color: #e5e7eb !important;
+        border-color: #d1d5db !important;
+        color: #374151 !important;
+        opacity: 1 !important;
+        filter: none !important;
+        position: relative;
+      }
 
-.meeting-cancelled .fc-event-title,
-.meeting-cancelled .fc-event-time {
-  text-decoration: line-through !important;
-  text-decoration-color: #ef4444 !important; /* tailwind red-500 */
-  text-decoration-thickness: 1.5px !important;
-}
+      .meeting-cancelled .fc-event-title,
+      .meeting-cancelled .fc-event-time {
+        text-decoration: line-through !important;
+        text-decoration-color: #ef4444 !important;
+        text-decoration-thickness: 1.5px !important;
+      }
 
-.meeting-cancelled::before {
-  content: "✖"; /* icon dấu X */
-  font-size: 12px;
-  color: #ef4444; /* đỏ */
-  position: absolute;
-  left: 6px;
-  top: 4px;
-}
+      .meeting-cancelled::before {
+        content: "✖";
+        font-size: 12px;
+        color: #ef4444;
+        position: absolute;
+        left: 6px;
+        top: 4px;
+      }
     `;
     document.head.appendChild(style);
     return () => style.remove();
@@ -384,9 +384,6 @@ const [currentViewType, setCurrentViewType] = useState("timeGridWeek");
       const data = res.data?.content || [];
 
       const filteredData = data.filter((m) => {
-        // Logic lọc cũ: Bỏ qua meeting đã hủy nếu muốn (hiện tại đang comment lại để hiển thị cả hủy)
-        // if (m.status === 'CANCELLED') return false;
-
         // 2. Kiểm tra xem user có phải người tổ chức không
         const isOrganizer = m.organizer?.id === user.id;
         // 3. Tìm trạng thái của user (nếu là người tham gia)
@@ -406,16 +403,12 @@ const [currentViewType, setCurrentViewType] = useState("timeGridWeek");
         return false;
       });
 
-      // Map từ dữ liệu ĐÃ LỌC
-      let cleanedData = filteredData;
+      // 🔥 ẨN HOÀN TOÀN CÁC CUỘC HỌP BỊ HỦY / BỊ TỪ CHỐI Ở TẤT CẢ VIEW
+      let cleanedData = filteredData.filter(
+        (m) => m.status !== "CANCELLED" && m.status !== "REJECTED"
+      );
 
-// ❌ Ẩn cuộc họp bị hủy trong Week/Day view (để không bị lỗi layout)
-if (currentViewType === "timeGridWeek" || currentViewType === "timeGridDay") {
-  cleanedData = cleanedData.filter(m => m.status !== "CANCELLED" && m.status !== "REJECTED");
-}
-
-const mappedEvents = cleanedData.map((m) => {
-
+      const mappedEvents = cleanedData.map((m) => {
         const startLocal = dayjs(m.startTime).local().format();
         const endLocal = dayjs(m.endTime).local().format();
 
@@ -447,7 +440,7 @@ const mappedEvents = cleanedData.map((m) => {
             status: m.status, // <-- thêm status vào extendedProps
           },
           classNames: isNegativeStatus ? ["meeting-cancelled"] : [],
-          hiddenInWeekDayView: isNegativeStatus, // <-- thêm cờ này
+          hiddenInWeekDayView: isNegativeStatus,
         };
       });
 
@@ -455,15 +448,15 @@ const mappedEvents = cleanedData.map((m) => {
 
       // GIỮ NGÀY USER ĐANG ĐỨNG (KHÔNG JUMP VỀ TODAY)
       setTimeout(() => {
-  const api = calendarRef.current?.getApi?.();
-  if (!api) return;
+        const api = calendarRef.current?.getApi?.();
+        if (!api) return;
 
-  if (lockedViewDate) {
-    api.gotoDate(lockedViewDate);
-  } else if (currentViewDate) {
-    api.gotoDate(currentViewDate);
-  }
-}, 50);
+        if (lockedViewDate) {
+          api.gotoDate(lockedViewDate);
+        } else if (currentViewDate) {
+          api.gotoDate(currentViewDate);
+        }
+      }, 50);
     } catch (err) {
       console.error("Lỗi tải lịch họp:", err);
       toast.error("Không thể tải danh sách lịch họp!");
@@ -575,7 +568,7 @@ const mappedEvents = cleanedData.map((m) => {
         start: dPast.hour(0).minute(0).second(0).format(),
         end: endOfPast,
         display: "background",
-        classNames: ["fc-nonbusiness"], // block quá khứ
+        classNames: ["fc-nonbusiness"],
       });
       dPast = dPast.add(1, "day");
     }
@@ -693,25 +686,6 @@ const mappedEvents = cleanedData.map((m) => {
       ) : (
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 transition-colors duration-500">
           <FullCalendar
-            // eventDidMount={(info) => {
-            //   const viewType = info.view.type; // Loại view hiện tại: dayGridMonth, timeGridWeek, timeGridDay
-            //   const event = info.event;
-
-            //   // Nếu event bị hủy
-            //   if (
-            //     event.extendedProps.status === "CANCELLED" ||
-            //     event.extendedProps.status === "REJECTED"
-            //   ) {
-            //     if (
-            //       viewType === "timeGridWeek" ||
-            //       viewType === "timeGridDay"
-            //     ) {
-            //       // Ẩn hẳn sự kiện trong day/week view
-            //       info.el.style.display = "none";
-            //     }
-            //     // Month view thì vẫn giữ, sẽ áp dụng class "meeting-cancelled" gạch đỏ
-            //   }
-            // }}
             ref={calendarRef}
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
             initialView="timeGridWeek"
@@ -776,14 +750,14 @@ const mappedEvents = cleanedData.map((m) => {
 
       {/* Modal đặt lịch nhanh */}
       <QuickBookingModal
-  open={quickBooking.open}
-  onCancel={() =>
-    setQuickBooking({ open: false, start: null, end: null })
-  }
-  quickBookingData={quickBooking}
-  onSuccess={fetchMeetings}
-  onLockViewDate={(date) => setLockedViewDate(date)}
-/>
+        open={quickBooking.open}
+        onCancel={() =>
+          setQuickBooking({ open: false, start: null, end: null })
+        }
+        quickBookingData={quickBooking}
+        onSuccess={fetchMeetings}
+        onLockViewDate={(date) => setLockedViewDate(date)}
+      />
 
       {/* Modal chỉnh sửa cuộc họp */}
       <EditMeetingModal
