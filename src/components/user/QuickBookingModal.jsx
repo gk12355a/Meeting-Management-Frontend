@@ -372,9 +372,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
               <DatePicker
                 className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
                 format="DD/MM/YYYY"
-                disabledDate={(d) =>
-                  d && (d < dayjs().startOf("day") || d.day() === 0 || d.day() === 6)
-                }
+                disabledDate={(d) => d && d < dayjs().startOf("day")}
               />
             </Form.Item>
 
@@ -605,9 +603,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
                 <DatePicker
                   format="DD/MM/YYYY"
                   className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                  disabledDate={(c) =>
-                    c && (c <= dayjs().startOf("day") || c.day() === 0 || c.day() === 6)
-                  }
+                  disabledDate={(c) => c && c <= dayjs().startOf("day")}
                 />
               </Form.Item>
             </div>
