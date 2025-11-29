@@ -60,7 +60,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
 
-  // --- STATE QUAN TRỌNG: isRecurring ---
+  // STATE: isRecurring
   const [isRecurring, setIsRecurring] = useState(false); 
   const [showRecurringOptions, setShowRecurringOptions] = useState(false);
 
@@ -80,9 +80,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
   const watchedTime = Form.useWatch("time", form);
   const watchedDuration = Form.useWatch("duration", form);
   
-  /* ===================================================
-                    LOAD ROOMS
-  ==================================================== */
+  /* LOAD ROOMS */
   useEffect(() => {
     if (!open || !meetingDetail) return;
 
@@ -97,9 +95,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
     fetchData();
   }, [open, meetingDetail]);
 
-  /* ===================================================
-          POPULATE FORM
-  ==================================================== */
+  /* POPULATE FORM */
   useEffect(() => {
     if (!meetingDetail || !open) return;
 
@@ -152,9 +148,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
     }
   }, [meetingDetail, open, form, user]);
 
-  /* ===================================================
-          LOAD DEVICES
-  ==================================================== */
+  /* LOAD DEVICES */
   const loadDevicesForTime = async (date, time, duration) => {
     if (!date || !time || !duration) {
       setAvailableDevices([]);
@@ -197,9 +191,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
     return () => clearTimeout(t);
   }, [watchedDate, watchedTime, watchedDuration]);
 
-  /* ===================================================
-              SEARCH USERS
-  ==================================================== */
+  /* SEARCH USERS */
   const handleSearchUsers = (query) => {
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
     if (!query?.trim()) {
@@ -225,9 +217,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
     return totalMin >= 480 && totalMin <= 1080;
   };
 
-  /* ===================================================
-              HANDLE FORM SUBMIT
-  ==================================================== */
+  /* HANDLE FORM SUBMIT */
   const handleSubmit = async (values) => {
     // 1. Validate cơ bản
     const date = values.date;
@@ -247,12 +237,10 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
     }
   };
 
-  /* ===================================================
-            EXECUTE UPDATE (SINGLE OR SERIES)
-  ==================================================== */
+  /* EXECUTE UPDATE (SINGLE OR SERIES) */
   const executeUpdate = async (values, mode) => {
     setLoading(true);
-    if(mode === 'SERIES') setConfirmModalOpen(false);
+    setConfirmModalOpen(false);
 
     try {
       const date = values.date;
@@ -279,11 +267,11 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
 
       let res;
 
-      // --- TRƯỜNG HỢP 1: CHỈ SỬA CUỘC HỌP NÀY ---
+      // TRƯỜNG HỢP 1: CHỈ SỬA CUỘC HỌP NÀY 
       if (mode === 'SINGLE') {
         res = await updateMeeting(meetingDetail.id, payload);
       } 
-      // --- TRƯỜNG HỢP 2: SỬA TOÀN BỘ CHUỖI ---
+      // TRƯỜNG HỢP 2: SỬA TOÀN BỘ CHUỖI 
       else if (mode === 'SERIES') {
         // Validate ngày kết thúc cho chuỗi
         if (!values.repeatUntil || dayjs(values.repeatUntil).isBefore(dayjs(), 'day')) {
@@ -330,7 +318,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
 
   return (
     <>
-      {/* MODAL CHÍNH: FORM CHỈNH SỬA */}
+      {/* MODAL FORM CHỈNH SỬA */}
       <Modal
         open={open}
         onCancel={onCancel}
@@ -474,8 +462,6 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
               </Select>
             </Form.Item>
 
-            {/* Đã xóa Alert VIP */}
-
             {/* DEVICES */}
             <Form.Item name="deviceIds" label="Thiết bị sử dụng">
               <Select
@@ -608,7 +594,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
         </Card>
       </Modal>
 
-      {/* MODAL XÁC NHẬN: SỬA 1 HAY SỬA CHUỖI */}
+      {/* MODAL XÁC NHẬN SỬA 1 HAY SỬA CHUỖI */}
       <Modal
         title={<span className="flex items-center gap-2"><FiCalendar /> Cập nhật cuộc họp định kỳ</span>}
         open={confirmModalOpen}

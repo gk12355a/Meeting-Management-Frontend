@@ -302,10 +302,13 @@ const MyMeetingPage = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // ⭐ LƯU NGÀY HIỆN TẠI ĐANG XEM TRÊN CALENDAR
+  // LƯU NGÀY HIỆN TẠI ĐANG XEM TRÊN CALENDAR
   const [currentViewDate, setCurrentViewDate] = useState(new Date());
-  // ⭐ LOCK NGÀY SAU KHI ĐẶT LỊCH NHANH ĐỂ KHÔNG BỊ NHẢY VỀ HÔM NAY
+  // LOCK NGÀY SAU KHI ĐẶT LỊCH NHANH ĐỂ KHÔNG BỊ NHẢY VỀ HÔM NAY
   const [lockedViewDate, setLockedViewDate] = useState(null);
+
+  // VIEW HIỆN TẠI (month/week/day) để xử lý ẩn meeting bị hủy
+  const [currentViewType, setCurrentViewType] = useState("timeGridWeek");
 
   // State modal chi tiết
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -338,21 +341,33 @@ const MyMeetingPage = () => {
     injectNoBusinessTimeStyle();
   }, []);
 
-  // CSS cho cuộc họp bị hủy VÀ TỪ CHỐI
+  // CSS cho cuộc họp bị hủy VÀ TỪ CHỐI (hiện tại sẽ không dùng nữa vì đã ẩn hẳn)
   useEffect(() => {
     const style = document.createElement("style");
     style.innerHTML = `
       .meeting-cancelled {
-        opacity: 0.4 !important;
-        filter: grayscale(0.5);
+        background-color: #e5e7eb !important;
+        border-color: #d1d5db !important;
+        color: #374151 !important;
+        opacity: 1 !important;
+        filter: none !important;
+        position: relative;
       }
 
       .meeting-cancelled .fc-event-title,
       .meeting-cancelled .fc-event-time {
         text-decoration: line-through !important;
-        text-decoration-color: #b91c1c !important;
-        text-decoration-thickness: 1.2px !important;
-        text-underline-offset: -4px;
+        text-decoration-color: #ef4444 !important;
+        text-decoration-thickness: 1.5px !important;
+      }
+
+      .meeting-cancelled::before {
+        content: "✖";
+        font-size: 12px;
+        color: #ef4444;
+        position: absolute;
+        left: 6px;
+        top: 4px;
       }
     `;
     document.head.appendChild(style);
@@ -369,9 +384,6 @@ const MyMeetingPage = () => {
       const data = res.data?.content || [];
 
       const filteredData = data.filter((m) => {
-        // Logic lọc cũ: Bỏ qua meeting đã hủy nếu muốn (hiện tại đang comment lại để hiển thị cả hủy)
-        // if (m.status === 'CANCELLED') return false;
-
         // 2. Kiểm tra xem user có phải người tổ chức không
         const isOrganizer = m.organizer?.id === user.id;
         // 3. Tìm trạng thái của user (nếu là người tham gia)
@@ -391,8 +403,12 @@ const MyMeetingPage = () => {
         return false;
       });
 
-      // Map từ dữ liệu ĐÃ LỌC
-      const mappedEvents = filteredData.map((m) => {
+      // 🔥 ẨN HOÀN TOÀN CÁC CUỘC HỌP BỊ HỦY / BỊ TỪ CHỐI Ở TẤT CẢ VIEW
+      let cleanedData = filteredData.filter(
+        (m) => m.status !== "CANCELLED" && m.status !== "REJECTED"
+      );
+
+      const mappedEvents = cleanedData.map((m) => {
         const startLocal = dayjs(m.startTime).local().format();
         const endLocal = dayjs(m.endTime).local().format();
 
@@ -424,25 +440,23 @@ const MyMeetingPage = () => {
             status: m.status, // <-- thêm status vào extendedProps
           },
           classNames: isNegativeStatus ? ["meeting-cancelled"] : [],
-          hiddenInWeekDayView: isNegativeStatus, // <-- thêm cờ này
+          hiddenInWeekDayView: isNegativeStatus,
         };
       });
 
       setEvents(mappedEvents);
 
-      // ⭐ GIỮ NGÀY USER ĐANG ĐỨNG (KHÔNG JUMP VỀ TODAY)
+      // GIỮ NGÀY USER ĐANG ĐỨNG (KHÔNG JUMP VỀ TODAY)
       setTimeout(() => {
         const api = calendarRef.current?.getApi?.();
         if (!api) return;
 
         if (lockedViewDate) {
           api.gotoDate(lockedViewDate);
-          // reset để chỉ dùng 1 lần sau khi đặt nhanh
-          setLockedViewDate(null);
         } else if (currentViewDate) {
           api.gotoDate(currentViewDate);
         }
-      }, 0);
+      }, 50);
     } catch (err) {
       console.error("Lỗi tải lịch họp:", err);
       toast.error("Không thể tải danh sách lịch họp!");
@@ -554,7 +568,7 @@ const MyMeetingPage = () => {
         start: dPast.hour(0).minute(0).second(0).format(),
         end: endOfPast,
         display: "background",
-        classNames: ["fc-nonbusiness"], // block quá khứ
+        classNames: ["fc-nonbusiness"],
       });
       dPast = dPast.add(1, "day");
     }
@@ -672,31 +686,13 @@ const MyMeetingPage = () => {
       ) : (
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 transition-colors duration-500">
           <FullCalendar
-            eventDidMount={(info) => {
-              const viewType = info.view.type; // Loại view hiện tại: dayGridMonth, timeGridWeek, timeGridDay
-              const event = info.event;
-
-              // Nếu event bị hủy
-              if (
-                event.extendedProps.status === "CANCELLED" ||
-                event.extendedProps.status === "REJECTED"
-              ) {
-                if (
-                  viewType === "timeGridWeek" ||
-                  viewType === "timeGridDay"
-                ) {
-                  // Ẩn hẳn sự kiện trong day/week view
-                  info.el.style.display = "none";
-                }
-                // Month view thì vẫn giữ, sẽ áp dụng class "meeting-cancelled" gạch đỏ
-              }
-            }}
             ref={calendarRef}
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
             initialView="timeGridWeek"
-            // ⭐ BẮT SỰ KIỆN THAY ĐỔI VIEW (CHUYỂN TUẦN / THÁNG / NGÀY)
+            // BẮT SỰ KIỆN THAY ĐỔI VIEW (CHUYỂN TUẦN / THÁNG / NGÀY)
             datesSet={(arg) => {
               setCurrentViewDate(arg.start);
+              setCurrentViewType(arg.view.type);
             }}
             headerToolbar={{
               left: "prev,next today",
@@ -760,6 +756,7 @@ const MyMeetingPage = () => {
         }
         quickBookingData={quickBooking}
         onSuccess={fetchMeetings}
+        onLockViewDate={(date) => setLockedViewDate(date)}
       />
 
       {/* Modal chỉnh sửa cuộc họp */}
