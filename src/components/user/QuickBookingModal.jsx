@@ -24,11 +24,6 @@ import { searchUsers } from "../../services/userService";
 import { getAvailableDevices } from "../../services/deviceService";
 import { useAuth } from "../../context/AuthContext";
 
-// MUI STATIC TIME PICKER
-import { LocalizationProvider } from "@mui/x-date-pickers";
-import { StaticTimePicker } from "@mui/x-date-pickers/StaticTimePicker";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-
 dayjs.locale("vi");
 dayjs.extend(utc);
 
@@ -101,13 +96,14 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
 
       setIsRecurring(false);
       setSelectedDays([]);
-      setClockValue(start);
 
       setTimeout(() => {
         form.setFieldsValue({
           title: "",
           date: start,
           time: start,
+          hour: start.hour(),
+          minute: start.minute(),
           duration: duration <= 0 ? 60 : duration,
           roomId: undefined,
           deviceIds: [],
@@ -341,6 +337,12 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
           form={form}
           disabled={loading}
           onFinish={handleCreateMeeting}
+          initialValues={{
+            hour: 8,
+            minute: 0,
+            time: dayjs().hour(8).minute(0),
+            duration: 60
+          }}
           onValuesChange={(vals) => {
             if (vals.isRecurring !== undefined) setIsRecurring(vals.isRecurring);
           }}
@@ -370,53 +372,52 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
               <DatePicker
                 className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
                 format="DD/MM/YYYY"
-                disabledDate={(d) =>
-                  d && (d < dayjs().startOf("day") || d.day() === 0 || d.day() === 6)
-                }
+                disabledDate={(d) => d && d < dayjs().startOf("day")}
               />
             </Form.Item>
 
-            <Form.Item
-              name="time"
-              label="Giờ bắt đầu"
-              rules={[{ required: true, message: "Chọn giờ bắt đầu" }]}
-            >
-              <div className="flex gap-2">
-                <Input
-                  readOnly
-                  value={clockValue.format("HH:mm")}
-                  onClick={() => setClockOpen(true)}
-                  className="dark:bg-gray-700 dark:text-white dark:border-gray-600 cursor-pointer"
-                />
-                <Button onClick={() => setClockOpen(true)}>🕒 Chọn</Button>
-              </div>
-
-              <Modal
-                title="Chọn giờ họp (08:00 - 18:00)"
-                open={clockOpen}
-                onCancel={() => setClockOpen(false)}
-                onOk={() => {
-                  if (!validateBusinessTime(clockValue)) {
-                    toast.error("⏰ Chỉ được đặt 08:00 - 18:00!");
-                    return;
-                  }
-                  form.setFieldsValue({ time: clockValue });
-                  setClockOpen(false);
-                }}
-                width={350}
-                centered
-              >
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <StaticTimePicker
-                    orientation="portrait"
-                    ampm={false}
-                    value={clockValue}
-                    onChange={(v) => setClockValue(v)}
-                    slotProps={{ actionBar: { actions: [] } }}
-                  />
-                </LocalizationProvider>
-              </Modal>
-            </Form.Item>
+            <Form.Item name="hour" hidden><Input /></Form.Item>
+                          <Form.Item name="minute" hidden><Input /></Form.Item>
+            
+                          <Form.Item name="time" label="Giờ bắt đầu" rules={[{ required: true }]}>
+                          <div className="grid grid-cols-2 gap-2">
+            
+                          {/* Chọn giờ */}
+                          <Select
+                        placeholder="Giờ"
+                        value={form.getFieldValue("hour")}
+                        onChange={(h) => {
+                          const m = form.getFieldValue("minute") || 0;
+                          const time = dayjs().hour(h).minute(m);
+                          form.setFieldsValue({ time, hour: h });
+                        }}
+                        className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                        options={Array.from({ length: 11 }, (_, i) => {
+                          const hour = i + 8; // 8 → 18
+                          return {
+                            label: hour.toString().padStart(2, "0"),
+                            value: hour,
+                          };
+                        })}
+                      />
+            
+                          <Select
+                        placeholder="Phút"
+                        value={form.getFieldValue("minute")}
+                        onChange={(m) => {
+                          const h = form.getFieldValue("hour") || 8;
+                          const time = dayjs().hour(h).minute(m);
+                          form.setFieldsValue({ time, minute: m });
+                        }}
+                        className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                        options={Array.from({ length: 60 }, (_, i) => ({
+                          label: i.toString().padStart(2, "0"),
+                          value: i,
+                        }))}
+                      />
+            
+                        </div>
+                      </Form.Item>
 
             <Form.Item
               name="duration"
@@ -602,9 +603,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
                 <DatePicker
                   format="DD/MM/YYYY"
                   className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                  disabledDate={(c) =>
-                    c && (c <= dayjs().startOf("day") || c.day() === 0 || c.day() === 6)
-                  }
+                  disabledDate={(c) => c && c <= dayjs().startOf("day")}
                 />
               </Form.Item>
             </div>

@@ -22,7 +22,10 @@ const NotificationItem = ({ notification, onMarkRead }) => {
     notification.message.includes("bị từ chối"); // <-- Đã bao gồm trường hợp của bạn
 
   // Chỉ hiện nút nếu là Lời mời họp VÀ chưa đọc VÀ không phải thông báo trạng thái
-  const showActions = notification.meetingId && !notification.read && !isStatusUpdate;
+  // const showActions = notification.meetingId && !notification.read && !isStatusUpdate;
+
+  // Tắt hoàn toàn nút Chấp nhận & Từ chối
+  const showActions = false;
 
   const handleResponse = async (status) => {
     if (isResponding) return;
