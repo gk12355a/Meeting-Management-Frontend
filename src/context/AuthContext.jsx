@@ -1,7 +1,8 @@
+// src/context/AuthContext.jsx
 import { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import * as authApi from "../services/authService";
-import * as userService from "../services/userService"; // <-- THÊM SERVICE
+import * as userService from "../services/userService"; 
 import api from "../utils/api";
 import { jwtDecode } from "jwt-decode";
 
@@ -15,10 +16,9 @@ export const AuthProvider = ({ children }) => {
   const [initializing, setInitializing] = useState(true);
   const [loading, setLoading] = useState(false);
 
-  // === HÀM MỚI: KIỂM TRA VÀ TẢI PROFILE (Hỗ trợ SSO & Legacy) ===
+  // Hàm checkAuth (Giữ nguyên như file trước)
   const checkAuth = async (current_token) => {
     if (!current_token) return;
-
     try {
       const decoded = jwtDecode(current_token);
       const expired = decoded.exp * 1000 < Date.now();
@@ -28,16 +28,13 @@ export const AuthProvider = ({ children }) => {
         return;
       }
 
-      // 1. Set token header
       api.defaults.headers.common["Authorization"] = current_token;
 
-      // 2. GỌI API PROFILE MỚI (LẤY ID CHUẨN BACKEND)
       const profileRes = await userService.getMyProfile();
-      const userProfile = profileRes.data; // { id, fullName, username, roles... }
+      const userProfile = profileRes.data;
 
-      // 3. Set User object hoàn chỉnh
       setUser({
-        id: userProfile.id, // <-- ID CHUẨN TỪ BACKEND
+        id: userProfile.id,
         username: userProfile.username || decoded.sub,
         fullName: userProfile.fullName,
         roles: userProfile.roles || decoded.roles || [],
@@ -46,38 +43,35 @@ export const AuthProvider = ({ children }) => {
       return userProfile.roles || decoded.roles || [];
     } catch (err) {
       console.error("AuthCheck failed:", err);
-      // Xóa token nếu không thể lấy profile (token lỗi hoặc không hợp lệ)
       logout(true);
     }
   };
-  // ==========================================================
 
-  // 🔁 Load token khi reload trang
   useEffect(() => {
     if (!token) {
       setInitializing(false);
       return;
     }
-
-    // Nếu token tồn tại, chạy hàm kiểm tra/tải profile
     checkAuth(token).then(() => setInitializing(false));
   }, [token]);
 
-  // 🟢 Login (Đã sửa để gọi API login và dùng useEffect để set user)
+  // === 🟢 SỬA HÀM LOGIN (Lưu thêm authProvider) ===
   const login = async (username, password) => {
     setLoading(true);
     try {
       const res = await authApi.login(username, password);
       const { accessToken, tokenType } = res.data;
-      const fullToken = `${tokenType} ${accessToken}`;
+      const fullToken = `${tokenType || "Bearer"} ${accessToken}`;
 
-      // Lưu token và set state (sẽ kích hoạt useEffect)
       localStorage.setItem("token", fullToken);
+      localStorage.setItem("authProvider", "local"); // <-- LƯU CỜ NÀY
+      
       setToken(fullToken);
 
       const decoded = jwtDecode(fullToken);
-      return decoded.roles || [];
+      await checkAuth(fullToken); // Load profile ngay
 
+      return decoded.roles || [];
     } catch (error) {
       return Promise.reject(error);
     } finally {
@@ -85,13 +79,26 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // 🔴 Logout
+  // === 🔴 SỬA HÀM LOGOUT (Xử lý Redirect SSO) ===
   const logout = (silent = false) => {
+    // 1. Kiểm tra loại đăng nhập trước khi xóa
+    const provider = localStorage.getItem("authProvider");
+
+    // 2. Xóa dữ liệu local
     localStorage.removeItem("token");
+    localStorage.removeItem("authProvider");
     delete api.defaults.headers.common["Authorization"];
     setUser(null);
     setToken(null);
-    if (!silent) navigate("/login");
+
+    // 3. Điều hướng
+    if (provider === "sso" && !silent) {
+       // Nếu là SSO -> Chuyển hướng sang Auth Service để logout session bên đó
+       window.location.href = authApi.getSSOLogoutUrl();
+    } else if (!silent) {
+       // Nếu là Local -> Về trang login bình thường
+       navigate("/login");
+    }
   };
 
   const isAuthenticated = !!token;
@@ -115,7 +122,7 @@ export const AuthProvider = ({ children }) => {
         loading,
         isAuthenticated,
         isAdmin,
-        checkAuth, // <-- EXPORT checkAuth cho AuthorizedPage dùng
+        checkAuth,
       }}
     >
       {children}
