@@ -1,9 +1,12 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next"; 
 import * as authService from "../../services/authService";
 import { FiLock, FiSave, FiEye, FiEyeOff } from "react-icons/fi";
 import { motion } from "framer-motion";
 
 export default function ChangePasswordPage() {
+  const { t } = useTranslation(['admin', 'common']); 
+
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -23,26 +26,30 @@ export default function ChangePasswordPage() {
     setSuccess(null);
 
     if (newPassword !== confirmPassword) {
-      setError("Mật khẩu mới và mật khẩu xác nhận không khớp.");
+      // {/* <span>Mật khẩu mới và mật khẩu xác nhận không khớp.</span> */}
+      setError(t('admin:changePassword.errors.mismatch'));
       return;
     }
 
     if (newPassword.length < 6) {
-      setError("Mật khẩu mới phải có ít nhất 6 ký tự.");
+      // {/* <span>Mật khẩu mới phải có ít nhất 6 ký tự.</span> */}
+      setError(t('admin:changePassword.errors.minLength'));
       return;
     }
 
     setLoading(true);
     try {
       await authService.changePassword(oldPassword, newPassword);
-      setSuccess("Đổi mật khẩu thành công!");
+      // {/* <span>Đổi mật khẩu thành công!</span> */}
+      setSuccess(t('admin:changePassword.success'));
       setOldPassword("");
       setNewPassword("");
       setConfirmPassword("");
     } catch (err) {
+      // {/* <span>Đổi mật khẩu thất bại. Vui lòng kiểm tra lại mật khẩu cũ.</span> */}
       setError(
         err.response?.data?.message ||
-          "Đổi mật khẩu thất bại. Vui lòng kiểm tra lại mật khẩu cũ."
+          t('admin:changePassword.errors.failed')
       );
     } finally {
       setLoading(false);
@@ -52,31 +59,33 @@ export default function ChangePasswordPage() {
   return (
     <div className="flex items-center justify-center min-h-[75vh]">
       <motion.div
-        className="bg-white shadow-xl p-10 rounded-3xl w-full max-w-lg border border-gray-200"
+        className="bg-white shadow-xl p-10 rounded-3xl w-full max-w-lg border border-gray-200 dark:bg-gray-800 dark:border-gray-700" // ✅ THÊM dark mode class (NEW)
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.4 }}
       >
-        <h2 className="text-3xl font-bold text-center mb-8 text-blue-700 flex items-center justify-center gap-2">
-          <FiLock /> Đổi mật khẩu
+        {/* <span>Đổi mật khẩu</span> */}
+        <h2 className="text-3xl font-bold text-center mb-8 text-blue-700 dark:text-blue-400 flex items-center justify-center gap-2">
+          <FiLock /> {t('admin:changePassword.title')}
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           {error && (
-            <div className="bg-red-50 border border-red-300 text-red-700 text-center rounded-lg p-3">
+            <div className="bg-red-50 border border-red-300 text-red-700 text-center rounded-lg p-3 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400">
               {error}
             </div>
           )}
           {success && (
-            <div className="bg-green-50 border border-green-300 text-green-700 text-center rounded-lg p-3">
+            <div className="bg-green-50 border border-green-300 text-green-700 text-center rounded-lg p-3 dark:bg-green-900/20 dark:border-green-800 dark:text-green-400">
               {success}
             </div>
           )}
 
           {/* Mật khẩu cũ */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Mật khẩu cũ
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              {/* <span>Mật khẩu cũ</span> */}
+              <span>{t('admin:changePassword.fields.oldPassword')}</span>
             </label>
             <div className="relative">
               <input
@@ -84,12 +93,12 @@ export default function ChangePasswordPage() {
                 value={oldPassword}
                 onChange={(e) => setOldPassword(e.target.value)}
                 required
-                className="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
+                className="w-full border border-gray-300 dark:border-gray-600 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10 dark:bg-gray-700 dark:text-white"
               />
               <button
                 type="button"
                 onClick={() => setShowOld(!showOld)}
-                className="absolute right-3 top-3 text-gray-500 hover:text-blue-600 transition"
+                className="absolute right-3 top-3 text-gray-500 hover:text-blue-600 transition dark:text-gray-400"
                 tabIndex={-1}
               >
                 {showOld ? <FiEye size={20} /> : <FiEyeOff size={20} />}
@@ -99,8 +108,9 @@ export default function ChangePasswordPage() {
 
           {/* Mật khẩu mới */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Mật khẩu mới
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              {/* <span>Mật khẩu mới</span> */}
+              <span>{t('admin:changePassword.fields.newPassword')}</span>
             </label>
             <div className="relative">
               <input
@@ -108,12 +118,12 @@ export default function ChangePasswordPage() {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 required
-                className="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
+                className="w-full border border-gray-300 dark:border-gray-600 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10 dark:bg-gray-700 dark:text-white"
               />
               <button
                 type="button"
                 onClick={() => setShowNew(!showNew)}
-                className="absolute right-3 top-3 text-gray-500 hover:text-blue-600 transition"
+                className="absolute right-3 top-3 text-gray-500 hover:text-blue-600 transition dark:text-gray-400"
                 tabIndex={-1}
               >
                 {showNew ? <FiEye size={20} /> : <FiEyeOff size={20} />}
@@ -123,8 +133,9 @@ export default function ChangePasswordPage() {
 
           {/* Xác nhận mật khẩu mới */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Xác nhận mật khẩu mới
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              {/* <span>Xác nhận mật khẩu mới</span> */}
+              <span>{t('admin:changePassword.fields.confirmPassword')}</span>
             </label>
             <div className="relative">
               <input
@@ -132,12 +143,12 @@ export default function ChangePasswordPage() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
-                className="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
+                className="w-full border border-gray-300 dark:border-gray-600 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10 dark:bg-gray-700 dark:text-white"
               />
               <button
                 type="button"
                 onClick={() => setShowConfirm(!showConfirm)}
-                className="absolute right-3 top-3 text-gray-500 hover:text-blue-600 transition"
+                className="absolute right-3 top-3 text-gray-500 hover:text-blue-600 transition dark:text-gray-400"
                 tabIndex={-1}
               >
                 {showConfirm ? <FiEye size={20} /> : <FiEyeOff size={20} />}
@@ -153,7 +164,9 @@ export default function ChangePasswordPage() {
             className="w-full bg-blue-600 text-white font-semibold py-3 mt-4 rounded-lg hover:bg-blue-700 transition duration-300 disabled:opacity-60 flex items-center justify-center gap-2"
           >
             <FiSave />
-            {loading ? "Đang lưu..." : "Lưu thay đổi"}
+            {/* <span>Đang lưu...</span> */}
+            {/* <span>Lưu thay đổi</span> */}
+            {loading ? t('common:messages.loading') : t('common:buttons.save')}
           </motion.button>
         </form>
       </motion.div>
