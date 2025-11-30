@@ -23,11 +23,13 @@ import {
 import { toast, ToastContainer } from "react-toastify";
 import { FiBarChart2, FiDownload } from "react-icons/fi";
 import "react-toastify/dist/ReactToastify.css";
-
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
+import { useTranslation } from "react-i18next";
 const { RangePicker } = DatePicker;
 
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
+
 const ReportPage = () => {
+  const { t } = useTranslation(['reports', 'common']);
   const [roomUsageData, setRoomUsageData] = useState([]);
   const [cancelStatsData, setCancelStatsData] = useState([]);
   const [dateRange, setDateRange] = useState([]);
@@ -70,7 +72,8 @@ const ReportPage = () => {
       setRoomUsageData(rooms.data || []);
       setCancelStatsData(cancelStats.data || []);
     } catch (error) {
-      toast.error("Không thể tải dữ liệu báo cáo!");
+      {/* toast.error("Không thể tải dữ liệu báo cáo!"); */}
+      toast.error(t('reports:messages.loadError'));
       console.error(error);
     } finally {
       setIsLoading(false);
@@ -78,7 +81,7 @@ const ReportPage = () => {
   };
 
   const handleDownloadExcel = async () => {
-    if (!dateRange.length) return toast.info("Vui lòng chọn ngày!");
+    if (!dateRange.length) return (/* toast.info("Vui lòng chọn ngày!"); */ toast.info(t('reports:messages.selectDateFirst')));
     const from = dateRange[0].toISOString().split("T")[0];
     const to = dateRange[1].toISOString().split("T")[0];
 
@@ -98,7 +101,8 @@ const ReportPage = () => {
       document.body.appendChild(link);
       link.click();
       link.remove();
-      toast.success("📊 Đã tải file Excel từ backend!");
+      {/* toast.success("📊 Đã tải file Excel từ backend!"); */}
+      toast.success(t('reports:messages.exportSuccess'));
     } catch (error) {
       console.error(error);
       toast.error("Không thể tải file Excel!");
@@ -112,12 +116,14 @@ const ReportPage = () => {
     labels: roomUsageData.map((r) => r.roomName),
     datasets: [
       {
-        label: "Số giờ sử dụng",
+        // label: "Số giờ sử dụng",
+        label: t('reports:charts.hoursBooked'), // ({/* <span>Số giờ sử dụng</span> */} <span>{t('reports:charts.hoursBooked')}</span>)
         data: roomUsageData.map((r) => r.totalHoursBooked),
         backgroundColor: isDarkMode ? "#3b82f6" : "#2563eb",
       },
       {
-        label: "Số lần đặt",
+        // label: "Số lần đặt",
+        label: t('reports:charts.bookingCount'), // ({/* <span>Số lần đặt</span> */} <span>{t('reports:charts.bookingCount')}</span>)
         data: roomUsageData.map((r) => r.bookingCount),
         backgroundColor: isDarkMode ? "#60a5fa" : "#93c5fd",
       },
@@ -128,7 +134,8 @@ const ReportPage = () => {
     labels: cancelStatsData.map((r) => r.reason),
     datasets: [
       {
-        label: "Số lần hủy",
+        // label: "Số lần hủy",
+        label: t('reports:charts.cancelCount'), // ({/* <span>Số lần hủy</span> */} <span>{t('reports:charts.cancelCount')}</span>)
         data: cancelStatsData.map((r) => r.count),
         backgroundColor: [
           "#ef4444",
@@ -142,7 +149,7 @@ const ReportPage = () => {
     ],
   };
 
-  // BAR OPTIONS (GIỮ NGUYÊN)
+  // BAR OPTIONS 
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -194,7 +201,8 @@ const ReportPage = () => {
               isDarkMode ? "text-gray-100" : "text-gray-900"
             }`}
           >
-            Báo cáo & Thống kê sử dụng phòng họp
+            {/* <h1>Báo cáo & Thống kê sử dụng phòng họp</h1> */}
+            <span>{t('reports:pageTitle')}</span>
           </h1>
         </div>
       </div>
@@ -229,7 +237,8 @@ const ReportPage = () => {
             onClick={handleDownloadExcel}
             className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold shadow active:scale-95 transition"
           >
-            <FiDownload /> Xuất Excel
+            {/* <FiDownload /> Xuất Excel */}
+            <FiDownload /> <span>{t('reports:exportExcel')}</span>
           </button>
         </div>
       </div>
@@ -241,7 +250,8 @@ const ReportPage = () => {
           items={[
             {
               key: "1",
-              label: "📊 Tần suất sử dụng phòng",
+              // label: "📊 Tần suất sử dụng phòng",
+              label: t('reports:tabs.roomUsage'), // ({/* <span>📊 Tần suất sử dụng phòng</span> */} <span>{t('reports:tabs.roomUsage')}</span>)
               children: (
                 <div
                   className={`rounded-2xl shadow-sm p-6 min-h-[450px] flex justify-center items-center ${
@@ -255,8 +265,11 @@ const ReportPage = () => {
                       <Bar data={roomChartData} options={chartOptions} />
                     </div>
                   ) : (
+                    // <p className="text-gray-500">
+                    //   Không có dữ liệu phòng họp trong thời gian đã chọn.
+                    // </p>
                     <p className="text-gray-500">
-                      Không có dữ liệu phòng họp trong thời gian đã chọn.
+                      {t('reports:messages.noRoomData')}
                     </p>
                   )}
                 </div>
@@ -264,7 +277,8 @@ const ReportPage = () => {
             },
             {
               key: "2",
-              label: "❌ Lý do hủy họp",
+              // label: "❌ Lý do hủy họp",
+              label: t('reports:tabs.cancelStats'), // ({/* <span>❌ Lý do hủy họp</span> */} <span>{t('reports:tabs.cancelStats')}</span>)
               children: (
                 <div
                   className={`rounded-2xl shadow-sm p-6 min-h-[450px] flex justify-center items-center ${
@@ -279,7 +293,8 @@ const ReportPage = () => {
                     </div>
                   ) : (
                     <p className="text-gray-500">
-                      Không có dữ liệu hủy họp trong thời gian đã chọn.
+                      {/* Không có dữ liệu hủy họp trong thời gian đã chọn. */}
+                      {t('reports:messages.noCancelData')}
                     </p>
                   )}
                 </div>
