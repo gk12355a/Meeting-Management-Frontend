@@ -1,0 +1,66 @@
+{
+  "appName": "MeetFlow",
+  "buttons": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
+    "confirm": "Confirm",
+    "close": "Close",
+    "update": "Update",
+    "create": "Create",
+    "export": "Export",
+    "download": "Download",
+    "viewMore": "View More",
+    "markAllRead": "Mark All as Read"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "available": "Available",
+    "maintenance": "Under Maintenance",
+    "pending": "Pending",
+    "accepted": "Accepted",
+    "declined": "Declined",
+    "confirmed": "Confirmed"
+  },
+  "messages": {
+    "success": "Success",
+    "error": "Error",
+    "loading": "Loading...",
+    "noData": "No data available",
+    "processing": "Processing...",
+    "saveSuccess": "Saved successfully!",
+    "saveError": "Error saving",
+    "deleteSuccess": "Deleted successfully!",
+    "deleteError": "Error deleting",
+    "updateSuccess": "Updated successfully!",
+    "updateError": "Error updating",
+    "createSuccess": "Created successfully!",
+    "createError": "Error creating"
+  },
+  "validation": {
+    "required": "Please enter {{field}}",
+    "minLength": "{{field}} must be at least {{min}} characters",
+    "maxLength": "{{field}} must not exceed {{max}} characters",
+    "email": "Invalid email",
+    "number": "Please enter a valid number"
+  },
+  "common": {
+    "stt": "No.",
+    "actions": "Actions",
+    "name": "Name",
+    "description": "Description",
+    "date": "Date",
+    "time": "Time",
+    "total": "Total",
+    "filterAll": "All Status",
+    "searchPlaceholder": "Search...",
+    "noResults": "No results found",
+    "tryAgain": "Try again",
+    "person": "person",
+    "item": "item"
+  }
+}
