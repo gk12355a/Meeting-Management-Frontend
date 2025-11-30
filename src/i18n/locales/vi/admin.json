@@ -1,0 +1,35 @@
+{
+  "sidebar": {
+    "title": "MeetFlow Admin",
+    "subtitle": "Quản lý cuộc họp",
+    "menu": {
+      "dashboard": "Dashboard",
+      "users": "Quản lý người dùng",
+      "rooms": "Quản lý phòng họp",
+      "devices": "Quản lý thiết bị",
+      "reports": "Thống kê & báo cáo"
+    }
+  },
+  "header": {
+    "notifications": "Thông báo",
+    "settings": "Cài đặt",
+    "changePassword": "Đổi mật khẩu",
+    "logout": "Đăng xuất",
+    "language": "Ngôn ngữ",
+    "noNotifications": "Không có thông báo mới."
+  },
+  "changePassword": {
+    "title": "Đổi mật khẩu",
+    "fields": {
+      "oldPassword": "Mật khẩu cũ",
+      "newPassword": "Mật khẩu mới",
+      "confirmPassword": "Xác nhận mật khẩu mới"
+    },
+    "success": "Đổi mật khẩu thành công!",
+    "errors": {
+      "mismatch": "Mật khẩu mới và mật khẩu xác nhận không khớp.",
+      "minLength": "Mật khẩu mới phải có ít nhất 6 ký tự.",
+      "failed": "Đổi mật khẩu thất bại. Vui lòng kiểm tra lại mật khẩu cũ."
+    }
+  }
+}
