@@ -11,6 +11,7 @@ import { FiUsers, FiPlus, FiTrash2, FiEdit2, FiSearch } from "react-icons/fi";
 import { motion } from "framer-motion";
 import "react-toastify/dist/ReactToastify.css";
 import Pagination from "../../components/Pagination";
+import { useTranslation } from "react-i18next";
 
 /* Tuỳ chỉnh màu cho Toast theo theme */
 const toastColors = {
@@ -30,6 +31,8 @@ const setToastTheme = () => {
 setToastTheme();
 
 export default function UsersPage() {
+  const { t } = useTranslation(['users', 'common']);
+
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
@@ -63,7 +66,7 @@ export default function UsersPage() {
       setUsers(data);
     } catch (err) {
       console.error("Lỗi khi tải danh sách:", err);
-      toast.error("Không thể tải danh sách người dùng!");
+      toast.error(t('users:messages.createError'));
     } finally {
       setLoading(false);
     }
@@ -76,7 +79,7 @@ export default function UsersPage() {
   /* Kiểm tra dữ liệu nhập */
   const validateUserInput = () => {
     if (!newUser.fullName.trim() || !newUser.username.trim()) {
-      toast.warning("Vui lòng điền đầy đủ Họ tên và Email!");
+      toast.warning(t('users:messages.fillRequired'));
       return false;
     }
     return true;
@@ -95,7 +98,7 @@ export default function UsersPage() {
       };
 
       const res = await createUser(payload);
-      toast.success("Tạo người dùng thành công! Mật khẩu đã được gửi qua email.");
+      toast.success(t('users:messages.createSuccess'));
       setNewUser({
         fullName: "",
         username: "",
@@ -127,7 +130,7 @@ export default function UsersPage() {
         msg.toLowerCase().includes("duplicate") ||
         msg.toLowerCase().includes("đã được sử dụng")
       ) {
-        toast.warning("Email (username) này đã tồn tại!");
+        toast.warning(t('users:messages.emailExists'));
       } else {
         toast.error(" " + msg);
       }
@@ -154,20 +157,20 @@ export default function UsersPage() {
         roles: [selectedUser.role],
         isActive: selectedUser.active,
       });
-      toast.success("Cập nhật thông tin thành công!");
+      toast.success(t('users:messages.updateSuccess'));
       setShowEditModal(false);
       setSelectedUser(null);
       fetchUsers();
     } catch (err) {
       console.error("Lỗi cập nhật người dùng:", err);
-      toast.error("Không thể cập nhật thông tin!");
+      toast.error(t('users:messages.updateError'));
     }
   };
 
   /* Xoá người dùng */
   const handleDeleteUser = async (id) => {
     if (!id) {
-      toast.error("Không xác định được ID người dùng!");
+      toast.error(t('users:messages.deleteError'));
       return;
     }
 
@@ -192,7 +195,8 @@ export default function UsersPage() {
               isDark ? "text-gray-100" : "text-gray-800"
             }`}
           >
-            Xác nhận xoá người dùng?
+            {/* <span>Xác nhận xoá người dùng?</span> */}
+            <span>{t('users:modal.confirmDelete')}</span>
           </h3>
         </div>
         <div className="flex justify-center gap-4 mt-5">
@@ -201,20 +205,20 @@ export default function UsersPage() {
               try {
                 await deleteUser(id);
                 toast.dismiss();
-                toast.success("Đã xoá người dùng!");
+                toast.success(t('users:messages.deleteSuccess'));
                 setUsers((prev) => prev.filter((u) => u.id !== id));
               } catch (err) {
                 console.error("Lỗi khi xoá:", err.response?.data || err);
                 toast.dismiss();
                 toast.error(
-                  err.response?.data?.message ||
-                  "Không thể xoá người dùng! Có thể do quyền hoặc ràng buộc dữ liệu."
+                  err.response?.data?.message || t('users:messages.deleteError')
                 );
               }
             }}
             className="bg-red-600 hover:bg-red-700 text-white font-semibold px-5 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 active:scale-95"
           >
-            Xoá
+            {/* <span>Xoá</span> */}
+            <span>{t('common:buttons.delete')}</span>
           </button>
           <button
             onClick={() => toast.dismiss()}
@@ -224,7 +228,8 @@ export default function UsersPage() {
                 : "bg-gray-200 hover:bg-gray-300 text-gray-800"
             }`}
           >
-            Huỷ
+            {/* <span>Huỷ</span> */}
+            <span>{t('common:buttons.cancel')}</span>
           </button>
         </div>
       </div>,
@@ -287,7 +292,8 @@ export default function UsersPage() {
         <div className="flex items-center gap-2">
           <FiUsers className="text-3xl text-blue-600 dark:text-blue-400" />
           <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
-            Quản lý người dùng
+            {/* <span>Quản lý người dùng</span> */}
+            <span>{t('users:pageTitle')}</span>
           </h1>
         </div>
       </motion.div>
@@ -303,7 +309,8 @@ export default function UsersPage() {
           <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" size={20} />
           <input
             type="text"
-            placeholder="Tìm kiếm người dùng..."
+            // <span>placeholder="Tìm kiếm người dùng..."</span>
+            placeholder={t('users:searchPlaceholder')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-gray-900
@@ -320,9 +327,12 @@ export default function UsersPage() {
             text-gray-900 focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-400 focus:border-transparent
              transition-all duration-200 cursor-pointer"
         >
-          <option value="all">Tất cả trạng thái</option>
+          {/* <option value="all">Tất cả trạng thái</option>
           <option value="active">Đang hoạt động</option>
-          <option value="inactive">Vô hiệu hoá</option>
+          <option value="inactive">Vô hiệu hoá</option> */}
+          <option value="all">{t('common:common.filterAll')}</option>
+          <option value="active">{t('common:status.active')}</option>
+          <option value="inactive">{t('common:status.inactive')}</option>
         </select>
         {/* Nút thêm người dùng */}
         <button
@@ -333,7 +343,8 @@ export default function UsersPage() {
               text-white rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
         >
           <FiPlus size={20} />
-          Thêm người dùng
+          {/* <span>Thêm người dùng</span> */}
+          <span>{t('users:addUser')}</span>
         </button>
       </motion.div>
 
@@ -354,7 +365,8 @@ export default function UsersPage() {
           className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow transition"
         >
           <div className="text-gray-500 dark:text-gray-400 text-base mb-0.5">
-            Tổng số người dùng
+            {/* <span>Tổng số người dùng</span> */}
+            <span>{t('users:stats.total')}</span>
           </div>
           <div className="text-2xl font-bold text-gray-800 dark:text-white">
             {users.length}
@@ -367,7 +379,8 @@ export default function UsersPage() {
           className="bg-green-50 dark:bg-green-900/20 rounded-2xl p-6 border border-green-200 dark:border-green-800 shadow transition"
         >
           <div className="text-green-700 dark:text-green-400 text-base mb-0.5">
-            Đang hoạt động
+            {/* <span>Đang hoạt động</span> */}
+            <span>{t('users:stats.active')}</span>
           </div>
           <div className="text-2xl font-bold text-green-700 dark:text-green-200">
             {users.filter((u) => u.active).length}
@@ -380,7 +393,8 @@ export default function UsersPage() {
           className="bg-orange-50 dark:bg-orange-900/20 rounded-2xl p-6 border border-orange-200 dark:border-orange-800 shadow transition"
         >
           <div className="text-orange-700 dark:text-orange-400 text-base mb-0.5">
-            Vô hiệu hoá
+            {/* <span>Vô hiệu hoá</span> */}
+            <span>{t('users:stats.inactive')}</span>
           </div>
           <div className="text-2xl font-bold text-orange-700 dark:text-orange-100">
             {users.filter((u) => !u.active).length}
@@ -407,12 +421,20 @@ export default function UsersPage() {
             {/* Table header */}
             <thead className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200">
               <tr>
-                <th className="p-4 text-base font-semibold w-16 text-center">STT</th>
-                <th className="p-4 text-base font-semibold">Họ và tên</th>
-                <th className="p-4 text-base font-semibold">Email</th>
-                <th className="p-4 text-base font-semibold">Vai trò</th>
-                <th className="p-4 text-base font-semibold text-center">Trạng thái</th>
-                <th className="p-4 text-base font-semibold text-center">Hành động</th>
+                {/* 
+                  <th className="p-4 text-base font-semibold w-16 text-center">STT</th>
+                  <th className="p-4 text-base font-semibold">Họ và tên</th>
+                  <th className="p-4 text-base font-semibold">Email</th>
+                  <th className="p-4 text-base font-semibold">Vai trò</th>
+                  <th className="p-4 text-base font-semibold text-center">Trạng thái</th>
+                  <th className="p-4 text-base font-semibold text-center">Hành động</th>
+                */}
+                <th className="p-4 text-base font-semibold w-16 text-center">{t('common:common.stt')}</th>
+                <th className="p-4 text-base font-semibold">{t('users:table.fullName')}</th>
+                <th className="p-4 text-base font-semibold">{t('users:table.email')}</th>
+                <th className="p-4 text-base font-semibold">{t('users:table.role')}</th>
+                <th className="p-4 text-base font-semibold text-center">{t('users:table.status')}</th>
+                <th className="p-4 text-base font-semibold text-center">{t('common:common.actions')}</th>
               </tr>
             </thead>
             {/* Table body */}
@@ -420,7 +442,8 @@ export default function UsersPage() {
               {loading ? (
                 <tr>
                   <td colSpan="6" className="p-10 text-center text-gray-500 dark:text-gray-400">
-                    Đang tải dữ liệu...
+                    {/* <span>Đang tải dữ liệu...</span> */}
+                    <span>{t('common:messages.loadingData')}</span>
                   </td>
                 </tr>
               ) : users.length === 0 ? (
@@ -428,8 +451,12 @@ export default function UsersPage() {
                   <td colSpan="6" className="p-10 text-center text-gray-500 dark:text-gray-400">
                     <div className="flex flex-col items-center gap-2">
                       <FiSearch size={48} className="text-gray-300 dark:text-gray-600" />
-                      <p className="text-lg font-semibold">Không có người dùng nào</p>
-                      <p className="text-base">Hệ thống chưa có dữ liệu người dùng</p>
+                      {/* 
+                        <p className="text-lg font-semibold">Không có người dùng nào</p>
+                        <p className="text-base">Hệ thống chưa có dữ liệu người dùng</p>
+                      */}
+                      <p className="text-lg font-semibold">{t('users:messages.noUsers')}</p>
+                      <p className="text-base">{t('users:messages.noUsersDesc')}</p>
                     </div>
                   </td>
                 </tr>
@@ -438,8 +465,12 @@ export default function UsersPage() {
                   <td colSpan="6" className="p-10 text-center text-gray-500 dark:text-gray-400">
                     <div className="flex flex-col items-center gap-2">
                       <FiSearch size={48} className="text-gray-300 dark:text-gray-600" />
-                      <p className="text-lg font-semibold">Không tìm thấy người dùng nào</p>
-                      <p className="text-base">Thử thay đổi bộ lọc hoặc tìm kiếm khác</p>
+                      {/* 
+                        <p className="text-lg font-semibold">Không tìm thấy người dùng nào</p>
+                        <p className="text-base">Thử thay đổi bộ lọc hoặc tìm kiếm khác</p>
+                      */}
+                      <p className="text-lg font-semibold">{t('users:messages.notFound')}</p>
+                      <p className="text-base">{t('users:messages.notFoundDesc')}</p>
                     </div>
                   </td>
                 </tr>
@@ -465,7 +496,12 @@ export default function UsersPage() {
                             ? "bg-blue-100 text-blue-700 dark:bg-blue-700 dark:text-blue-100"
                             : "bg-green-100 text-green-700 dark:bg-green-700 dark:text-green-100"
                         }`}>
-                          {roleCode === "ROLE_ADMIN" ? "Admin" : "User"}
+                          {/* <span>{roleCode === "ROLE_ADMIN" ? "Admin" : "User"}</span> */}
+                          <span>
+                            {roleCode === "ROLE_ADMIN"
+                              ? t('users:roles.admin')
+                              : t('users:roles.user')}
+                          </span>
                         </span>
                       </td>
                       <td className="p-4 text-center">
@@ -474,7 +510,12 @@ export default function UsersPage() {
                             ? "bg-green-100 text-green-700 dark:bg-green-700 dark:text-green-100"
                             : "bg-red-100 text-red-700 dark:bg-red-700 dark:text-red-100"
                         }`}>
-                          {user.active ? "Đang hoạt động" : "Vô hiệu"}
+                          {/* <span>{user.active ? "Đang hoạt động" : "Vô hiệu"}</span> */}
+                          <span>
+                            {user.active
+                              ? t('common:status.active')
+                              : t('common:status.inactive')}
+                          </span>
                         </span>
                       </td>
                       <td className="p-4 text-center">
@@ -486,7 +527,7 @@ export default function UsersPage() {
                             className="p-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300
                               hover:bg-blue-100 dark:hover:bg-blue-900/20 rounded-md transition
                               disabled:opacity-50 disabled:cursor-not-allowed"
-                            title="Cập nhật quyền / trạng thái"
+                            title={t('users:table.edit')}
                           >
                             <FiEdit2 size={18} />
                           </button>
@@ -497,7 +538,7 @@ export default function UsersPage() {
                             className="p-2 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300
                               hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition
                               disabled:opacity-50 disabled:cursor-not-allowed"
-                            title="Xóa người dùng"
+                            title={t('users:table.delete')}
                           >
                             <FiTrash2 size={18} />
                           </button>
@@ -531,7 +572,8 @@ export default function UsersPage() {
             {/* Modal Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Thêm người dùng mới
+                {/* <span>Thêm người dùng mới</span> */}
+                <span>{t('users:modal.addTitle')}</span>
               </h2>
               <button
                 onClick={() => setShowAddModal(false)}
@@ -548,7 +590,8 @@ export default function UsersPage() {
                 {/* Họ và tên */}
                 <div>
                   <label className="block text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Họ và tên <span className="text-red-500">*</span>
+                    {/* <span>Họ và tên</span> */}
+                    <span>{t('users:modal.fields.fullName')} <span className="text-red-500">*</span></span>
                   </label>
                   <input
                     type="text"
@@ -556,7 +599,8 @@ export default function UsersPage() {
                     onChange={(e) =>
                       setNewUser({ ...newUser, fullName: e.target.value })
                     }
-                    placeholder="VD: Nguyễn Văn A"
+                    // <span>placeholder="VD: Nguyễn Văn A"</span>
+                    placeholder={t('users:modal.placeholders.fullName')}
                     disabled={creating}
                     className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-gray-900
                       placeholder-gray-400 dark:placeholder-gray-500
@@ -567,7 +611,8 @@ export default function UsersPage() {
                 {/* Tên người dùng */}
                 <div>
                   <label className="block text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Email <span className="text-red-500">*</span>
+                    {/* <span>Email</span> */}
+                    <span>{t('users:modal.fields.email')} <span className="text-red-500">*</span></span>
                   </label>
                   <input
                     type="text"
@@ -575,7 +620,8 @@ export default function UsersPage() {
                     onChange={(e) =>
                       setNewUser({ ...newUser, username: e.target.value })
                     }
-                    placeholder="VD: admin@gmail.com"
+                    // <span>placeholder="VD: admin@gmail.com"</span>
+                    placeholder={t('users:modal.placeholders.email')}
                     disabled={creating}
                     className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-gray-900
                       placeholder-gray-400 dark:placeholder-gray-500
@@ -584,9 +630,11 @@ export default function UsersPage() {
                   />
                 </div>
                 {/* Vai trò cho thêm mới */}
-                 {/* <div>
+                 {/* NOTE: nếu muốn bật lại cho phép chọn vai trò khi thêm mới, chỉ cần mở khóa đoạn này và áp dụng các nhãn i18n như dưới */}
+                 {/* 
+                 <div>
                    <label className="block text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
-                     Vai trò <span className="text-red-500">*</span>
+                     <span>{t('users:modal.fields.role')} <span className="text-red-500">*</span></span>
                    </label>
                    <select
                      value={newUser.role}
@@ -598,10 +646,11 @@ export default function UsersPage() {
                          focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-400 focus:border-transparent
                          transition-all duration-200 text-base"
                    >
-                     <option value="ROLE_USER">User</option>
-                     <option value="ROLE_ADMIN">Admin</option>
+                     <option value="ROLE_USER">{t('users:roles.user')}</option>
+                     <option value="ROLE_ADMIN">{t('users:roles.admin')}</option>
                    </select>
-                 </div> */}
+                 </div> 
+                 */}
               </div>
               <div className="flex justify-end gap-3 mt-8">
                 <button
@@ -609,7 +658,8 @@ export default function UsersPage() {
                   disabled={creating}
                   className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                 >
-                  Huỷ
+                  {/* <span>Huỷ</span> */}
+                  <span>{t('common:buttons.cancel')}</span>
                 </button>
                 <button
                   onClick={handleCreateUser}
@@ -620,7 +670,10 @@ export default function UsersPage() {
                       : "bg-blue-600 hover:bg-blue-700"
                   }`}
                 >
-                  {creating ? "Đang thêm..." : "Thêm"}
+                  {/* <span>{creating ? "Đang thêm..." : "Thêm"}</span> */}
+                  <span>
+                    {creating ? t('common:messages.processing') : t('common:buttons.add')}
+                  </span>
                 </button>
               </div>
             </div>
@@ -639,7 +692,8 @@ export default function UsersPage() {
             {/* Modal Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Cập nhật quyền / trạng thái
+                {/* <span>Cập nhật quyền / trạng thái</span> */}
+                <span>{t('users:modal.editTitle')}</span>
               </h2>
               <button
                 onClick={() => setShowEditModal(false)}
@@ -662,7 +716,8 @@ export default function UsersPage() {
                 {/* Vai trò - THÊM MỚI */}
                 <div>
                   <label className="block text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Vai trò <span className="text-red-500">*</span>
+                    {/* <span>Vai trò</span> */}
+                    <span>{t('users:modal.fields.role')} <span className="text-red-500">*</span></span>
                   </label>
                   <select
                     value={selectedUser.role}
@@ -676,15 +731,16 @@ export default function UsersPage() {
                       focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-400 focus:border-transparent
                       transition-all duration-200 text-base"
                   >
-                    <option value="ROLE_USER">User</option>
-                    <option value="ROLE_ADMIN">Admin</option>
+                    <option value="ROLE_USER">{t('users:roles.user')}</option>
+                    <option value="ROLE_ADMIN">{t('users:roles.admin')}</option>
                   </select>
                 </div>
 
                 {/* Trạng thái */}
                 <div>
                   <label className="block text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Trạng thái
+                    {/* <span>Trạng thái</span> */}
+                    <span>{t('users:modal.fields.status')}</span>
                   </label>
                   <select
                     value={selectedUser.active ? "active" : "inactive"}
@@ -698,8 +754,8 @@ export default function UsersPage() {
                       focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-400 focus:border-transparent
                       transition-all duration-200 text-base"
                   >
-                    <option value="active">Đang hoạt động</option>
-                    <option value="inactive">Vô hiệu</option>
+                    <option value="active">{t('common:status.active')}</option>
+                    <option value="inactive">{t('common:status.inactive')}</option>
                   </select>
                 </div>
               </div>
@@ -708,13 +764,15 @@ export default function UsersPage() {
                   onClick={() => setShowEditModal(false)}
                   className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                 >
-                  Huỷ
+                  {/* <span>Huỷ</span> */}
+                  <span>{t('common:buttons.cancel')}</span>
                 </button>
                 <button
                   onClick={handleUpdateUser}
                   className="px-4 py-2 rounded-lg font-semibold text-white shadow-md active:scale-95 transition bg-blue-600 hover:bg-blue-700"
                 >
-                  Lưu
+                  {/* <span>Lưu</span> */}
+                  <span>{t('common:buttons.save')}</span>
                 </button>
               </div>
             </div>
