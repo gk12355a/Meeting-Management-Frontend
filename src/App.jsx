@@ -19,7 +19,7 @@ import Users from "./pages/admin/UsersPage";
 import Rooms from "./pages/admin/RoomsPage";
 import Devices from "./pages/admin/DevicesPage";
 import Reports from "./pages/admin/ReportsPage";
-import ChangePasswordPageAdmin from './pages/admin/ChangePasswordPage';
+import ChangePasswordPageAdmin from "./pages/admin/ChangePasswordPage";
 
 // ===== User Pages =====
 import UserDashboard from "./pages/user/DashboardPage";
@@ -28,13 +28,14 @@ import CreateMeetingPage from "./pages/user/CreateMeetingPage";
 import UserRoomsPage from "./pages/user/RoomsPage";
 import HistoryPage from "./pages/user/HistoryPage";
 import ProfilePage from "./pages/user/ProfilePage";
-import ChangePasswordPageUser from './pages/user/ChangePasswordPage';
+import ChangePasswordPageUser from "./pages/user/ChangePasswordPage";
 import DevicePage from "./pages/user/DevicePage";
 import CheckInProcessingPage from "./pages/user/CheckInProcessingPage";
 
 // ===== Guards =====
 import ProtectedRoute from "./routes/ProtectedRoute";
 import AdminOnlyRoute from "./routes/AdminOnlyRoute";
+import AuthorizedPage from "./pages/auth/AuthorizedPage";
 // ===== Google OAuth Callback Page =====
 import GoogleCallbackPage from "./pages/GoogleCallbackPage";
 
@@ -46,6 +47,7 @@ export default function App() {
       <Routes>
         {/* === PUBLIC ROUTES === */}
         <Route element={<PublicLayout />}>
+          <Route path="/authorized" element={<AuthorizedPage />} />
           <Route
             path="/login"
             element={

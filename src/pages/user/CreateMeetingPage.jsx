@@ -140,6 +140,10 @@ const CreateMeetingPage = () => {
 
   // Submit
   const handleCreateMeeting = async (values) => {
+    if (!user?.id) {
+    toast.error("Không thể tạo cuộc họp: Tài khoản của bạn chưa được đồng bộ đầy đủ. Vui lòng đăng xuất và đăng nhập lại!");
+    return;
+  }
     try {
       setLoading(true);
 
