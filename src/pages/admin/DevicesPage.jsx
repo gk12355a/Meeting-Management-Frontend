@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import { motion } from "framer-motion";
 import "react-toastify/dist/ReactToastify.css";
 import Pagination from "../../components/Pagination";
+import { useTranslation } from "react-i18next";
 const toastColors = {
   success: "#10b981", // xanh ngọc dịu
   error: "#ef4444", // đỏ ấm
@@ -24,6 +25,7 @@ const setToastTheme = () => {
 setToastTheme();
 
 export default function DevicesPage() {
+  const { t } = useTranslation(['devices', 'common']);
   // Danh sách thiết bị
   const [devices, setDevices] = useState([]);  
   // Tìm kiếm & lọc
@@ -53,25 +55,25 @@ export default function DevicesPage() {
     fetchDevices();
   }, []);
   // Lọc thiết bị theo search term và status filter
-useEffect(() => {
-  setCurrentPage(1);
-}, [searchTerm, statusFilter]);
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter]);
 
-const filteredDevices = devices.filter(d => {
-  const term = searchTerm.toLowerCase();
-  const matchSearch =
-    !term ||
-    d.name?.toLowerCase().includes(term) ||
-    d.description?.toLowerCase().includes(term);
+  const filteredDevices = devices.filter(d => {
+    const term = searchTerm.toLowerCase();
+    const matchSearch =
+      !term ||
+      d.name?.toLowerCase().includes(term) ||
+      d.description?.toLowerCase().includes(term);
 
-  const matchStatus = statusFilter === "ALL" ? true : d.status === statusFilter;
+    const matchStatus = statusFilter === "ALL" ? true : d.status === statusFilter;
 
-  return matchSearch && matchStatus;
-});
-const paginatedDevices = filteredDevices.slice(
-  (currentPage - 1) * ITEMS_PER_PAGE,
-  currentPage * ITEMS_PER_PAGE
-);
+    return matchSearch && matchStatus;
+  });
+  const paginatedDevices = filteredDevices.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
   /**
    * Lấy danh sách tất cả thiết bị từ API
@@ -85,7 +87,7 @@ const paginatedDevices = filteredDevices.slice(
       data = [...data].sort((a, b) => (b.id || 0) - (a.id || 0));
       setDevices(data);
     } catch (error) {
-      toast.error("❌ Không thể tải danh sách thiết bị!");
+      toast.error("❌ " + t("devices:messages.loadError")); // ({/* <span>Không thể tải danh sách thiết bị!</span> */} )
       console.error("Fetch devices error:", error);
     } finally {
       setLoading(false);
@@ -121,62 +123,68 @@ const paginatedDevices = filteredDevices.slice(
 
   // Khi tạo mới thiết bị, show thiết bị lên đầu 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  // Validate tên thiết bị
-  if (!formData.name.trim()) {
-    toast.warning("⚠️ Vui lòng nhập tên thiết bị!");
-    return;
-  }
+    // Validate tên thiết bị
+    if (!formData.name.trim()) {
+      toast.warning("⚠️ " + t("devices:messages.nameRequired")); // ({/* <span>Vui lòng nhập tên thiết bị!</span> */})
+      return;
+    }
 
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const submitData = {
-      name: formData.name.trim(),
-      description: formData.description.trim(),
-      status: formData.status,
-    };
+      const submitData = {
+        name: formData.name.trim(),
+        description: formData.description.trim(),
+        status: formData.status,
+      };
 
-    if (editingDevice) {
-      // Cập nhật thiết bị
-      await updateDevice(editingDevice.id, submitData);
-      toast.success("Cập nhật thiết bị thành công!");
-      await fetchDevices();
-      handleCloseModal();
-    } else {
-  // Thêm mới thiết bị
-const res = await createDevice(submitData);
-toast.success("Thêm thiết bị mới thành công!");
+      if (editingDevice) {
+        // Cập nhật thiết bị
+        await updateDevice(editingDevice.id, submitData);
+        toast.success(t("devices:messages.updateSuccess")); // ({/* <span>Cập nhật thiết bị thành công!</span> */})
+        await fetchDevices();
+        handleCloseModal();
+      } else {
+        // Thêm mới thiết bị
+        const res = await createDevice(submitData);
+        toast.success(t("devices:messages.createSuccess")); // ({/* <span>Thêm thiết bị mới thành công!</span> */})
 
-let createdDevice = res?.data;
-if (createdDevice && createdDevice.data) createdDevice = createdDevice.data;
+        let createdDevice = res?.data;
+        if (createdDevice && createdDevice.data) createdDevice = createdDevice.data;
 
-createdDevice = {
-  ...createdDevice,
-  status: createdDevice.status || submitData.status || "AVAILABLE",
-};
+        createdDevice = {
+          ...createdDevice,
+          status: createdDevice.status || submitData.status || "AVAILABLE",
+        };
 
-// Cập nhật list thiết bị
-setDevices(prev => {
-  const newDevices = [{ ...createdDevice }, ...prev];
-  return newDevices.sort((a, b) => (b.id || 0) - (a.id || 0));
-});
+        // Cập nhật list thiết bị
+        setDevices(prev => {
+          const newDevices = [{ ...createdDevice }, ...prev];
+          return newDevices.sort((a, b) => (b.id || 0) - (a.id || 0));
+        });
 
-// 🕒 Đợi 0.3s rồi tắt modal (mượt hơn)
-setTimeout(() => {
-  handleCloseModal();
-}, 300);
-}
-
-  } catch (error) {
-    const errorMsg = error?.response?.data?.message || error?.message || "Có lỗi xảy ra";
-    toast.error(`${editingDevice ? "Cập nhật" : "Thêm"} thiết bị thất bại: ${errorMsg}`);
-    console.error("Submit error:", error?.response?.data || error);
-  } finally {
-    setLoading(false);
-  }
-};
+        // Đợi 0.3s rồi tắt modal (mượt hơn)
+        setTimeout(() => {
+          handleCloseModal();
+        }, 300);
+      }
+    } catch (error) {
+      const errorMsg = error?.response?.data?.message || error?.message || t('common:messages.error');
+      toast.error(
+        (editingDevice
+          ? t("devices:messages.updateError")
+          : t("devices:messages.createError")
+        ) +
+        ": " +
+        errorMsg
+      ); // ({/* <span>Thêm thiết bị thất bại: ...</span> */})
+      console.error("Submit error:", error?.response?.data || error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   /**
    * Mở modal xác nhận xóa thiết bị
@@ -204,14 +212,13 @@ setTimeout(() => {
     try {
       setLoading(true);
       await deleteDevice(deviceToDelete.id);
-      toast.success("Đã xóa thiết bị thành công!");
-      
+      toast.success(t("devices:messages.deleteSuccess")); // ({/* <span>Đã xóa thiết bị thành công!</span> */})
       // Refresh danh sách và đóng modal
       await fetchDevices();
       handleCloseDeleteModal();
     } catch (error) {
-      const errorMsg = error?.response?.data?.message || "Có lỗi xảy ra";
-      toast.error(`Xóa thiết bị thất bại: ${errorMsg}`);
+      const errorMsg = error?.response?.data?.message || t('devices:messages.deleteError');
+      toast.error(t("devices:messages.deleteError") + ": " + errorMsg); // ({/* <span>Xóa thiết bị thất bại: ...</span> */})
       console.error("Delete error:", error);
     } finally {
       setLoading(false);
@@ -232,8 +239,8 @@ setTimeout(() => {
     };
 
     const labels = {
-      AVAILABLE: "Có sẵn",
-      UNDER_MAINTENANCE: "Đang bảo trì"
+      AVAILABLE: t('devices:modal.statusOptions.available'), // ({/* <span>Có sẵn</span> */})
+      UNDER_MAINTENANCE: t('devices:modal.statusOptions.maintenance'), // ({/* <span>Đang bảo trì</span> */})
     };
 
     return (
@@ -284,7 +291,8 @@ setTimeout(() => {
           </svg>
         </span>
         <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
-          Quản lý thiết bị
+          {/* <span>Quản lý thiết bị</span> */}
+          <span>{t('devices:pageTitle')}</span>
         </h1>
       </motion.div>
 
@@ -300,7 +308,7 @@ setTimeout(() => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" size={20} />
             <input
               type="text"
-              placeholder="Tìm kiếm thiết bị..."
+              placeholder={t('devices:searchPlaceholder') /* <span>Tìm kiếm thiết bị...</span> */}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-gray-900
@@ -318,9 +326,10 @@ setTimeout(() => {
             text-gray-900 focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-400 focus:border-transparent
              transition-all duration-200 cursor-pointer"
           >
-            <option value="ALL">Tất cả trạng thái</option>
-            <option value="AVAILABLE">Có sẵn</option>
-            <option value="UNDER_MAINTENANCE">Đang bảo trì</option>
+            {/* Sử dụng common:common.filterAll và trạng thái i18n */}
+            <option value="ALL">{t('common:common.filterAll') /* <span>Tất cả trạng thái</span> */}</option>
+            <option value="AVAILABLE">{t('devices:modal.statusOptions.available') /* <span>Có sẵn</span> */}</option>
+            <option value="UNDER_MAINTENANCE">{t('devices:modal.statusOptions.maintenance') /* <span>Đang bảo trì</span> */}</option>
           </select>
 
           {/* Nút thêm thiết bị */}
@@ -332,7 +341,8 @@ setTimeout(() => {
               text-white rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
           >
             <Plus size={20} />
-            Thêm thiết bị
+            {/* <span>Thêm thiết bị</span> */}
+            <span>{t('devices:addDevice')}</span>
           </button>
         </div>
       </motion.div>
@@ -355,7 +365,8 @@ setTimeout(() => {
           className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow transition"
         >
           <div className="text-gray-500 dark:text-gray-400 text-base mb-0.5">
-            Tổng số thiết bị
+            {/* <span>Tổng số thiết bị</span> */}
+            <span>{t('devices:stats.total')}</span>
           </div>
           <div className="text-2xl font-bold text-gray-800 dark:text-white">
             {devices.length}
@@ -369,7 +380,8 @@ setTimeout(() => {
           className="bg-green-50 dark:bg-green-900/20 rounded-2xl p-6 border border-green-200 dark:border-green-800 shadow transition"
         >
           <div className="text-green-700 dark:text-green-400 text-base mb-0.5">
-            Có sẵn
+            {/* <span>Có sẵn</span> */}
+            <span>{t('devices:stats.available')}</span>
           </div>
           <div className="text-2xl font-bold text-green-700 dark:text-green-200">
             {getStatsByStatus("AVAILABLE")}
@@ -383,7 +395,8 @@ setTimeout(() => {
           className="bg-orange-50 dark:bg-orange-900/20 rounded-2xl p-6 border border-orange-200 dark:border-orange-800 shadow transition"
         >
           <div className="text-orange-700 dark:text-orange-400 text-base mb-0.5">
-            Đang bảo trì
+            {/* <span>Đang bảo trì</span> */}
+            <span>{t('devices:stats.maintenance')}</span>
           </div>
           <div className="text-2xl font-bold text-orange-700 dark:text-orange-100">
             {getStatsByStatus("UNDER_MAINTENANCE")}
@@ -410,11 +423,12 @@ setTimeout(() => {
             {/* Table header */}
             <thead className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200">
               <tr>
-                <th className="p-4 text-base font-semibold w-16 text-center">STT</th>
-                <th className="p-4 text-base font-semibold">Tên thiết bị</th>
-                <th className="p-4 text-base font-semibold">Mô tả</th>
-                <th className="p-4 text-base font-semibold">Trạng thái</th>
-                <th className="p-4 text-base font-semibold text-center">Hành động</th>
+                {/* {t('common:common.stt')}, {t('devices:table.name')}, ... */}
+                <th className="p-4 text-base font-semibold w-16 text-center">{t('common:common.stt')}</th>
+                <th className="p-4 text-base font-semibold">{t('devices:table.name')}</th>
+                <th className="p-4 text-base font-semibold">{t('devices:table.description')}</th>
+                <th className="p-4 text-base font-semibold">{t('devices:table.status')}</th>
+                <th className="p-4 text-base font-semibold text-center">{t('common:common.actions')}</th>
               </tr>
             </thead>
             
@@ -426,8 +440,10 @@ setTimeout(() => {
                   <td colSpan="5" className="p-10 text-center text-gray-500 dark:text-gray-400">
                     <div className="flex flex-col items-center gap-2">
                       <Search size={48} className="text-gray-300 dark:text-gray-600" />
-                      <p className="text-lg font-semibold">Không tìm thấy thiết bị nào</p>
-                      <p className="text-base">Thử thay đổi bộ lọc hoặc tìm kiếm khác</p>
+                      {/* <p className="text-lg font-semibold">Không tìm thấy thiết bị nào</p> */}
+                      {/* <p className="text-base">Thử thay đổi bộ lọc hoặc tìm kiếm khác</p> */}
+                      <p className="text-lg font-semibold">{t('devices:messages.noDevices')}</p>
+                      <p className="text-base">{t('devices:messages.noDevicesDesc')}</p>
                     </div>
                   </td>
                 </tr>
@@ -451,7 +467,8 @@ setTimeout(() => {
                     <td className="p-4 text-gray-600 dark:text-gray-400">
                       {device.description || (
                         <span className="text-gray-400 dark:text-gray-600 italic">
-                          Chưa có mô tả
+                          {/* <span>Chưa có mô tả</span> */}
+                          {t('devices:table.noDescription')}
                         </span>
                       )}
                     </td>
@@ -467,7 +484,7 @@ setTimeout(() => {
                           className="p-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300
                             hover:bg-blue-100 dark:hover:bg-blue-900/20 rounded-md transition
                             disabled:opacity-50 disabled:cursor-not-allowed"
-                          title="Chỉnh sửa"
+                          title={t('common:buttons.edit')}
                         >
                           <Edit2 size={18} />
                         </button>
@@ -479,7 +496,7 @@ setTimeout(() => {
                           className="p-2 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300
                             hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition
                             disabled:opacity-50 disabled:cursor-not-allowed"
-                          title="Xóa"
+                          title={t('common:buttons.delete')}
                         >
                           <Trash2 size={18} />
                         </button>
@@ -513,7 +530,8 @@ setTimeout(() => {
             {/* Modal Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                {editingDevice ? "Chỉnh sửa thiết bị" : "Thêm thiết bị mới"}
+                {/* {editingDevice ? "Chỉnh sửa thiết bị" : "Thêm thiết bị mới"} */}
+                {editingDevice ? t("devices:modal.editTitle") : t("devices:modal.addTitle")}
               </h2>
               <button
                 onClick={handleCloseModal}
@@ -531,13 +549,14 @@ setTimeout(() => {
                 {/* Trường tên thiết bị */}
                 <div>
                   <label className="block text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Tên thiết bị <span className="text-red-500">*</span>
+                    {/* Tên thiết bị <span className="text-red-500">*</span> */}
+                    {t('devices:modal.fields.name')} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     value={formData.name}
                     onChange={e => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="VD: Máy chiếu Epson X123"
+                    placeholder={t('devices:modal.placeholders.name') /* <span>VD: Máy chiếu Epson X123</span> */}
                     disabled={loading}
                     className="w-full px-4 py-2.5 text-base rounded-lg border border-gray-300 dark:border-gray-600
                     bg-white dark:bg-gray-700 text-gray-900 dark:text-white
@@ -552,12 +571,13 @@ setTimeout(() => {
                 {/* Trường mô tả */}
                 <div>
                   <label className="block text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Mô tả
+                    {/* Mô tả */}
+                    {t('devices:modal.fields.description')}
                   </label>
                   <textarea
                     value={formData.description}
                     onChange={e => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="VD: Máy chiếu full HD, độ phân giải 1920x1080"
+                    placeholder={t('devices:modal.placeholders.description') /* <span>VD: Máy chiếu full HD,...</span> */}
                     rows="3"
                     disabled={loading}
                     className="w-full px-4 py-2.5 text-base rounded-lg border border-gray-300 dark:border-gray-600
@@ -572,7 +592,8 @@ setTimeout(() => {
                 {/* Trường trạng thái */}
                 <div>
                   <label className="block text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Trạng thái <span className="text-red-500">*</span>
+                    {/* Trạng thái <span className="text-red-500">*</span> */}
+                    {t('devices:modal.fields.status')} <span className="text-red-500">*</span>
                   </label>
                   <select
                     value={formData.status}
@@ -585,8 +606,10 @@ setTimeout(() => {
                     transition-all duration-200 cursor-pointer"
                     required
                   >
-                    <option value="AVAILABLE">Có sẵn</option>
-                    <option value="UNDER_MAINTENANCE">Đang bảo trì</option>
+                    {/* <option value="AVAILABLE">Có sẵn</option>
+                    <option value="UNDER_MAINTENANCE">Đang bảo trì</option> */}
+                    <option value="AVAILABLE">{t('devices:modal.statusOptions.available')}</option>
+                    <option value="UNDER_MAINTENANCE">{t('devices:modal.statusOptions.maintenance')}</option>
                   </select>
                 </div>
               </div>
@@ -601,7 +624,8 @@ setTimeout(() => {
                     text-gray-700 dark:text-gray-300 rounded-lg font-semibold transition-all duration-200
                     disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Hủy
+                  {/* Hủy */}
+                  {t("common:buttons.cancel")}
                 </button>
                 <button
                   type="button"
@@ -615,12 +639,14 @@ setTimeout(() => {
                   {loading ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      <span>Đang xử lý...</span>
+                      {/* <span>Đang xử lý...</span> */}
+                      <span>{t('common:messages.processing')}</span>
                     </>
                   ) : (
                     <>
                       <Check size={18} />
-                      {editingDevice ? "Cập nhật" : "Thêm mới"}
+                      {/* {editingDevice ? "Cập nhật" : "Thêm mới"} */}
+                      {editingDevice ? t("common:buttons.save") : t("common:buttons.add")}
                     </>
                   )}
                 </button>
@@ -646,7 +672,8 @@ setTimeout(() => {
                   <AlertTriangle size={24} className="text-red-600 dark:text-red-400" />
                 </div>
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Xác nhận xóa
+                  {/* Xác nhận xóa */}
+                  {t('devices:modal.deleteTitle')}
                 </h2>
               </div>
               <button
@@ -662,7 +689,8 @@ setTimeout(() => {
             {/* Modal Body */}
             <div className="p-6">
               <p className="text-base text-gray-700 dark:text-gray-300 mb-4">
-                Bạn có chắc chắn muốn xóa thiết bị này không?
+                {/* Bạn có chắc chắn muốn xóa thiết bị này không? */}
+                {t('devices:modal.deleteDesc')}
               </p>
               
               {/* Thông tin thiết bị sẽ bị xóa */}
@@ -674,7 +702,7 @@ setTimeout(() => {
                         {deviceToDelete.name}
                       </p>
                       <p className="text-base text-gray-600 dark:text-gray-400">
-                        {deviceToDelete.description || "Không có mô tả"}
+                        {deviceToDelete.description || t('devices:table.noDescription')}
                       </p>
                     </div>
                     {getStatusBadge(deviceToDelete.status)}
@@ -684,7 +712,8 @@ setTimeout(() => {
               
               {/* Cảnh báo */}
               <p className="text-base text-red-600 dark:text-red-400">
-                ⚠️ Hành động này không thể hoàn tác!
+                {/* ⚠️ Hành động này không thể hoàn tác! */}
+                {t('devices:modal.deleteWarning')}
               </p>
             </div>
 
@@ -698,7 +727,8 @@ setTimeout(() => {
                   text-gray-700 dark:text-gray-300 rounded-lg font-semibold transition-all duration-200
                   disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Hủy
+                {/* Hủy */}
+                {t('common:buttons.cancel')}
               </button>
               <button
                 type="button"
@@ -712,12 +742,14 @@ setTimeout(() => {
                 {loading ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    <span>Đang xóa...</span>
+                    {/* <span>Đang xóa...</span> */}
+                    <span>{t('common:messages.processing')}</span>
                   </>
                 ) : (
                   <>
                     <Trash2 size={18} />
-                    Xóa thiết bị
+                    {/* Xóa thiết bị */}
+                    {t('common:buttons.delete')}
                   </>
                 )}
               </button>
