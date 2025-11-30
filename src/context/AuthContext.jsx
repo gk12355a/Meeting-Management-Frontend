@@ -81,22 +81,24 @@ export const AuthProvider = ({ children }) => {
 
   // === 🔴 SỬA HÀM LOGOUT (Xử lý Redirect SSO) ===
   const logout = (silent = false) => {
-    // 1. Kiểm tra loại đăng nhập trước khi xóa
+    // 1. Lấy thông tin trước khi xóa
     const provider = localStorage.getItem("authProvider");
+    const idToken = localStorage.getItem("id_token"); // <-- Lấy ID Token
 
     // 2. Xóa dữ liệu local
     localStorage.removeItem("token");
     localStorage.removeItem("authProvider");
+    localStorage.removeItem("id_token"); // <-- Xóa ID Token
     delete api.defaults.headers.common["Authorization"];
+    
     setUser(null);
     setToken(null);
 
     // 3. Điều hướng
     if (provider === "sso" && !silent) {
-       // Nếu là SSO -> Chuyển hướng sang Auth Service để logout session bên đó
-       window.location.href = authApi.getSSOLogoutUrl();
+       // Truyền idToken vào hàm để tạo URL đúng chuẩn OIDC
+       window.location.href = authApi.getSSOLogoutUrl(idToken);
     } else if (!silent) {
-       // Nếu là Local -> Về trang login bình thường
        navigate("/login");
     }
   };

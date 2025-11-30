@@ -7,13 +7,17 @@ const AUTH_SERVICE_URL = import.meta.env.VITE_AUTH_SERVICE_URL || "http://localh
 const CLIENT_ID = import.meta.env.VITE_OAUTH2_CLIENT_ID || "meeting-client";
 const CLIENT_SECRET = import.meta.env.VITE_OAUTH2_CLIENT_SECRET || "secret";
 const REDIRECT_URI = import.meta.env.VITE_OAUTH2_REDIRECT_URI || "http://localhost:5173/authorized";
-export const getSSOLogoutUrl = () => {
-  // 1. Xác định địa chỉ muốn quay về (Trang Login của Frontend)
-
+export const getSSOLogoutUrl = (idToken) => {
+  // URL đích muốn quay về (phải khớp với config Backend)
+  const postLogoutRedirectUri = encodeURIComponent(window.location.origin + "/login");
   
-  // 2. Gửi kèm tham số redirect (thường là 'post_logout_redirect_uri' hoặc 'redirect_uri')
-  // Tùy thuộc vào cấu hình Backend của bạn, hãy thử dòng dưới:
-  return `http://localhost:5173/login`;
+  // Nếu có idToken, gửi kèm để server không hỏi xác nhận
+  if (idToken) {
+    return `${AUTH_SERVICE_URL}/connect/logout?id_token_hint=${idToken}&post_logout_redirect_uri=${postLogoutRedirectUri}`;
+  }
+  
+  // Fallback nếu mất idToken (User sẽ phải bấm nút xác nhận ở trang Auth)
+  return `${AUTH_SERVICE_URL}/connect/logout?post_logout_redirect_uri=${postLogoutRedirectUri}`;
 };
 /**
  * [SSO] Chuyển hướng người dùng sang trang đăng nhập của Auth Service
