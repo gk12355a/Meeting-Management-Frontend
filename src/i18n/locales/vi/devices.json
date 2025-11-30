@@ -1,0 +1,48 @@
+{
+  "pageTitle": "Quản lý thiết bị",
+  "addDevice": "Thêm thiết bị",
+  "searchPlaceholder": "Tìm kiếm thiết bị...",
+  "stats": {
+    "total": "Tổng số thiết bị",
+    "available": "Có sẵn",
+    "maintenance": "Đang bảo trì"
+  },
+  "table": {
+    "name": "Tên thiết bị",
+    "description": "Mô tả",
+    "status": "Trạng thái",
+    "noDescription": "Chưa có mô tả"
+  },
+  "modal": {
+    "addTitle": "Thêm thiết bị mới",
+    "editTitle": "Chỉnh sửa thiết bị",
+    "deleteTitle": "Xác nhận xóa",
+    "deleteDesc": "Bạn có chắc chắn muốn xóa thiết bị này không?",
+    "deleteWarning": "⚠️ Hành động này không thể hoàn tác!",
+    "fields": {
+      "name": "Tên thiết bị",
+      "description": "Mô tả",
+      "status": "Trạng thái"
+    },
+    "placeholders": {
+      "name": "VD: Máy chiếu Epson X123",
+      "description": "VD: Máy chiếu full HD, độ phân giải 1920x1080"
+    },
+    "statusOptions": {
+      "available": "Có sẵn",
+      "maintenance": "Đang bảo trì"
+    }
+  },
+  "messages": {
+    "createSuccess": "Thêm thiết bị mới thành công!",
+    "createError": "Thêm thiết bị thất bại",
+    "updateSuccess": "Cập nhật thiết bị thành công!",
+    "updateError": "Cập nhật thiết bị thất bại",
+    "deleteSuccess": "Đã xóa thiết bị thành công!",
+    "deleteError": "Xóa thiết bị thất bại",
+    "nameRequired": "Vui lòng nhập tên thiết bị!",
+    "loadError": "Không thể tải danh sách thiết bị!",
+    "noDevices": "Không tìm thấy thiết bị nào",
+    "noDevicesDesc": "Thử thay đổi bộ lọc hoặc tìm kiếm khác"
+  }
+}

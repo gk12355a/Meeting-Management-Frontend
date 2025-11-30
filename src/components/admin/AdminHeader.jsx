@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { useTranslation } from "react-i18next";
 import * as notificationService from "../../services/notificationService";
 import * as meetingService from "../../services/meetingService";
 import {
@@ -16,6 +17,7 @@ import {
   FiInbox,
 } from "react-icons/fi";
 import ThemeToggle from "../ThemeToggle";
+import LanguageSelector from "../LanguageSelector";
 import { Modal, Input, message } from "antd";
 
 // === COMPONENT CON: NotificationItem ===
@@ -200,6 +202,7 @@ const NotificationItem = ({ notification, onMarkRead }) => {
 // === COMPONENT CHÍNH: AdminHeader ===
 const AdminHeader = ({ setIsSidebarOpen }) => {
   const { logout, user } = useAuth();
+  const { t } = useTranslation(['common', 'admin']);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
@@ -321,7 +324,8 @@ const AdminHeader = ({ setIsSidebarOpen }) => {
           <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white">
             🗓️
           </div>
-          <span className="font-semibold text-lg">MeetFlow</span>
+          {/* <span className="font-semibold text-lg">MeetFlow</span> */}
+          <span className="font-semibold text-lg">{t('common:appName')}</span>
         </div>
       </div>
 
@@ -348,8 +352,11 @@ const AdminHeader = ({ setIsSidebarOpen }) => {
           {isNotificationOpen && (
             <div className="absolute top-12 right-0 w-80 max-h-[70vh] flex flex-col bg-white dark:bg-slate-800 rounded-lg shadow-xl border dark:border-slate-700">
               <div className="p-3 border-b dark:border-slate-700 flex justify-between items-center">
-                <h4 className="font-semibold text-gray-800 dark:text-white">
+                {/* <h4 className="font-semibold text-gray-800 dark:text-white">
                   Thông báo
+                </h4> */}
+                <h4 className="font-semibold text-gray-800 dark:text-white">
+                  {t('admin:header.notifications')}
                 </h4>
                 <button
                   onClick={handleMarkAllAsRead}
@@ -358,7 +365,8 @@ const AdminHeader = ({ setIsSidebarOpen }) => {
                     notifications.every((n) => n.read) || notificationLoading
                   }
                 >
-                  Đánh dấu tất cả đã đọc
+                  {/* Đánh dấu tất cả đã đọc */}
+                  {t('common:buttons.markAllRead')}
                 </button>
               </div>
               <div className="flex-1 overflow-y-auto">
@@ -373,7 +381,8 @@ const AdminHeader = ({ setIsSidebarOpen }) => {
                 {!notificationLoading && notifications.length === 0 && (
                   <div className="p-10 flex flex-col justify-center items-center text-center text-gray-500 dark:text-gray-400">
                     <FiInbox size={30} />
-                    <p className="mt-2 text-sm">Không có thông báo mới.</p>
+                    {/* <p className="mt-2 text-sm">Không có thông báo mới.</p> */}
+                    <p className="mt-2 text-sm">{t('admin:header.noNotifications')}</p>
                   </div>
                 )}
                 {notifications.length > 0 &&
@@ -392,7 +401,8 @@ const AdminHeader = ({ setIsSidebarOpen }) => {
                     disabled={notificationLoading}
                     className="text-sm text-blue-600 hover:underline dark:text-blue-400"
                   >
-                    {notificationLoading ? "Đang tải..." : "Xem thêm"}
+                    {/* {notificationLoading ? "Đang tải..." : "Xem thêm"} */}
+                    {notificationLoading ? t('common:messages.loading') : t('common:buttons.viewMore')}
                   </button>
                 </div>
               )}
@@ -410,6 +420,7 @@ const AdminHeader = ({ setIsSidebarOpen }) => {
           </button>
           {isSettingsOpen && (
             <div className="absolute top-12 right-0 w-52 bg-white dark:bg-slate-800 rounded-lg shadow-xl border dark:border-slate-700 py-2">
+              <LanguageSelector />
               <ThemeToggle />
               <NavLink
                 to="/admin/change-password"
@@ -417,7 +428,8 @@ const AdminHeader = ({ setIsSidebarOpen }) => {
                 onClick={() => setIsSettingsOpen(false)}
               >
                 <FiLock size={16} />
-                <span>Đổi mật khẩu</span>
+                {/* <span>Đổi mật khẩu</span> */}
+                <span>{t('admin:header.changePassword')}</span>
               </NavLink>
               <button
                 onClick={() => {
@@ -427,7 +439,8 @@ const AdminHeader = ({ setIsSidebarOpen }) => {
                 className="w-full text-left flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-slate-700"
               >
                 <FiLogOut size={16} />
-                <span>Đăng xuất</span>
+                {/* <span>Đăng xuất</span> */}
+                <span>{t('admin:header.logout')}</span>
               </button>
             </div>
           )}

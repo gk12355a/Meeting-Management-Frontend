@@ -38,6 +38,8 @@ import AdminOnlyRoute from "./routes/AdminOnlyRoute";
 // ===== Google OAuth Callback Page =====
 import GoogleCallbackPage from "./pages/GoogleCallbackPage";
 
+import "./i18n";
+
 export default function App() {
   const { isAuthenticated, isAdmin } = useAuth();
 

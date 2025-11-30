@@ -20,8 +20,7 @@ import {
 import { toast } from "react-toastify";
 import Pagination from "../../components/Pagination";
 import { motion } from "framer-motion";
-
-/* Toast màu */
+import { useTranslation } from "react-i18next";
 const toastColors = {
   success: "#10b981",
   error: "#ef4444",
@@ -49,6 +48,7 @@ const SUGGESTED_DEVICES = [
 ];
 
 export default function RoomsPage() {
+  const { t } = useTranslation(['rooms', 'common']);
   // === States ===
   const [filteredRooms, setFilteredRooms] = useState([]);
   const [rooms, setRooms] = useState([]);
@@ -91,7 +91,8 @@ export default function RoomsPage() {
       setRooms(sortedData);
       setFilteredRooms(sortedData);
     } catch (error) {
-      toast.error("Lỗi khi tải danh sách phòng họp");
+      toast.error(t('rooms:messages.loadError'));
+      // ({/* <span>toast.error("Lỗi khi tải danh sách phòng họp") */})
     } finally {
       setLoading(false);
     }
@@ -178,7 +179,8 @@ export default function RoomsPage() {
       });
       setDeviceInput("");
     } else if (formData.fixedDevices.includes(val)) {
-      toast.warning("Thiết bị này đã có trong danh sách");
+      toast.warning(t('rooms:messages.deviceExists'));
+      // ({/* <span>toast.warning("Thiết bị này đã có trong danh sách") */})
     }
   };
 
@@ -201,13 +203,15 @@ export default function RoomsPage() {
     e.preventDefault();
 
     if (!formData.name.trim()) {
-      toast.error("Vui lòng nhập tên phòng họp");
+      toast.error(t('rooms:messages.nameRequired'));
+      // ({/* <span>toast.error("Vui lòng nhập tên phòng họp") */})
       return;
     }
 
     const capacityValue = parseInt(formData.capacity, 10);
     if (isNaN(capacityValue) || capacityValue <= 0) {
-      toast.error("Sức chứa phải lớn hơn 0");
+      toast.error(t('rooms:messages.capacityInvalid'));
+      // ({/* <span>toast.error("Sức chứa phải lớn hơn 0") */})
       return;
     }
 
@@ -225,16 +229,19 @@ export default function RoomsPage() {
 
       if (editingRoom) {
         await updateRoom(editingRoom.id, payload);
-        toast.success("Cập nhật phòng họp thành công!");
+        toast.success(t('rooms:messages.updateSuccess'));
+        // ({/* <span>toast.success("Cập nhật phòng họp thành công!") */})
       } else {
         await createRoom(payload);
-        toast.success("Tạo phòng họp thành công!");
+        toast.success(t('rooms:messages.createSuccess'));
+        // ({/* <span>toast.success("Tạo phòng họp thành công!") */})
       }
 
       await fetchRooms();
       handleCloseModal();
     } catch (error) {
-      toast.error("Lỗi khi lưu phòng họp");
+      toast.error(t('rooms:messages.updateError'));
+      // ({/* <span>toast.error("Lỗi khi lưu phòng họp") */})
     } finally {
       setLoading(false);
     }
@@ -256,11 +263,13 @@ export default function RoomsPage() {
     try {
       setLoading(true);
       await deleteRoom(roomToDelete.id);
-      toast.success("Đã xóa phòng họp!");
+      toast.success(t('rooms:messages.deleteSuccess'));
+      // ({/* <span>toast.success("Đã xóa phòng họp!") */})
       await fetchRooms();
       handleCloseDeleteModal();
     } catch (error) {
-      toast.error("Không thể xóa phòng họp");
+      toast.error(t('rooms:messages.deleteError'));
+      // ({/* <span>toast.error("Không thể xóa phòng họp") */})
     } finally {
       setLoading(false);
     }
@@ -276,8 +285,8 @@ export default function RoomsPage() {
     };
 
     const labels = {
-      AVAILABLE: "Có sẵn",
-      UNDER_MAINTENANCE: "Bảo trì",
+      AVAILABLE: t('rooms:modal.statusOptions.available'),
+      UNDER_MAINTENANCE: t('rooms:modal.statusOptions.maintenance'),
     };
 
     return (
@@ -316,7 +325,8 @@ export default function RoomsPage() {
       >
         <Building size={32} className="text-blue-600 dark:text-blue-400" />
         <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
-          Quản lý phòng họp
+          {/* <span>Quản lý phòng họp</span> */}
+          <span>{t('rooms:pageTitle')}</span>
         </h1>
       </motion.div>
 
@@ -335,7 +345,8 @@ export default function RoomsPage() {
             />
             <input
               type="text"
-              placeholder="Tìm kiếm phòng họp..."
+              placeholder={t('rooms:searchPlaceholder')}
+              // ({/* <span>placeholder="Tìm kiếm phòng họp..."</span> */}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-400 transition"
@@ -346,9 +357,12 @@ export default function RoomsPage() {
             onChange={(e) => setStatusFilter(e.target.value)}
             className="px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-400 cursor-pointer"
           >
-            <option value="ALL">Tất cả trạng thái</option>
-            <option value="AVAILABLE">Có sẵn</option>
-            <option value="UNDER_MAINTENANCE">Đang bảo trì</option>
+            <option value="ALL">{t('common:common.filterAll')}</option>
+            {/* ({/* <span>Tất cả trạng thái</span> */}
+            <option value="AVAILABLE">{t('rooms:modal.statusOptions.available')}</option>
+            {/* ({/* <span>Có sẵn/Sẵn sàng sử dụng</span> */}
+            <option value="UNDER_MAINTENANCE">{t('rooms:modal.statusOptions.maintenance')}</option>
+            {/* ({/* <span>Đang bảo trì</span> */}
             {/* Đã xóa option VIP */}
           </select>
           <button
@@ -357,7 +371,8 @@ export default function RoomsPage() {
             className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold shadow hover:shadow-lg transition disabled:opacity-50"
           >
             <Plus size={20} />
-            Thêm phòng
+            {/* <span>Thêm phòng</span> */}
+            <span>{t('rooms:addRoom')}</span>
           </button>
         </div>
       </motion.div>
@@ -367,19 +382,22 @@ export default function RoomsPage() {
       <motion.div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-7">
         {[
           {
-            label: "Tổng số phòng",
+            label: t('rooms:stats.total'),
+            // ({/* <span>Tổng số phòng</span> */})
             val: totalRooms,
             color: "text-gray-800",
             bg: "bg-white",
           },
           {
-            label: "Sẵn sàng",
+            label: t('rooms:stats.available'),
+            // ({/* <span>Sẵn sàng</span> */})
             val: totalAvailable,
             color: "text-green-700",
             bg: "bg-green-50",
           },
           {
-            label: "Bảo trì",
+            label: t('rooms:stats.maintenance'),
+            // ({/* <span>Bảo trì</span> */})
             val: totalMaintenance,
             color: "text-orange-700",
             bg: "bg-orange-50",
@@ -419,13 +437,20 @@ export default function RoomsPage() {
           <table className="min-w-full table-auto text-sm text-left">
             <thead className="bg-gray-50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-200 uppercase text-xs">
               <tr>
-                <th className="p-4 w-16 text-center">STT</th>
-                <th className="p-4">Phòng họp</th>
-                <th className="p-4">Vị trí</th>
-                <th className="p-4">Sức chứa</th>
-                <th className="p-4 w-64">Thiết bị</th>
-                <th className="p-4">Trạng thái</th>
-                <th className="p-4 text-center">Tác vụ</th>
+                <th className="p-4 w-16 text-center">{t('common:common.stt')}</th>
+                {/* ({/* <span>STT</span> */}
+                <th className="p-4">{t('rooms:table.room')}</th>
+                {/* ({/* <span>Phòng họp</span> */}
+                <th className="p-4">{t('rooms:table.location')}</th>
+                {/* ({/* <span>Vị trí</span> */}
+                <th className="p-4">{t('rooms:table.capacity')}</th>
+                {/* ({/* <span>Sức chứa</span> */}
+                <th className="p-4 w-64">{t('rooms:table.equipment')}</th>
+                {/* ({/* <span>Thiết bị</span> */}
+                <th className="p-4">{t('rooms:table.status')}</th>
+                {/* ({/* <span>Trạng thái</span> */}
+                <th className="p-4 text-center">{t('common:common.actions')}</th>
+                {/* ({/* <span>Tác vụ</span> */}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
@@ -433,7 +458,8 @@ export default function RoomsPage() {
                 <tr>
                   <td colSpan="7" className="p-10 text-center text-gray-500">
                     <Search size={40} className="mx-auto mb-2 opacity-50" />
-                    Không tìm thấy dữ liệu
+                    {/* <span>Không tìm thấy dữ liệu</span> */}
+                    <span>{t('rooms:messages.noResults')}</span>
                   </td>
                 </tr>
               ) : (
@@ -460,7 +486,7 @@ export default function RoomsPage() {
                       )}
                     </td>
                     <td className="p-4 text-gray-900 dark:text-white font-medium">
-                      {room.capacity} người
+                      {room.capacity} {/* <span>người</span> */}
                     </td>
 
                     {/* CỘT THIẾT BỊ */}
@@ -483,7 +509,8 @@ export default function RoomsPage() {
                         </div>
                       ) : (
                         <span className="text-gray-400 text-xs italic">
-                          Không có
+                          {/* <span>Không có</span> */}
+                          <span>{t('rooms:table.noEquipment')}</span>
                         </span>
                       )}
                     </td>
@@ -494,14 +521,14 @@ export default function RoomsPage() {
                         <button
                           onClick={() => handleOpenModal(room)}
                           className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md transition"
-                          title="Sửa"
+                          title={t('common:buttons.edit')}
                         >
                           <Edit2 size={18} />
                         </button>
                         <button
                           onClick={() => handleOpenDeleteModal(room)}
                           className="p-1.5 text-red-600 hover:bg-red-50 rounded-md transition"
-                          title="Xóa"
+                          title={t('common:buttons.delete')}
                         >
                           <Trash2 size={18} />
                         </button>
@@ -535,7 +562,10 @@ export default function RoomsPage() {
             {/* Modal Header */}
             <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-700">
               <h2 className="text-xl font-bold text-gray-800 dark:text-white">
-                {editingRoom ? "Cập nhật phòng họp" : "Thêm phòng họp mới"}
+                {/* <span>{editingRoom ? "Cập nhật phòng họp" : "Thêm phòng họp mới"}</span> */}
+                <span>
+                  {editingRoom ? t('rooms:modal.editTitle') : t('rooms:modal.addTitle')}
+                </span>
               </h2>
               <button
                 onClick={handleCloseModal}
@@ -551,7 +581,8 @@ export default function RoomsPage() {
                 {/* Tên phòng */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Tên phòng họp <span className="text-red-500">*</span>
+                    {/* <span>Tên phòng họp</span> */}
+                    <span>{t('rooms:modal.fields.name')}</span> <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -559,7 +590,8 @@ export default function RoomsPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, name: e.target.value })
                     }
-                    placeholder="VD: Phòng Họp Sao Hỏa"
+                    placeholder={t('rooms:modal.placeholders.name')}
+                    // ({/* <span>placeholder="VD: Phòng Họp Sao Hỏa"</span> */})
                     required
                     className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition"
                   />
@@ -569,7 +601,8 @@ export default function RoomsPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Vị trí
+                      {/* <span>Vị trí</span> */}
+                      <span>{t('rooms:modal.fields.location')}</span>
                     </label>
                     <input
                       type="text"
@@ -577,13 +610,15 @@ export default function RoomsPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, location: e.target.value })
                       }
-                      placeholder="VD: Tầng 3"
+                      placeholder={t('rooms:modal.placeholders.location')}
+                      // ({/* <span>placeholder="VD: Tầng 3"</span> */})
                       className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition"
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Sức chứa <span className="text-red-500">*</span>
+                      {/* <span>Sức chứa</span> */}
+                      <span>{t('rooms:modal.fields.capacity')}</span> <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="number"
@@ -601,7 +636,8 @@ export default function RoomsPage() {
                 {/* Status */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Trạng thái
+                    {/* <span>Trạng thái</span> */}
+                    <span>{t('rooms:modal.fields.status')}</span>
                   </label>
                   <select
                     value={formData.status}
@@ -610,15 +646,19 @@ export default function RoomsPage() {
                     }
                     className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition cursor-pointer"
                   >
-                    <option value="AVAILABLE">Sẵn sàng sử dụng</option>
-                    <option value="UNDER_MAINTENANCE">Đang bảo trì</option>
+                    <option value="AVAILABLE">{t('rooms:modal.statusOptions.available')}</option>
+                    {/* ({/* <span>Sẵn sàng sử dụng</span> */}
+                    <option value="UNDER_MAINTENANCE">{t('rooms:modal.statusOptions.maintenance')}</option>
+                    {/* ({/* <span>Đang bảo trì</span> */}
                   </select>
                 </div>
 
                 {/* === MỤC THIẾT BỊ CÓ SẴN === */}
                 <div className="p-4 bg-gray-50 dark:bg-gray-700/30 rounded-xl border border-gray-200 dark:border-gray-700">
                   <label className="block text-sm font-bold text-gray-700 dark:text-gray-200 mb-2 flex items-center gap-2">
-                    <Monitor size={16} /> Thiết bị có sẵn
+                    <Monitor size={16} />
+                    {/* <span>Thiết bị có sẵn</span> */}
+                    <span>{t('rooms:modal.fields.equipment')}</span>
                   </label>
 
                   {/* Input nhập tag */}
@@ -628,7 +668,8 @@ export default function RoomsPage() {
                       value={deviceInput}
                       onChange={(e) => setDeviceInput(e.target.value)}
                       onKeyDown={handleKeyDownDevice}
-                      placeholder="Nhập tên thiết bị rồi nhấn Enter..."
+                      placeholder={t('rooms:modal.placeholders.equipmentInput')}
+                      // ({/* <span>placeholder="Nhập tên thiết bị rồi nhấn Enter..."</span> */})
                       className="flex-1 px-3 py-1.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-800 focus:ring-2 focus:ring-blue-400 outline-none"
                     />
                     <button
@@ -636,7 +677,8 @@ export default function RoomsPage() {
                       onClick={handleAddDevice}
                       className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition"
                     >
-                      Thêm
+                      {/* <span>Thêm</span> */}
+                      <span>{t('rooms:modal.equipment.add')}</span>
                     </button>
                   </div>
 
@@ -644,7 +686,8 @@ export default function RoomsPage() {
                   <div className="flex flex-wrap gap-2 mb-3 min-h-[30px]">
                     {formData.fixedDevices.length === 0 && (
                       <span className="text-gray-400 text-xs italic">
-                        Chưa có thiết bị nào.
+                        {/* <span>Chưa có thiết bị nào.</span> */}
+                        <span>{t('rooms:modal.equipment.noDevice')}</span>
                       </span>
                     )}
                     {formData.fixedDevices.map((device, index) => (
@@ -667,7 +710,8 @@ export default function RoomsPage() {
                   {/* Gợi ý thiết bị phổ biến */}
                   <div>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
-                      Gợi ý nhanh:
+                      {/* <span>Gợi ý nhanh:</span> */}
+                      <span>{t('rooms:modal.equipment.suggestions')}</span>
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {SUGGESTED_DEVICES.map((suggestion) => (
@@ -710,7 +754,8 @@ export default function RoomsPage() {
                 disabled={loading}
                 className="flex-1 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition"
               >
-                Hủy bỏ
+                {/* <span>Hủy bỏ</span> */}
+                <span>{t('rooms:modal.buttons.cancel')}</span>
               </button>
               <button
                 form="roomForm"
@@ -723,7 +768,12 @@ export default function RoomsPage() {
                 ) : (
                   <Check size={18} />
                 )}
-                {editingRoom ? "Lưu thay đổi" : "Tạo phòng"}
+                {/* <span>{editingRoom ? "Lưu thay đổi" : "Tạo phòng"}</span> */}
+                <span>
+                  {editingRoom
+                    ? t('rooms:modal.buttons.save')
+                    : t('rooms:modal.buttons.create')}
+                </span>
               </button>
             </div>
           </motion.div>
@@ -742,24 +792,30 @@ export default function RoomsPage() {
               <AlertTriangle size={32} />
             </div>
             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-              Xóa phòng họp?
+              {/* <span>Xóa phòng họp?</span> */}
+              <span>{t('rooms:modal.deleteTitle')}</span>
             </h3>
             <p className="text-gray-500 dark:text-gray-400 mb-6 text-sm">
-              Hành động này sẽ xóa vĩnh viễn phòng{" "}
-              <strong>{roomToDelete?.name}</strong>. Không thể hoàn tác.
+              {/* <span>Hành động này sẽ xóa vĩnh viễn phòng</span> */}
+              {t('rooms:modal.deleteDesc')}
+              <br />
+              {/* <strong>{roomToDelete?.name}</strong>. Không thể hoàn tác. */}
+              <strong>{roomToDelete?.name}</strong>. {t('rooms:modal.deleteWarning')}
             </p>
             <div className="flex gap-3">
               <button
                 onClick={handleCloseDeleteModal}
                 className="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition"
               >
-                Hủy
+                {/* <span>Hủy</span> */}
+                <span>{t('rooms:modal.buttons.cancel')}</span>
               </button>
               <button
                 onClick={handleConfirmDelete}
                 className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition shadow-md"
               >
-                Xóa ngay
+                {/* <span>Xóa ngay</span> */}
+                <span>{t('rooms:modal.buttons.delete')}</span>
               </button>
             </div>
           </motion.div>
