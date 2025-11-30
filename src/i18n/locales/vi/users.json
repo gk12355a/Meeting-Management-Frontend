@@ -1,0 +1,49 @@
+{
+  "pageTitle": "Quản lý người dùng",
+  "addUser": "Thêm người dùng",
+  "searchPlaceholder": "Tìm kiếm người dùng...",
+  "stats": {
+    "total": "Tổng số người dùng",
+    "active": "Đang hoạt động",
+    "inactive": "Vô hiệu hoá"
+  },
+  "table": {
+    "fullName": "Họ và tên",
+    "email": "Email",
+    "role": "Vai trò",
+    "status": "Trạng thái"
+  },
+  "roles": {
+    "admin": "Admin",
+    "user": "User"
+  },
+  "modal": {
+    "addTitle": "Thêm người dùng mới",
+    "editTitle": "Cập nhật quyền / trạng thái",
+    "deleteTitle": "Xác nhận xóa người dùng?",
+    "fields": {
+      "fullName": "Họ và tên",
+      "email": "Email",
+      "role": "Vai trò",
+      "status": "Trạng thái"
+    },
+    "placeholders": {
+      "fullName": "VD: Nguyễn Văn A",
+      "email": "VD: admin@gmail.com"
+    }
+  },
+  "messages": {
+    "createSuccess": "Tạo người dùng thành công! Mật khẩu đã được gửi qua email.",
+    "createError": "Không thể tạo người dùng!",
+    "updateSuccess": "Cập nhật thông tin thành công!",
+    "updateError": "Không thể cập nhật thông tin!",
+    "deleteSuccess": "Đã xóa người dùng!",
+    "deleteError": "Không thể xóa người dùng! Có thể do quyền hoặc ràng buộc dữ liệu.",
+    "emailExists": "Email (username) này đã tồn tại!",
+    "fillRequired": "Vui lòng điền đầy đủ Họ tên và Email!",
+    "noUsers": "Không có người dùng nào",
+    "noUsersDesc": "Hệ thống chưa có dữ liệu người dùng",
+    "noResults": "Không tìm thấy người dùng nào",
+    "noResultsDesc": "Thử thay đổi bộ lọc hoặc tìm kiếm khác"
+  }
+}
