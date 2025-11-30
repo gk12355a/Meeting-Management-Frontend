@@ -1,0 +1,66 @@
+{
+  "pageTitle": "Quản lý phòng họp",
+  "addRoom": "Thêm phòng",
+  "searchPlaceholder": "Tìm kiếm phòng họp...",
+  "stats": {
+    "total": "Tổng số phòng",
+    "available": "Sẵn sàng",
+    "maintenance": "Bảo trì"
+  },
+  "table": {
+    "room": "Phòng họp",
+    "location": "Vị trí",
+    "capacity": "Sức chứa",
+    "equipment": "Thiết bị",
+    "status": "Trạng thái",
+    "noEquipment": "Không có"
+  },
+  "modal": {
+    "addTitle": "Thêm phòng họp mới",
+    "editTitle": "Cập nhật phòng họp",
+    "deleteTitle": "Xóa phòng họp?",
+    "deleteDesc": "Hành động này sẽ xóa vĩnh viễn phòng",
+    "deleteWarning": "Không thể hoàn tác.",
+    "fields": {
+      "name": "Tên phòng họp",
+      "location": "Vị trí",
+      "capacity": "Sức chứa",
+      "status": "Trạng thái",
+      "equipment": "Thiết bị có sẵn"
+    },
+    "placeholders": {
+      "name": "VD: Phòng Họp Sao Hỏa",
+      "location": "VD: Tầng 3",
+      "equipmentInput": "Nhập tên thiết bị rồi nhấn Enter..."
+    },
+    "statusOptions": {
+      "available": "Sẵn sàng sử dụng",
+      "maintenance": "Đang bảo trì"
+    },
+    "equipment": {
+      "title": "Thiết bị có sẵn",
+      "add": "Thêm",
+      "noDevice": "Chưa có thiết bị nào.",
+      "suggestions": "Gợi ý nhanh:"
+    },
+    "buttons": {
+      "cancel": "Hủy bỏ",
+      "create": "Tạo phòng",
+      "save": "Lưu thay đổi",
+      "delete": "Xóa ngay"
+    }
+  },
+  "messages": {
+    "createSuccess": "Tạo phòng họp thành công!",
+    "createError": "Lỗi khi lưu phòng họp",
+    "updateSuccess": "Cập nhật phòng họp thành công!",
+    "updateError": "Lỗi khi lưu phòng họp",
+    "deleteSuccess": "Đã xóa phòng họp!",
+    "deleteError": "Không thể xóa phòng họp",
+    "nameRequired": "Vui lòng nhập tên phòng họp",
+    "capacityInvalid": "Sức chứa phải lớn hơn 0",
+    "deviceExists": "Thiết bị này đã có trong danh sách",
+    "loadError": "Lỗi khi tải danh sách phòng họp",
+    "noResults": "Không tìm thấy dữ liệu"
+  }
+}

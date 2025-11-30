@@ -1,0 +1,35 @@
+{
+  "sidebar": {
+    "title": "MeetFlow Admin",
+    "subtitle": "Meeting Management",
+    "menu": {
+      "dashboard": "Dashboard",
+      "users": "User Management",
+      "rooms": "Room Management",
+      "devices": "Device Management",
+      "reports": "Statistics & Reports"
+    }
+  },
+  "header": {
+    "notifications": "Notifications",
+    "settings": "Settings",
+    "changePassword": "Change Password",
+    "logout": "Logout",
+    "language": "Language",
+    "noNotifications": "No new notifications."
+  },
+  "changePassword": {
+    "title": "Change Password",
+    "fields": {
+      "oldPassword": "Old Password",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm New Password"
+    },
+    "success": "Password changed successfully!",
+    "errors": {
+      "mismatch": "New password and confirmation password do not match.",
+      "minLength": "New password must be at least 6 characters.",
+      "failed": "Failed to change password. Please check your old password."
+    }
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "pageTitle": "Room Management",
+  "addRoom": "Add Room",
+  "searchPlaceholder": "Search meeting rooms...",
+  "stats": {
+    "total": "Total Rooms",
+    "available": "Available",
+    "maintenance": "Maintenance"
+  },
+  "table": {
+    "room": "Meeting Room",
+    "location": "Location",
+    "capacity": "Capacity",
+    "equipment": "Equipment",
+    "status": "Status",
+    "noEquipment": "None"
+  },
+  "modal": {
+    "addTitle": "Add New Meeting Room",
+    "editTitle": "Update Meeting Room",
+    "deleteTitle": "Delete Meeting Room?",
+    "deleteDesc": "This will permanently delete room",
+    "deleteWarning": "This cannot be undone.",
+    "fields": {
+      "name": "Room Name",
+      "location": "Location",
+      "capacity": "Capacity",
+      "status": "Status",
+      "equipment": "Available Equipment"
+    },
+    "placeholders": {
+      "name": "e.g., Mars Meeting Room",
+      "location": "e.g., 3rd Floor",
+      "equipmentInput": "Enter equipment name then press Enter..."
+    },
+    "statusOptions": {
+      "available": "Available",
+      "maintenance": "Under Maintenance"
+    },
+    "equipment": {
+      "title": "Available Equipment",
+      "add": "Add",
+      "noDevice": "No equipment added.",
+      "suggestions": "Quick suggestions:"
+    },
+    "buttons": {
+      "cancel": "Cancel",
+      "create": "Create Room",
+      "save": "Save Changes",
+      "delete": "Delete Now"
+    }
+  },
+  "messages": {
+    "createSuccess": "Meeting room created successfully!",
+    "createError": "Error saving meeting room",
+    "updateSuccess": "Meeting room updated successfully!",
+    "updateError": "Error saving meeting room",
+    "deleteSuccess": "Meeting room deleted!",
+    "deleteError": "Cannot delete meeting room",
+    "nameRequired": "Please enter room name",
+    "capacityInvalid": "Capacity must be greater than 0",
+    "deviceExists": "This equipment is already in the list",
+    "loadError": "Error loading room list",
+    "noResults": "No data found"
+  }
+}
