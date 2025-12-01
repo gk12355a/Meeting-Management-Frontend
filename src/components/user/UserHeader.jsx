@@ -9,6 +9,7 @@ import {
 } from "react-icons/fi";
 import ThemeToggle from "../ThemeToggle";
 import { message } from "antd";
+import LanguageSelector from "../LanguageSelector";
 
 // === COMPONENT CON: NotificationItem ===
 const NotificationItem = ({ notification, onMarkRead }) => {
@@ -251,19 +252,47 @@ const UserHeader = ({ setIsSidebarOpen }) => {
             <FiSettings size={20} />
           </button>
           {isSettingsOpen && (
-            <div className="absolute top-12 right-0 w-52 bg-white dark:bg-slate-800 rounded-lg shadow-xl border dark:border-slate-700 py-2">
-              <ThemeToggle />
-              <NavLink to="/user/profile" className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700" onClick={() => setIsSettingsOpen(false)}>
-                <FiUser size={16} /><span>Thông tin cá nhân</span>
-              </NavLink>
-              <NavLink to="/user/change-password" className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700" onClick={() => setIsSettingsOpen(false)}>
-                <FiLock size={16} /><span>Đổi mật khẩu</span>
-              </NavLink>
-              <button onClick={() => { logout(); setIsSettingsOpen(false); }} className="w-full text-left flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-slate-700">
-                <FiLogOut size={16} /><span>Đăng xuất</span>
-              </button>
-            </div>
-          )}
+  <div className="absolute top-12 right-0 w-52 bg-white dark:bg-slate-800 
+      rounded-lg shadow-xl border dark:border-slate-700 py-2">
+
+    {/* Language Selector — menu item */}
+    <LanguageSelector />
+
+    {/* Theme Toggle — menu item */}
+    <ThemeToggle />
+
+    {/* Profile */}
+    <NavLink
+      to="/user/profile"
+      className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 
+                 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700"
+    >
+      <FiUser size={16} />
+      <span>Thông tin cá nhân</span>
+    </NavLink>
+
+    {/* Change Password */}
+    <NavLink
+      to="/user/change-password"
+      className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 
+                 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700"
+    >
+      <FiLock size={16} />
+      <span>Đổi mật khẩu</span>
+    </NavLink>
+
+    {/* Logout */}
+    <button
+      onClick={() => { logout(); setIsSettingsOpen(false); }}
+      className="w-full text-left flex items-center gap-3 px-4 py-2.5 text-sm 
+                 text-red-500 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-slate-700"
+    >
+      <FiLogOut size={16} />
+      <span>Đăng xuất</span>
+    </button>
+  </div>
+)}
+
         </div>
       </div>
     </header>
