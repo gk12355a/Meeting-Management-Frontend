@@ -33,5 +33,10 @@
     "wednesday": "T4",
     "thursday": "T5",
     "friday": "T6"
-  }
+  },
+  "tooltip": {
+  "date": "Ngày",
+  "time": "Thời gian",
+  "room": "Phòng"
+}
 }
