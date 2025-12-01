@@ -41,7 +41,15 @@
       "title": "Thiết bị có sẵn",
       "add": "Thêm",
       "noDevice": "Chưa có thiết bị nào.",
-      "suggestions": "Gợi ý nhanh:"
+      "suggestions": "Gợi ý nhanh:",
+      "list": {
+        "projector": "Máy chiếu",
+        "largeTV": "TV màn hình lớn",
+        "whiteboard": "Bảng trắng",
+        "soundSystem": "Hệ thống âm thanh",
+        "conferenceCam": "Webcam hội nghị",
+        "airCooler": "Quạt điều hòa"
+      }
     },
     "buttons": {
       "cancel": "Hủy bỏ",
