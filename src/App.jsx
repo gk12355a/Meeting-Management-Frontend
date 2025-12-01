@@ -39,6 +39,8 @@ import AuthorizedPage from "./pages/auth/AuthorizedPage";
 // ===== Google OAuth Callback Page =====
 import GoogleCallbackPage from "./pages/GoogleCallbackPage";
 
+import "./i18n";
+
 export default function App() {
   const { isAuthenticated, isAdmin } = useAuth();
 

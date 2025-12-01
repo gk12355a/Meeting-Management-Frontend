@@ -1,0 +1,48 @@
+{
+  "pageTitle": "Device Management",
+  "addDevice": "Add Device",
+  "searchPlaceholder": "Search devices...",
+  "stats": {
+    "total": "Total Devices",
+    "available": "Available",
+    "maintenance": "Under Maintenance"
+  },
+  "table": {
+    "name": "Device Name",
+    "description": "Description",
+    "status": "Status",
+    "noDescription": "No description"
+  },
+  "modal": {
+    "addTitle": "Add New Device",
+    "editTitle": "Edit Device",
+    "deleteTitle": "Confirm Delete",
+    "deleteDesc": "Are you sure you want to delete this device?",
+    "deleteWarning": "⚠️ This action cannot be undone!",
+    "fields": {
+      "name": "Device Name",
+      "description": "Description",
+      "status": "Status"
+    },
+    "placeholders": {
+      "name": "e.g., Epson X123 Projector",
+      "description": "e.g., Full HD projector, 1920x1080 resolution"
+    },
+    "statusOptions": {
+      "available": "Available",
+      "maintenance": "Under Maintenance"
+    }
+  },
+  "messages": {
+    "createSuccess": "Device added successfully!",
+    "createError": "Failed to add device",
+    "updateSuccess": "Device updated successfully!",
+    "updateError": "Failed to update device",
+    "deleteSuccess": "Device deleted successfully!",
+    "deleteError": "Failed to delete device",
+    "nameRequired": "Please enter device name!",
+    "loadError": "Cannot load device list!",
+    "noDevices": "No devices found",
+    "noDevicesDesc": "Try changing filters or search terms"
+  }
+}
