@@ -61,6 +61,12 @@
     "noResults": "No results found",
     "tryAgain": "Try again",
     "person": "person",
-    "item": "item"
+    "item": "item",
+    "notifications": "Notifications",
+"markAllRead": "Mark all as read",
+"noNotifications": "No new notifications.",
+"loadMore": "Load more",
+"loading": "Loading...",
+"viewed": "Viewed"
   }
 }
