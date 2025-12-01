@@ -1,58 +1,58 @@
+// src/components/user/Chatbot.jsx
 import React, { useState, useRef, useEffect } from "react";
 import { chatbotService } from "../../services/chatbotService";
-// Bạn có thể dùng icon từ thư viện như react-icons hoặc heroicons
-// npm install react-icons
-import { FaRobot, FaPaperPlane, FaTimes, FaMinus } from "react-icons/fa";
+import { FaRobot, FaPaperPlane, FaMinus, FaUser } from "react-icons/fa";
+import ReactMarkdown from "react-markdown"; // <-- Import thư viện Markdown
 
 const Chatbot = () => {
-  const [isOpen, setIsOpen] = useState(false); // Trạng thái mở/đóng cửa sổ chat
+  const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Xin chào! Tôi là trợ lý ảo đặt phòng họp. Tôi có thể giúp gì cho bạn?",
+      text: "Xin chào! Tôi là trợ lý ảo AI. Tôi có thể giúp bạn đặt lịch, tra cứu phòng họp hoặc giải đáp quy định công ty.",
       sender: "bot",
     },
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-
-  // Ref để tự động cuộn xuống cuối khi có tin nhắn mới
   const messagesEndRef = useRef(null);
 
+  // Tự động cuộn xuống cuối
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, isLoading]);
 
-  // Hàm xử lý gửi tin nhắn
-  const handleSend = async (e) => {
-    e.preventDefault();
-    if (!input.trim()) return;
+  // Gửi tin nhắn
+  const handleSend = async (e, manualText = null) => {
+    if (e) e.preventDefault();
+    
+    const textToSend = manualText || input;
+    if (!textToSend.trim()) return;
 
-    const userMessage = { id: Date.now(), text: input, sender: "user" };
-
-    // 1. Hiển thị tin nhắn user ngay lập tức
+    // 1. UI: Hiển thị tin nhắn user ngay lập tức
+    const userMessage = { id: Date.now(), text: textToSend, sender: "user" };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
 
     try {
-      // 2. Gọi API Backend
-      const data = await chatbotService.sendMessage(userMessage.text);
+      // 2. Gọi API sang Python Service
+      const data = await chatbotService.sendMessage(textToSend);
 
       const botMessage = {
         id: Date.now() + 1,
-        text: data.reply, // Lấy trường 'reply' từ ChatResponse java
+        text: data.reply, // AI trả về Markdown
         sender: "bot",
       };
       setMessages((prev) => [...prev, botMessage]);
     } catch (error) {
       const errorMessage = {
         id: Date.now() + 1,
-        text: "Xin lỗi, hệ thống đang bận hoặc token hết hạn. Vui lòng thử lại sau.",
+        text: "⚠️ **Lỗi kết nối AI:** Hệ thống đang bận hoặc token hết hạn. Vui lòng đăng nhập lại hoặc thử sau.",
         sender: "bot",
         isError: true,
       };
@@ -62,37 +62,42 @@ const Chatbot = () => {
     }
   };
 
+  // Các câu hỏi gợi ý (Optional - Theo báo cáo)
+  const suggestedQuestions = [
+    "Tìm phòng trống chiều nay",
+    "Lịch họp của tôi hôm nay",
+    "Quy định hủy phòng là gì?",
+  ];
+
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
-      {/* CỬA SỔ CHAT (Chỉ hiện khi isOpen = true) */}
+    <div className="fixed bottom-6 right-6 z-[1000] flex flex-col items-end">
+      {/* CỬA SỔ CHAT */}
       {isOpen && (
-        <div className="mb-4 w-80 md:w-96 h-[500px] bg-white rounded-2xl shadow-2xl flex flex-col border border-gray-200 overflow-hidden animate-fade-in-up">
+        <div className="mb-4 w-80 md:w-96 h-[550px] bg-white rounded-2xl shadow-2xl flex flex-col border border-gray-200 overflow-hidden animate-fade-in-up font-sans">
           {/* Header */}
-          <div className="bg-blue-600 p-4 flex justify-between items-center text-white">
-            <div className="flex items-center gap-2">
-              <div className="bg-white/20 p-2 rounded-full">
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 flex justify-between items-center text-white shadow-md">
+            <div className="flex items-center gap-3">
+              <div className="bg-white/20 p-2 rounded-full backdrop-blur-sm">
                 <FaRobot className="text-xl" />
               </div>
               <div>
-                <h3 className="font-bold text-sm">Trợ lý Nigga</h3>
-                <span className="text-xs text-blue-100 flex items-center gap-1">
-                  <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                  Online
+                <h3 className="font-bold text-sm">Trợ lý AI (Beta)</h3>
+                <span className="text-[10px] text-blue-100 flex items-center gap-1 opacity-90">
+                  <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
+                  Sẵn sàng hỗ trợ
                 </span>
               </div>
             </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setIsOpen(false)}
-                className="hover:bg-white/20 p-1 rounded"
-              >
-                <FaMinus />
-              </button>
-            </div>
+            <button
+              onClick={() => setIsOpen(false)}
+              className="hover:bg-white/20 p-1.5 rounded-full transition-colors"
+            >
+              <FaMinus size={12} />
+            </button>
           </div>
 
           {/* Nội dung tin nhắn */}
-          <div className="flex-1 overflow-y-auto p-4 bg-gray-50 space-y-4">
+          <div className="flex-1 overflow-y-auto p-4 bg-gray-50 space-y-4 scroll-smooth">
             {messages.map((msg) => (
               <div
                 key={msg.id}
@@ -100,37 +105,48 @@ const Chatbot = () => {
                   msg.sender === "user" ? "justify-end" : "justify-start"
                 }`}
               >
+                {msg.sender === "bot" && (
+                  <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center mr-2 mt-1 shrink-0 text-indigo-600">
+                    <FaRobot size={12} />
+                  </div>
+                )}
+                
                 <div
-                  className={`max-w-[80%] p-3 rounded-2xl text-sm whitespace-pre-wrap ${
+                  className={`max-w-[85%] p-3 rounded-2xl text-sm leading-relaxed shadow-sm ${
                     msg.sender === "user"
                       ? "bg-blue-600 text-white rounded-br-none"
-                      : "bg-white text-gray-800 border border-gray-200 shadow-sm rounded-bl-none"
-                  } ${
-                    msg.isError ? "bg-red-100 text-red-600 border-red-200" : ""
+                      : `bg-white text-gray-800 border border-gray-200 rounded-bl-none ${msg.isError ? "border-red-200 bg-red-50 text-red-800" : ""}`
                   }`}
                 >
-                  {msg.text}
+                  {msg.sender === "bot" ? (
+                    // Render Markdown cho tin nhắn của Bot
+                    <div className="markdown-body prose prose-sm max-w-none dark:prose-invert">
+                        <ReactMarkdown>{msg.text}</ReactMarkdown>
+                    </div>
+                  ) : (
+                    msg.text
+                  )}
                 </div>
+
+                {msg.sender === "user" && (
+                   <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center ml-2 mt-1 shrink-0 text-blue-600">
+                     <FaUser size={10} />
+                   </div>
+                )}
               </div>
             ))}
 
-            {/* Loading Indicator */}
+            {/* Loading Indicator (Typing...) */}
             {isLoading && (
-              <div className="flex justify-start">
+              <div className="flex justify-start items-center gap-2">
+                 <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
+                    <FaRobot size={12} />
+                  </div>
                 <div className="bg-white p-3 rounded-2xl rounded-bl-none border border-gray-200 shadow-sm">
                   <div className="flex space-x-1">
-                    <div
-                      className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                      style={{ animationDelay: "0s" }}
-                    ></div>
-                    <div
-                      className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                      style={{ animationDelay: "0.2s" }}
-                    ></div>
-                    <div
-                      className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                      style={{ animationDelay: "0.4s" }}
-                    ></div>
+                    <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0s" }}></div>
+                    <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
+                    <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.4s" }}></div>
                   </div>
                 </div>
               </div>
@@ -138,25 +154,41 @@ const Chatbot = () => {
             <div ref={messagesEndRef} />
           </div>
 
+          {/* Gợi ý câu hỏi (Chỉ hiện khi không loading và chưa nhập gì) */}
+          {!isLoading && messages.length < 5 && (
+             <div className="px-4 pb-2 bg-gray-50 flex gap-2 overflow-x-auto no-scrollbar">
+                {suggestedQuestions.map((q, idx) => (
+                   <button 
+                      key={idx}
+                      onClick={() => handleSend(null, q)}
+                      className="text-xs bg-white border border-blue-200 text-blue-600 px-3 py-1.5 rounded-full whitespace-nowrap hover:bg-blue-50 transition-colors"
+                   >
+                      {q}
+                   </button>
+                ))}
+             </div>
+          )}
+
           {/* Input Area */}
           <form
             onSubmit={handleSend}
-            className="p-3 bg-white border-t border-gray-100 flex gap-2"
+            className="p-3 bg-white border-t border-gray-100 flex gap-2 items-center"
           >
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Đặt phòng họp ngày mai..."
-              className="flex-1 px-4 py-2 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-gray-700"
+              placeholder="Nhập yêu cầu (vd: đặt phòng...)"
+              className="flex-1 px-4 py-2.5 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-gray-700 transition-all placeholder:text-gray-400"
               disabled={isLoading}
+              autoFocus
             />
             <button
               type="submit"
               disabled={isLoading || !input.trim()}
-              className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full transition-colors disabled:bg-gray-300"
+              className="bg-blue-600 hover:bg-blue-700 text-white p-2.5 rounded-full transition-all disabled:bg-gray-300 disabled:cursor-not-allowed shadow-sm hover:shadow-md active:scale-95"
             >
-              <FaPaperPlane className="text-sm" />
+              <FaPaperPlane className="text-sm ml-0.5" />
             </button>
           </form>
         </div>
@@ -166,15 +198,33 @@ const Chatbot = () => {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg transition-all hover:scale-110 flex items-center justify-center group"
+          className="bg-gradient-to-br from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white p-4 rounded-full shadow-xl transition-all hover:scale-110 flex items-center justify-center group z-50"
         >
           <FaRobot className="text-2xl animate-bounce-slow" />
+          
+          {/* Badge thông báo (Giả lập) */}
+          <span className="absolute top-0 right-0 flex h-3 w-3">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+          </span>
+
           {/* Tooltip */}
-          <span className="absolute right-full mr-3 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap transition-opacity">
-            Chat với AI
+          <span className="absolute right-full mr-4 bg-gray-900 text-white text-xs px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 whitespace-nowrap transition-all translate-x-2 group-hover:translate-x-0 shadow-lg">
+            Hỏi AI Chatbot
+            <div className="absolute top-1/2 -right-1 w-2 h-2 bg-gray-900 rotate-45 -translate-y-1/2"></div>
           </span>
         </button>
       )}
+
+      {/* CSS cho Markdown (đơn giản hóa) */}
+      <style>{`
+        .markdown-body ul { list-style-type: disc; padding-left: 1.5em; margin: 0.5em 0; }
+        .markdown-body ol { list-style-type: decimal; padding-left: 1.5em; margin: 0.5em 0; }
+        .markdown-body p { margin: 0.5em 0; }
+        .markdown-body strong { font-weight: 600; color: #1e40af; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      `}</style>
     </div>
   );
 };

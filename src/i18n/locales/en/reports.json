@@ -1,0 +1,22 @@
+{
+  "pageTitle": "Meeting Room Usage Statistics & Reports",
+  "exportExcel": "Export Excel",
+  "selectDate": "Select Date",
+  "tabs": {
+    "roomUsage": "📊 Room Usage Frequency",
+    "cancelStats": "❌ Meeting Cancellation Reasons"
+  },
+  "charts": {
+    "hoursBooked": "Hours Booked",
+    "bookingCount": "Booking Count",
+    "cancelCount": "Cancellation Count"
+  },
+  "messages": {
+    "loadError": "Cannot load report data!",
+    "exportSuccess": "📊 Excel file downloaded from backend!",
+    "exportError": "Cannot download Excel file!",
+    "selectDateFirst": "Please select a date!",
+    "noRoomData": "No room data available for the selected period.",
+    "noCancelData": "No cancellation data available for the selected period."
+  }
+}

@@ -1,5 +1,6 @@
 // src/pages/admin/DashboardPage.jsx
 import { useEffect, useState, useRef } from "react";
+import { useTranslation } from "react-i18next"; 
 import FullCalendar from "@fullcalendar/react";
 import resourceTimelinePlugin from "@fullcalendar/resource-timeline";
 import {
@@ -37,11 +38,11 @@ dayjs.extend(isoWeek);
 dayjs.extend(duration);
 dayjs.extend(isBetween);
 
-const cardTemplates = [
-  { label: "Cuộc họp hôm nay", value: "0", icon: <FiCalendar /> },
-  { label: "Thời lượng họp TB", value: "0", icon: <FiClock /> },
-  { label: "Cuộc họp sắp tới", value: "0", icon: <FiCheckSquare /> },
-];
+// const cardTemplates = [
+//   { label: "Cuộc họp hôm nay", value: "0", icon: <FiCalendar /> },
+//   { label: "Thời lượng họp TB", value: "0", icon: <FiClock /> },
+//   { label: "Cuộc họp sắp tới", value: "0", icon: <FiCheckSquare /> },
+// ];
 
 const COLORS = [
   "#60A5FA", 
@@ -75,6 +76,17 @@ const roundToTwo = (num) => {
 
 export default function DashboardPage() {
   const [isDarkMode, setIsDarkMode] = useState(false);
+
+  const { t } = useTranslation(['dashboard', 'common']);
+
+  const cardTemplates = [
+    // {/* <span>Cuộc họp hôm nay</span> */}
+    { label: t('dashboard:cards.todayMeetings'), value: "0", icon: <FiCalendar /> },
+    // {/* <span>Thời lượng họp TB</span> */}
+    { label: t('dashboard:cards.avgDuration'), value: "0", icon: <FiClock /> },
+    // {/* <span>Cuộc họp sắp tới</span> */}
+    { label: t('dashboard:cards.upcomingMeetings'), value: "0", icon: <FiCheckSquare /> },
+  ];
 
   // === 2. STATE CHO TẤT CẢ DỮ LIỆU ===
   const [stats, setStats] = useState(cardTemplates);
@@ -125,7 +137,7 @@ const handleTodayMeetingsClick = () => {
     const endTime = dayjs(event.end).format('HH:mm');
     const dateDisplay = dayjs(event.start).format('DD/MM/YYYY');
     const durationMins = dayjs(event.end).diff(dayjs(event.start), 'minute');
-    const roomName = event.extendedProps?.roomName || "Chưa xác định";
+    const roomName = event.extendedProps?.roomName || t('dashboard:modal.noEquipment'); // Chưa xác định
     return `
       <div style="line-height: 1.6; min-width: 220px;">
         <div style="font-weight: 600; margin-bottom: 6px; font-size: 14px;">${event.title}</div>
@@ -141,7 +153,7 @@ const handleTodayMeetingsClick = () => {
       </div>
     `;
   };
-// === FIXED: CustomRoomTooltip lấy màu từ data.payload.color hoặc data.payload.fill, dùng fill cho Pie Cell, và CustomRoomTooltip hiển thị màu đúng ===
+// === CustomRoomTooltip lấy màu từ data.payload.color hoặc data.payload.fill, dùng fill cho Pie Cell, và CustomRoomTooltip hiển thị màu đúng ===
 const CustomRoomTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
     const data = payload[0];
@@ -256,7 +268,8 @@ const CustomRoomTooltip = ({ active, payload }) => {
   // === HÀM RENDER NGƯỜI THAM GIA ===
   const renderParticipants = (organizer, participants) => {
     if (!participants && !organizer) {
-      return <span className="text-gray-500 dark:text-gray-400">Không có người tham gia.</span>;
+      // {/* <span>Không có người tham gia.</span> */}
+      return <span className="text-gray-500 dark:text-gray-400">{t('dashboard:modal.noParticipants')}</span>;
     }
 
     const getTag = (status) => {
@@ -288,6 +301,7 @@ const CustomRoomTooltip = ({ active, payload }) => {
             <span className="text-gray-800 dark:text-gray-100">
               {p.fullName}
               {p.id === organizer?.id && (
+                // {/* <span>(Tổ chức)</span> */}
                 <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">(Tổ chức)</span>
               )}
             </span>
@@ -369,9 +383,9 @@ const CustomRoomTooltip = ({ active, payload }) => {
               ? 0.4
               : 1,
           extendedProps: {
-            organizer: meeting.organizer?.fullName || "Không rõ",
-            roomName: meeting.room?.name || "Không có phòng",
-            location: meeting.room?.location || "Không có địa điểm",
+            organizer: meeting.organizer?.fullName || t('dashboard:modal.organizer'), // fallback
+            roomName: meeting.room?.name || t('dashboard:modal.noEquipment'),
+            location: meeting.room?.location || t('dashboard:modal.noEquipment'),
             status: meeting.room?.status
           }
         }));
@@ -415,7 +429,7 @@ const CustomRoomTooltip = ({ active, payload }) => {
         const roomColorMap = {}; // Map màu cho từng phòng
         activeMeetings.forEach(m => {
           const roomId = m.room?.id?.toString();
-          const roomName = m.room?.name || "Không có phòng";
+          const roomName = m.room?.name || t('dashboard:modal.noEquipment');
           roomUsage[roomName] = (roomUsage[roomName] || 0) + 1;
           // Lưu màu từ roomColors
           if (!roomColorMap[roomName] && roomId) {
@@ -442,20 +456,24 @@ const CustomRoomTooltip = ({ active, payload }) => {
       }
     };
     fetchDashboardData();
-  }, []);
+  // NOTE: t có thể thay đổi → thêm vào deps để luôn lấy update cardTemplates
+  // eslint-disable-next-line
+  }, [t]);
 
   // === 8. RENDER DASHBOARD ===
   return (
   <div className="p-6 space-y-6 transition-all duration-500">
     {/* Header */}
     <div className="flex items-center justify-between mb-6">
-  <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100">
-    Meeting Overview
-  </h2>
-  <p className="text-gray-500 dark:text-gray-400 text-sm">
-    Tổng quan hệ thống cuộc họp và hoạt động
-  </p>
-</div>
+      <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100">
+        {/* <span>Meeting Overview</span> */}
+        <span>{t('dashboard:pageTitle')}</span>
+      </h2>
+      <p className="text-gray-500 dark:text-gray-400 text-sm">
+        {/* <span>Tổng quan hệ thống cuộc họp và hoạt động</span> */}
+        <span>{t('dashboard:subtitle')}</span>
+      </p>
+    </div>
 
     {loading ? (
       <div className="flex justify-center items-center h-[70vh]">
@@ -466,32 +484,37 @@ const CustomRoomTooltip = ({ active, payload }) => {
         {/* Cards */}
         <div className="grid grid-cols-3 gap-4">
           {stats.map((card, i) => {
-  let onClickFunc;
-  if (card.label === "Cuộc họp hôm nay") onClickFunc = handleTodayMeetingsClick;
-  else if (card.label === "Cuộc họp sắp tới") onClickFunc = handleUpcomingMeetingsClick;
+            let onClickFunc;
+            // Dùng so sánh theo translation label luôn:
+            if (card.label === t('dashboard:cards.todayMeetings')) onClickFunc = handleTodayMeetingsClick;
+            else if (card.label === t('dashboard:cards.upcomingMeetings')) onClickFunc = handleUpcomingMeetingsClick;
 
-  return (
-    <div
-      key={i}
-      onClick={onClickFunc}
-      className="flex items-center gap-3 bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all cursor-pointer"
-    >
-      <div className="p-3 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-lg">
-        {card.icon}
-      </div>
-      <div>
-        <p className="text-sm text-gray-500 dark:text-gray-400">{card.label}</p>
-        <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">{card.value}</h3>
-      </div>
-    </div>
-  );
-})}
+            return (
+              <div
+                key={i}
+                onClick={onClickFunc}
+                className="flex items-center gap-3 bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all cursor-pointer"
+              >
+                <div className="p-3 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-lg">
+                  {card.icon}
+                </div>
+                <div>
+                  {/* <span>Cuộc họp hôm nay | Thời lượng họp TB | Cuộc họp sắp tới</span> */}
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{card.label}</p>
+                  <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">{card.value}</h3>
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         {/* Charts */}
         <div className="grid grid-cols-2 gap-6">
           <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow border border-gray-100 dark:border-slate-700">
-            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3">📅 Cuộc họp (Tuần này)</h3>
+            {/* <span>📅 Cuộc họp (Tuần này)</span> */}
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3">
+              📅 {t('dashboard:charts.weeklyMeetings')}
+            </h3>
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={meetingsPerDayData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDarkMode ? "#334155" : "#e5e7eb"} />
@@ -514,7 +537,10 @@ const CustomRoomTooltip = ({ active, payload }) => {
           </div>
 
           <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow border border-gray-100 dark:border-slate-700">
-            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3">👥 Phòng họp đang sử dụng</h3>
+            {/* <span>👥 Phòng họp đang sử dụng</span> */}
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3">
+              👥 {t('dashboard:charts.roomUsage')}
+            </h3>
             <ResponsiveContainer width="100%" height={220}>
               <PieChart>
                 <Pie data={roomUsageData} cx="50%" cy="50%" labelLine={false} outerRadius={80} dataKey="value">
@@ -534,7 +560,10 @@ const CustomRoomTooltip = ({ active, payload }) => {
 
         {/* FullCalendar */}
         <div className="bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-2xl shadow-lg p-4">
-          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3">🗓️ Lịch họp tổng hợp trong ngày</h3>
+          {/* <span>🗓️ Lịch họp tổng hợp trong ngày</span> */}
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3">
+            🗓️ {t('dashboard:charts.calendar')}
+          </h3>
           <FullCalendar
             plugins={[resourceTimelinePlugin]}
             schedulerLicenseKey="CC-Attribution-NonCommercial-NoDerivatives"
@@ -545,7 +574,8 @@ const CustomRoomTooltip = ({ active, payload }) => {
               right: "resourceTimelineDay,resourceTimelineWeek,resourceTimelineMonth"
             }}
             titleFormat={{ month: "long", year: "numeric", day: "numeric" }}
-            resourceAreaHeaderContent="Phòng họp"
+            // {/* <span>Phòng họp</span> */}
+            resourceAreaHeaderContent={t('dashboard:modal.room')}
             resources={calendarResources}
             events={calendarEvents}
             height="auto"
@@ -559,39 +589,39 @@ const CustomRoomTooltip = ({ active, payload }) => {
             eventMouseLeave={handleEventMouseLeave}
             eventClick={handleCalendarEventClick}
             resourceLabelContent={(arg) => {
-  const isMaintenance = arg.resource._resource.extendedProps.status === "UNDER_MAINTENANCE";
+              const isMaintenance = arg.resource._resource.extendedProps.status === "UNDER_MAINTENANCE";
 
-  return (
-    <span
-      className={`text-sm font-medium ${
-        isMaintenance
-          ? "text-gray-400 line-through opacity-60"
-          : isDarkMode
-          ? "text-gray-200"
-          : "text-gray-800"
-      }`}
-    >
-      {arg.resource.title}
-    </span>
-  );
-}}
+              return (
+                <span
+                  className={`text-sm font-medium ${
+                    isMaintenance
+                      ? "text-gray-400 line-through opacity-60"
+                      : isDarkMode
+                      ? "text-gray-200"
+                      : "text-gray-800"
+                  }`}
+                >
+                  {arg.resource.title}
+                </span>
+              );
+            }}
             eventContent={(arg) => (
-  <div style={{
-    background: arg.event.backgroundColor,
-    opacity: arg.event.extendedProps.opacity ?? 1,
-    color: "white",
-    borderRadius: 6,
-    padding: "2px 6px",
-    fontSize: 12,
-    fontWeight: 500,
-    overflow: "hidden",
-    whiteSpace: "nowrap",
-    textOverflow: "ellipsis",
-    cursor: "pointer"
-  }}>
-    {arg.event.title}
-  </div>
-)}
+              <div style={{
+                background: arg.event.backgroundColor,
+                opacity: arg.event.extendedProps.opacity ?? 1,
+                color: "white",
+                borderRadius: 6,
+                padding: "2px 6px",
+                fontSize: 12,
+                fontWeight: 500,
+                overflow: "hidden",
+                whiteSpace: "nowrap",
+                textOverflow: "ellipsis",
+                cursor: "pointer"
+              }}>
+                {arg.event.title}
+              </div>
+            )}
             views={{
               resourceTimelineDay: { slotDuration: { hours: 1 }, slotLabelFormat: [{ hour: "2-digit", minute: "2-digit", hour12: false }] },
               resourceTimelineWeek: { slotDuration: { days: 1 }, slotLabelFormat: [{ weekday: "short", day: "numeric" }] },
@@ -601,28 +631,31 @@ const CustomRoomTooltip = ({ active, payload }) => {
         </div>
 
         {/* Modal cuộc họp hôm nay */}
-<MeetingListModal
-  visible={todayMeetingsModalVisible}
-  onClose={() => setTodayMeetingsModalVisible(false)}
-  title="📋 Cuộc họp hôm nay"
-  meetings={todayMeetingsList}
-  onMeetingClick={handleOpenMeetingDetail}
-/>
+        <MeetingListModal
+          visible={todayMeetingsModalVisible}
+          onClose={() => setTodayMeetingsModalVisible(false)}
+          // {/* <span>📋 Cuộc họp hôm nay</span> */}
+          title={t('dashboard:modal.todayTitle')}
+          meetings={todayMeetingsList}
+          onMeetingClick={handleOpenMeetingDetail}
+        />
 
-{/* Modal cuộc họp sắp tới */}
-<MeetingListModal
-  visible={upcomingMeetingsModalVisible}
-  onClose={() => setUpcomingMeetingsModalVisible(false)}
-  title="📋 Cuộc họp sắp tới"
-  meetings={upcomingMeetingsList}
-  onMeetingClick={handleOpenMeetingDetail}
-/>
+        {/* Modal cuộc họp sắp tới */}
+        <MeetingListModal
+          visible={upcomingMeetingsModalVisible}
+          onClose={() => setUpcomingMeetingsModalVisible(false)}
+          // {/* <span>📋 Cuộc họp sắp tới</span> */}
+          title={t('dashboard:modal.upcomingTitle')}
+          meetings={upcomingMeetingsList}
+          onMeetingClick={handleOpenMeetingDetail}
+        />
         {/* Modal chi tiết cuộc họp */}
         <Modal
           open={detailModalVisible}
           onCancel={() => setDetailModalVisible(false)}
           footer={null}
-          title={<span className="dark:text-white">Chi tiết cuộc họp</span>}
+          // {/* <span>Chi tiết cuộc họp</span> */}
+          title={<span className="dark:text-white">{t('dashboard:modal.detailTitle')}</span>}
           width={600}
           className="dark:[&_.ant-modal-content]:bg-gray-800 dark:[&_.ant-modal-content]:text-gray-200"
         >
@@ -632,31 +665,38 @@ const CustomRoomTooltip = ({ active, payload }) => {
               column={1}
               className="dark:[&_.ant-descriptions-item-label]:text-gray-300 dark:[&_.ant-descriptions-item-content]:text-gray-100"
             >
-              <Descriptions.Item label="Tên cuộc họp">
+              {/* <span>Tên cuộc họp</span> */}
+              <Descriptions.Item label={t('dashboard:modal.meetingName')}>
                 {selectedMeeting.title}
               </Descriptions.Item>
-              <Descriptions.Item label="Thời gian">
+              {/* <span>Thời gian</span> */}
+              <Descriptions.Item label={t('dashboard:modal.time')}>
                 {`${dayjs(selectedMeeting.startTime).format("HH:mm")} - ${dayjs(selectedMeeting.endTime).format("HH:mm, DD/MM/YYYY")}`}
               </Descriptions.Item>
-              <Descriptions.Item label="Trạng thái">
+              {/* <span>Trạng thái</span> */}
+              <Descriptions.Item label={t('dashboard:modal.status')}>
                 <Tag color={selectedMeeting.status === 'CONFIRMED' ? 'blue' : 'warning'}>
                   {selectedMeeting.status}
                 </Tag>
               </Descriptions.Item>
-              <Descriptions.Item label="Phòng họp">
-                {selectedMeeting.room?.name || "Chưa xác định"}
+              {/* <span>Phòng họp</span> */}
+              <Descriptions.Item label={t('dashboard:modal.room')}>
+                {selectedMeeting.room?.name || t('dashboard:modal.noEquipment')}
                 {selectedMeeting.room?.location && ` (${selectedMeeting.room.location})`}
               </Descriptions.Item>
               {selectedMeeting.equipment?.length > 0 && (
-                <Descriptions.Item label="Thiết bị">
+                // {/* <span>Thiết bị</span> */}
+                <Descriptions.Item label={t('dashboard:modal.equipment')}>
                   {selectedMeeting.equipment.map(eq => eq.name).join(", ")}
                 </Descriptions.Item>
               )}
-              <Descriptions.Item label="Người tham gia">
+              {/* <span>Người tham gia</span> */}
+              <Descriptions.Item label={t('dashboard:modal.participants')}>
                 {renderParticipants(selectedMeeting.organizer, selectedMeeting.participants)}
               </Descriptions.Item>
-              <Descriptions.Item label="Ghi chú">
-                {selectedMeeting.description || "Không có"}
+              {/* <span>Ghi chú</span> */}
+              <Descriptions.Item label={t('dashboard:modal.notes')}>
+                {selectedMeeting.description || t('dashboard:modal.noNotes')}
               </Descriptions.Item>
             </Descriptions>
           ) : (

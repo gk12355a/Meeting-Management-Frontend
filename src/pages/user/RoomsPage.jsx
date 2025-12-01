@@ -129,56 +129,59 @@ const RoomsPage = () => {
           />
         </div>
 
-        {/* NEW CHECKBOX FILTER */}
-        <div
-          className="flex flex-wrap items-center gap-4 bg-white dark:bg-slate-800 
-  p-3 rounded-lg border border-gray-300 dark:border-slate-700 shadow-sm"
-        >
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={filterStatus.includes("AVAILABLE")}
-              onChange={() => {
-                setFilterStatus((prev) =>
-                  prev.includes("AVAILABLE")
-                    ? prev.filter((f) => f !== "AVAILABLE")
-                    : [...prev, "AVAILABLE"]
-                );
-              }}
-            />
-            <span className="text-gray-700 dark:text-gray-200">Trống</span>
-          </label>
+       {/* FILTER SECTION - UI GIỐNG ẢNH MẪU */}
+<div className="flex items-center gap-3">
+  <span className="font-medium text-gray-700 dark:text-gray-300">
+    Trạng thái:
+  </span>
 
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={filterStatus.includes("UNDER_MAINTENANCE")}
-              onChange={() => {
-                setFilterStatus((prev) =>
-                  prev.includes("UNDER_MAINTENANCE")
-                    ? prev.filter((f) => f !== "UNDER_MAINTENANCE")
-                    : [...prev, "UNDER_MAINTENANCE"]
-                );
-              }}
-            />
-            <span className="text-gray-700 dark:text-gray-200">
-              Đang bảo trì
-            </span>
-          </label>
+  {[
+    { key: "ALL", label: "Tất cả" },
+    { key: "AVAILABLE", label: "Sẵn sàng" },
+    { key: "UNDER_MAINTENANCE", label: "Bảo trì" },
+  ].map((btn) => {
+    const isAll = btn.key === "ALL";
+    const isActive =
+      (isAll && filterStatus.length === 0) ||
+      (!isAll && filterStatus[0] === btn.key);
 
-          {/* Đã xóa Checkbox Phòng VIP */}
+    const handleClick = () => {
+      if (isAll) {
+        setFilterStatus([]);
+      } else {
+        setFilterStatus([btn.key]);  // CHỈ GIỮ 1 GIÁ TRỊ
+      }
+    };
 
-          {/* SELECT ALL */}
-          <button
-            onClick={() =>
-              setFilterStatus(["AVAILABLE", "UNDER_MAINTENANCE"])
+    return (
+      <button
+        key={btn.key}
+        onClick={handleClick}
+        className={`
+          flex items-center gap-2 px-4 py-1.5 rounded-xl border text-sm font-medium transition-all
+          ${
+            isActive
+              ? "bg-green-600 border-green-600 text-white shadow"
+              : "bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700"
+          }
+        `}
+      >
+        <span
+          className={`
+            w-3.5 h-3.5 rounded-sm border-2 flex-shrink-0
+            ${
+              isActive
+                ? "border-white bg-green-300"
+                : "border-gray-400 dark:border-gray-500"
             }
-            className="ml-auto px-3 py-1 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700"
-          >
-            Chọn tất cả
-          </button>
-        </div>
-      </div>
+          `}
+        />
+        {btn.label}
+      </button>
+    );
+  })}
+</div>
+</div>
 
       {/* ROOM LIST */}
       {loading ? (
