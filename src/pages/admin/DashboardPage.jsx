@@ -420,7 +420,13 @@ const CustomRoomTooltip = ({ active, payload }) => {
         ]);
 
         // Bar Chart
-        const weekDays = [{ name: "T2", count: 0 }, { name: "T3", count: 0 }, { name: "T4", count: 0 }, { name: "T5", count: 0 }, { name: "T6", count: 0 }];
+        const weekDays = [
+  { name: t("dashboard:days.monday"), count: 0 },
+  { name: t("dashboard:days.tuesday"), count: 0 },
+  { name: t("dashboard:days.wednesday"), count: 0 },
+  { name: t("dashboard:days.thursday"), count: 0 },
+  { name: t("dashboard:days.friday"), count: 0 },
+];
         const startOfWeek = now.startOf('isoWeek');
         const endOfWeek = now.endOf('isoWeek');
         activeMeetings
