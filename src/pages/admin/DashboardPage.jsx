@@ -31,6 +31,8 @@ import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import duration from 'dayjs/plugin/duration';
 import isBetween from 'dayjs/plugin/isBetween';
+import viLocale from "@fullcalendar/core/locales/vi";
+import enLocale from "@fullcalendar/core/locales/en-gb";
 
 dayjs.extend(isToday);
 dayjs.extend(isSameOrAfter);
@@ -77,7 +79,7 @@ const roundToTwo = (num) => {
 export default function DashboardPage() {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
-  const { t } = useTranslation(['dashboard', 'common']);
+  const { t, i18n } = useTranslation(['dashboard', 'common']);
 
   const cardTemplates = [
     // {/* <span>Cuộc họp hôm nay</span> */}
@@ -133,26 +135,31 @@ const handleTodayMeetingsClick = () => {
 
   // === 4. TOOLTIP ===
   const getEventTooltipContent = (event) => {
-    const startTime = dayjs(event.start).format('HH:mm');
-    const endTime = dayjs(event.end).format('HH:mm');
-    const dateDisplay = dayjs(event.start).format('DD/MM/YYYY');
-    const durationMins = dayjs(event.end).diff(dayjs(event.start), 'minute');
-    const roomName = event.extendedProps?.roomName || t('dashboard:modal.noEquipment'); // Chưa xác định
-    return `
-      <div style="line-height: 1.6; min-width: 220px;">
-        <div style="font-weight: 600; margin-bottom: 6px; font-size: 14px;">${event.title}</div>
-        <div style="font-size: 12px; opacity: 0.9; margin-bottom: 3px;">
-          <strong>Ngày:</strong> ${dateDisplay}
-        </div>
-        <div style="font-size: 12px; opacity: 0.9; margin-bottom: 3px;">
-          <strong>Thời gian:</strong> ${startTime} - ${endTime} (${durationMins}m)
-        </div>
-        <div style="font-size: 12px; opacity: 0.9; margin-bottom: 3px;">
-          <strong>Phòng:</strong> ${roomName}
-        </div>
+  const startTime = dayjs(event.start).format('HH:mm');
+  const endTime = dayjs(event.end).format('HH:mm');
+  const dateDisplay = dayjs(event.start).format('DD/MM/YYYY');
+  const durationMins = dayjs(event.end).diff(dayjs(event.start), 'minute');
+  const roomName = event.extendedProps?.roomName || t('dashboard:modal.noEquipment');
+
+  return `
+    <div style="line-height: 1.6; min-width: 220px;">
+      <div style="font-weight: 600; margin-bottom: 6px; font-size: 14px;">${event.title}</div>
+
+      <div style="font-size: 12px; opacity: 0.9; margin-bottom: 3px;">
+        <strong>${t('dashboard:tooltip.date')}:</strong> ${dateDisplay}
       </div>
-    `;
-  };
+
+      <div style="font-size: 12px; opacity: 0.9; margin-bottom: 3px;">
+        <strong>${t('dashboard:tooltip.time')}:</strong> ${startTime} - ${endTime} (${durationMins}m)
+      </div>
+
+      <div style="font-size: 12px; opacity: 0.9; margin-bottom: 3px;">
+        <strong>${t('dashboard:tooltip.room')}:</strong> ${roomName}
+      </div>
+    </div>
+  `;
+};
+
 // === CustomRoomTooltip lấy màu từ data.payload.color hoặc data.payload.fill, dùng fill cho Pie Cell, và CustomRoomTooltip hiển thị màu đúng ===
 const CustomRoomTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
@@ -413,7 +420,13 @@ const CustomRoomTooltip = ({ active, payload }) => {
         ]);
 
         // Bar Chart
-        const weekDays = [{ name: "T2", count: 0 }, { name: "T3", count: 0 }, { name: "T4", count: 0 }, { name: "T5", count: 0 }, { name: "T6", count: 0 }];
+        const weekDays = [
+  { name: t("dashboard:days.monday"), count: 0 },
+  { name: t("dashboard:days.tuesday"), count: 0 },
+  { name: t("dashboard:days.wednesday"), count: 0 },
+  { name: t("dashboard:days.thursday"), count: 0 },
+  { name: t("dashboard:days.friday"), count: 0 },
+];
         const startOfWeek = now.startOf('isoWeek');
         const endOfWeek = now.endOf('isoWeek');
         activeMeetings
@@ -573,6 +586,10 @@ const CustomRoomTooltip = ({ active, payload }) => {
               center: "title",
               right: "resourceTimelineDay,resourceTimelineWeek,resourceTimelineMonth"
             }}
+
+            locales={[viLocale, enLocale]}     
+            locale={i18n.language}             
+
             titleFormat={{ month: "long", year: "numeric", day: "numeric" }}
             // {/* <span>Phòng họp</span> */}
             resourceAreaHeaderContent={t('dashboard:modal.room')}
@@ -583,7 +600,7 @@ const CustomRoomTooltip = ({ active, payload }) => {
             slotMaxTime="20:00:00"
             nowIndicator
             eventMinWidth={80}
-            locale="vi"
+            locale={i18n.language}
             slotLabelFormat={{ hour: "numeric", minute: "2-digit", hour12: false }}
             eventMouseEnter={handleEventMouseEnter}
             eventMouseLeave={handleEventMouseLeave}
