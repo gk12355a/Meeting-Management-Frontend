@@ -31,6 +31,8 @@ import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import duration from 'dayjs/plugin/duration';
 import isBetween from 'dayjs/plugin/isBetween';
+import viLocale from "@fullcalendar/core/locales/vi";
+import enLocale from "@fullcalendar/core/locales/en-gb";
 
 dayjs.extend(isToday);
 dayjs.extend(isSameOrAfter);
@@ -77,7 +79,7 @@ const roundToTwo = (num) => {
 export default function DashboardPage() {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
-  const { t } = useTranslation(['dashboard', 'common']);
+  const { t, i18n } = useTranslation(['dashboard', 'common']);
 
   const cardTemplates = [
     // {/* <span>Cuộc họp hôm nay</span> */}
@@ -573,6 +575,10 @@ const CustomRoomTooltip = ({ active, payload }) => {
               center: "title",
               right: "resourceTimelineDay,resourceTimelineWeek,resourceTimelineMonth"
             }}
+
+            locales={[viLocale, enLocale]}     
+            locale={i18n.language}             
+
             titleFormat={{ month: "long", year: "numeric", day: "numeric" }}
             // {/* <span>Phòng họp</span> */}
             resourceAreaHeaderContent={t('dashboard:modal.room')}
@@ -583,7 +589,7 @@ const CustomRoomTooltip = ({ active, payload }) => {
             slotMaxTime="20:00:00"
             nowIndicator
             eventMinWidth={80}
-            locale="vi"
+            locale={i18n.language}
             slotLabelFormat={{ hour: "numeric", minute: "2-digit", hour12: false }}
             eventMouseEnter={handleEventMouseEnter}
             eventMouseLeave={handleEventMouseLeave}
