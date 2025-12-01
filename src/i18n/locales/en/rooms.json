@@ -19,7 +19,7 @@
     "addTitle": "Add New Meeting Room",
     "editTitle": "Update Meeting Room",
     "deleteTitle": "Delete Meeting Room?",
-    "deleteDesc": "This will permanently delete room",
+    "deleteDesc": "This will permanently delete the room",
     "deleteWarning": "This cannot be undone.",
     "fields": {
       "name": "Room Name",
@@ -41,7 +41,15 @@
       "title": "Available Equipment",
       "add": "Add",
       "noDevice": "No equipment added.",
-      "suggestions": "Quick suggestions:"
+      "suggestions": "Quick suggestions:",
+      "list": {
+        "projector": "Projector",
+        "largeTV": "Large Screen TV",
+        "whiteboard": "Whiteboard",
+        "soundSystem": "Sound System",
+        "conferenceCam": "Conference Webcam",
+        "airCooler": "Air Cooler"
+      }
     },
     "buttons": {
       "cancel": "Cancel",
