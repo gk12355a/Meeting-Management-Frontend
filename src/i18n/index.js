@@ -12,6 +12,7 @@ import viDevices from './locales/vi/devices.json';
 import viReports from './locales/vi/reports.json';
 import viAuth from './locales/vi/auth.json';      
 import viMeeting from './locales/vi/meeting.json';
+import viUserDashboard from './locales/vi/userDashboard.json';
 
 import enCommon from './locales/en/common.json';
 import enAdmin from './locales/en/admin.json';
@@ -22,6 +23,7 @@ import enDevices from './locales/en/devices.json';
 import enReports from './locales/en/reports.json';
 import enAuth from './locales/en/auth.json';         
 import enMeeting from './locales/en/meeting.json';
+import enUserDashboard from './locales/en/userDashboard.json';
 
 // Lấy ngôn ngữ đã lưu hoặc mặc định là 'vi' (tiếng việt)
 const savedLanguage = localStorage.getItem('language') || 'vi';
@@ -40,6 +42,7 @@ i18n
         reports: viReports,
         auth: viAuth,            
         meeting: viMeeting,   
+        userDashboard: viUserDashboard
       },
       en: {
         common: enCommon,
@@ -51,6 +54,7 @@ i18n
         reports: enReports,
         auth: enAuth,           
         meeting: enMeeting,
+        userDashboard: enUserDashboard 
       },
     },
     lng: savedLanguage,
@@ -68,7 +72,8 @@ i18n
       'devices',
       'reports',
       'auth',     
-      'meeting' 
+      'meeting' ,
+      'userDashboard'
     ],
     defaultNS: 'common',
   });
