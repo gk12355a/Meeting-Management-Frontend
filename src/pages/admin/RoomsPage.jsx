@@ -37,18 +37,21 @@ const setToastTheme = () => {
 };
 setToastTheme();
 
-// Danh sách gợi ý thiết bị phổ biến
-const SUGGESTED_DEVICES = [
-  "Máy chiếu",
-  "TV màn hình lớn",
-  "Bảng trắng",
-  "Hệ thống âm thanh",
-  "Webcam hội nghị",
-  "Quạt điều hòa",
-];
-
 export default function RoomsPage() {
   const { t } = useTranslation(['rooms', 'common']);
+  const DEVICE_KEYS = [
+  "projector",
+  "largeTV",
+  "whiteboard",
+  "soundSystem",
+  "conferenceCam",
+  "airCooler",
+];
+
+const SUGGESTED_DEVICES = DEVICE_KEYS.map((key) =>
+  t(`rooms:modal.equipment.list.${key}`)
+);
+
   // === States ===
   const [filteredRooms, setFilteredRooms] = useState([]);
   const [rooms, setRooms] = useState([]);
