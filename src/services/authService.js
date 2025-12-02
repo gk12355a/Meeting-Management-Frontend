@@ -7,23 +7,33 @@ const AUTH_SERVICE_URL = import.meta.env.VITE_AUTH_SERVICE_URL || "http://localh
 const CLIENT_ID = import.meta.env.VITE_OAUTH2_CLIENT_ID || "meeting-client";
 const CLIENT_SECRET = import.meta.env.VITE_OAUTH2_CLIENT_SECRET || "secret";
 const REDIRECT_URI = import.meta.env.VITE_OAUTH2_REDIRECT_URI || "http://localhost:5173/authorized";
+
+/**
+ * [SSO] Lấy URL để đăng xuất khỏi Auth Service
+ * Backend cần cấu hình 'postLogoutRedirectUri' khớp với tham số này
+ * @param {string} idToken - Token định danh (bắt buộc để redirect tự động)
+ */
 export const getSSOLogoutUrl = (idToken) => {
-  // URL đích muốn quay về (phải khớp với config Backend)
+  // URL đích muốn quay về (phải khớp với whitelist trong backend)
   const postLogoutRedirectUri = encodeURIComponent(window.location.origin + "/login");
   
-  // Nếu có idToken, gửi kèm để server không hỏi xác nhận
+  // Endpoint logout chuẩn của OIDC là /connect/logout
+  let logoutUrl = `${AUTH_SERVICE_URL}/connect/logout?post_logout_redirect_uri=${postLogoutRedirectUri}`;
+
+  // Nếu có idToken, gửi kèm để server không hỏi xác nhận ("Are you sure you want to logout?")
   if (idToken) {
-    return `${AUTH_SERVICE_URL}/connect/logout?id_token_hint=${idToken}&post_logout_redirect_uri=${postLogoutRedirectUri}`;
+    logoutUrl += `&id_token_hint=${idToken}`;
   }
   
-  // Fallback nếu mất idToken (User sẽ phải bấm nút xác nhận ở trang Auth)
-  return `${AUTH_SERVICE_URL}/connect/logout?post_logout_redirect_uri=${postLogoutRedirectUri}`;
+  return logoutUrl;
 };
+
 /**
  * [SSO] Chuyển hướng người dùng sang trang đăng nhập của Auth Service
  */
 export const loginWithSSO = () => {
   // Xây dựng URL Authorization Code Flow
+  // Scope phải có 'openid' để nhận về id_token
   const authUrl = `${AUTH_SERVICE_URL}/oauth2/authorize?response_type=code&client_id=${CLIENT_ID}&scope=openid profile meeting:read meeting:write&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
   
   // Chuyển hướng trình duyệt
@@ -53,7 +63,7 @@ export const exchangeCodeForToken = async (code) => {
         "Authorization": `Basic ${basicAuth}`
       }
     });
-    return response.data; // Trả về { access_token, refresh_token, ... }
+    return response.data; // Trả về { access_token, id_token, refresh_token, ... }
   } catch (error) {
     console.error("SSO Token Exchange Error:", error);
     throw error;

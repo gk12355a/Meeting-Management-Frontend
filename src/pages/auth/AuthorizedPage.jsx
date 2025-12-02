@@ -1,5 +1,5 @@
 // src/pages/auth/AuthorizedPage.jsx
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react"; // <-- Thêm useRef
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Spin, message } from "antd";
 import { exchangeCodeForToken } from "../../services/authService";
@@ -10,6 +10,9 @@ const AuthorizedPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { checkAuth } = useAuth(); 
+  
+  // 🛑 BIẾN QUAN TRỌNG: Cờ đánh dấu đã chạy
+  const hasRun = useRef(false);
 
   useEffect(() => {
     const processLogin = async () => {
@@ -22,30 +25,23 @@ const AuthorizedPage = () => {
       }
 
       try {
+        // 1. Đổi code lấy token
         const data = await exchangeCodeForToken(code);
-        
-        // Lấy cả access_token và id_token
         const { access_token, id_token } = data;
 
         if (access_token) {
+          // 2. Lưu token
           localStorage.setItem("token", access_token);
           localStorage.setItem("authProvider", "sso");
-
-          // === QUAN TRỌNG: Lưu id_token để dùng khi logout ===
-          if (id_token) {
-            localStorage.setItem("id_token", id_token);
-          }
+          if (id_token) localStorage.setItem("id_token", id_token);
           
-          if (checkAuth) {
-             await checkAuth();
-          }
+          // 3. Cập nhật Context
+          const realRoles = await checkAuth(access_token); 
 
           message.success("Đăng nhập SSO thành công!");
           
-          const decoded = jwtDecode(access_token);
-          const roles = decoded.roles || [];
-          
-          if (roles.includes("ROLE_ADMIN")) {
+          // 4. Điều hướng
+          if (realRoles && realRoles.includes("ROLE_ADMIN")) {
             window.location.href = "/admin/dashboard";
           } else {
             window.location.href = "/user/dashboard";
@@ -58,7 +54,12 @@ const AuthorizedPage = () => {
       }
     };
 
-    processLogin();
+    // 🛑 LOGIC CHẶN GỌI KÉP (React StrictMode)
+    if (!hasRun.current) {
+      hasRun.current = true; // Đánh dấu là đã chạy
+      processLogin();
+    }
+    
   }, [searchParams, navigate, checkAuth]);
 
   return (

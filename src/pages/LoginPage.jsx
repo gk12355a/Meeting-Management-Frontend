@@ -27,13 +27,18 @@ export default function LoginPage() {
     e.preventDefault();
 
     try {
-      const roles = await login(username, password);
+      // Hàm login trong Context bây giờ sẽ trả về Role chuẩn từ API
+      const realRoles = await login(username, password);
 
       toast.success("Đăng nhập thành công!", { autoClose: 1000 });
 
       setTimeout(() => {
-        if (roles.includes("ROLE_ADMIN")) navigate("/admin/dashboard");
-        else navigate("/user/dashboard");
+        // Điều hướng dựa trên Role thật
+        if (realRoles.includes("ROLE_ADMIN")) {
+            navigate("/admin/dashboard");
+        } else {
+            navigate("/user/dashboard");
+        }
       }, 1000);
     } catch (err) {
       const msg =

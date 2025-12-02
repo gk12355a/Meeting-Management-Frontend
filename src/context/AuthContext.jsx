@@ -10,40 +10,49 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
-
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [initializing, setInitializing] = useState(true);
   const [loading, setLoading] = useState(false);
 
-  // Hàm checkAuth (Giữ nguyên như file trước)
+  // === HÀM QUAN TRỌNG: CHECK AUTH VÀ LẤY PROFILE MỚI NHẤT ===
   const checkAuth = async (current_token) => {
-    if (!current_token) return;
+    if (!current_token) return []; // Trả về mảng rỗng nếu không có token
+
     try {
       const decoded = jwtDecode(current_token);
       const expired = decoded.exp * 1000 < Date.now();
 
       if (expired) {
         logout(true);
-        return;
+        return [];
       }
 
       api.defaults.headers.common["Authorization"] = current_token;
 
+      // 1. GỌI API ĐỂ LẤY ROLE MỚI NHẤT TỪ DATABASE 8080
       const profileRes = await userService.getMyProfile();
-      const userProfile = profileRes.data;
+      const userProfile = profileRes.data; 
+
+      // 2. Ưu tiên dùng Role từ API, nếu không có mới fallback về Token
+      const finalRoles = userProfile.roles && userProfile.roles.length > 0 
+                         ? userProfile.roles 
+                         : (decoded.roles || []);
 
       setUser({
         id: userProfile.id,
         username: userProfile.username || decoded.sub,
         fullName: userProfile.fullName,
-        roles: userProfile.roles || decoded.roles || [],
+        roles: finalRoles, // Lưu Role chuẩn vào State
       });
 
-      return userProfile.roles || decoded.roles || [];
+      // 3. QUAN TRỌNG: Return Role ra ngoài để logic điều hướng sử dụng
+      return finalRoles; 
+
     } catch (err) {
       console.error("AuthCheck failed:", err);
       logout(true);
+      return [];
     }
   };
 
@@ -55,7 +64,6 @@ export const AuthProvider = ({ children }) => {
     checkAuth(token).then(() => setInitializing(false));
   }, [token]);
 
-  // === 🟢 SỬA HÀM LOGIN (Lưu thêm authProvider) ===
   const login = async (username, password) => {
     setLoading(true);
     try {
@@ -64,14 +72,12 @@ export const AuthProvider = ({ children }) => {
       const fullToken = `${tokenType || "Bearer"} ${accessToken}`;
 
       localStorage.setItem("token", fullToken);
-      localStorage.setItem("authProvider", "local"); // <-- LƯU CỜ NÀY
-      
+      localStorage.setItem("authProvider", "local");
       setToken(fullToken);
 
-      const decoded = jwtDecode(fullToken);
-      await checkAuth(fullToken); // Load profile ngay
-
-      return decoded.roles || [];
+      // Gọi checkAuth để lấy Role chuẩn từ DB thay vì decode token cũ
+      const roles = await checkAuth(fullToken); 
+      return roles; // Trả về role chuẩn cho LoginPage
     } catch (error) {
       return Promise.reject(error);
     } finally {
@@ -79,30 +85,26 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // === 🔴 SỬA HÀM LOGOUT (Xử lý Redirect SSO) ===
   const logout = (silent = false) => {
-    // 1. Lấy thông tin trước khi xóa
     const provider = localStorage.getItem("authProvider");
-    const idToken = localStorage.getItem("id_token"); // <-- Lấy ID Token
+    const idToken = localStorage.getItem("id_token"); // <--- Lấy ID Token
 
-    // 2. Xóa dữ liệu local
     localStorage.removeItem("token");
     localStorage.removeItem("authProvider");
-    localStorage.removeItem("id_token"); // <-- Xóa ID Token
+    localStorage.removeItem("id_token"); // <--- Xóa ID Token
     delete api.defaults.headers.common["Authorization"];
     
     setUser(null);
     setToken(null);
 
-    // 3. Điều hướng
     if (provider === "sso" && !silent) {
        // Truyền idToken vào hàm để tạo URL đúng chuẩn OIDC
+       // Hàm getSSOLogoutUrl sẽ trả về URL tới Auth Service (port 9000)
        window.location.href = authApi.getSSOLogoutUrl(idToken);
     } else if (!silent) {
        navigate("/login");
     }
   };
-
   const isAuthenticated = !!token;
   const isAdmin = user?.roles?.includes("ROLE_ADMIN");
 
@@ -116,16 +118,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{
-        user,
-        token,
-        login,
-        logout,
-        loading,
-        isAuthenticated,
-        isAdmin,
-        checkAuth,
-      }}
+      value={{ user, token, login, logout, loading, isAuthenticated, isAdmin, checkAuth }}
     >
       {children}
     </AuthContext.Provider>
