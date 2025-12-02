@@ -16,17 +16,27 @@ const NotificationItem = ({ notification, onMarkRead }) => {
   const navigate = useNavigate();
   const [isResponding, setIsResponding] = useState(false);
 
+  // Thông báo LỜI MỜI họp (người khác mời bạn)
+const isInvite =
+  notification.message.includes("mời bạn tham gia") ||
+  notification.message.includes("đã mời");
+
   // Logic xác định loại thông báo
   const isStatusUpdate =
-    notification.message.includes("đã được phê duyệt") ||
-    notification.message.includes("chờ Admin phê duyệt") ||
-    notification.message.includes("bị từ chối"); // <-- Đã bao gồm trường hợp của bạn
+  notification.message.includes("đã được phê duyệt") ||
+  notification.message.includes("chờ Admin phê duyệt") ||
+  notification.message.includes("bị từ chối") ||
+  notification.message.includes("đã chấp nhận") ||
+  notification.message.includes("đã từ chối");
 
   // Chỉ hiện nút nếu là Lời mời họp VÀ chưa đọc VÀ không phải thông báo trạng thái
   // const showActions = notification.meetingId && !notification.read && !isStatusUpdate;
 
-  // Tắt hoàn toàn nút Chấp nhận & Từ chối
-  const showActions = false;
+  const showActions =
+  isInvite &&
+  notification.meetingId &&
+  !notification.read &&
+  !isStatusUpdate;
 
   const handleResponse = async (status) => {
     if (isResponding) return;
@@ -37,7 +47,7 @@ const NotificationItem = ({ notification, onMarkRead }) => {
     } catch (error) {
       console.error(`Lỗi khi ${status} cuộc họp:`, error);
     } finally {
-      // setIsResponding(false); 
+      setIsResponding(false); 
     }
   };
 
