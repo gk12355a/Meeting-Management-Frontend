@@ -1,5 +1,5 @@
 // src/components/user/BookRoomModal.jsx
-import {useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   Modal,
   DatePicker,
@@ -74,6 +74,8 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, start, end, onSuccess })
           title: "",
           date: startD,
           time: startD,
+          hour: startD.hour(),
+          minute: startD.minute(),
           duration: durationMin,
           roomId: prefilledRoom.id,
           deviceIds: [],
