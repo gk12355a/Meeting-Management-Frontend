@@ -30,5 +30,14 @@
   "successUpdate": "Meeting updated successfully",
   "successDelete": "Meeting deleted successfully",
   "errorLoadMeeting": "Failed to load meeting information",
-  "errorTimeInvalid": "End time must be after start time"
+  "errorTimeInvalid": "End time must be after start time",
+  "modal": {
+    "upcomingMeetings": "Upcoming Meetings",
+    "location": "Location",
+    "time": "Meeting time",
+    "organizer": "Organizer",
+    "unknown": "Unknown",
+    "noMeetings": "No meetings.",
+    "close": "Close"
+  }
 }
