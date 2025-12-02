@@ -1,19 +1,20 @@
 import React, { useState, useEffect } from "react";
 import dayjs from "dayjs";
+import { useTranslation } from "react-i18next";
 
 export default function MeetingListModal({ visible, onClose, title, meetings, onMeetingClick }) {
-  const [render, setRender] = useState(visible); // render modal
-  const [animate, setAnimate] = useState(false);  // control animation
+  const { t } = useTranslation("meeting"); // dùng namespace "meeting"
+
+  const [render, setRender] = useState(visible);
+  const [animate, setAnimate] = useState(false);
 
   useEffect(() => {
     if (visible) {
       setRender(true);
-      // Slight delay để DOM cập nhật trước khi animate
       setTimeout(() => setAnimate(true), 10);
     } else {
       setAnimate(false);
-      // Sau animation mới remove DOM
-      setTimeout(() => setRender(false), 300); // match transition duration
+      setTimeout(() => setRender(false), 300);
     }
   }, [visible]);
 
@@ -43,23 +44,30 @@ export default function MeetingListModal({ visible, onClose, title, meetings, on
                 onClick={() => onMeetingClick(m)}
               >
                 <p className="font-semibold text-gray-700 dark:text-gray-200 text-md">{m.title}</p>
+
                 {m.room && (
-                  <p className="text-sm text-gray-500 dark:text-gray-400"> Địa điểm: {m.room?.name || "Chưa xác định"}</p>
-                )}
-                {m.startTime && m.endTime && (
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Giờ họp: {dayjs(m.startTime).format("HH:mm")} - {dayjs(m.endTime).format("HH:mm, DD/MM/YYYY")}
+                    {t("modal.location")}: {m.room?.name || t("modal.unknown")}
                   </p>
                 )}
+
+                {m.startTime && m.endTime && (
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {t("modal.time")}:{" "}
+                    {dayjs(m.startTime).format("HH:mm")} -{" "}
+                    {dayjs(m.endTime).format("HH:mm, DD/MM/YYYY")}
+                  </p>
+                )}
+
                 {m.organizer && (
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Người tổ chức: {m.organizer.fullName || "Chưa xác định"}
+                    {t("modal.organizer")}: {m.organizer.fullName || t("modal.unknown")}
                   </p>
                 )}
               </div>
             ))
           ) : (
-            <p className="text-gray-500 dark:text-gray-400">Không có cuộc họp.</p>
+            <p className="text-gray-500 dark:text-gray-400">{t("modal.noMeetings")}</p>
           )}
         </div>
 
@@ -67,7 +75,7 @@ export default function MeetingListModal({ visible, onClose, title, meetings, on
           className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
           onClick={onClose}
         >
-          Đóng
+          {t("modal.close")}
         </button>
       </div>
     </div>

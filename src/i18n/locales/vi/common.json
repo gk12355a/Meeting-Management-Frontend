@@ -61,6 +61,12 @@
     "noResults": "Không tìm thấy kết quả",
     "tryAgain": "Thử lại",
     "person": "người",
-    "item": "mục"
+    "item": "mục",
+    "notifications": "Thông báo",
+    "markAllRead": "Đánh dấu tất cả đã đọc",
+    "noNotifications": "Không có thông báo mới.",
+    "loadMore": "Xem thêm",
+    "loading": "Đang tải...",
+    "viewed": "Đã xem"
   }
 }
