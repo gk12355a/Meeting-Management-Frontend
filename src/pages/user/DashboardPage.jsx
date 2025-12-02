@@ -5,6 +5,7 @@ import { FiCalendar, FiClock, FiUsers, FiCheckSquare } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { Spin, message, Modal, Pagination } from "antd";
 import { getMyMeetings, getMeetingById } from "../../services/meetingService";
+import { useTranslation } from "react-i18next";
 import dayjs from "dayjs";
 import "dayjs/locale/vi";
 import isToday from "dayjs/plugin/isToday";
@@ -20,31 +21,31 @@ dayjs.extend(isSameOrAfter);
 dayjs.extend(isBetween);
 dayjs.extend(isoWeek);
 
-// Template cho thẻ Stats 
+// Template cho thẻ Stats (dùng key i18n)
 const statTemplates = [
   {
-    title: "Lịch họp hôm nay",
+    key: "stats.today",
     value: "0",
     icon: <FiCalendar size={24} />,
     textColor: "text-blue-600",
     bgLight: "bg-blue-50 dark:bg-blue-900/20",
   },
   {
-    title: "Lịch họp tuần này",
+    key: "stats.week",
     value: "0",
     icon: <FiClock size={24} />,
     textColor: "text-green-600",
     bgLight: "bg-green-50 dark:bg-green-900/20",
   },
   {
-    title: "Cuộc họp sắp tới",
+    key: "stats.upcoming",
     value: "0",
     icon: <FiUsers size={24} />,
     textColor: "text-purple-600",
     bgLight: "bg-purple-50 dark:bg-purple-900/20",
   },
   {
-    title: "Tổng số cuộc họp",
+    key: "stats.total",
     value: "0",
     icon: <FiCheckSquare size={24} />,
     textColor: "text-orange-600",
@@ -82,11 +83,13 @@ const statTemplates = [
 // }
 
 export default function DashboardPage() {
+  const { t } = useTranslation("userDashboard");
   const [listModalOpen, setListModalOpen] = useState(false);
   const [listModalTitle, setListModalTitle] = useState("");
   const [listModalData, setListModalData] = useState([]);
   const [activeMeetingsAll, setActiveMeetingsAll] = useState([]);
   const [upcomingMeetingsAll, setUpcomingMeetingsAll] = useState([]);
+  const [page, setPage] = useState(1);
 
   const { user } = useAuth(); // <-- Cần user.id để lọc
   const navigate = useNavigate();
@@ -245,14 +248,12 @@ export default function DashboardPage() {
   };
 const handleOpenStat = (type) => {
   if (type === "today") {
-    setListModalTitle("Lịch họp hôm nay");
-    setListModalData(
-      activeMeetingsAll.filter(m => dayjs(m.startTime).isToday())
-    );
+    setListModalTitle(t("stats.today"));
+    setListModalData(activeMeetingsAll.filter(m => dayjs(m.startTime).isToday()));
   }
 
   if (type === "week") {
-    setListModalTitle("Lịch họp tuần này");
+    setListModalTitle(t("stats.week"));
     setListModalData(
       activeMeetingsAll.filter(m =>
         dayjs(m.startTime).isBetween(
@@ -264,13 +265,12 @@ const handleOpenStat = (type) => {
   }
 
   if (type === "upcoming") {
-    setListModalTitle("Các cuộc họp sắp tới");
-    // dùng danh sách đầy đủ, không phải bản preview 3 cuộc
+    setListModalTitle(t("stats.upcoming"));
     setListModalData(upcomingMeetingsAll);
   }
 
   if (type === "total") {
-    setListModalTitle("Tổng số cuộc họp");
+    setListModalTitle(t("stats.total"));
     setListModalData(activeMeetingsAll);
   }
 
@@ -283,93 +283,96 @@ const handleOpenStat = (type) => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
-            👋 Xin chào, {user?.username || "User"}
-          </h1>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Chào mừng bạn đến với hệ thống quản lý lịch họp
-          </p>
+  👋 {t("welcomeTitle", { username: user?.username || "User" })}
+</h1>
+<p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+  {t("welcomeSubtitle")}
+</p>
         </div>
       </div>
 
       {/* Wrapper cho Spinner */}
       {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <Spin size="large" />
-        </div>
-      ) : (
-        <>
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {stats.map((stat, index) => (
-              <div
-                onClick={() => {
-                  if (index === 0) handleOpenStat("today");
-                  if (index === 1) handleOpenStat("week");
-                  if (index === 2) handleOpenStat("upcoming");
-                  if (index === 3) handleOpenStat("total");
-                }}
-                className="cursor-pointer bg-white dark:bg-slate-900 rounded-xl p-5 shadow-sm border ... hover:scale-105"
-                >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                      {stat.title}
-                    </p>
-                    <p className={`text-2xl font-bold ${stat.textColor} dark:text-gray-100`}>
-                      {stat.value}
-                    </p>
-                  </div>
-                  <div className={`${stat.bgLight} p-3 rounded-lg`}>
-                    <div className={`${stat.textColor}`}>{stat.icon}</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* UPCOMING MEETINGS */}
-          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-gray-200 dark:border-slate-800 p-6">
-            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">
-              📅 Lịch họp sắp tới
-            </h2>
-
-            <div className="space-y-3">
-              {upcomingMeetings.map((meeting) => (
-                <div
-                  key={meeting.id}
-                  className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-800 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition cursor-pointer"
-                  onClick={() => handleShowMeetingDetail(meeting)}
-                  style={{ cursor: "pointer" }}
-                >
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-gray-800 dark:text-gray-100">
-                      {meeting.title}
-                    </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                      {dayjs(meeting.startTime).format("HH:mm")} - {dayjs(meeting.endTime).format("HH:mm")}
-                       · {meeting.room?.name || "N/A"}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                    <FiUsers size={16} />
-                    {/* === SỬA LỖI ĐẾM SỐ NGƯỜI THAM GIA === */}
-                    <span>
-                      {/* Chỉ đếm những người 'ACCEPTED' */}
-                      {meeting.participants?.filter((p) => p.status === "ACCEPTED").length || 0} người
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {upcomingMeetings.length === 0 && !loading && (
-              <p className="text-center text-gray-500 dark:text-gray-400 py-8">
-                Không có lịch họp nào sắp tới
+  <div className="flex justify-center items-center h-64">
+    <Spin size="large" />
+  </div>
+) : (
+  <>
+    {/* Stats Cards */}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {stats.map((stat, index) => (
+        <div
+          key={index}
+          onClick={() => {
+            if (index === 0) handleOpenStat("today");
+            if (index === 1) handleOpenStat("week");
+            if (index === 2) handleOpenStat("upcoming");
+            if (index === 3) handleOpenStat("total");
+          }}
+          className="cursor-pointer bg-white dark:bg-slate-900 rounded-xl p-5 shadow-sm border hover:scale-105 transition"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                {t(stat.key)}
               </p>
-            )}
+              <p className={`text-2xl font-bold ${stat.textColor} dark:text-gray-100`}>
+                {stat.value}
+              </p>
+            </div>
+            <div className={`${stat.bgLight} p-3 rounded-lg`}>
+              <div className={`${stat.textColor}`}>{stat.icon}</div>
+            </div>
           </div>
-        </>
-      )}
+        </div>
+      ))}
+    </div>
+
+    {/* Upcoming meetings */}
+    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-gray-200 dark:border-slate-800 p-6">
+      <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">
+        📅 {t("upcomingMeetingsTitle")}
+      </h2>
+
+      <div className="space-y-3">
+        {upcomingMeetings.map((meeting) => {
+          const acceptedCount =
+            meeting.participants?.filter((p) => p.status === "ACCEPTED").length || 0;
+
+          return (
+            <div
+              key={meeting.id}
+              className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-800 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition cursor-pointer"
+              onClick={() => handleShowMeetingDetail(meeting)}
+            >
+              <div className="flex-1">
+                <h3 className="font-semibold text-gray-800 dark:text-gray-100">
+                  {meeting.title}
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  {dayjs(meeting.startTime).format("HH:mm")} -{" "}
+                  {dayjs(meeting.endTime).format("HH:mm")} ·{" "}
+                  {meeting.room?.name || "N/A"}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                <FiUsers size={16} />
+                <span>{t("meeting.participants", { count: acceptedCount })}</span>
+              </div>
+            </div>
+          );
+        })}
+
+        {upcomingMeetings.length === 0 && (
+          <p className="text-center text-gray-500 dark:text-gray-400 py-8">
+            {t("upcomingMeetingsEmpty")}
+          </p>
+        )}
+      </div>
+    </div>
+  </>
+)}
 
       {/* Meeting Details Modal */}
       <MeetingDetailModal
@@ -404,9 +407,9 @@ const handleOpenStat = (type) => {
           className="bg-blue-600 text-white rounded-xl p-6 text-left hover:bg-blue-700 transition shadow-md"
           onClick={handleCreateMeeting}
         >
-          <h3 className="font-semibold text-lg mb-2">Tạo lịch họp mới</h3>
+          <h3 className="font-semibold text-lg mb-2">{t("buttons.create")}</h3>
           <p className="text-sm text-blue-100">
-            Đặt phòng và thiết bị cho cuộc họp
+            {t("buttonDesc.create")}
           </p>
         </button>
 
@@ -414,18 +417,18 @@ const handleOpenStat = (type) => {
           className="bg-green-600 text-white rounded-xl p-6 text-left hover:bg-green-700 transition shadow-md"
           onClick={handleViewRooms}
         >
-          <h3 className="font-semibold text-lg mb-2">Xem phòng trống</h3>
+          <h3 className="font-semibold text-lg mb-2">{t("buttons.rooms")}</h3>
           <p className="text-sm text-green-100">
-            Tìm phòng họp phù hợp với nhu cầu
+            {t("buttonDesc.rooms")}
           </p>
         </button>
         <button
           className="bg-purple-600 text-white rounded-xl p-6 text-left hover:bg-purple-700 transition shadow-md"
           onClick={handleViewDevices}
         >
-          <h3 className="font-semibold text-lg mb-2">Xem thiết bị</h3>
+          <h3 className="font-semibold text-lg mb-2">{t("buttons.devices")}</h3>
           <p className="text-sm text-purple-100">
-            Xem thiết bị phù hợp với nhu cầu
+            {t("buttonDesc.devices")}
           </p>
         </button>
       </div>
