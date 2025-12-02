@@ -43,7 +43,7 @@ import QRCheckInModal from "../../components/user/QRCheckInModal";
 dayjs.locale("vi");
 dayjs.extend(utc);
 
-// ---- GIỜ HÀNH CHÍNH ----
+// GIỜ HÀNH CHÍNH
 const WORK_HOUR_START = 8; // 8h sáng
 const WORK_HOUR_END = 18; // 18h chiều (6PM), kết thúc lúc 18:00
 
