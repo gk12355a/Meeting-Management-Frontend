@@ -10,6 +10,9 @@ import viUsers from './locales/vi/users.json';
 import viRooms from './locales/vi/rooms.json';
 import viDevices from './locales/vi/devices.json';
 import viReports from './locales/vi/reports.json';
+import viAuth from './locales/vi/auth.json';      
+import viMeeting from './locales/vi/meeting.json';
+import viUserDashboard from './locales/vi/userDashboard.json';
 
 import enCommon from './locales/en/common.json';
 import enAdmin from './locales/en/admin.json';
@@ -18,6 +21,9 @@ import enUsers from './locales/en/users.json';
 import enRooms from './locales/en/rooms.json';
 import enDevices from './locales/en/devices.json';
 import enReports from './locales/en/reports.json';
+import enAuth from './locales/en/auth.json';         
+import enMeeting from './locales/en/meeting.json';
+import enUserDashboard from './locales/en/userDashboard.json';
 
 // Lấy ngôn ngữ đã lưu hoặc mặc định là 'vi' (tiếng việt)
 const savedLanguage = localStorage.getItem('language') || 'vi';
@@ -34,6 +40,9 @@ i18n
         rooms: viRooms,
         devices: viDevices,
         reports: viReports,
+        auth: viAuth,            
+        meeting: viMeeting,   
+        userDashboard: viUserDashboard
       },
       en: {
         common: enCommon,
@@ -43,6 +52,9 @@ i18n
         rooms: enRooms,
         devices: enDevices,
         reports: enReports,
+        auth: enAuth,           
+        meeting: enMeeting,
+        userDashboard: enUserDashboard 
       },
     },
     lng: savedLanguage,
@@ -51,7 +63,18 @@ i18n
       escapeValue: false,
     },
     // Tách namespace
-    ns: ['common', 'admin', 'dashboard', 'users', 'rooms', 'devices', 'reports'],
+    ns: [
+      'common',
+      'admin',
+      'dashboard',
+      'users',
+      'rooms',
+      'devices',
+      'reports',
+      'auth',     
+      'meeting' ,
+      'userDashboard'
+    ],
     defaultNS: 'common',
   });
 

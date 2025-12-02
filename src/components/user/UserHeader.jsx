@@ -9,23 +9,34 @@ import {
 } from "react-icons/fi";
 import ThemeToggle from "../ThemeToggle";
 import { message } from "antd";
+import LanguageSelector from "../LanguageSelector";
 
 // === COMPONENT CON: NotificationItem ===
 const NotificationItem = ({ notification, onMarkRead }) => {
   const navigate = useNavigate();
   const [isResponding, setIsResponding] = useState(false);
 
+  // Thông báo LỜI MỜI họp (người khác mời bạn)
+const isInvite =
+  notification.message.includes("mời bạn tham gia") ||
+  notification.message.includes("đã mời");
+
   // Logic xác định loại thông báo
   const isStatusUpdate =
-    notification.message.includes("đã được phê duyệt") ||
-    notification.message.includes("chờ Admin phê duyệt") ||
-    notification.message.includes("bị từ chối"); // <-- Đã bao gồm trường hợp của bạn
+  notification.message.includes("đã được phê duyệt") ||
+  notification.message.includes("chờ Admin phê duyệt") ||
+  notification.message.includes("bị từ chối") ||
+  notification.message.includes("đã chấp nhận") ||
+  notification.message.includes("đã từ chối");
 
   // Chỉ hiện nút nếu là Lời mời họp VÀ chưa đọc VÀ không phải thông báo trạng thái
   // const showActions = notification.meetingId && !notification.read && !isStatusUpdate;
 
-  // Tắt hoàn toàn nút Chấp nhận & Từ chối
-  const showActions = false;
+  const showActions =
+  isInvite &&
+  notification.meetingId &&
+  !notification.read &&
+  !isStatusUpdate;
 
   const handleResponse = async (status) => {
     if (isResponding) return;
@@ -36,7 +47,7 @@ const NotificationItem = ({ notification, onMarkRead }) => {
     } catch (error) {
       console.error(`Lỗi khi ${status} cuộc họp:`, error);
     } finally {
-      // setIsResponding(false); 
+      setIsResponding(false); 
     }
   };
 
@@ -251,19 +262,47 @@ const UserHeader = ({ setIsSidebarOpen }) => {
             <FiSettings size={20} />
           </button>
           {isSettingsOpen && (
-            <div className="absolute top-12 right-0 w-52 bg-white dark:bg-slate-800 rounded-lg shadow-xl border dark:border-slate-700 py-2">
-              <ThemeToggle />
-              <NavLink to="/user/profile" className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700" onClick={() => setIsSettingsOpen(false)}>
-                <FiUser size={16} /><span>Thông tin cá nhân</span>
-              </NavLink>
-              <NavLink to="/user/change-password" className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700" onClick={() => setIsSettingsOpen(false)}>
-                <FiLock size={16} /><span>Đổi mật khẩu</span>
-              </NavLink>
-              <button onClick={() => { logout(); setIsSettingsOpen(false); }} className="w-full text-left flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-slate-700">
-                <FiLogOut size={16} /><span>Đăng xuất</span>
-              </button>
-            </div>
-          )}
+  <div className="absolute top-12 right-0 w-52 bg-white dark:bg-slate-800 
+      rounded-lg shadow-xl border dark:border-slate-700 py-2">
+
+    {/* Language Selector — menu item */}
+    <LanguageSelector />
+
+    {/* Theme Toggle — menu item */}
+    <ThemeToggle />
+
+    {/* Profile */}
+    <NavLink
+      to="/user/profile"
+      className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 
+                 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700"
+    >
+      <FiUser size={16} />
+      <span>Thông tin cá nhân</span>
+    </NavLink>
+
+    {/* Change Password */}
+    <NavLink
+      to="/user/change-password"
+      className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 
+                 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700"
+    >
+      <FiLock size={16} />
+      <span>Đổi mật khẩu</span>
+    </NavLink>
+
+    {/* Logout */}
+    <button
+      onClick={() => { logout(); setIsSettingsOpen(false); }}
+      className="w-full text-left flex items-center gap-3 px-4 py-2.5 text-sm 
+                 text-red-500 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-slate-700"
+    >
+      <FiLogOut size={16} />
+      <span>Đăng xuất</span>
+    </button>
+  </div>
+)}
+
         </div>
       </div>
     </header>
