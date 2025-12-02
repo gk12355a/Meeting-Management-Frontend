@@ -30,5 +30,14 @@
   "successUpdate": "Cập nhật cuộc họp thành công",
   "successDelete": "Xóa cuộc họp thành công",
   "errorLoadMeeting": "Không tải được thông tin cuộc họp",
-  "errorTimeInvalid": "Thời gian kết thúc phải lớn hơn thời gian bắt đầu"
+  "errorTimeInvalid": "Thời gian kết thúc phải lớn hơn thời gian bắt đầu",
+  "modal": {
+    "upcomingMeetings": "Cuộc họp sắp tới",
+    "location": "Địa điểm",
+    "time": "Giờ họp",
+    "organizer": "Người tổ chức",
+    "unknown": "Chưa xác định",
+    "noMeetings": "Không có cuộc họp.",
+    "close": "Đóng"
+  }
 }
