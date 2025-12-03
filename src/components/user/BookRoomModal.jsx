@@ -345,7 +345,7 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, start, end, onSuccess })
               <DatePicker
                 className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
                 format="DD/MM/YYYY"
-                disabledDate={(d) => d && (d < dayjs().startOf("day") || d.day() === 0 || d.day() === 6)}
+                disabledDate={(d) => d && d < dayjs().startOf("day")}
               />
             </Form.Item>
 
@@ -589,7 +589,7 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, start, end, onSuccess })
                   format="DD/MM/YYYY"
                   className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
                   disabledDate={(current) =>
-                    current && (current <= dayjs().startOf("day") || current.day() === 0 || current.day() === 6)
+                    current && current <= dayjs().startOf("day")
                   }
                 />
               </Form.Item>
