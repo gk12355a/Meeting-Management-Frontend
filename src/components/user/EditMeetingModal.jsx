@@ -26,7 +26,11 @@ import {
 import { searchUsers } from "../../services/userService";
 import { getAvailableDevices } from "../../services/deviceService";
 import { useAuth } from "../../context/AuthContext";
-import { Underline } from "lucide-react";
+
+// MUI STATIC TIME PICKER
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { StaticTimePicker } from "@mui/x-date-pickers/StaticTimePicker";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 dayjs.locale("vi");
 dayjs.extend(utc);
@@ -73,8 +77,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
 
   // Watch form values
   const watchedDate = Form.useWatch("date", form);
-  const watchedHour = Form.useWatch("hour", form);
-  const watchedMinute = Form.useWatch("minute", form);
+  const watchedTime = Form.useWatch("time", form);
   const watchedDuration = Form.useWatch("duration", form);
   
   /* LOAD ROOMS */
@@ -112,8 +115,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
     form.setFieldsValue({
       title: meetingDetail.title,
       date: startTime,
-      hour: startTime.hour(),
-      minute: startTime.minute(),
+      time: startTime,
       duration: duration,
       roomId: meetingDetail.room?.id,
       deviceIds: meetingDetail.devices?.map((d) => d.id) || [],
@@ -147,7 +149,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
   }, [meetingDetail, open, form, user]);
 
   /* LOAD DEVICES */
-  const loadDevicesForTime = async (dateObj, timeObj, duration) => {
+  const loadDevicesForTime = async (date, time, duration) => {
     if (!date || !time || !duration) {
       setAvailableDevices([]);
       return;
@@ -182,17 +184,12 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
   };
 
   useEffect(() => {
-  if (watchedDate == null || watchedHour == null || watchedMinute == null || watchedDuration == null) return;
-
-  const dateObj = dayjs(watchedDate);
-  const timeObj = dayjs().hour(watchedHour).minute(watchedMinute);
-
-  const t = setTimeout(() => {
-    loadDevicesForTime(dateObj, timeObj, watchedDuration);
-  }, 500);
-
-  return () => clearTimeout(t);
-}, [watchedDate, watchedHour, watchedMinute, watchedDuration]);
+    if (!watchedDate || !watchedTime || !watchedDuration) return;
+    const t = setTimeout(() => {
+      loadDevicesForTime(watchedDate, watchedTime, watchedDuration);
+    }, 500);
+    return () => clearTimeout(t);
+  }, [watchedDate, watchedTime, watchedDuration]);
 
   /* SEARCH USERS */
   const handleSearchUsers = (query) => {
@@ -214,8 +211,9 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
     }, 500);
   };
 
-  const validateBusinessTime = (hour,minute) => {
-    const totalMin = hour * 60 + minute;
+  const validateBusinessTime = (value) => {
+    if (!value) return false;
+    const totalMin = value.hour() * 60 + value.minute();
     return totalMin >= 480 && totalMin <= 1080;
   };
 
@@ -223,8 +221,8 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
   const handleSubmit = async (values) => {
     // 1. Validate cơ bản
     const date = values.date;
-    const time = dayjs().hour(values.hour).minute(values.minute);
-    if (!validateBusinessTime(values.hour, values.minute)) {
+    const time = dayjs(values.time);
+    if (!validateBusinessTime(time)) {
       toast.error("Chỉ được đặt lịch từ 08:00 đến 18:00!");
       return;
     }
@@ -246,7 +244,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
 
     try {
       const date = values.date;
-      const time = dayjs().hour(values.hour).minute(values.minute);
+      const time = dayjs(values.time);
 
       const startUTC = dayjs.utc()
         .year(date.year()).month(date.month()).date(date.date())
@@ -370,64 +368,52 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
                   className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
                   format="DD/MM/YYYY"
                   disabledDate={(d) =>
-                    d &&
-                    (d < dayjs().startOf("day") ||
-                      d.day() === 0 ||
-                      d.day() === 6)
+                    d && d < dayjs().startOf("day")
                   }
                 />
               </Form.Item>
 
-              {/* TIME PICKER */}
-                          <Form.Item label="Giờ bắt đầu" required>
-                <div className="grid grid-cols-2 gap-2">
-                  {/* SELECT GIỜ */}
-                  <Form.Item
-                    name="hour"
-                    noStyle
-                    rules={[{ required: true, message: "Chọn giờ" }]}
-                  >
-                    <Select
-                      placeholder="Giờ"
-                      onChange={(h) => {
-                        const m = form.getFieldValue("minute") ?? 0;
-                        form.setFieldsValue({
-                          time: dayjs().hour(h).minute(m),
-                        });
-                      }}
-                    >
-                      {Array.from({ length: 11 }, (_, i) => i + 8 ).map((h) => (
-                        <Select.Option key={h} value={h}>
-                          {String(h).padStart(2, "0")}
-                        </Select.Option>
-                      ))}
-                    </Select>
-                  </Form.Item>
-              
-                  {/* SELECT PHÚT */}
-                  <Form.Item
-                    name="minute"
-                    noStyle
-                    rules={[{ required: true, message: "Chọn phút" }]}
-                  >
-                    <Select
-                      placeholder="Phút"
-                      onChange={(m) => {
-                        const h = form.getFieldValue("hour") ?? 8;
-                        form.setFieldsValue({
-                          time: dayjs().hour(h).minute(m),
-                        });
-                      }}
-                    >
-                      {Array.from({ length: 60 }, (_, i) => i).map((m) => (
-                        <Select.Option key={m} value={m}>
-                          {String(m).padStart(2, "0")}
-                        </Select.Option>
-                      ))}
-                    </Select>
-                  </Form.Item>
-                </div>
-              </Form.Item>
+              <Form.Item
+  name="time"
+  label="Giờ bắt đầu"
+  rules={[{ required: true }]}
+>
+  <div className="flex gap-2">
+    <Input
+      readOnly
+      value={clockValue.format("HH:mm")}
+      onClick={() => setClockOpen(true)}
+      className="dark:bg-gray-700 dark:text-white dark:border-gray-600 cursor-pointer"
+    />
+
+    <Button onClick={() => setClockOpen(true)}>Chọn giờ</Button>
+  </div>
+  <Modal
+    title="Chọn giờ họp (08:00 - 18:00)"
+    open={clockOpen}
+    onCancel={() => setClockOpen(false)}
+    onOk={() => {
+      if (!validateBusinessTime(clockValue)) {
+        toast.error("Chỉ được đặt 08:00 - 18:00!");
+        return;
+      }
+      form.setFieldsValue({ time: clockValue });
+      setClockOpen(false);
+    }}
+    width={350}
+    centered
+  >
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <StaticTimePicker
+        orientation="portrait"
+        ampm={false}
+        value={clockValue}
+        onChange={(v) => setClockValue(v)}
+        slotProps={{ actionBar: { actions: [] } }}
+      />
+    </LocalizationProvider>
+  </Modal>
+</Form.Item>
 
               <Form.Item
                 name="duration"
@@ -478,7 +464,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
               <Select
                 mode="multiple"
                 placeholder={
-                  !watchedDate || !watchedHour == null || !watchedMinute == null
+                  !watchedDate || !watchedTime
                     ? "Vui lòng chọn thời gian trước"
                     : "Chọn thiết bị khả dụng (hiện tại được giữ lại)"
                 }
@@ -563,7 +549,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
                         <DatePicker
                           format="DD/MM/YYYY"
                           className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                          disabledDate={(c) => c && (c <= dayjs().startOf("day") || c.day() === 0 || c.day() === 6)}
+                          disabledDate={(c) => c && c <= dayjs().startOf("day")}
                         />
                       </Form.Item>
                     </div>
