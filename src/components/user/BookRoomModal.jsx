@@ -24,6 +24,11 @@ import { getAvailableDevices } from "../../services/deviceService";
 import { useAuth } from "../../context/AuthContext";
 import RoomSchedule from "./RoomSchedule";
 
+// MUI STATIC TIME PICKER
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { StaticTimePicker } from "@mui/x-date-pickers/StaticTimePicker";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+
 dayjs.locale("vi");
 dayjs.extend(utc);
 
@@ -74,8 +79,6 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, start, end, onSuccess })
           title: "",
           date: startD,
           time: startD,
-          hour: startD.hour(),
-          minute: startD.minute(),
           duration: durationMin,
           roomId: prefilledRoom.id,
           deviceIds: [],
@@ -347,55 +350,68 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, start, end, onSuccess })
             </Form.Item>
 
             {/* TIME PICKER */}
-            <Form.Item label="Giờ bắt đầu" required>
-  <div className="grid grid-cols-2 gap-2">
-    {/* SELECT GIỜ */}
-    <Form.Item
-      name="hour"
-      noStyle
-      rules={[{ required: true, message: "Chọn giờ" }]}
-    >
-      <Select
-        placeholder="Giờ"
-        onChange={(h) => {
-          const m = form.getFieldValue("minute") ?? 0;
-          form.setFieldsValue({
-            time: dayjs().hour(h).minute(m),
-          });
-        }}
-      >
-        {Array.from({ length: 11 }, (_, i) => i + 8 ).map((h) => (
-          <Select.Option key={h} value={h}>
-            {String(h).padStart(2, "0")}
-          </Select.Option>
-        ))}
-      </Select>
-    </Form.Item>
+            <Form.Item
+              name="time"
+              label="Giờ bắt đầu"
+              rules={[{ required: true, message: "Chọn giờ bắt đầu" }]}
+            >
+              <>
+                <div className="flex gap-2">
+                  <Input
+                    readOnly
+                    value={clockValue.format("HH:mm")}
+                    onClick={() => setClockOpen(true)}
+                    className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                  />
+                  <Button 
+                    onClick={() => setClockOpen(true)}
+                    className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                  >
+                    🕒 Đồng hồ
+                  </Button>
+                </div>
 
-    {/* SELECT PHÚT */}
-    <Form.Item
-      name="minute"
-      noStyle
-      rules={[{ required: true, message: "Chọn phút" }]}
-    >
-      <Select
-        placeholder="Phút"
-        onChange={(m) => {
-          const h = form.getFieldValue("hour") ?? 8;
-          form.setFieldsValue({
-            time: dayjs().hour(h).minute(m),
-          });
-        }}
-      >
-        {Array.from({ length: 60 }, (_, i) => i).map((m) => (
-          <Select.Option key={m} value={m}>
-            {String(m).padStart(2, "0")}
-          </Select.Option>
-        ))}
-      </Select>
-    </Form.Item>
-  </div>
-</Form.Item>
+                <Modal
+                  title="Chọn giờ họp (08:00 - 18:00)"
+                  open={clockOpen}
+                  onCancel={() => setClockOpen(false)}
+                  onOk={() => {
+                    if (!validateBusinessTime(clockValue)) {
+                      toast.error("⏰ Chỉ được đặt 08:00 - 18:00!");
+                      return;
+                    }
+                    form.setFieldsValue({ time: clockValue });
+                    setClockOpen(false);
+                  }}
+                  width={520}
+                  style={{ overflow: "visible" }}
+                  bodyStyle={{ overflow: "visible", paddingTop: 8 }}
+                  className="dark:[&_.ant-modal-content]:bg-gray-800 dark:[&_.ant-modal-header]:bg-gray-800"
+                >
+                  <div className="text-center text-gray-500 dark:text-gray-300 mb-2 text-sm">
+                    <span className="font-medium text-indigo-600 dark:text-indigo-400">
+                      Giờ (HH)
+                    </span>{" "}
+                    :{" "}
+                    <span className="font-medium text-indigo-600 dark:text-indigo-400">
+                      Phút (MM)
+                    </span>
+                  </div>
+
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <StaticTimePicker
+                      orientation="landscape"
+                      ampm={false}
+                      value={clockValue}
+                      onChange={(v) => setClockValue(v)}
+                      slotProps={{
+                        actionBar: { actions: [] },
+                      }}
+                    />
+                  </LocalizationProvider>
+                </Modal>
+              </>
+            </Form.Item>
 
             {/* DURATION */}
             <Form.Item
