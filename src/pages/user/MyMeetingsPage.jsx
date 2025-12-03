@@ -301,6 +301,8 @@ const MyMeetingPage = () => {
   // State quản lý lịch họp
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [softLoading, setSoftLoading] = useState(false);
+  const [initialLoad, setInitialLoad] = useState(true);
 
   // LƯU NGÀY HIỆN TẠI ĐANG XEM TRÊN CALENDAR
   const [currentViewDate, setCurrentViewDate] = useState(new Date());
@@ -375,10 +377,13 @@ const MyMeetingPage = () => {
   }, []);
 
   // === TẢI LỊCH HỌP ===
-  const fetchMeetings = async () => {
-    if (!user) return; // Đảm bảo user đã tải xong
+  const fetchMeetings = async (isAuto = false) => {
+  if (!user) return;
 
+  // Chỉ đặt loading cho lần đầu, không cho auto refresh
+  if (!isAuto && initialLoad) {
     setLoading(true);
+  }
     try {
       const res = await getMyMeetings();
       const data = res.data?.content || [];
@@ -444,7 +449,12 @@ const MyMeetingPage = () => {
         };
       });
 
-      setEvents(mappedEvents);
+      setSoftLoading(true); // bật hiệu ứng fade
+
+setTimeout(() => {
+  setEvents(mappedEvents);
+  setSoftLoading(false); // tắt hiệu ứng fade
+}, 150);
 
       // GIỮ NGÀY USER ĐANG ĐỨNG (KHÔNG JUMP VỀ TODAY)
       setTimeout(() => {
@@ -461,7 +471,10 @@ const MyMeetingPage = () => {
       console.error("Lỗi tải lịch họp:", err);
       toast.error("Không thể tải danh sách lịch họp!");
     } finally {
-      setLoading(false);
+      if (initialLoad) {
+    setInitialLoad(false); // Ghi nhớ rằng đã load xong lần đầu
+  }
+  setLoading(false);
     }
   };
 
@@ -578,15 +591,13 @@ const MyMeetingPage = () => {
 
   // RED LINE NOW-INDICATOR
   useEffect(() => {
-    let interval = setInterval(() => {
-      try {
-        if (calendarRef.current && calendarRef.current.getApi) {
-          calendarRef.current.getApi().updateNow();
-        }
-      } catch (e) {}
-    }, 20000);
-    return () => clearInterval(interval);
-  }, []);
+  const id = setInterval(() => {
+    try {
+      calendarRef.current?.getApi()?.updateNow();
+    } catch {}
+  }, 20000);
+  return () => clearInterval(id);
+}, []);
 
   // Xử lý click vào khoảng trống trên calendar để đặt lịch nhanh
   const handleDateSelect = (selection) => {
@@ -658,6 +669,30 @@ const MyMeetingPage = () => {
     );
   }
 
+  // === AUTO REFRESH EVERY 5 SECONDS ===
+useEffect(() => {
+  const interval = setInterval(() => {
+    // Không refresh nếu đang mở modal để tránh nhảy UI
+    if (
+      !isModalOpen &&
+      !isEditModalOpen &&
+      !isDeleteModalOpen &&
+      !isQRModalOpen &&
+      !quickBooking.open
+    ) {
+      fetchMeetings(true); // không bật spinner khi auto refresh
+    }
+  }, 5000); // 5 giây
+
+  return () => clearInterval(interval);
+}, [
+  isModalOpen,
+  isEditModalOpen,
+  isDeleteModalOpen,
+  isQRModalOpen,
+  quickBooking.open,
+]);
+
   // RENDER
   return (
     <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-500">
@@ -679,74 +714,83 @@ const MyMeetingPage = () => {
       </div>
 
       {/* Calendar */}
-      {loading ? (
-        <div className="flex justify-center items-center h-96">
-          <Spin size="large" />
-        </div>
-      ) : (
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 transition-colors duration-500">
-          <FullCalendar
-            ref={calendarRef}
-            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-            initialView="timeGridWeek"
-            // BẮT SỰ KIỆN THAY ĐỔI VIEW (CHUYỂN TUẦN / THÁNG / NGÀY)
-            datesSet={(arg) => {
-              setCurrentViewDate(arg.start);
-              setCurrentViewType(arg.view.type);
-            }}
-            headerToolbar={{
-              left: "prev,next today",
-              center: "title",
-              right: "timeGridDay,timeGridWeek,dayGridMonth",
-            }}
-            allDaySlot={false}
-            slotMinTime="06:00:00"
-            slotMaxTime="19:30:00"
-            events={events}
-            eventClick={handleEventClick}
-            eventMouseEnter={handleEventMouseEnter}
-            eventMouseLeave={handleEventMouseLeave}
-            height="75vh"
-            locale="vi"
-            selectable={true}
-            selectMirror={true}
-            select={handleDateSelect}
-            selectAllow={function (selectInfo) {
-              const start = dayjs(selectInfo.start);
-              const end = dayjs(selectInfo.end);
-              const validStart = isBusinessTime(start);
-              const validEnd = isBusinessTime(end);
-              // chỉ cho phép chọn nếu trong cùng 1 ngày
-              const sameDay = isSameDay(
-                start,
-                end.subtract(1, "minute")
-              ); // subtract 1 minute to avoid end 00:00 of next day
-              return validStart && validEnd && sameDay;
-            }}
-            eventAllow={function (dropInfo, draggedEvent) {
-              const start = dayjs(dropInfo.start);
-              const end = dayjs(dropInfo.end);
-              const validStart = isBusinessTime(start);
-              const validEnd = isBusinessTime(end);
-              // CHỈ CHO KÉO THẢ TRONG 1 NGÀY
-              const sameDay = isSameDay(
-                start,
-                end.subtract(1, "minute")
-              );
-              return validStart && validEnd && sameDay;
-            }}
-            businessHours={{
-              daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
-              startTime: "08:00",
-              endTime: "18:00",
-            }}
-            backgroundEvents={(arg) =>
-              getNonBusinessHourBackgroundEvents(arg.start, arg.end)
-            }
-            nowIndicator={true}
-          />
-        </div>
-      )}
+{loading ? (
+  <div className="flex justify-center items-center h-96">
+    <Spin size="large" />
+  </div>
+) : (
+  <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 transition-colors duration-500">
+
+    {/* Fade container */}
+    <div
+      className={`transition-opacity duration-200 ${
+        softLoading ? "opacity-50" : "opacity-100"
+      }`}
+    >
+      <FullCalendar
+        ref={calendarRef}
+        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+        initialView="timeGridWeek"
+        datesSet={(arg) => {
+          setCurrentViewDate(arg.start);
+          setCurrentViewType(arg.view.type);
+        }}
+        headerToolbar={{
+          left: "prev,next today",
+          center: "title",
+          right: "timeGridDay,timeGridWeek,dayGridMonth",
+        }}
+        allDaySlot={false}
+        slotMinTime="06:00:00"
+        slotMaxTime="19:30:00"
+        events={events}
+        eventClick={handleEventClick}
+        eventMouseEnter={handleEventMouseEnter}
+        eventMouseLeave={handleEventMouseLeave}
+        height="75vh"
+        locale="vi"
+        selectable={true}
+        selectMirror={true}
+        select={handleDateSelect}
+        selectAllow={function (selectInfo) {
+          const start = dayjs(selectInfo.start);
+          const end = dayjs(selectInfo.end);
+          const validStart = isBusinessTime(start);
+          const validEnd = isBusinessTime(end);
+
+          const sameDay = isSameDay(
+            start,
+            end.subtract(1, "minute")
+          );
+
+          return validStart && validEnd && sameDay;
+        }}
+        eventAllow={function (dropInfo, draggedEvent) {
+          const start = dayjs(dropInfo.start);
+          const end = dayjs(dropInfo.end);
+          const validStart = isBusinessTime(start);
+          const validEnd = isBusinessTime(end);
+
+          const sameDay = isSameDay(
+            start,
+            end.subtract(1, "minute")
+          );
+
+          return validStart && validEnd && sameDay;
+        }}
+        businessHours={{
+          daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
+          startTime: "08:00",
+          endTime: "18:00",
+        }}
+        backgroundEvents={(arg) =>
+          getNonBusinessHourBackgroundEvents(arg.start, arg.end)
+        }
+        nowIndicator={true}
+      />
+    </div>
+  </div>
+)}
 
       {/* Modal đặt lịch nhanh */}
       <QuickBookingModal
