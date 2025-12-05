@@ -28,6 +28,7 @@ import { useAuth } from "../../context/AuthContext";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { StaticTimePicker } from "@mui/x-date-pickers/StaticTimePicker";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { useTranslation } from "react-i18next";
 
 dayjs.locale("vi");
 dayjs.extend(utc);
@@ -36,6 +37,7 @@ const { TextArea } = Input;
 const { Option } = Select;
 
 const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
+  const { t } = useTranslation("userDevices");
   const [loading, setLoading] = useState(false);
   const [isRecurring, setIsRecurring] = useState(false);
   const [rooms, setRooms] = useState([]);
@@ -342,69 +344,68 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
     />
   </Form.Item>
 
-  {/* TIME PICKER */}
-  <Form.Item
-    name="time"
-    label="Giờ bắt đầu"
-    rules={[{ required: true, message: "Chọn giờ bắt đầu" }]}
-  >
-    <>
-      <div className="flex gap-2">
-        <Input
-          readOnly
-          value={clockValue.format("HH:mm")}
-          onClick={() => setClockOpen(true)}
-          className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-        />
-        <Button
-          onClick={() => setClockOpen(true)}
-          className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-        >
-          🕒 Đồng hồ
-        </Button>
+  {/* TIME PICKER - MUI CLOCK */}
+<Form.Item
+  name="time"
+  label="Giờ bắt đầu"
+  rules={[{ required: true, message: "Chọn giờ bắt đầu" }]}>
+  <>
+    <div className="flex gap-2">
+      <Input
+        readOnly
+        value={clockValue.format("HH:mm")}
+        onClick={() => setClockOpen(true)}
+        className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+      />
+      <Button
+        onClick={() => setClockOpen(true)}
+        className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+      >
+        🕒 Đồng hồ
+      </Button>
+    </div>
+
+    <Modal
+      title="Chọn giờ họp (08:00 - 18:00)"
+      open={clockOpen}
+      onCancel={() => setClockOpen(false)}
+      onOk={() => {
+        if (!validateBusinessTime(clockValue)) {
+          toast.error("⏰ Chỉ được đặt 08:00 - 18:00!");
+          return;
+        }
+        form.setFieldsValue({ time: clockValue });
+        setClockOpen(false);
+      }}
+      width={520}
+      style={{ overflow: "visible" }}
+      bodyStyle={{ overflow: "visible", paddingTop: 8 }}
+      className="dark:[&_.ant-modal-content]:bg-gray-800 dark:[&_.ant-modal-header]:bg-gray-800"
+    >
+      <div className="text-center text-gray-500 dark:text-gray-300 mb-2 text-sm">
+        <span className="font-medium text-indigo-600 dark:text-indigo-400">
+          Giờ (HH)
+        </span>{" "}
+        :{" "}
+        <span className="font-medium text-indigo-600 dark:text-indigo-400">
+          Phút (MM)
+        </span>
       </div>
 
-      <Modal
-        title="Chọn giờ họp (08:00 - 18:00)"
-        open={clockOpen}
-        onCancel={() => setClockOpen(false)}
-        onOk={() => {
-          if (!validateBusinessTime(clockValue)) {
-            toast.error("⏰ Chỉ được đặt 08:00 - 18:00!");
-            return;
-          }
-          form.setFieldsValue({ time: clockValue });
-          setClockOpen(false);
-        }}
-        width={520}
-        style={{ overflow: "visible" }}
-        bodyStyle={{ overflow: "visible", paddingTop: 8 }}
-        className="dark:[&_.ant-modal-content]:bg-gray-800 dark:[&_.ant-modal-header]:bg-gray-800"
-      >
-        <div className="text-center text-gray-500 dark:text-gray-300 mb-2 text-sm">
-          <span className="font-medium text-indigo-600 dark:text-indigo-400">
-            Giờ (HH)
-          </span>{" "}
-          :{" "}
-          <span className="font-medium text-indigo-600 dark:text-indigo-400">
-            Phút (MM)
-          </span>
-        </div>
-
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <StaticTimePicker
-            orientation="landscape"
-            ampm={false}
-            value={clockValue}
-            onChange={(v) => setClockValue(v)}
-            slotProps={{
-              actionBar: { actions: [] },
-            }}
-          />
-        </LocalizationProvider>
-      </Modal>
-    </>
-  </Form.Item>
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <StaticTimePicker
+          orientation="landscape"
+          ampm={false}
+          value={clockValue}
+          onChange={(v) => setClockValue(v)}
+          slotProps={{
+            actionBar: { actions: [] },
+          }}
+        />
+      </LocalizationProvider>
+    </Modal>
+  </>
+</Form.Item>
 
   {/* DURATION + CUSTOM HOUR */}
   <div className="flex gap-2 items-end">
