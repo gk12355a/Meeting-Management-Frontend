@@ -1,0 +1,31 @@
+{
+  "welcomeTitle": "Xin chào, {{username}}",
+  "welcomeSubtitle": "Chào mừng bạn đến với hệ thống quản lý lịch họp",
+
+  "stats": {
+    "today": "Lịch họp hôm nay",
+    "week": "Lịch họp tuần này",
+    "upcoming": "Cuộc họp sắp tới",
+    "total": "Tổng số cuộc họp"
+  },
+
+  "upcomingMeetingsTitle": "Lịch họp sắp tới",
+
+  "meeting": {
+    "participants": "{{count}} người",
+    "room": "Phòng họp {{room}}",
+    "upcomingMeetingsEmpty": "Không có lịch họp nào sắp tới"
+  },
+
+  "buttons": {
+    "create": "Tạo lịch họp mới",
+    "rooms": "Xem phòng trống",
+    "devices": "Xem thiết bị"
+  },
+
+  "buttonDesc": {
+  "create": "Đặt phòng và thiết bị cho cuộc họp",
+  "rooms": "Tìm phòng họp phù hợp với nhu cầu",
+  "devices": "Xem thiết bị phù hợp với nhu cầu"
+  }
+}

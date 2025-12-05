@@ -39,7 +39,20 @@ setToastTheme();
 
 export default function RoomsPage() {
   const { t } = useTranslation(['rooms', 'common']);
-  const DEVICE_KEYS = [
+  const DEVICE_MAP = {
+  "Máy chiếu": "projector",
+  "TV màn hình lớn": "largeTV",
+  "Bảng trắng": "whiteboard",
+  "Hệ thống âm thanh": "soundSystem",
+  "Webcam hội nghị": "conferenceCam",
+  "Quạt điều hòa": "airCooler",
+};
+
+const DEVICE_MAP_REVERSE = Object.fromEntries(
+  Object.entries(DEVICE_MAP).map(([vi, key]) => [key, vi])
+);
+
+const DEVICE_KEYS = [
   "projector",
   "largeTV",
   "whiteboard",
@@ -48,9 +61,11 @@ export default function RoomsPage() {
   "airCooler",
 ];
 
-const SUGGESTED_DEVICES = DEVICE_KEYS.map((key) =>
-  t(`rooms:modal.equipment.list.${key}`)
-);
+// Gợi ý nhanh theo ngôn ngữ
+const SUGGESTED_DEVICES = DEVICE_KEYS.map((key) => ({
+  key,
+  label: t(`rooms:modal.equipment.list.${key}`)
+}));
 
   // === States ===
   const [filteredRooms, setFilteredRooms] = useState([]);
@@ -150,7 +165,7 @@ const SUGGESTED_DEVICES = DEVICE_KEYS.map((key) =>
         location: room.location,
         status: room.status,
         requiresApproval: true, // Luôn đảm bảo là true khi sửa (hoặc giữ room.requiresApproval nếu muốn)
-        fixedDevices: room.fixedDevices || [],
+        fixedDevices: room.fixedDevices.map(dev => DEVICE_MAP[dev] || dev),
       });
     } else {
       setEditingRoom(null);
@@ -174,17 +189,21 @@ const SUGGESTED_DEVICES = DEVICE_KEYS.map((key) =>
 
   // === Logic thêm/xóa thiết bị trong Form ===
   const handleAddDevice = () => {
-    const val = deviceInput.trim();
-    if (val && !formData.fixedDevices.includes(val)) {
-      setFormData({
-        ...formData,
-        fixedDevices: [...formData.fixedDevices, val],
-      });
-      setDeviceInput("");
-    } else if (formData.fixedDevices.includes(val)) {
-      toast.warning(t('rooms:messages.deviceExists'));
-      // ({/* <span>toast.warning("Thiết bị này đã có trong danh sách") */})
-    }
+    let val = deviceInput.trim();
+
+// Nếu người dùng nhập tiếng Việt → convert sang KEY
+const mappedKey = DEVICE_MAP[val];
+if (mappedKey) val = mappedKey;
+
+if (val && !formData.fixedDevices.includes(val)) {
+  setFormData({
+    ...formData,
+    fixedDevices: [...formData.fixedDevices, val],
+  });
+  setDeviceInput("");
+} else {
+  toast.warning(t('rooms:messages.deviceExists'));
+}
   };
 
   const handleRemoveDevice = (deviceToRemove) => {
@@ -227,7 +246,7 @@ const SUGGESTED_DEVICES = DEVICE_KEYS.map((key) =>
         capacity: capacityValue,
         status: formData.status,
         requiresApproval: true, // HARDCODE: Luôn yêu cầu duyệt
-        fixedDevices: formData.fixedDevices,
+        fixedDevices: formData.fixedDevices.map(key => DEVICE_MAP_REVERSE[key] || key),
       };
 
       if (editingRoom) {
@@ -496,14 +515,17 @@ const SUGGESTED_DEVICES = DEVICE_KEYS.map((key) =>
                     <td className="p-4">
                       {room.fixedDevices && room.fixedDevices.length > 0 ? (
                         <div className="flex flex-wrap gap-1">
-                          {room.fixedDevices.slice(0, 3).map((dev, i) => (
-                            <span
-                              key={i}
-                              className="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 rounded text-xs border border-blue-100 dark:border-blue-800"
-                            >
-                              {dev}
-                            </span>
-                          ))}
+                          {room.fixedDevices.slice(0, 3).map((dev, i) => {
+  const key = DEVICE_MAP[dev] || dev; // Nếu không có trong map thì dùng nguyên bản
+  return (
+    <span
+      key={i}
+      className="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 rounded text-xs border border-blue-100 dark:border-blue-800"
+    >
+      {t(`rooms:modal.equipment.list.${key}`)}
+    </span>
+  );
+})}
                           {room.fixedDevices.length > 3 && (
                             <span className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded text-xs">
                               +{room.fixedDevices.length - 3}
@@ -698,7 +720,7 @@ const SUGGESTED_DEVICES = DEVICE_KEYS.map((key) =>
                         key={index}
                         className="inline-flex items-center gap-1 px-2.5 py-1 bg-white dark:bg-gray-800 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 rounded-full text-sm shadow-sm"
                       >
-                        {device}
+                        {t(`rooms:modal.equipment.list.${device}`)}
                         <button
                           type="button"
                           onClick={() => handleRemoveDevice(device)}
@@ -717,28 +739,28 @@ const SUGGESTED_DEVICES = DEVICE_KEYS.map((key) =>
                       <span>{t('rooms:modal.equipment.suggestions')}</span>
                     </p>
                     <div className="flex flex-wrap gap-2">
-                      {SUGGESTED_DEVICES.map((suggestion) => (
+                      {SUGGESTED_DEVICES.map((item) => (
                         <button
-                          key={suggestion}
+                          key={item.key}
                           type="button"
                           onClick={() => {
-                            if (!formData.fixedDevices.includes(suggestion)) {
+                            if (!formData.fixedDevices.includes(item.key)) {
                               setFormData((prev) => ({
                                 ...prev,
                                 fixedDevices: [
                                   ...prev.fixedDevices,
-                                  suggestion,
+                                  item.key,
                                 ],
                               }));
                             }
                           }}
                           className={`px-2 py-1 text-xs rounded border transition-colors ${
-                            formData.fixedDevices.includes(suggestion)
+                            formData.fixedDevices.includes(item.key)
                               ? "bg-blue-100 text-blue-600 border-blue-200 cursor-default opacity-60"
                               : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 hover:border-blue-400 hover:text-blue-500"
                           }`}
                         >
-                          + {suggestion}
+                          + {item.label}
                         </button>
                       ))}
                     </div>

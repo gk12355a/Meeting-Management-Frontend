@@ -7,12 +7,14 @@ import { getDevices } from "../../services/deviceService";
 import BookDeviceModal from "../../components/user/BookDeviceModal";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useTranslation } from "react-i18next";
 
 export default function DevicePage() {
+  const { t } = useTranslation("userDevices");
   const [devices, setDevices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterStatus, setFilterStatus] = useState("Tất cả");
+  const [filterStatus, setFilterStatus] = useState("ALL");
   const [bookingModal, setBookingModal] = useState({
     open: false,
     device: null,
@@ -37,12 +39,12 @@ export default function DevicePage() {
     switch (status) {
       case "AVAILABLE":
         return {
-          text: "Sẵn sàng",
+          text: t("filters.available"),
           color: "text-green-600 dark:text-green-400 font-semibold",
         };
       case "UNDER_MAINTENANCE":
         return {
-          text: "Bảo trì",
+          text: t("filters.maintenance"),
           color: "text-amber-600 dark:text-amber-400 font-semibold",
         };
       default:
@@ -56,15 +58,15 @@ export default function DevicePage() {
       ?.toLowerCase()
       .includes(searchTerm.toLowerCase());
     const matchStatus =
-      filterStatus === "Tất cả" || d.status === filterStatus;
+      filterStatus === "ALL" || d.status === filterStatus;
     return matchSearch && matchStatus;
   });
 
   // Danh sách option cho tickbox filter
   const STATUS_FILTERS = [
-    { value: "Tất cả", label: "Tất cả" },
-    { value: "AVAILABLE", label: "Sẵn sàng" },
-    { value: "UNDER_MAINTENANCE", label: "Bảo trì" },
+    { value: "ALL", label: t("filters.all") },
+    { value: "AVAILABLE", label: t("filters.available") },
+    { value: "UNDER_MAINTENANCE", label: t("filters.maintenance") },
   ];
 
   return (
@@ -79,10 +81,10 @@ export default function DevicePage() {
 
         <div>
           <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100">
-            Trạng thái thiết bị
+            {t("title")}
           </h2>
           <p className="text-gray-500 dark:text-gray-400">
-            Theo dõi tình trạng thiết bị trong các phòng họp
+            {t("subtitle")}
           </p>
         </div>
       </div>
@@ -94,7 +96,7 @@ export default function DevicePage() {
           <FiSearch className="absolute top-3 left-3 text-gray-500 dark:text-gray-400" />
           <input
             type="text"
-            placeholder="Tìm theo tên thiết bị..."
+            placeholder={t("searchPlaceholder")}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-700 
@@ -106,7 +108,7 @@ export default function DevicePage() {
         {/* Tickbox filter trạng thái */}
         <div className="w-full md:w-auto flex flex-wrap items-center gap-2">
           <span className="text-sm font-medium text-gray-600 dark:text-gray-300 mr-1">
-            Trạng thái:
+            {t("statusLabel")}
           </span>
           {STATUS_FILTERS.map((opt) => {
             const active = filterStatus === opt.value;
@@ -187,7 +189,7 @@ export default function DevicePage() {
                       className="absolute top-4 right-4 flex items-center gap-1 text-sm 
                       text-amber-600 dark:text-amber-400 font-semibold"
                     >
-                      <FiTool size={14} /> Bảo trì
+                      <FiTool size={14} /> {t("filters.maintenance")}
                     </div>
                   )}
 
@@ -198,13 +200,13 @@ export default function DevicePage() {
 
                   {/* MÔ TẢ */}
                   <p className="text-gray-700 dark:text-gray-300">
-                    <span className="font-semibold">Loại thiết bị: </span>
+                    <span className="font-semibold">{t("deviceType")}: </span>
                     {dv.description}
                   </p>
 
                   {/* TRẠNG THÁI */}
                   <p className="mt-2 text-gray-700 dark:text-gray-300">
-                    <span className="font-semibold">Trạng thái: </span>
+                    <span className="font-semibold">{t("status")}: </span>
                     <span className={statusDisplay.color}>
                       {statusDisplay.text}
                     </span>
@@ -228,7 +230,7 @@ export default function DevicePage() {
                         setBookingModal({ open: true, device: dv })
                       }
                     >
-                      {isAvailable ? "Đặt phòng" : "Bảo trì"}
+                      {isAvailable ? t("button.book") : t("button.maintenance")}
                     </button>
                   </div>
                 </div>
@@ -236,7 +238,7 @@ export default function DevicePage() {
             })
           ) : (
             <div className="col-span-full text-center text-gray-500 dark:text-gray-400 py-10">
-              Không tìm thấy thiết bị nào phù hợp.
+              {t("noResults")}
             </div>
           )}
         </div>

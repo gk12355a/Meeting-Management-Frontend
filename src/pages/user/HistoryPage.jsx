@@ -6,6 +6,8 @@ import { getMyMeetings } from "../../services/meetingService";
 import dayjs from "dayjs";
 import "dayjs/locale/vi";
 import MeetingDetailModal from "../../components/user/MeetingDetailModal";
+import { useTranslation } from "react-i18next";
+
 dayjs.locale("vi");
 
 /* ===============================
@@ -49,6 +51,7 @@ const getRoomColor = (roomName, isDark) => {
 };
 
 const HistoryPage = () => {
+  const { t } = useTranslation("userHistory");
   const [activeTab, setActiveTab] = useState("joined");
   const [joinedMeetings, setJoinedMeetings] = useState([]);
   const [cancelledMeetings, setCancelledMeetings] = useState([]);
@@ -92,7 +95,7 @@ const HistoryPage = () => {
         setJoinedMeetings(past.filter((m) => m.status !== "CANCELLED"));
         setCancelledMeetings(cancelled);
       } catch (err) {
-        message.error("Không thể tải lịch sử cuộc họp.");
+        message.error(t("errors.loadFailed"));
       } finally {
         setLoading(false);
       }
@@ -112,9 +115,9 @@ const HistoryPage = () => {
           <FiCalendar className="text-white text-2xl" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold dark:text-gray-100">Lịch sử họp</h1>
+          <h1 className="text-3xl font-bold dark:text-gray-100">{t("title")}</h1>
           <p className="text-gray-500 dark:text-gray-400">
-            Xem lại các cuộc họp bạn đã tham gia
+            {t("subtitle")}
           </p>
         </div>
       </div>
@@ -129,7 +132,7 @@ const HistoryPage = () => {
           }`}
           onClick={() => setActiveTab("joined")}
         >
-          Đã tham gia
+          {t("tabs.joined")}
         </button>
 
         <button
@@ -140,7 +143,7 @@ const HistoryPage = () => {
           }`}
           onClick={() => setActiveTab("cancelled")}
         >
-          Đã hủy
+          {t("tabs.cancelled")}
         </button>
       </div>
 
@@ -154,7 +157,7 @@ const HistoryPage = () => {
         ) : meetings.length === 0 ? (
           <div className="flex flex-col items-center py-16 text-gray-500 dark:text-gray-400">
             <FiCalendar size={32} className="mb-3" />
-            Không có dữ liệu.
+            {t("empty")}
           </div>
         ) : (
           <ul className="flex flex-col gap-4">

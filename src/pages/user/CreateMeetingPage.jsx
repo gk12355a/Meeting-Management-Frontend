@@ -1,4 +1,6 @@
 // src/pages/user/CreateMeetingPage.jsx
+// file còn dong hồ
+
 import React, { useEffect, useState, useRef } from "react";
 import {
   DatePicker,
@@ -27,7 +29,12 @@ import { getAvailableDevices } from "../../services/deviceService";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+import { useTranslation } from "react-i18next";
 
+// MUI STATIC TIME PICKER
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { StaticTimePicker } from "@mui/x-date-pickers/StaticTimePicker";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 dayjs.locale("vi");
 dayjs.extend(utc);
@@ -36,6 +43,7 @@ const { TextArea } = Input;
 const { Option } = Select;
 
 const CreateMeetingPage = () => {
+  const { t, i18n } = useTranslation("meeting");
   const [loading, setLoading] = useState(false);
   const [rooms, setRooms] = useState([]);
 
@@ -56,6 +64,9 @@ const CreateMeetingPage = () => {
   const watchedDuration = Form.useWatch("duration", form);
   const watchedCustomHour = Form.useWatch("customHour", form);
 
+  // TIME PICKER STATE
+  const [clockOpen, setClockOpen] = useState(false);
+  const [clockValue, setClockValue] = useState(dayjs().hour(8).minute(0));
 
 
   // Load Rooms
@@ -65,7 +76,11 @@ const CreateMeetingPage = () => {
         const res = await getRooms();
         setRooms(res.data || []);
       } catch {
-        message.error("Không thể tải danh sách phòng họp!");
+        message.error(
+  i18n.language === "vi"
+    ? "Không thể tải danh sách phòng họp!"
+    : "Cannot load meeting rooms!"
+);
       }
     };
     loadRooms();
@@ -99,7 +114,7 @@ const CreateMeetingPage = () => {
         setAvailableDevices(res.data || []);
       } catch (err) {
         console.error(err);
-        message.error("Không thể tải thiết bị khả dụng!");
+        message.error(t("errorLoadMeeting"));
       } finally {
         setDevicesLoading(false);
       }
@@ -124,7 +139,11 @@ const CreateMeetingPage = () => {
         const res = await searchUsers(query);
         setSearchResults((res.data || []).filter((u) => u.id !== user?.id));
       } catch {
-        toast.error("Không thể tìm kiếm người dùng.");
+        toast.error(
+  i18n.language === "vi"
+    ? "Không thể tìm kiếm người dùng."
+    : "Cannot search users."
+);
       } finally {
         setIsSearching(false);
       }
@@ -144,10 +163,14 @@ const CreateMeetingPage = () => {
       setLoading(true);
 
       const date = values.date;
-      const time = values.time;
+      const time = dayjs(values.time);
 
       if (!validateBusinessTime(time)) {
-        toast.error("⏰ Chỉ được đặt lịch từ 08:00 đến 18:00!");
+        toast.error(
+  i18n.language === "vi"
+    ? "⏰ Chỉ được đặt lịch từ 08:00 đến 18:00!"
+    : "⏰ You can only book between 08:00 and 18:00!"
+);
         return;
       }
 
@@ -179,12 +202,17 @@ const CreateMeetingPage = () => {
       const res = await createMeeting(payload);
 
       if (res.data?.status === "PENDING_APPROVAL") {
-        toast.info("📝 Yêu cầu đặt phòng đã được gửi và đang chờ Admin phê duyệt.");
+        toast.info(
+  i18n.language === "vi"
+    ? "Yêu cầu đặt phòng đã được gửi và đang chờ Admin phê duyệt."
+    : "Booking request sent and awaiting admin approval."
+);
       } else {
-        toast.success("Tạo cuộc họp thành công!");
+        toast.success(t("successCreate"));
       }
 
       form.resetFields();
+      setClockValue(dayjs().hour(8).minute(0));
       setIsRecurring(false);
       setAvailableDevices([]);
 
@@ -197,16 +225,22 @@ const CreateMeetingPage = () => {
         "Không thể tạo cuộc họp!";
 
       const raw = backendMsg.toLowerCase();
-      let msg = "Không thể tạo cuộc họp!";
+      let msg = i18n.language === "vi"
+  ? "Không thể tạo cuộc họp!"
+  : "Failed to create meeting!";
 
       // === 1️⃣ Phòng họp trùng lịch ===
       if (raw.includes("phòng") && raw.includes("đã bị đặt")) {
-        msg = "Phòng họp đã được đặt trong khung giờ này";
+        msg = i18n.language === "vi"
+  ? "Phòng họp đã được đặt trong khung giờ này"
+  : "The meeting room is already booked during this time.";
       }
 
       // === 2️⃣ Người tham dự trùng lịch ===
       else if (raw.includes("người tham dự") && raw.includes("trùng lịch")) {
-        msg = "Người tham gia bị trùng lịch trong khung giờ này";
+        msg = i18n.language === "vi"
+  ? "Người tham gia bị trùng lịch trong khung giờ này"
+  : "A participant has a schedule conflict during this time.";
       }
 
       // fallback chung nếu BE trả lỗi khác
@@ -232,8 +266,8 @@ const CreateMeetingPage = () => {
           <FiPlusCircle className="text-white text-2xl" />
         </div>
         <div>
-          <h2 className="text-3xl font-bold dark:text-gray-100">Tạo lịch họp mới</h2>
-          <p className="text-gray-500 dark:text-gray-400">Nhập thông tin để tạo cuộc họp</p>
+          <h2 className="text-3xl font-bold dark:text-gray-100">{t("createMeetingTitle")}</h2>
+          <p className="text-gray-500 dark:text-gray-400">{t("description")}</p>
         </div>
       </div>
 
@@ -242,69 +276,84 @@ const CreateMeetingPage = () => {
           <Form form={form} layout="vertical" onFinish={handleCreateMeeting}>
 
             {/* TITLE */}
-            <Form.Item name="title" label="Tên cuộc họp"
-              rules={[{ required: true, message: "Vui lòng nhập tên cuộc họp" }, { min: 3, message: "Quá ngắn" }]}>
-              <Input placeholder="Nhập tên cuộc họp..." className="dark:bg-gray-700 dark:text-white dark:border-gray-600" />
+            <Form.Item name="title" label={t("meetingName")}
+              rules={[
+    { required: true, message: t("meetingName") + " " + t("errorTimeInvalid") },
+    { min: 3, message: t("meetingName") + " quá ngắn" }
+  ]}>
+              <Input placeholder={t("meetingName")} className="dark:bg-gray-700 dark:text-white dark:border-gray-600" />
             </Form.Item>
 
             {/* DATE - TIME - DURATION */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <Form.Item name="date" label="Ngày họp" rules={[{ required: true }]}>
+              <Form.Item name="date" label={t("date")} rules={[{ required: true }]}>
                 <DatePicker className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600" format="DD/MM/YYYY"
                   disabledDate={(d) => !d || d < dayjs().startOf("day")} />
               </Form.Item>
 
-              <Form.Item name="hour" hidden><Input /></Form.Item>
-              <Form.Item name="minute" hidden><Input /></Form.Item>
+              <Form.Item name="time" label={t("startTime")} rules={[{ required: true }]}>
+  {/* Hiển thị giờ đã chọn + nút mở modal */}
+  <div className="flex gap-2">
+    <Input
+      readOnly
+      value={clockValue.format("HH:mm")}
+      onClick={() => setClockOpen(true)}
+      placeholder={t("startTime")}
+      className="cursor-pointer dark:bg-gray-700 dark:text-white dark:border-gray-600"
+    />
+    <Button onClick={() => setClockOpen(true)}>
+      🕒 {i18n.language === "vi" ? "Chọn giờ" : "Pick time"}
+    </Button>
+  </div>
 
-              <Form.Item name="time" label="Giờ bắt đầu" rules={[{ required: true }]}>
-              <div className="grid grid-cols-2 gap-2">
-
-              {/* Chọn giờ */}
-              <Select
-            placeholder="Giờ"
-            onChange={(h) => {
-              const m = form.getFieldValue("minute") || 0;
-              const time = dayjs().hour(h).minute(m);
-              form.setFieldsValue({ time, hour: h });
-            }}
-            className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-            options={Array.from({ length: 11 }, (_, i) => {
-              const hour = i + 8; // 8 → 18
-              return {
-                label: hour.toString().padStart(2, "0"),
-                value: hour,
-              };
-            })}
-          />
-
-              <Select
-            placeholder="Phút"
-            onChange={(m) => {
-              const h = form.getFieldValue("hour") || 8;
-              const time = dayjs().hour(h).minute(m);
-              form.setFieldsValue({ time, minute: m });
-            }}
-            className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-            options={Array.from({ length: 60 }, (_, i) => ({
-              label: i.toString().padStart(2, "0"),
-              value: i,
-            }))}
-          />
-
-            </div>
-          </Form.Item>
+  {/* Modal chứa đồng hồ chọn giờ */}
+  <Modal
+    title={i18n.language === "vi" ? "Chọn giờ họp (08:00 - 18:00)" : "Select meeting time (08:00 - 18:00)"}
+    open={clockOpen}
+    onCancel={() => setClockOpen(false)}
+    onOk={() => {
+      if (!validateBusinessTime(clockValue)) {
+        toast.error(
+          i18n.language === "vi"
+            ? "⏰ Chỉ được đặt lịch từ 08:00 đến 18:00!"
+            : "⏰ Bookings allowed only 08:00 - 18:00!"
+        );
+        return;
+      }
+      form.setFieldsValue({ time: clockValue });
+      setClockOpen(false);
+    }}
+    width={350}
+    centered
+  >
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <StaticTimePicker
+        orientation="portrait"
+        ampm={false}
+        value={clockValue}
+        onChange={(v) => setClockValue(v)}
+        slotProps={{
+          actionBar: { actions: [] }, // ẩn nút OK/Cancel của MUI
+        }}
+      />
+    </LocalizationProvider>
+  </Modal>
+</Form.Item>
 
               <div className="flex gap-2">
-                <Form.Item name="duration" label="Thời lượng" initialValue={60} style={{ flex: 1 }}>
+                <Form.Item name="duration" label={t("endTime")} initialValue={60} style={{ flex: 1 }}>
                   <Select className="dark:bg-gray-700 dark:text-white dark:border-gray-600">
-                    <Option value={30}>30 phút</Option>
-                    <Option value={60}>1 giờ</Option>
-                    <Option value={90}>1.5 giờ</Option>
-                    <Option value={120}>2 giờ</Option>
+                    <Option value={30}>{i18n.language === "vi" ? "30 phút" : "30 minutes"}</Option>
+                    <Option value={60}>{i18n.language === "vi" ? "1 giờ" : "1 hour"}</Option>
+                    <Option value={90}>{i18n.language === "vi" ? "1.5 giờ" : "1.5 hours"}</Option>
+                    <Option value={120}>{i18n.language === "vi" ? "2 giờ" : "2 hours"}</Option>
                   </Select>
                 </Form.Item>
-                <Form.Item name="customHour" label="Khác (giờ)" style={{ width: 80 }}>
+                <Form.Item
+  name="customHour"
+  label={i18n.language === "vi" ? "Khác (giờ)" : "Custom(h)"}
+  style={{ width: 80 }}
+>
                   <Input type="number" step={0.5} min={0.5} max={8}
                     onChange={() => form.setFieldsValue({ duration: undefined })}
                     className="dark:bg-gray-700 dark:text-white dark:border-gray-600" />
@@ -313,19 +362,22 @@ const CreateMeetingPage = () => {
             </div>
 
             {/* ROOM SELECT */}
-            <Form.Item name="roomId" label="Phòng họp" rules={[{ required: true, message: "Chọn phòng họp" }]}>
-              <Select placeholder="-- Chọn phòng họp --" optionLabelProp="label"
+            <Form.Item name="roomId" label={t("room")} rules={[{ required: true, message: "Chọn phòng họp" }]}>
+              <Select placeholder={t("room")} optionLabelProp="label"
                 className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
                 popupClassName="dark:bg-gray-700 dark:text-gray-100">
                 {rooms.map((r) => (
                   <Option key={r.id} value={r.id} label={r.name} disabled={r.status !== "AVAILABLE"}>
                     <div className="flex justify-between items-center">
                       <span>
-                        {r.name} ({r.capacity} chỗ)
+                        {r.name} ({r.capacity} {t("seats")})
                       </span>
                       <Tag color={r.status === "AVAILABLE" ? "green" : "red"}>
-                        {r.status === "AVAILABLE" ? "Có sẵn" : "Bảo trì"}
-                      </Tag>
+  {r.status === "AVAILABLE"
+    ? (i18n.language === "vi" ? "Có sẵn" : "Available")
+    : (i18n.language === "vi" ? "Bảo trì" : "Maintenance")
+  }
+</Tag>
                     </div>
                   </Option>
                 ))}
@@ -335,10 +387,14 @@ const CreateMeetingPage = () => {
             {/* Đã xóa Alert VIP */}
 
             {/* DEVICES */}
-            <Form.Item name="deviceIds" label="Thiết bị sử dụng">
+            <Form.Item name="deviceIds" label={t("device")}>
               <Select mode="multiple" loading={devicesLoading}
                 disabled={!watchedDate || !watchedTime || devicesLoading}
-                placeholder={!watchedDate || !watchedTime ? "Vui lòng chọn thời gian trước" : "Chọn thiết bị khả dụng"}
+                placeholder={
+  !watchedDate || !watchedTime
+    ? (i18n.language === "vi" ? "Vui lòng chọn thời gian trước" : "Please select time first")
+    : (i18n.language === "vi" ? "Chọn thiết bị khả dụng" : "Select available devices")
+}
                 className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
                 popupClassName="dark:bg-gray-700 dark:text-gray-100">
                 {availableDevices.map((d) => (
@@ -362,7 +418,7 @@ const CreateMeetingPage = () => {
               label={
                 <span>
                   <FiUsers className="inline mr-2" />
-                  Người tham gia (Nội bộ)
+                  {t("participants")}
                 </span>
               }
             >
@@ -372,8 +428,16 @@ const CreateMeetingPage = () => {
                 filterOption={false}
                 onSearch={handleSearchUsers}
                 loading={isSearching}
-                placeholder="-- Gõ tên hoặc email để tìm người tham gia --"
-                notFoundContent={isSearching ? <Spin size="small" /> : "Không tìm thấy người dùng"}
+                placeholder={
+  i18n.language === "vi"
+    ? "Gõ tên hoặc email để tìm"
+    : "Type name or email to search"
+}
+                notFoundContent={
+  isSearching
+    ? <Spin size="small" />
+    : (i18n.language === "vi" ? "Không tìm thấy người dùng" : "No users found")
+}
                 className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
                 popupClassName="dark:bg-gray-700 dark:text-gray-100"
               >
@@ -388,8 +452,12 @@ const CreateMeetingPage = () => {
             {/* GUEST EMAILS */}
             <Form.Item
               name="guestEmails"
-              label="Email khách mời (bên ngoài)"
-              tooltip="Nhập email, nhấn Enter hoặc dấu phẩy"
+              label={i18n.language === "vi" ? "Email khách mời" : "Guest emails"}
+              tooltip={
+  i18n.language === "vi"
+    ? "Nhập email, nhấn Enter"
+    : "Enter email then press Enter"
+}
               rules={[{
                 validator: (_, list) => {
                   if (!list || !list.length) return Promise.resolve();
@@ -414,20 +482,21 @@ const CreateMeetingPage = () => {
             {/* RECURRING */}
             <Form.Item name="isRecurring" valuePropName="checked" className="mb-1">
               <Checkbox onChange={(e) => setIsRecurring(e.target.checked)} className="dark:text-gray-200">
-                Lặp lại cuộc họp
+                {i18n.language === "vi" ? "Lặp lại cuộc họp" : "Repeat meeting"}
               </Checkbox>
             </Form.Item>
 
             {isRecurring && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Form.Item name="frequency" label="Tần suất" initialValue="DAILY" rules={[{ required: true }]}>
+                <Form.Item name="frequency" label={i18n.language === "vi" ? "Tần suất" : "Frequency"}
+                              initialValue="DAILY" rules={[{ required: true }]}>
                   <Select className="dark:bg-gray-700 dark:text-white dark:border-gray-600">
-                    <Option value="DAILY">Hằng ngày</Option>
-                    <Option value="WEEKLY">Hằng tuần</Option>
-                    <Option value="MONTHLY">Hằng tháng</Option>
+                    <Option value="DAILY">{i18n.language === "vi" ? "Hằng ngày" : "Daily"}</Option>
+                    <Option value="WEEKLY">{i18n.language === "vi" ? "Hằng tuần" : "Weekly"}</Option>
+                    <Option value="MONTHLY">{i18n.language === "vi" ? "Hằng tháng" : "Monthly"}</Option>
                   </Select>
                 </Form.Item>
-                <Form.Item name="repeatUntil" label="Lặp đến ngày" rules={[{ required: true }]}>
+                <Form.Item name="repeatUntil" label={i18n.language === "vi" ? "Lặp đến ngày" : "Repeat until"} rules={[{ required: true }]}>
                   <DatePicker
                     format="DD/MM/YYYY"
                     className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
@@ -437,8 +506,8 @@ const CreateMeetingPage = () => {
               </div>
             )}
 
-            <Form.Item name="description" label="Ghi chú">
-              <TextArea rows={3} placeholder="Ghi chú thêm cho cuộc họp..."
+            <Form.Item name="description" label={t("description")}>
+              <TextArea rows={3} placeholder={t("description")}
                 className="dark:bg-gray-700 dark:text-white dark:border-gray-600" />
             </Form.Item>
 
@@ -451,7 +520,7 @@ const CreateMeetingPage = () => {
                 size="large"
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600"
               >
-                Tạo cuộc họp
+                {t("createMeetingTitle")}
               </Button>
             </Form.Item>
           </Form>
