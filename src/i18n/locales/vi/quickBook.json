@@ -60,7 +60,11 @@
     "frequencyWeekly": "Hằng tuần",
     "frequencyMonthly": "Hằng tháng",
 
-    "seat": "chỗ"
+    "seat": "chỗ",
+
+    "pickTime": "Chọn giờ",
+    "pickTimeRange": "Chọn giờ (08:00 - 18:00)"
+
   },
 
   "errors": {
