@@ -13,6 +13,12 @@ import viReports from './locales/vi/reports.json';
 import viAuth from './locales/vi/auth.json';      
 import viMeeting from './locales/vi/meeting.json';
 import viUserDashboard from './locales/vi/userDashboard.json';
+import userSidebar_vi from "./locales/vi/userSidebar.json";
+import meetingDetail_vi from "./locales/vi/meetingDetail.json";
+import userRooms_vi from "./locales/vi/userRooms.json";
+import userDevices_vi from "./locales/vi/userDevices.json";
+import userHistory_vi from "./locales/vi/userHistory.json";
+import quickBook_vi from "./locales/vi/quickBook.json";
 
 import enCommon from './locales/en/common.json';
 import enAdmin from './locales/en/admin.json';
@@ -24,6 +30,12 @@ import enReports from './locales/en/reports.json';
 import enAuth from './locales/en/auth.json';         
 import enMeeting from './locales/en/meeting.json';
 import enUserDashboard from './locales/en/userDashboard.json';
+import userSidebar_en from "./locales/en/userSidebar.json";
+import meetingDetail_en from "./locales/en/meetingDetail.json";
+import userRooms_en from "./locales/en/userRooms.json";
+import userDevices_en from "./locales/en/userDevices.json";
+import userHistory_en from "./locales/en/userHistory.json";
+import quickBook_en from "./locales/en/quickBook.json";
 
 // Lấy ngôn ngữ đã lưu hoặc mặc định là 'vi' (tiếng việt)
 const savedLanguage = localStorage.getItem('language') || 'vi';
@@ -42,7 +54,13 @@ i18n
         reports: viReports,
         auth: viAuth,            
         meeting: viMeeting,   
-        userDashboard: viUserDashboard
+        userDashboard: viUserDashboard,
+        userSidebar: userSidebar_vi,
+        meetingDetail: meetingDetail_vi,
+        userRooms: userRooms_vi,
+        userDevices: userDevices_vi,
+        userHistory: userHistory_vi,
+        quickBook: quickBook_vi
       },
       en: {
         common: enCommon,
@@ -54,7 +72,13 @@ i18n
         reports: enReports,
         auth: enAuth,           
         meeting: enMeeting,
-        userDashboard: enUserDashboard 
+        userDashboard: enUserDashboard,
+        userSidebar: userSidebar_en,
+        meetingDetail: meetingDetail_en,
+        userRooms: userRooms_en,
+        userDevices: userDevices_en,
+        userHistory: userHistory_en,
+        quickBook: quickBook_en
       },
     },
     lng: savedLanguage,
@@ -73,7 +97,13 @@ i18n
       'reports',
       'auth',     
       'meeting' ,
-      'userDashboard'
+      'userDashboard',
+      'userSidebar',
+      'meetingDetail',
+      'userRooms',
+      'userDevices',
+      'userHistory',
+      'quickBook'
     ],
     defaultNS: 'common',
   });
