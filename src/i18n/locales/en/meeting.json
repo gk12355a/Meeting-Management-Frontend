@@ -39,5 +39,12 @@
     "unknown": "Unknown",
     "noMeetings": "No meetings.",
     "close": "Close"
-  }
+  },
+  "timeHour": "Hour",
+  "timeMinute": "Minute",
+  "customHour": "Custom (hours)",
+  "seats": "seats",
+  "searchUserPlaceholder": "Type name or email to search",
+  "noUsersFound": "No users found",
+  "guestEmailTooltip": "Enter email then press Enter"
 }
