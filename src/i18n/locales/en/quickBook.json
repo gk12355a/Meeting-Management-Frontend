@@ -1,0 +1,98 @@
+{
+  "title": "Quick Room Booking",
+  "fields": {
+    "meetingTitle": "Meeting title",
+    "meetingTitlePlaceholder": "Enter meeting title...",
+    "meetingTitleRequired": "Please enter meeting title",
+    "meetingTitleTooShort": "Meeting title is too short",
+
+    "date": "Date",
+    "dateRequired": "Please select a meeting date",
+
+    "startTime": "Start time",
+    "duration": "Duration",
+
+    "room": "Meeting room",
+    "roomPlaceholder": "-- Select a meeting room --",
+    "roomRequired": "Please select a room",
+    "roomAvailable": "Available",
+    "roomMaintenance": "Maintenance",
+
+    "devices": "Devices",
+    "deviceSelectBefore": "Please select time first",
+    "deviceAvailable": "Available",
+    "deviceUnavailable": "Maintenance",
+
+    "participantsInternal": "Participants (Internal)",
+    "participantPlaceholder": "Type name or email to search",
+    "participantNotFound": "No results",
+
+    "guestEmails": "Guest emails (External)",
+    "guestEmailInvalid": "Invalid email: ",
+
+    "repeatMeeting": "Repeat meeting",
+    "frequency": "Frequency",
+    "repeatUntil": "Repeat until",
+    "frequencyRequired": "Please select frequency",
+    "repeatUntilRequired": "Please select an end date",
+
+    "weeklyDays": "Days of the week",
+    "weeklyDaysRequired": "Please select at least one day",
+
+    "note": "Notes",
+    "notePlaceholder": "Add meeting notes...",
+
+    "startHour": "Hour",
+    "startMinute": "Minute",
+
+    "durationRequired": "Please select a duration",
+
+    "duration15": "15 minutes",
+    "duration30": "30 minutes",
+    "duration45": "45 minutes",
+    "duration60": "1 hour",
+    "duration90": "1 hour 30 minutes",
+    "duration120": "2 hours",
+
+    "guestEmailTooltip": "Enter email, press Enter or comma",
+
+    "frequencyDaily": "Daily",
+    "frequencyWeekly": "Weekly",
+    "frequencyMonthly": "Monthly",
+
+    "seat": "seats"
+  },
+
+  "errors": {
+  "loadRooms": "Cannot load meeting rooms!",
+  "loadDevices": "Cannot load available devices!",
+  "outsideBusiness": "⏰ Allowed meeting time is 08:00 - 18:00!",
+  "searchUsers": "Cannot search users.",
+  "createFailed": "Failed to create meeting.",
+  "roomBusy": "This room is already booked for this time.",
+  "participantBusy": "One or more participants are busy during this time.",
+  "roomMaintenance": "Room is under maintenance. Please choose another room.",
+  "deviceMaintenance": "A selected device is under maintenance. Please remove that device.",
+  "recurrenceConflict": "Recurring schedule has conflicts. Please review."
+},
+
+  "buttons": {
+    "cancel": "Cancel",
+    "submit": "Create meeting"
+  },
+
+  "week": {
+  "mon": "Monday",
+  "tue": "Tuesday",
+  "wed": "Wednesday",
+  "thu": "Thursday",
+  "fri": "Friday",
+  "sat": "Saturday",
+  "sun": "Sunday"
+  },
+
+  "messages": {
+  "pendingApproval": "Room booking request has been sent and is awaiting admin approval.",
+  "createSuccess": "Meeting created successfully!"
+  }
+}
