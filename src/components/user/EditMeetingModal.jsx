@@ -144,7 +144,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
     }
 
     if (startTime && duration) {
-      loadDevicesForTime(startTime, duration);
+      loadDevicesForTime(startTime , duration);
     }
   }, [meetingDetail, open, form, user]);
 
@@ -368,55 +368,52 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
                   className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
                   format="DD/MM/YYYY"
                   disabledDate={(d) =>
-                    d &&
-                    (d < dayjs().startOf("day") ||
-                      d.day() === 0 ||
-                      d.day() === 6)
+                    d && d < dayjs().startOf("day")
                   }
                 />
               </Form.Item>
 
               <Form.Item
-                name="time"
-                label="Giờ bắt đầu"
-                rules={[{ required: true }]}
-              >
-                <div className="flex gap-2">
-                  <Input
-                    readOnly
-                    value={clockValue.format("HH:mm")}
-                    onClick={() => setClockOpen(true)}
-                    className="dark:bg-gray-700 dark:text-white dark:border-gray-600 cursor-pointer"
-                  />
-                  <Button onClick={() => setClockOpen(true)}>Chọn giờ</Button>
-                </div>
+  name="time"
+  label="Giờ bắt đầu"
+  rules={[{ required: true }]}
+>
+  <div className="flex gap-2">
+    <Input
+      readOnly
+      value={clockValue.format("HH:mm")}
+      onClick={() => setClockOpen(true)}
+      className="dark:bg-gray-700 dark:text-white dark:border-gray-600 cursor-pointer"
+    />
 
-                <Modal
-                  title="Chọn giờ họp (08:00 - 18:00)"
-                  open={clockOpen}
-                  onCancel={() => setClockOpen(false)}
-                  onOk={() => {
-                    if (!validateBusinessTime(clockValue)) {
-                      toast.error("Chỉ được đặt 08:00 - 18:00!");
-                      return;
-                    }
-                    form.setFieldsValue({ time: clockValue });
-                    setClockOpen(false);
-                  }}
-                  width={350}
-                  centered
-                >
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <StaticTimePicker
-                      orientation="portrait"
-                      ampm={false}
-                      value={clockValue}
-                      onChange={(v) => setClockValue(v)}
-                      slotProps={{ actionBar: { actions: [] } }}
-                    />
-                  </LocalizationProvider>
-                </Modal>
-              </Form.Item>
+    <Button onClick={() => setClockOpen(true)}>Chọn giờ</Button>
+  </div>
+  <Modal
+    title="Chọn giờ họp (08:00 - 18:00)"
+    open={clockOpen}
+    onCancel={() => setClockOpen(false)}
+    onOk={() => {
+      if (!validateBusinessTime(clockValue)) {
+        toast.error("Chỉ được đặt 08:00 - 18:00!");
+        return;
+      }
+      form.setFieldsValue({ time: clockValue });
+      setClockOpen(false);
+    }}
+    width={350}
+    centered
+  >
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <StaticTimePicker
+        orientation="portrait"
+        ampm={false}
+        value={clockValue}
+        onChange={(v) => setClockValue(v)}
+        slotProps={{ actionBar: { actions: [] } }}
+      />
+    </LocalizationProvider>
+  </Modal>
+</Form.Item>
 
               <Form.Item
                 name="duration"
@@ -552,7 +549,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
                         <DatePicker
                           format="DD/MM/YYYY"
                           className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                          disabledDate={(c) => c && (c <= dayjs().startOf("day") || c.day() === 0 || c.day() === 6)}
+                          disabledDate={(c) => c && c <= dayjs().startOf("day")}
                         />
                       </Form.Item>
                     </div>

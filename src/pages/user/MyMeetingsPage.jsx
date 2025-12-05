@@ -313,6 +313,8 @@ const MyMeetingPage = () => {
   // State quản lý lịch họp
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [softLoading, setSoftLoading] = useState(false);
+  const [initialLoad, setInitialLoad] = useState(true);
 
   // LƯU NGÀY HIỆN TẠI ĐANG XEM TRÊN CALENDAR
   const [currentViewDate, setCurrentViewDate] = useState(new Date());
@@ -456,7 +458,12 @@ const MyMeetingPage = () => {
         };
       });
 
-      setEvents(mappedEvents);
+      setSoftLoading(true); // bật hiệu ứng fade
+
+setTimeout(() => {
+  setEvents(mappedEvents);
+  setSoftLoading(false); // tắt hiệu ứng fade
+}, 150);
 
       // GIỮ NGÀY USER ĐANG ĐỨNG (KHÔNG JUMP VỀ TODAY)
       setTimeout(() => {
@@ -473,7 +480,10 @@ const MyMeetingPage = () => {
       console.error("Lỗi tải lịch họp:", err);
       toast.error(t("errorLoadMeeting"));
     } finally {
-      setLoading(false);
+      if (initialLoad) {
+    setInitialLoad(false); // Ghi nhớ rằng đã load xong lần đầu
+  }
+  setLoading(false);
     }
   };
 
@@ -590,15 +600,13 @@ const MyMeetingPage = () => {
 
   // RED LINE NOW-INDICATOR
   useEffect(() => {
-    let interval = setInterval(() => {
-      try {
-        if (calendarRef.current && calendarRef.current.getApi) {
-          calendarRef.current.getApi().updateNow();
-        }
-      } catch (e) {}
-    }, 20000);
-    return () => clearInterval(interval);
-  }, []);
+  const id = setInterval(() => {
+    try {
+      calendarRef.current?.getApi()?.updateNow();
+    } catch {}
+  }, 20000);
+  return () => clearInterval(id);
+}, []);
 
   // Xử lý click vào khoảng trống trên calendar để đặt lịch nhanh
   const handleDateSelect = (selection) => {
@@ -692,6 +700,30 @@ useEffect(() => {
       dayjs(d1).date() === dayjs(d2).date()
     );
   }
+
+  // === AUTO REFRESH EVERY 5 SECONDS ===
+useEffect(() => {
+  const interval = setInterval(() => {
+    // Không refresh nếu đang mở modal để tránh nhảy UI
+    if (
+      !isModalOpen &&
+      !isEditModalOpen &&
+      !isDeleteModalOpen &&
+      !isQRModalOpen &&
+      !quickBooking.open
+    ) {
+      fetchMeetings(true); // không bật spinner khi auto refresh
+    }
+  }, 5000); // 5 giây
+
+  return () => clearInterval(interval);
+}, [
+  isModalOpen,
+  isEditModalOpen,
+  isDeleteModalOpen,
+  isQRModalOpen,
+  quickBooking.open,
+]);
 
   // RENDER
   return (

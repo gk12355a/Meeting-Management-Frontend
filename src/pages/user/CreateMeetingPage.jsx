@@ -1,4 +1,6 @@
 // src/pages/user/CreateMeetingPage.jsx
+// file còn dong hồ
+
 import React, { useEffect, useState, useRef } from "react";
 import {
   DatePicker,
@@ -57,7 +59,9 @@ const CreateMeetingPage = () => {
   const watchedDuration = Form.useWatch("duration", form);
   const watchedCustomHour = Form.useWatch("customHour", form);
 
-
+  // TIME PICKER STATE
+  const [clockOpen, setClockOpen] = useState(false);
+  const [clockValue, setClockValue] = useState(dayjs().hour(8).minute(0));
 
   // Load Rooms
   useEffect(() => {
@@ -153,7 +157,7 @@ const CreateMeetingPage = () => {
       setLoading(true);
 
       const date = values.date;
-      const time = values.time;
+      const time = dayjs(values.time);
 
       if (!validateBusinessTime(time)) {
         toast.error(
@@ -202,6 +206,7 @@ const CreateMeetingPage = () => {
       }
 
       form.resetFields();
+      setClockValue(dayjs().hour(8).minute(0));
       setIsRecurring(false);
       setAvailableDevices([]);
 
@@ -279,9 +284,6 @@ const CreateMeetingPage = () => {
                 <DatePicker className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600" format="DD/MM/YYYY"
                   disabledDate={(d) => !d || d < dayjs().startOf("day")} />
               </Form.Item>
-
-              <Form.Item name="hour" hidden><Input /></Form.Item>
-              <Form.Item name="minute" hidden><Input /></Form.Item>
 
               <Form.Item name="time" label={t("startTime")} rules={[{ required: true }]}>
               <div className="grid grid-cols-2 gap-2">

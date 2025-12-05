@@ -96,14 +96,13 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
 
       setIsRecurring(false);
       setSelectedDays([]);
+      setClockValue(start);
 
       setTimeout(() => {
         form.setFieldsValue({
           title: "",
           date: start,
           time: start,
-          hour: start.hour(),
-          minute: start.minute(),
           duration: duration <= 0 ? 60 : duration,
           roomId: undefined,
           deviceIds: [],
@@ -337,12 +336,6 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
           form={form}
           disabled={loading}
           onFinish={handleCreateMeeting}
-          initialValues={{
-            hour: 8,
-            minute: 0,
-            time: dayjs().hour(8).minute(0),
-            duration: 60
-          }}
           onValuesChange={(vals) => {
             if (vals.isRecurring !== undefined) setIsRecurring(vals.isRecurring);
           }}
