@@ -3,9 +3,10 @@ import { Form, Input, Button, Card, Spin, message, Tag } from "antd";
 import { FiUser, FiSave, FiMail, FiShield } from "react-icons/fi";
 import { useAuth } from "../../context/AuthContext";
 import { getMyProfile, updateMyProfile } from "../../services/userService";
-import { getGoogleAuthorizeUrl } from "../../services/googleService";   // ✅ THÊM
+import { getGoogleAuthorizeUrl } from "../../services/googleService"; 
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useTranslation } from "react-i18next";
 
 // Hàm trợ giúp để dịch Role
 const formatRole = (role) => {
@@ -15,6 +16,7 @@ const formatRole = (role) => {
 };
 
 const ProfilePage = () => {
+  const { t } = useTranslation("profile");
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -61,9 +63,9 @@ const ProfilePage = () => {
     setSaving(true);
     try {
       await updateMyProfile({ fullName: values.fullName });
-      toast.success("🎉 Cập nhật thông tin thành công!");
+      toast.success(t("messages.updateSuccess"));
     } catch {
-      toast.error("Cập nhật thất bại. Vui lòng thử lại.");
+      toast.error(t("messages.updateFail"));
     } finally {
       setSaving(false);
     }
@@ -79,8 +81,8 @@ const ProfilePage = () => {
           <FiUser className="text-white text-2xl" />
         </div>
         <div>
-          <h2 className="text-3xl font-bold dark:text-gray-100">Thông tin cá nhân</h2>
-          <p className="text-gray-500 dark:text-gray-400">Xem và chỉnh sửa hồ sơ của bạn</p>
+          <h2 className="text-3xl font-bold dark:text-gray-100">{t("title")}</h2>
+          <p className="text-gray-500 dark:text-gray-400">{t("subtitle")}</p>
         </div>
       </div>
 
@@ -98,7 +100,7 @@ const ProfilePage = () => {
               <Form.Item
                 label={
                   <span className="flex items-center gap-2 font-medium text-gray-700 dark:text-gray-300">
-                    <FiMail /> Email
+                    <FiMail /> {t("email")}
                   </span>
                 }
                 name="username"
@@ -116,7 +118,7 @@ const ProfilePage = () => {
               <Form.Item
                 label={
                   <span className="flex items-center gap-2 font-medium text-gray-700 dark:text-gray-300">
-                    <FiShield /> Vai trò
+                    <FiShield /> {t("role")}
                   </span>
                 }
                 name="role"
@@ -134,14 +136,14 @@ const ProfilePage = () => {
               <Form.Item
                 label={
                   <span className="flex items-center gap-2 font-medium text-gray-700 dark:text-gray-300">
-                    <FiUser /> Họ và tên
+                    <FiUser /> {t("fullName")}
                   </span>
                 }
                 name="fullName"
-                rules={[{ required: true, message: "Vui lòng nhập họ và tên!" }]}
+                rules={[{ required: true, message: t("errors.requiredFullName") }]}
               >
                 <Input
-                  placeholder="Nhập họ và tên đầy đủ của bạn"
+                  placeholder={t("placeholders.fullName")}
                   className="
                     rounded-xl py-2 bg-white border-gray-300
                     focus:ring-2 focus:ring-blue-500 focus:border-blue-500 
@@ -152,14 +154,14 @@ const ProfilePage = () => {
               </Form.Item>
 
               {/* GOOGLE CALENDAR */}
-              <Form.Item label="Google Calendar">
+              <Form.Item label={t("googleCalendar.title")}>
                 {user?.isGoogleLinked ? (
                   <Tag color="green" className="px-3 py-1 text-base">
-                    ✔ Đã liên kết Google Calendar
+                    ✔ {t("googleCalendar.linked")}
                   </Tag>
                 ) : (
                   <Button type="primary" danger onClick={handleConnectGoogle}>
-                    Kết nối Google Calendar
+                    {t("googleCalendar.connect")}
                   </Button>
                 )}
               </Form.Item>
@@ -180,7 +182,7 @@ const ProfilePage = () => {
                     dark:from-blue-500 dark:to-indigo-500
                   "
                 >
-                  Lưu thay đổi
+                  {t("save")}
                 </Button>
               </Form.Item>
 

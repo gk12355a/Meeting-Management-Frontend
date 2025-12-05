@@ -318,6 +318,14 @@ const MyMeetingPage = () => {
 
   // LƯU NGÀY HIỆN TẠI ĐANG XEM TRÊN CALENDAR
   const [currentViewDate, setCurrentViewDate] = useState(new Date());
+
+  const [userSelectedDate, setUserSelectedDate] = useState(null);
+
+  const [lastDatesSet, setLastDatesSet] = useState(null);
+
+  // LƯU NGÀY USER ĐANG XEM (KHÔNG BAO GIỜ BỊ RESET)
+const [fixedViewDate, setFixedViewDate] = useState(null);
+  
   // LOCK NGÀY SAU KHI ĐẶT LỊCH NHANH ĐỂ KHÔNG BỊ NHẢY VỀ HÔM NAY
   const [lockedViewDate, setLockedViewDate] = useState(null);
 
@@ -466,16 +474,16 @@ setTimeout(() => {
 }, 150);
 
       // GIỮ NGÀY USER ĐANG ĐỨNG (KHÔNG JUMP VỀ TODAY)
-      setTimeout(() => {
-        const api = calendarRef.current?.getApi?.();
-        if (!api) return;
+      // GIỮ NGÀY USER ĐANG ĐỨNG KHI AUTO-REFRESH
+setTimeout(() => {
+  const api = calendarRef.current?.getApi?.();
+  if (!api) return;
 
-        if (lockedViewDate) {
-          api.gotoDate(lockedViewDate);
-        } else if (currentViewDate) {
-          api.gotoDate(currentViewDate);
-        }
-      }, 50);
+  // Luôn ưu tiên fixedViewDate — ngày user đang đứng
+  if (fixedViewDate) {
+    api.gotoDate(fixedViewDate);
+  }
+}, 50);
     } catch (err) {
       console.error("Lỗi tải lịch họp:", err);
       toast.error(t("errorLoadMeeting"));
@@ -669,29 +677,6 @@ setTimeout(() => {
     return () => document.head.removeChild(style);
   }, []);
 
-  // === AUTO REFRESH EVERY 5 SECONDS ===
-useEffect(() => {
-  const interval = setInterval(() => {
-    if (
-      !isModalOpen &&
-      !isEditModalOpen &&
-      !isDeleteModalOpen &&
-      !isQRModalOpen &&
-      !quickBooking.open
-    ) {
-      fetchMeetings(true);
-    }
-  }, 5000);
-
-  return () => clearInterval(interval);
-}, [
-  isModalOpen,
-  isEditModalOpen,
-  isDeleteModalOpen,
-  isQRModalOpen,
-  quickBooking.open,
-]);
-
   // ===== KÉO THẢ CHỈ CHO KÉO TRONG CÙNG 1 NGÀY =====
   function isSameDay(d1, d2) {
     return (
@@ -760,9 +745,15 @@ useEffect(() => {
             buttonText={buttonText}
             // BẮT SỰ KIỆN THAY ĐỔI VIEW (CHUYỂN TUẦN / THÁNG / NGÀY)
             datesSet={(arg) => {
-              setCurrentViewDate(arg.start);
-              setCurrentViewType(arg.view.type);
-            }}
+  setCurrentViewDate(arg.start);
+
+  // Nếu user chuyển sang tuần/ngày/tháng khác → cập nhật fixedViewDate
+  if (!fixedViewDate || !dayjs(arg.start).isSame(fixedViewDate, "day")) {
+    setFixedViewDate(arg.start);
+  }
+
+  setCurrentViewType(arg.view.type);
+}}
             headerToolbar={{
               left: "prev,next today",
               center: "title",
