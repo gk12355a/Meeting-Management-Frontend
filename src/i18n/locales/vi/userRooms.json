@@ -1,0 +1,27 @@
+{
+  "pageTitle": "Danh sách phòng họp",
+  "pageSubtitle": "Xem và đặt phòng họp có sẵn trong hệ thống",
+
+  "searchPlaceholder": "Tìm kiếm theo tên phòng...",
+
+  "filterStatus": "Trạng thái:",
+  "filterAll": "Tất cả",
+  "filterAvailable": "Sẵn sàng",
+  "filterMaintenance": "Bảo trì",
+
+  "capacity": "Sức chứa",
+  "people": "người",
+
+  "deviceLabel": "Thiết bị",
+  "noDevice": "Không có",
+
+  "statusLabel": "Trạng thái",
+  "statusAvailable": "Trống",
+  "statusMaintenance": "Đang bảo trì",
+
+  "bookRoom": "Đặt phòng",
+
+  "noRoomMatch": "Không có phòng nào phù hợp với bộ lọc.",
+
+  "errorLoadRooms": "Không thể tải danh sách phòng họp."
+}

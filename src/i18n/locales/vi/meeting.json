@@ -39,5 +39,12 @@
     "unknown": "Chưa xác định",
     "noMeetings": "Không có cuộc họp.",
     "close": "Đóng"
-  }
+  },
+  "timeHour": "Giờ",
+  "timeMinute": "Phút",
+  "customHour": "Khác (giờ)",
+  "seats": "chỗ",
+  "searchUserPlaceholder": "Gõ tên hoặc email để tìm",
+  "noUsersFound": "Không tìm thấy người dùng",
+  "guestEmailTooltip": "Nhập email, nhấn Enter"
 }

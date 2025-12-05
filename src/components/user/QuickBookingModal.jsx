@@ -23,11 +23,7 @@ import { createMeeting, getRooms } from "../../services/meetingService";
 import { searchUsers } from "../../services/userService";
 import { getAvailableDevices } from "../../services/deviceService";
 import { useAuth } from "../../context/AuthContext";
-
-// MUI STATIC TIME PICKER
-import { LocalizationProvider } from "@mui/x-date-pickers";
-import { StaticTimePicker } from "@mui/x-date-pickers/StaticTimePicker";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { useTranslation } from "react-i18next";
 
 dayjs.locale("vi");
 dayjs.extend(utc);
@@ -35,18 +31,17 @@ dayjs.extend(utc);
 const { TextArea } = Input;
 const { Option } = Select;
 
-// Thêm constant DAYS_OF_WEEK TRƯỚC COMPONENT
-const DAYS_OF_WEEK = [
-  { value: "MONDAY", label: "Thứ 2" },
-  { value: "TUESDAY", label: "Thứ 3" },
-  { value: "WEDNESDAY", label: "Thứ 4" },
-  { value: "THURSDAY", label: "Thứ 5" },
-  { value: "FRIDAY", label: "Thứ 6" },
-  { value: "SATURDAY", label: "Thứ 7" },
-  { value: "SUNDAY", label: "Chủ nhật" },
-];
-
 const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLockViewDate }) => {
+  const { t } = useTranslation("quickBook");
+  const DAYS_OF_WEEK = [
+  { value: "MONDAY", label: t("week.mon") },
+  { value: "TUESDAY", label: t("week.tue") },
+  { value: "WEDNESDAY", label: t("week.wed") },
+  { value: "THURSDAY", label: t("week.thu") },
+  { value: "FRIDAY", label: t("week.fri") },
+  { value: "SATURDAY", label: t("week.sat") },
+  { value: "SUNDAY", label: t("week.sun") },
+];
   const [loading, setLoading] = useState(false);
   const [rooms, setRooms] = useState([]);
 
@@ -84,7 +79,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
         const res = await getRooms();
         setRooms(res.data || []);
       } catch {
-        toast.error("Không thể tải danh sách phòng họp!");
+        toast.error(t("errors.loadRooms"));
       }
     };
     loadRooms();
@@ -152,7 +147,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
         setAvailableDevices(res.data || []);
       } catch (err) {
         console.error(err);
-        toast.error("Không thể tải thiết bị khả dụng!");
+        toast.error(t("errors.loadDevices"));
       } finally {
         setDevicesLoading(false);
       }
@@ -178,7 +173,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
         const res = await searchUsers(query);
         setSearchResults((res.data || []).filter((u) => u.id !== user?.id));
       } catch {
-        toast.error("Không thể tìm kiếm người dùng.");
+        toast.error(t("errors.searchUsers"));
       } finally {
         setIsSearching(false);
       }
@@ -201,7 +196,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
       const time = dayjs(values.time);
 
       if (!validateBusinessTime(time)) {
-        toast.error("⏰ Chỉ được đặt lịch từ 08:00 đến 18:00!");
+        toast.error(t("errors.outsideBusiness"));
         return;
       }
 
@@ -242,12 +237,12 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
       const res = await createMeeting(payload);
 
       if (res.data?.status === "PENDING_APPROVAL") {
-        toast.info("Yêu cầu đặt phòng đã được gửi và đang chờ Admin phê duyệt.");
+        toast.info(t("messages.pendingApproval"));
       } else {
-        toast.success("Tạo cuộc họp thành công!");
+        toast.success(t("messages.createSuccess"));
 
         if (onLockViewDate && quickBookingData?.start) {
-  onLockViewDate(quickBookingData.start.toDate());
+        onLockViewDate(quickBookingData.start.toDate());
 }
 
       }
@@ -260,34 +255,34 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
       const backendMsg =
         err?.response?.data?.error ||
         err?.response?.data?.message ||
-        "Không thể tạo cuộc họp!";
+        t("errors.createFailed");
 
       const raw = backendMsg.toLowerCase();
-      let msg = "Không thể tạo cuộc họp!";
+      let msg = t("errors.createFailed");
 
       // === 1️⃣ Phòng họp trùng lịch ===
       if (raw.includes("phòng") && raw.includes("đã bị đặt")) {
-        msg = "Phòng họp đã được đặt trong khung giờ này";
+        msg = t("errors.roomBusy");
       }
 
       // === 2️⃣ Người tham dự trùng lịch ===
       else if (raw.includes("người tham dự") && raw.includes("trùng lịch")) {
-        msg = "Người tham gia bị trùng lịch trong khung giờ này";
+        msg = t("errors.participantBusy");
       }
 
       // === 3️⃣ Phòng họp đang bảo trì ===
       else if (raw.includes("bảo trì") && raw.includes("phòng")) {
-        msg = "🚫 Phòng họp đang bảo trì, vui lòng chọn phòng khác!";
+        msg = t("errors.roomMaintenance");
       }
 
       // === 4️⃣ Thiết bị đang bảo trì ===
       else if (raw.includes("thiết bị") && raw.includes("bảo trì")) {
-        msg = "Một thiết bị bạn chọn đang bảo trì • vui lòng bỏ chọn thiết bị đó.";
+        msg = t("errors.deviceMaintenance");
       }
 
       // === 5️⃣ Xung đột lịch định kỳ ===
       else if (raw.includes("recurrence") || raw.includes("định kỳ")) {
-        msg = "❌ Lịch họp định kỳ bị trùng lịch • vui lòng kiểm tra lại.";
+        msg = t("errors.recurrenceConflict");
       }
 
       // === 6️⃣ Fallback chung ===
@@ -325,7 +320,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
       maskClosable={!loading}
       title={
         <span className="flex items-center gap-2 dark:text-white text-lg font-semibold">
-          <FiPlusCircle /> Đặt lịch phòng họp nhanh
+          <FiPlusCircle /> {t("title")}
         </span>
       }
       className="dark:[&_.ant-modal-content]:bg-gray-800 dark:[&_.ant-modal-content]:text-gray-100 
@@ -348,14 +343,14 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
           {/* TITLE */}
           <Form.Item
             name="title"
-            label="Tên cuộc họp"
+            label={t("fields.meetingTitle")}
             rules={[
-              { required: true, message: "Vui lòng nhập tên cuộc họp" },
-              { min: 3, message: "Tên cuộc họp quá ngắn" },
-            ]}
+  { required: true, message: t("fields.meetingTitleRequired") },
+  { min: 3, message: t("fields.meetingTitleTooShort") }
+]}
           >
             <Input
-              placeholder="Nhập tên cuộc họp..."
+              placeholder={t("fields.meetingTitlePlaceholder")}
               className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
             />
           </Form.Item>
@@ -364,8 +359,8 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Form.Item
               name="date"
-              label="Ngày họp"
-              rules={[{ required: true, message: "Chọn ngày họp" }]}
+              label={t("fields.date")}
+              rules={[{ required: true, message: t("fields.dateRequired") }]}
             >
               <DatePicker
                 className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
@@ -374,61 +369,63 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
               />
             </Form.Item>
 
-            <Form.Item
-              name="time"
-              label="Giờ bắt đầu"
-              rules={[{ required: true, message: "Chọn giờ bắt đầu" }]}
-            >
-              <div className="flex gap-2">
-                <Input
-                  readOnly
-                  value={clockValue.format("HH:mm")}
-                  onClick={() => setClockOpen(true)}
-                  className="dark:bg-gray-700 dark:text-white dark:border-gray-600 cursor-pointer"
-                />
-                <Button onClick={() => setClockOpen(true)}>🕒 Chọn</Button>
-              </div>
-
-              <Modal
-                title="Chọn giờ họp (08:00 - 18:00)"
-                open={clockOpen}
-                onCancel={() => setClockOpen(false)}
-                onOk={() => {
-                  if (!validateBusinessTime(clockValue)) {
-                    toast.error("⏰ Chỉ được đặt 08:00 - 18:00!");
-                    return;
-                  }
-                  form.setFieldsValue({ time: clockValue });
-                  setClockOpen(false);
-                }}
-                width={350}
-                centered
-              >
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <StaticTimePicker
-                    orientation="portrait"
-                    ampm={false}
-                    value={clockValue}
-                    onChange={(v) => setClockValue(v)}
-                    slotProps={{ actionBar: { actions: [] } }}
-                  />
-                </LocalizationProvider>
-              </Modal>
-            </Form.Item>
+            <Form.Item name="hour" hidden><Input /></Form.Item>
+                          <Form.Item name="minute" hidden><Input /></Form.Item>
+            
+                          <Form.Item name="time" label={t("fields.startTime")} rules={[{ required: true }]}>
+                          <div className="grid grid-cols-2 gap-2">
+            
+                          {/* Chọn giờ */}
+                          <Select
+                        placeholder={t("fields.startHour")}
+                        value={form.getFieldValue("hour")}
+                        onChange={(h) => {
+                          const m = form.getFieldValue("minute") || 0;
+                          const time = dayjs().hour(h).minute(m);
+                          form.setFieldsValue({ time, hour: h });
+                        }}
+                        className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                        options={Array.from({ length: 11 }, (_, i) => {
+                          const hour = i + 8; // 8 → 18
+                          return {
+                            label: hour.toString().padStart(2, "0"),
+                            value: hour,
+                          };
+                        })}
+                      />
+            
+                          <Select
+                        placeholder={t("fields.startMinute")}
+                        value={form.getFieldValue("minute")}
+                        onChange={(m) => {
+                          const h = form.getFieldValue("hour") || 8;
+                          const time = dayjs().hour(h).minute(m);
+                          form.setFieldsValue({ time, minute: m });
+                        }}
+                        className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                        options={Array.from({ length: 60 }, (_, i) => ({
+                          label: i.toString().padStart(2, "0"),
+                          value: i,
+                        }))}
+                      />
+            
+                        </div>
+                      </Form.Item>
 
             <Form.Item
               name="duration"
-              label="Thời lượng"
+              label={t("fields.duration")}
               initialValue={60}
-              rules={[{ required: true, message: "Chọn thời lượng" }]}
+              rules={[{ required: true, message: t("fields.durationRequired") }]}
             >
               <Select className="dark:bg-gray-700 dark:text-white dark:border-gray-600">
-                <Option value={15}>15 phút</Option>
-                <Option value={30}>30 phút</Option>
-                <Option value={45}>45 phút</Option>
-                <Option value={60}>1 giờ</Option>
-                <Option value={90}>1 giờ 30 phút</Option>
-                <Option value={120}>2 giờ</Option>
+                <Option value={15}>{t("fields.duration15")}</Option>
+                <Option value={30}>{t("fields.duration30")}</Option>
+                <Option value={45}>{t("fields.duration45")}</Option>
+                <Option value={60}>{t("fields.duration60")}</Option>
+                <Option value={90}>{t("fields.duration90")}</Option>
+                <Option value={120}>{t("fields.duration120")}</Option>
+
               </Select>
             </Form.Item>
           </div>
@@ -436,11 +433,11 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
           {/* ROOM SELECT */}
           <Form.Item
             name="roomId"
-            label="Phòng họp"
-            rules={[{ required: true, message: "Chọn phòng họp" }]}
+            label={t("fields.room")}
+            rules={[{ required: true, message: t("fields.roomRequired") }]}
           >
             <Select
-              placeholder="-- Chọn phòng họp --"
+              placeholder={t("fields.roomPlaceholder")}
               optionLabelProp="label"
               className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
               popupClassName="dark:bg-gray-700 dark:text-gray-100"
@@ -454,10 +451,10 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
                 >
                   <div className="flex justify-between items-center">
                     <span>
-                      {r.name} ({r.capacity} chỗ)
+                      {r.name} ({r.capacity} {t("fields.seat")})
                     </span>
                     <Tag color={r.status === "AVAILABLE" ? "green" : "red"}>
-                      {r.status === "AVAILABLE" ? "Có sẵn" : "Bảo trì"}
+                      {r.status === "AVAILABLE" ? t("fields.roomAvailable") : t("fields.roomMaintenance")}
                     </Tag>
                   </div>
                 </Option>
@@ -468,13 +465,13 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
           {/* Đã xóa Alert VIP */}
 
           {/* DEVICES */}
-          <Form.Item name="deviceIds" label="Thiết bị sử dụng">
+          <Form.Item name="deviceIds" label={t("fields.devices")}>
             <Select
               mode="multiple"
               placeholder={
                 !watchedDate || !watchedTime
-                  ? "Vui lòng chọn thời gian trước"
-                  : "Chọn thiết bị khả dụng"
+                  ? t("fields.deviceSelectBefore")
+                  : t("fields.devices")
               }
               loading={devicesLoading}
               disabled={!watchedDate || !watchedTime || devicesLoading}
@@ -490,7 +487,9 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
                   <div className="flex justify-between items-center">
                     <span>{d.name}</span>
                     <Tag color={d.status === "AVAILABLE" ? "green" : "red"}>
-                      {d.status === "AVAILABLE" ? "Có sẵn" : "Bảo trì"}
+                      {d.status === "AVAILABLE"
+                          ? t("fields.deviceAvailable")
+                          : t("fields.deviceUnavailable")}
                     </Tag>
                   </div>
                 </Option>
@@ -506,7 +505,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
             label={
               <span>
                 <FiUsers className="inline mr-2" />
-                Người tham gia (Nội bộ)
+                {t("fields.participantsInternal")}
               </span>
             }
           >
@@ -516,8 +515,8 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
               filterOption={false}
               onSearch={handleSearchUsers}
               loading={isSearching}
-              placeholder="-- Gõ tên hoặc email để tìm --"
-              notFoundContent={isSearching ? <Spin size="small" /> : "Không tìm thấy"}
+              placeholder={t("fields.participantPlaceholder")}
+              notFoundContent={isSearching ? <Spin size="small" /> : t("fields.participantNotFound")}
               className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
               popupClassName="dark:bg-gray-700 dark:text-gray-100"
             >
@@ -532,8 +531,8 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
           {/* GUEST EMAILS */}
           <Form.Item
             name="guestEmails"
-            label="Email khách mời (bên ngoài)"
-            tooltip="Nhập email, nhấn Enter hoặc dấu phẩy"
+            label={t("fields.guestEmails")}
+            tooltip={t("fields.guestEmailTooltip")}
             rules={[
               {
                 validator: (_, list) => {
@@ -542,7 +541,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
                     (e) => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)
                   );
                   return invalid.length
-                    ? Promise.reject(`Email không hợp lệ: ${invalid.join(", ")}`)
+                    ? Promise.reject(t("fields.guestEmailInvalid") + invalid.join(", "))
                     : Promise.resolve();
                 },
               },
@@ -564,7 +563,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
               onChange={(e) => setIsRecurring(e.target.checked)}
               className="dark:text-gray-200"
             >
-              Lặp lại cuộc họp
+              {t("fields.repeatMeeting")}
             </Checkbox>
           </Form.Item>
 
@@ -573,8 +572,8 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Form.Item
                 name="frequency"
-                label="Tần suất"
-                rules={[{ required: true, message: "Chọn tần suất" }]}
+                label={t("fields.frequency")}
+                rules={[{ required: true, message: t("fields.frequencyRequired") }]}
               >
                 <Select
                   className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
@@ -586,16 +585,17 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
                     }
                   }}
                 >
-                  <Option value="DAILY">Hằng ngày</Option>
-                  <Option value="WEEKLY">Hằng tuần</Option>
-                  <Option value="MONTHLY">Hằng tháng</Option>
+                  <Option value="DAILY">{t("fields.frequencyDaily")}</Option>
+                  <Option value="WEEKLY">{t("fields.frequencyWeekly")}</Option>
+                  <Option value="MONTHLY">{t("fields.frequencyMonthly")}</Option>
+
                 </Select>
               </Form.Item>
 
               <Form.Item
                 name="repeatUntil"
-                label="Lặp đến ngày"
-                rules={[{ required: true, message: "Chọn ngày kết thúc" }]}
+                label={t("fields.repeatUntil")}
+                rules={[{ required: true, message: t("fields.repeatUntilRequired") }]}
               >
                 <DatePicker
                   format="DD/MM/YYYY"
@@ -610,12 +610,12 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
           {isRecurring && watchedFrequency === "WEEKLY" && (
             <Form.Item
               name="daysOfWeek"
-              label="Chọn các thứ trong tuần"
+              label={t("fields.weeklyDays")}
               rules={[
                 {
                   validator: (_, value) => {
                     if (!value || value.length === 0) {
-                      return Promise.reject("Vui lòng chọn ít nhất 1 thứ");
+                      return Promise.reject(t("fields.weeklyDaysRequired"))
                     }
                     return Promise.resolve();
                   },
@@ -647,10 +647,10 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
           )}
 
           {/* DESCRIPTION */}
-          <Form.Item name="description" label="Ghi chú">
+          <Form.Item name="description" label={t("fields.note")}>
             <TextArea
               rows={3}
-              placeholder="Ghi chú thêm cho cuộc họp..."
+              placeholder={t("fields.notePlaceholder")}
               className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
             />
           </Form.Item>
@@ -658,7 +658,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
           {/* SUBMIT BUTTONS */}
           <div className="flex justify-end gap-3 mt-6">
             <Button onClick={handleCancel} disabled={loading}>
-              Hủy
+              {t("buttons.cancel")}
             </Button>
             <Button
               type="primary"
@@ -666,7 +666,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
               loading={loading}
               className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600"
             >
-              Tạo cuộc họp
+              {t("buttons.submit")}
             </Button>
           </div>
         </Form>
