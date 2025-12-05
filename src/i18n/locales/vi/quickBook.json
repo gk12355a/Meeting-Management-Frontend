@@ -1,0 +1,98 @@
+{
+  "title": "Đặt lịch phòng họp nhanh",
+  "fields": {
+    "meetingTitle": "Tên cuộc họp",
+    "meetingTitlePlaceholder": "Nhập tên cuộc họp...",
+    "meetingTitleRequired": "Vui lòng nhập tên cuộc họp",
+    "meetingTitleTooShort": "Tên cuộc họp quá ngắn",
+
+    "date": "Ngày họp",
+    "dateRequired": "Chọn ngày họp",
+
+    "startTime": "Giờ bắt đầu",
+    "duration": "Thời lượng",
+
+    "room": "Phòng họp",
+    "roomPlaceholder": "-- Chọn phòng họp --",
+    "roomRequired": "Chọn phòng họp",
+    "roomAvailable": "Có sẵn",
+    "roomMaintenance": "Bảo trì",
+
+    "devices": "Thiết bị sử dụng",
+    "deviceSelectBefore": "Vui lòng chọn thời gian trước",
+    "deviceAvailable": "Có sẵn",
+    "deviceUnavailable": "Bảo trì",
+
+    "participantsInternal": "Người tham gia (Nội bộ)",
+    "participantPlaceholder": "Gõ tên hoặc email để tìm",
+    "participantNotFound": "Không tìm thấy",
+
+    "guestEmails": "Email khách mời (bên ngoài)",
+    "guestEmailInvalid": "Email không hợp lệ: ",
+
+    "repeatMeeting": "Lặp lại cuộc họp",
+    "frequency": "Tần suất",
+    "repeatUntil": "Lặp đến ngày",
+    "frequencyRequired": "Chọn tần suất",
+    "repeatUntilRequired": "Chọn ngày kết thúc",
+
+    "weeklyDays": "Chọn các thứ trong tuần",
+    "weeklyDaysRequired": "Vui lòng chọn ít nhất 1 thứ",
+
+    "note": "Ghi chú",
+    "notePlaceholder": "Nhập ghi chú...",
+
+    "startHour": "Giờ",
+    "startMinute": "Phút",
+
+    "durationRequired": "Vui lòng chọn thời lượng",
+
+    "duration15": "15 phút",
+    "duration30": "30 phút",
+    "duration45": "45 phút",
+    "duration60": "1 giờ",
+    "duration90": "1 giờ 30 phút",
+    "duration120": "2 giờ",
+
+    "guestEmailTooltip": "Nhập email, nhấn Enter hoặc dấu phẩy",
+
+    "frequencyDaily": "Hằng ngày",
+    "frequencyWeekly": "Hằng tuần",
+    "frequencyMonthly": "Hằng tháng",
+
+    "seat": "chỗ"
+  },
+
+  "errors": {
+  "loadRooms": "Không thể tải danh sách phòng họp!",
+  "loadDevices": "Không thể tải thiết bị khả dụng!",
+  "outsideBusiness": "⏰ Chỉ được đặt lịch từ 08:00 đến 18:00!",
+  "searchUsers": "Không thể tìm kiếm người dùng.",
+  "createFailed": "Không thể tạo cuộc họp!",
+  "roomBusy": "Phòng họp đã được đặt trong khung giờ này.",
+  "participantBusy": "Người tham dự bị trùng lịch trong khung giờ này.",
+  "roomMaintenance": "Phòng họp đang bảo trì, vui lòng chọn phòng khác!",
+  "deviceMaintenance": "Một thiết bị bạn chọn đang bảo trì, vui lòng bỏ chọn thiết bị đó.",
+  "recurrenceConflict": "Lịch họp định kỳ bị trùng lịch, vui lòng kiểm tra lại."
+},
+
+  "buttons": {
+    "cancel": "Hủy",
+    "submit": "Tạo cuộc họp"
+  },
+
+  "week": {
+  "mon": "Thứ 2",
+  "tue": "Thứ 3",
+  "wed": "Thứ 4",
+  "thu": "Thứ 5",
+  "fri": "Thứ 6",
+  "sat": "Thứ 7",
+  "sun": "Chủ nhật"
+  },
+
+  "messages": {
+  "pendingApproval": "Yêu cầu đặt phòng đã được gửi và đang chờ Admin phê duyệt.",
+  "createSuccess": "Tạo cuộc họp thành công!"
+  }
+}
