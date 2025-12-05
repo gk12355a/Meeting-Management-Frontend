@@ -31,6 +31,11 @@ import "react-toastify/dist/ReactToastify.css";
 
 import { useTranslation } from "react-i18next";
 
+// MUI STATIC TIME PICKER
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { StaticTimePicker } from "@mui/x-date-pickers/StaticTimePicker";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+
 dayjs.locale("vi");
 dayjs.extend(utc);
 
@@ -62,6 +67,7 @@ const CreateMeetingPage = () => {
   // TIME PICKER STATE
   const [clockOpen, setClockOpen] = useState(false);
   const [clockValue, setClockValue] = useState(dayjs().hour(8).minute(0));
+
 
   // Load Rooms
   useEffect(() => {
@@ -286,42 +292,53 @@ const CreateMeetingPage = () => {
               </Form.Item>
 
               <Form.Item name="time" label={t("startTime")} rules={[{ required: true }]}>
-              <div className="grid grid-cols-2 gap-2">
+  {/* Hiển thị giờ đã chọn + nút mở modal */}
+  <div className="flex gap-2">
+    <Input
+      readOnly
+      value={clockValue.format("HH:mm")}
+      onClick={() => setClockOpen(true)}
+      placeholder={t("startTime")}
+      className="cursor-pointer dark:bg-gray-700 dark:text-white dark:border-gray-600"
+    />
+    <Button onClick={() => setClockOpen(true)}>
+      🕒 {i18n.language === "vi" ? "Chọn giờ" : "Pick time"}
+    </Button>
+  </div>
 
-              {/* Chọn giờ */}
-              <Select
-            placeholder={t("timeHour")}
-            onChange={(h) => {
-              const m = form.getFieldValue("minute") || 0;
-              const time = dayjs().hour(h).minute(m);
-              form.setFieldsValue({ time, hour: h });
-            }}
-            className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-            options={Array.from({ length: 11 }, (_, i) => {
-              const hour = i + 8; // 8 → 18
-              return {
-                label: hour.toString().padStart(2, "0"),
-                value: hour,
-              };
-            })}
-          />
-
-              <Select
-            placeholder={t("timeMinute")}
-            onChange={(m) => {
-              const h = form.getFieldValue("hour") || 8;
-              const time = dayjs().hour(h).minute(m);
-              form.setFieldsValue({ time, minute: m });
-            }}
-            className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-            options={Array.from({ length: 60 }, (_, i) => ({
-              label: i.toString().padStart(2, "0"),
-              value: i,
-            }))}
-          />
-
-            </div>
-          </Form.Item>
+  {/* Modal chứa đồng hồ chọn giờ */}
+  <Modal
+    title={i18n.language === "vi" ? "Chọn giờ họp (08:00 - 18:00)" : "Select meeting time (08:00 - 18:00)"}
+    open={clockOpen}
+    onCancel={() => setClockOpen(false)}
+    onOk={() => {
+      if (!validateBusinessTime(clockValue)) {
+        toast.error(
+          i18n.language === "vi"
+            ? "⏰ Chỉ được đặt lịch từ 08:00 đến 18:00!"
+            : "⏰ Bookings allowed only 08:00 - 18:00!"
+        );
+        return;
+      }
+      form.setFieldsValue({ time: clockValue });
+      setClockOpen(false);
+    }}
+    width={350}
+    centered
+  >
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <StaticTimePicker
+        orientation="portrait"
+        ampm={false}
+        value={clockValue}
+        onChange={(v) => setClockValue(v)}
+        slotProps={{
+          actionBar: { actions: [] }, // ẩn nút OK/Cancel của MUI
+        }}
+      />
+    </LocalizationProvider>
+  </Modal>
+</Form.Item>
 
               <div className="flex gap-2">
                 <Form.Item name="duration" label={t("endTime")} initialValue={60} style={{ flex: 1 }}>
