@@ -25,6 +25,11 @@ import { getAvailableDevices } from "../../services/deviceService";
 import { useAuth } from "../../context/AuthContext";
 import { useTranslation } from "react-i18next";
 
+// MUI STATIC TIME PICKER
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { StaticTimePicker } from "@mui/x-date-pickers/StaticTimePicker";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+
 dayjs.locale("vi");
 dayjs.extend(utc);
 
@@ -369,48 +374,51 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
               />
             </Form.Item>
 
-            <Form.Item name="hour" hidden><Input /></Form.Item>
-                          <Form.Item name="minute" hidden><Input /></Form.Item>
-            
-                          <Form.Item name="time" label={t("fields.startTime")} rules={[{ required: true }]}>
-                          <div className="grid grid-cols-2 gap-2">
-            
-                          {/* Chọn giờ */}
-                          <Select
-                        placeholder={t("fields.startHour")}
-                        value={form.getFieldValue("hour")}
-                        onChange={(h) => {
-                          const m = form.getFieldValue("minute") || 0;
-                          const time = dayjs().hour(h).minute(m);
-                          form.setFieldsValue({ time, hour: h });
-                        }}
-                        className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                        options={Array.from({ length: 11 }, (_, i) => {
-                          const hour = i + 8; // 8 → 18
-                          return {
-                            label: hour.toString().padStart(2, "0"),
-                            value: hour,
-                          };
-                        })}
-                      />
-            
-                          <Select
-                        placeholder={t("fields.startMinute")}
-                        value={form.getFieldValue("minute")}
-                        onChange={(m) => {
-                          const h = form.getFieldValue("hour") || 8;
-                          const time = dayjs().hour(h).minute(m);
-                          form.setFieldsValue({ time, minute: m });
-                        }}
-                        className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                        options={Array.from({ length: 60 }, (_, i) => ({
-                          label: i.toString().padStart(2, "0"),
-                          value: i,
-                        }))}
-                      />
-            
-                        </div>
-                      </Form.Item>
+            {/* TIME PICKER MỚI - MUI STATIC TIME PICKER */}
+<Form.Item
+  name="time"
+  label={t("fields.startTime")}
+  rules={[{ required: true }]}
+>
+  <div className="flex gap-2">
+    <Input
+      readOnly
+      value={clockValue.format("HH:mm")}
+      onClick={() => setClockOpen(true)}
+      placeholder={t("fields.startTime")}
+      className="cursor-pointer dark:bg-gray-700 dark:text-white dark:border-gray-600"
+    />
+    <Button onClick={() => setClockOpen(true)}>🕒 {t("fields.pickTime")}</Button>
+  </div>
+
+  <Modal
+    title={t("fields.pickTimeRange")} // "Chọn giờ (08:00 - 18:00)"
+    open={clockOpen}
+    onCancel={() => setClockOpen(false)}
+    onOk={() => {
+      if (!validateBusinessTime(clockValue)) {
+        toast.error(t("errors.outsideBusiness"));
+        return;
+      }
+      form.setFieldsValue({ time: clockValue });
+      setClockOpen(false);
+    }}
+    width={350}
+    centered
+  >
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <StaticTimePicker
+        orientation="portrait"
+        ampm={false}
+        value={clockValue}
+        onChange={(v) => setClockValue(v)}
+        slotProps={{
+          actionBar: { actions: [] }, // Ẩn nút OK/Cancel của MUI
+        }}
+      />
+    </LocalizationProvider>
+  </Modal>
+</Form.Item>
 
             <Form.Item
               name="duration"
