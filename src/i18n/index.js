@@ -20,6 +20,7 @@ import userDevices_vi from "./locales/vi/userDevices.json";
 import userHistory_vi from "./locales/vi/userHistory.json";
 import quickBook_vi from "./locales/vi/quickBook.json";
 import profile_vi from "./locales/vi/profile.json";
+import changePassword_vi from "./locales/vi/changePassword.json";
 
 import enCommon from './locales/en/common.json';
 import enAdmin from './locales/en/admin.json';
@@ -38,6 +39,7 @@ import userDevices_en from "./locales/en/userDevices.json";
 import userHistory_en from "./locales/en/userHistory.json";
 import quickBook_en from "./locales/en/quickBook.json";
 import profile_en from "./locales/en/profile.json";
+import changePassword_en from "./locales/en/changePassword.json";
 
 // Lấy ngôn ngữ đã lưu hoặc mặc định là 'vi' (tiếng việt)
 const savedLanguage = localStorage.getItem('language') || 'vi';
@@ -63,7 +65,8 @@ i18n
         userDevices: userDevices_vi,
         userHistory: userHistory_vi,
         quickBook: quickBook_vi,
-        profile: profile_vi
+        profile: profile_vi,
+        changePassword: changePassword_vi
       },
       en: {
         common: enCommon,
@@ -82,7 +85,8 @@ i18n
         userDevices: userDevices_en,
         userHistory: userHistory_en,
         quickBook: quickBook_en,
-        profile: profile_en
+        profile: profile_en,
+        changePassword: changePassword_en
       },
     },
     lng: savedLanguage,
@@ -108,7 +112,8 @@ i18n
       'userDevices',
       'userHistory',
       'quickBook',
-      'profile'
+      'profile',
+      'changePassword'
     ],
     defaultNS: 'common',
   });
