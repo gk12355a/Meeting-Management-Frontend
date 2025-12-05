@@ -60,7 +60,10 @@
     "frequencyWeekly": "Weekly",
     "frequencyMonthly": "Monthly",
 
-    "seat": "seats"
+    "seat": "seats",
+
+    "pickTime": "Pick time",
+    "pickTimeRange": "Choose time (08:00 - 18:00)"
   },
 
   "errors": {
