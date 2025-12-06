@@ -21,6 +21,10 @@ import userHistory_vi from "./locales/vi/userHistory.json";
 import quickBook_vi from "./locales/vi/quickBook.json";
 import profile_vi from "./locales/vi/profile.json";
 import changePassword_vi from "./locales/vi/changePassword.json";
+import roomCalendar_vi from "./locales/vi/roomCalendar.json";
+import roomSchedule_vi from "./locales/vi/roomSchedule.json";
+import bookRoom_vi from "./locales/vi/bookRoom.json";
+import deleteMeeting_vi from "./locales/vi/deleteMeeting.json";
 
 import enCommon from './locales/en/common.json';
 import enAdmin from './locales/en/admin.json';
@@ -40,6 +44,10 @@ import userHistory_en from "./locales/en/userHistory.json";
 import quickBook_en from "./locales/en/quickBook.json";
 import profile_en from "./locales/en/profile.json";
 import changePassword_en from "./locales/en/changePassword.json";
+import roomCalendar_en from "./locales/en/roomCalendar.json";
+import roomSchedule_en from "./locales/en/roomSchedule.json";
+import bookRoom_en from "./locales/en/bookRoom.json";
+import deleteMeeting_en from "./locales/en/deleteMeeting.json";
 
 // Lấy ngôn ngữ đã lưu hoặc mặc định là 'vi' (tiếng việt)
 const savedLanguage = localStorage.getItem('language') || 'vi';
@@ -66,7 +74,11 @@ i18n
         userHistory: userHistory_vi,
         quickBook: quickBook_vi,
         profile: profile_vi,
-        changePassword: changePassword_vi
+        changePassword: changePassword_vi,
+        roomCalendar: roomCalendar_vi,
+        roomSchedule: roomSchedule_vi,
+        deleteMeeting: deleteMeeting_vi,
+        bookRoom: bookRoom_vi
       },
       en: {
         common: enCommon,
@@ -86,7 +98,11 @@ i18n
         userHistory: userHistory_en,
         quickBook: quickBook_en,
         profile: profile_en,
-        changePassword: changePassword_en
+        changePassword: changePassword_en,
+        roomCalendar: roomCalendar_en,
+        roomSchedule: roomSchedule_en,
+        deleteMeeting: deleteMeeting_en,
+        bookRoom: bookRoom_en
       },
     },
     lng: savedLanguage,
@@ -113,7 +129,11 @@ i18n
       'userHistory',
       'quickBook',
       'profile',
-      'changePassword'
+      'changePassword',
+      'roomCalendar',
+      'roomSchedule',
+      'bookRoom',
+      'deleteMeeting'
     ],
     defaultNS: 'common',
   });
