@@ -25,6 +25,10 @@ import roomCalendar_vi from "./locales/vi/roomCalendar.json";
 import roomSchedule_vi from "./locales/vi/roomSchedule.json";
 import bookRoom_vi from "./locales/vi/bookRoom.json";
 import deleteMeeting_vi from "./locales/vi/deleteMeeting.json";
+import viUserHeader from './locales/vi/userHeader.json';
+import viThemeToggle from './locales/vi/themeToggle.json';
+import viCheckIn from './locales/vi/checkIn.json';
+import viQr from './locales/vi/qr.json';
 
 import enCommon from './locales/en/common.json';
 import enAdmin from './locales/en/admin.json';
@@ -48,6 +52,10 @@ import roomCalendar_en from "./locales/en/roomCalendar.json";
 import roomSchedule_en from "./locales/en/roomSchedule.json";
 import bookRoom_en from "./locales/en/bookRoom.json";
 import deleteMeeting_en from "./locales/en/deleteMeeting.json";
+import enUserHeader from './locales/en/userHeader.json';
+import enThemeToggle from './locales/en/themeToggle.json';
+import enCheckIn from './locales/en/checkIn.json';
+import enQr from './locales/en/qr.json';
 
 // Lấy ngôn ngữ đã lưu hoặc mặc định là 'vi' (tiếng việt)
 const savedLanguage = localStorage.getItem('language') || 'vi';
@@ -78,7 +86,11 @@ i18n
         roomCalendar: roomCalendar_vi,
         roomSchedule: roomSchedule_vi,
         deleteMeeting: deleteMeeting_vi,
-        bookRoom: bookRoom_vi
+        bookRoom: bookRoom_vi,
+        userHeader: viUserHeader,
+        themeToggle: viThemeToggle,
+        checkIn: viCheckIn,
+        qr: viQr,
       },
       en: {
         common: enCommon,
@@ -102,7 +114,11 @@ i18n
         roomCalendar: roomCalendar_en,
         roomSchedule: roomSchedule_en,
         deleteMeeting: deleteMeeting_en,
-        bookRoom: bookRoom_en
+        bookRoom: bookRoom_en,
+        userHeader: enUserHeader,
+        themeToggle: enThemeToggle,
+        checkIn: enCheckIn,
+        qr: enQr,
       },
     },
     lng: savedLanguage,
@@ -133,7 +149,11 @@ i18n
       'roomCalendar',
       'roomSchedule',
       'bookRoom',
-      'deleteMeeting'
+      'deleteMeeting',
+      'userHeader',
+      'themeToggle',
+      'checkIn',
+      'qr',
     ],
     defaultNS: 'common',
   });

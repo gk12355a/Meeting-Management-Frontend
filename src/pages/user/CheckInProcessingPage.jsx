@@ -4,15 +4,19 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Result, Button, Spin, Card } from "antd";
 import { useAuth } from "../../context/AuthContext";
 import { checkInWithQRCode } from "../../services/meetingService";
+import { useTranslation } from "react-i18next";
 
 const CheckInProcessingPage = () => {
   const { code } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated } = useAuth();
+  const { t } = useTranslation();
 
   const [status, setStatus] = useState("loading"); // loading | success | error
-  const [title, setTitle] = useState("Đang xử lý check-in...");
+  // ({/* <span>Đang xử lý check-in...</span> */}
+  //   <span>{t('checkIn:processing.loading')}</span>)
+  const [title, setTitle] = useState(t('checkIn:processing.loading'));
   const [subTitle, setSubTitle] = useState("");
 
   useEffect(() => {
@@ -27,8 +31,12 @@ const CheckInProcessingPage = () => {
     const handleCheckIn = async () => {
       if (!code) {
         setStatus("error");
-        setTitle("Check-in không thành công");
-        setSubTitle("Mã QR bị thiếu. Vui lòng quét lại hoặc liên hệ người tổ chức.");
+        // ({/* <span>Check-in không thành công</span> */}
+        //   <span>{t('checkIn:error.title')}</span>)
+        setTitle(t('checkIn:error.title'));
+        // ({/* <span>Mã QR bị thiếu. Vui lòng quét lại hoặc liên hệ người tổ chức.</span> */}
+        //   <span>{t('checkIn:error.missingCode')}</span>)
+        setSubTitle(t('checkIn:error.missingCode'));
         return;
       }
 
@@ -36,23 +44,29 @@ const CheckInProcessingPage = () => {
         await checkInWithQRCode(code);
 
         setStatus("success");
-        setTitle("Check-in thành công!");
-        setSubTitle("Bạn đã được ghi nhận tham gia cuộc họp.");
+        // ({/* <span>Check-in thành công!</span> */}
+        //   <span>{t('checkIn:success.title')}</span>)
+        setTitle(t('checkIn:success.title'));
+        // ({/* <span>Bạn đã được ghi nhận tham gia cuộc họp.</span> */}
+        //   <span>{t('checkIn:success.message')}</span>)
+        setSubTitle(t('checkIn:success.message'));
       } catch (err) {
         const statusCode = err?.response?.status;
         let backendMsg =
-  err?.response?.data?.message ||
-  err?.response?.data?.error ||
-  "Lỗi không xác định";
+          err?.response?.data?.message ||
+          err?.response?.data?.error ||
+          "Lỗi không xác định";
 
-// ✨ Nếu chuỗi có dạng HH:mm:ss.xxxxxx → cắt về HH:mm:ss
-backendMsg = backendMsg.replace(
-  /(\d{2}:\d{2}:\d{2})\.\d+/,
-  "$1"
-);
+        // Nếu chuỗi có dạng HH:mm:ss.xxxxxx → cắt về HH:mm:ss
+        backendMsg = backendMsg.replace(
+          /(\d{2}:\d{2}:\d{2})\.\d+/,
+          "$1"
+        );
 
         setStatus("error");
-        setTitle("Check-in không thành công");
+        // ({/* <span>Check-in không thành công</span> */}
+        //   <span>{t('checkIn:error.title')}</span>)
+        setTitle(t('checkIn:error.title'));
 
         switch (statusCode) {
           case 400:
@@ -60,13 +74,17 @@ backendMsg = backendMsg.replace(
             break;
 
           case 403:
+            // ({/* <span>Bạn không nằm trong danh sách khách mời của cuộc họp này.</span> */}
+            //   <span>{t('checkIn:error.notInvited')}</span>)
             setSubTitle(
-              backendMsg || "Bạn không nằm trong danh sách khách mời của cuộc họp này."
+              backendMsg || t('checkIn:error.notInvited')
             );
             break;
 
           case 404:
-            setSubTitle("Mã QR không hợp lệ. Vui lòng kiểm tra lại hoặc liên hệ người tổ chức.");
+            // ({/* <span>Mã QR không hợp lệ. Vui lòng kiểm tra lại hoặc liên hệ người tổ chức.</span> */}
+            //   <span>{t('checkIn:error.invalidCode')}</span>)
+            setSubTitle(t('checkIn:error.invalidCode'));
             break;
 
           default:
@@ -76,7 +94,7 @@ backendMsg = backendMsg.replace(
     };
 
     handleCheckIn();
-  }, [code, navigate, location, isAuthenticated]);
+  }, [code, navigate, location, isAuthenticated, t]);
 
   // UI Loading
   if (status === "loading") {
@@ -84,9 +102,11 @@ backendMsg = backendMsg.replace(
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-slate-900 p-4">
         <Spin size="large" />
         <h2 className="mt-4 text-lg font-semibold text-gray-700 dark:text-gray-200">
-          Đang xác thực check-in...
+          {/* <span>Đang xác thực check-in...</span> */}
+          <span>{t('checkIn:processing.verifying')}</span>
         </h2>
-        <p className="text-gray-500">Vui lòng đợi trong giây lát</p>
+        {/* <span>Vui lòng đợi trong giây lát</span> */}
+        <p className="text-gray-500">{t('checkIn:processing.pleaseWait')}</p>
       </div>
     );
   }
@@ -95,9 +115,9 @@ backendMsg = backendMsg.replace(
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-900 p-4">
-<Card className="w-full max-w-md shadow-xl rounded-2xl dark:bg-slate-800 dark:border-slate-700">
+      <Card className="w-full max-w-md shadow-xl rounded-2xl dark:bg-slate-800 dark:border-slate-700">
 
-        {/* ❌ ĐÃ XOÁ ICON TICK PHÍA TRÊN HOÀN TOÀN */}
+        {/* ĐÃ XOÁ ICON TICK PHÍA TRÊN HOÀN TOÀN */}
 
         <Result
           status={isSuccess ? "success" : "error"}
@@ -111,7 +131,8 @@ backendMsg = backendMsg.replace(
               onClick={() => navigate("/user/my-meetings")}
               className="bg-blue-600 hover:bg-blue-700 w-full"
             >
-              Về trang Lịch họp của tôi
+              {/* <span>Về trang Lịch họp của tôi</span> */}
+              <span>{t('checkIn:buttons.backToMeetings')}</span>
             </Button>,
           ]}
         />

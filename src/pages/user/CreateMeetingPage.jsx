@@ -229,14 +229,14 @@ const CreateMeetingPage = () => {
   ? "Không thể tạo cuộc họp!"
   : "Failed to create meeting!";
 
-      // === 1️⃣ Phòng họp trùng lịch ===
+      // === Phòng họp trùng lịch ===
       if (raw.includes("phòng") && raw.includes("đã bị đặt")) {
         msg = i18n.language === "vi"
   ? "Phòng họp đã được đặt trong khung giờ này"
   : "The meeting room is already booked during this time.";
       }
 
-      // === 2️⃣ Người tham dự trùng lịch ===
+      // === Người tham dự trùng lịch ===
       else if (raw.includes("người tham dự") && raw.includes("trùng lịch")) {
         msg = i18n.language === "vi"
   ? "Người tham gia bị trùng lịch trong khung giờ này"
@@ -383,8 +383,6 @@ const CreateMeetingPage = () => {
                 ))}
               </Select>
             </Form.Item>
-
-            {/* Đã xóa Alert VIP */}
 
             {/* DEVICES */}
             <Form.Item name="deviceIds" label={t("device")}>
