@@ -45,7 +45,7 @@ const CheckInProcessingPage = () => {
   err?.response?.data?.error ||
   "Lỗi không xác định";
 
-// ✨ Nếu chuỗi có dạng HH:mm:ss.xxxxxx → cắt về HH:mm:ss
+// Nếu chuỗi có dạng HH:mm:ss.xxxxxx → cắt về HH:mm:ss
 backendMsg = backendMsg.replace(
   /(\d{2}:\d{2}:\d{2})\.\d+/,
   "$1"
@@ -97,7 +97,7 @@ backendMsg = backendMsg.replace(
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-900 p-4">
 <Card className="w-full max-w-md shadow-xl rounded-2xl dark:bg-slate-800 dark:border-slate-700">
 
-        {/* ❌ ĐÃ XOÁ ICON TICK PHÍA TRÊN HOÀN TOÀN */}
+        {/* ĐÃ XOÁ ICON TICK PHÍA TRÊN HOÀN TOÀN */}
 
         <Result
           status={isSuccess ? "success" : "error"}
