@@ -1,0 +1,72 @@
+{
+  "edit": {
+    "title": "Edit Meeting",
+    "titleRecurring": "Update Recurring Meeting",
+    "fields": {
+      "meetingName": "Meeting Name",
+      "date": "Meeting Date",
+      "startTime": "Start Time",
+      "duration": "Duration",
+      "room": "Meeting Room",
+      "devices": "Equipment",
+      "participants": "Internal Participants",
+      "guestEmails": "Guest Emails",
+      "notes": "Notes",
+      "recurring": "Update Recurrence (Apply to entire series)",
+      "frequency": "Frequency",
+      "repeatUntil": "Until",
+      "daysOfWeek": "Repeat on"
+    },
+    "placeholders": {
+      "meetingName": "Enter meeting name...",
+      "selectRoom": "-- Select meeting room --",
+      "selectTime": "Please select time first",
+      "devicesAvailable": "Select available equipment (current kept)",
+      "searchUsers": "Search users...",
+      "enterEmail": "Enter email..."
+    },
+    "durations": {
+      "15min": "15 minutes",
+      "30min": "30 minutes",
+      "45min": "45 minutes",
+      "1hour": "1 hour",
+      "1hour30": "1 hour 30 minutes",
+      "2hours": "2 hours"
+    },
+    "frequencies": {
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly"
+    },
+    "buttons": {
+      "cancel": "Cancel",
+      "update": "Update",
+      "selectTime": "Select Time",
+      "thisOne": "This meeting only",
+      "wholeSeries": "Entire series (Future meetings)"
+    },
+    "messages": {
+      "businessHoursOnly": "Booking allowed from 08:00 to 18:00 only!",
+      "selectTimeTitle": "Select meeting time (08:00 - 18:00)",
+      "updateSuccess": "Meeting updated successfully!",
+      "updateSeriesSuccess": "Meeting series updated successfully!",
+      "pendingApproval": "📝 Update request sent and pending Admin approval.",
+      "updateError": "Cannot update meeting!",
+      "conflictError": "Schedule conflict",
+      "maintenanceError": "Room or equipment under maintenance!",
+      "invalidEndDate": "Invalid end date (must be in future)!",
+      "confirmQuestion": "You are changing a meeting in recurring series. Apply changes to:"
+    },
+    "status": {
+      "available": "Available",
+      "maintenance": "Maintenance",
+      "processed": "Processed.",
+      "responded": "Responded."
+    },
+    "modal": {
+      "rejectTitle": "Rejection Reason",
+      "rejectPlaceholder": "Please enter rejection reason...",
+      "confirmReject": "Confirm Rejection"
+    }
+  }
+}  
