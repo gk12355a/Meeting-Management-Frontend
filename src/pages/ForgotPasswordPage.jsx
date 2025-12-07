@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import api from "../utils/api"; // Giữ nguyên logic gọi API
+import api from "../utils/api"; 
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
