@@ -1,0 +1,59 @@
+{
+  "title": "Đặt lịch sử dụng {{name}}",
+
+  "usageTitle": "Tên cuộc họp",
+  "usageTitlePlaceholder": "Nhập tên cuộc họp...",
+  "usageTitleRequired": "Vui lòng nhập tên cuộc họp",
+  "usageTitleShort": "Tên cuộc họp quá ngắn",
+
+  "date": "Ngày họp",
+  "dateRequired": "Chọn ngày họp",
+
+  "startTime": "Giờ bắt đầu",
+  "chooseClock": "Đồng hồ",
+  "chooseTimeTitle": "Chọn giờ họp (08:00 - 18:00)",
+  "invalidTime": "⏰ Chỉ được đặt lịch từ 08:00 đến 18:00!",
+
+  "duration": "Thời lượng",
+  "customDuration": "Khác (giờ)",
+
+  "roomLabel": "Phòng họp",
+  "roomRequired": "Chọn phòng họp",
+
+  "deviceLabel": "Thiết bị sử dụng",
+  "devicePlaceholder": "Chọn thêm thiết bị khả dụng",
+  "deviceNeedDate": "Chọn ngày và giờ trước",
+  "deviceAvailable": "Có sẵn",
+  "deviceBusy": "Bảo trì",
+  "deviceRequiredLabel": "🖥️ Thiết bị bắt buộc:",
+  "deviceRequiredNote": "💡 Bạn có thể chọn thêm thiết bị khác, nhưng không thể bỏ chọn thiết bị này.",
+
+  "participants": "Người tham gia (Nội bộ)",
+  "participantsPlaceholder": "Gõ tên hoặc email để tìm người tham gia",
+  "noUser": "Không tìm thấy người dùng",
+
+  "guestEmail": "Email khách mời (bên ngoài)",
+  "guestEmailPlaceholder": "Ví dụ: guest@email.com",
+  "invalidEmail": "Email không hợp lệ: {{list}}",
+
+  "repeat": "Lặp lại cuộc họp",
+  "frequency": "Tần suất",
+  "repeatUntil": "Lặp đến ngày",
+  "frequencyRequired": "Chọn tần suất lặp",
+  "repeatUntilRequired": "Chọn ngày kết thúc",
+
+  "note": "Ghi chú",
+  "notePlaceholder": "Ghi chú thêm cho cuộc họp...",
+
+  "cancel": "Hủy",
+  "submit": "Đặt lịch",
+
+  "success": "Đặt lịch sử dụng {{name}} thành công!",
+
+  "people": "người",
+  "emailTooltip": "Nhập email, nhấn Enter hoặc dấu phẩy để thêm.",
+
+  "daily": "Hằng ngày",
+  "weekly": "Hằng tuần",
+  "monthly": "Hằng tháng"
+}
