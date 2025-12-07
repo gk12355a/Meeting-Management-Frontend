@@ -214,7 +214,6 @@ const RoomsPage = () => {
                       <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
                         {room.name}
                       </h2>
-                      {/* Đã xóa hiển thị Tag VIP */}
                     </div>
 
                     {room.status === "UNDER_MAINTENANCE" && (
@@ -260,7 +259,6 @@ const RoomsPage = () => {
                       )}
                     </div>
                   </div>
-                  {/* ================================================= */}
 
                   <div className="flex items-center justify-between mt-3">
                     <p className="text-gray-700 dark:text-gray-300 text-sm">
