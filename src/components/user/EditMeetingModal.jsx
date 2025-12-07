@@ -130,7 +130,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
 
       // Recurrence fields
       isRecurring: isSeries, // Set giá trị cho checkbox
-      frequency: meetingDetail.recurrenceRule?.frequency || "DAILY",
+      frequencies: meetingDetail.recurrenceRule?.frequencies || "DAILY",
       repeatUntil: meetingDetail.recurrenceRule?.repeatUntil
         ? dayjs(meetingDetail.recurrenceRule.repeatUntil)
         : undefined,
@@ -285,10 +285,10 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
 
         // Thêm thông tin Recurrence Rule vào payload
         payload.recurrenceRule = {
-          frequency: values.frequency || "DAILY",
+          frequencies: values.frequencies || "DAILY",
           interval: 1,
           repeatUntil: dayjs(values.repeatUntil).format("YYYY-MM-DD"),
-          daysOfWeek: values.frequency === 'WEEKLY' ? values.daysOfWeek : null
+          daysOfWeek: values.frequencies === 'WEEKLY' ? values.daysOfWeek : null
         };
 
         // Gọi API seriesId
@@ -596,7 +596,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
                 <Form.Item name="isRecurring" valuePropName="checked" className="mb-1">
                   {/* ({/* "Cập nhật lặp lại (Áp dụng cho toàn bộ chuỗi)" */}
                   <Checkbox className="dark:text-gray-200">
-                    {t('userEdit:edit.fields.applyToSeries')}
+                    {t('userEdit:edit.fields.recurring')}
                   </Checkbox>
                   {/* ) */}
                 </Form.Item>
@@ -605,15 +605,15 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
                   <div className="bg-gray-50 dark:bg-slate-800 p-4 rounded-lg mb-4 border border-gray-200 dark:border-gray-700">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                       <Form.Item 
-                        name="frequency" 
+                        name="frequencies" 
                         // ({/* label="Tần suất" */}
                         label={t('userEdit:edit.fields.frequency')}
                         // )
                       >
                         <Select className="dark:bg-gray-700 dark:text-white dark:border-gray-600">
-                          <Option value="DAILY">{t('userEdit:edit.frequency.daily')}</Option>
-                          <Option value="WEEKLY">{t('userEdit:edit.frequency.weekly')}</Option>
-                          <Option value="MONTHLY">{t('userEdit:edit.frequency.monthly')}</Option>
+                          <Option value="DAILY">{t('userEdit:edit.frequencies.daily')}</Option>
+                          <Option value="WEEKLY">{t('userEdit:edit.frequencies.weekly')}</Option>
+                          <Option value="MONTHLY">{t('userEdit:edit.frequencies.monthly')}</Option>
                         </Select>
                       </Form.Item>
                       <Form.Item 
@@ -632,10 +632,10 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
                     </div>
                     {/* CHỌN THỨ (NẾU LÀ WEEKLY) */}
                     <Form.Item 
-                      shouldUpdate={(prev, curr) => prev.frequency !== curr.frequency}
+                      shouldUpdate={(prev, curr) => prev.frequencies !== curr.frequencies}
                     >
                       {({ getFieldValue }) => 
-                        getFieldValue('frequency') === 'WEEKLY' ? (
+                        getFieldValue('frequencies') === 'WEEKLY' ? (
                           <Form.Item 
                             name="daysOfWeek" 
                             // ({/* label="Lặp lại vào các thứ" */}
