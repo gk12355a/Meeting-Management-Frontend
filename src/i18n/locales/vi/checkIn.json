@@ -1,0 +1,21 @@
+{
+  "processing": {
+    "loading": "Đang xử lý check-in...",
+    "verifying": "Đang xác thực check-in...",
+    "pleaseWait": "Vui lòng đợi trong giây lát"
+  },
+  "success": {
+    "title": "Check-in thành công!",
+    "message": "Bạn đã được ghi nhận tham gia cuộc họp."
+  },
+  "error": {
+    "title": "Check-in không thành công",
+    "missingCode": "Mã QR bị thiếu. Vui lòng quét lại hoặc liên hệ người tổ chức.",
+    "notInvited": "Bạn không nằm trong danh sách khách mời của cuộc họp này.",
+    "invalidCode": "Mã QR không hợp lệ. Vui lòng kiểm tra lại hoặc liên hệ người tổ chức.",
+    "unknown": "Lỗi không xác định"
+  },
+  "buttons": {
+    "backToMeetings": "Về trang Lịch họp của tôi"
+  }
+}
