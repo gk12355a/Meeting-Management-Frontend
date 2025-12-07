@@ -1,0 +1,59 @@
+{
+  "title": "Book usage for {{name}}",
+
+  "usageTitle": "Meeting title",
+  "usageTitlePlaceholder": "Enter meeting title...",
+  "usageTitleRequired": "Please enter meeting title",
+  "usageTitleShort": "Meeting title is too short",
+
+  "date": "Meeting date",
+  "dateRequired": "Please select a meeting date",
+
+  "startTime": "Start time",
+  "chooseClock": "Clock",
+  "chooseTimeTitle": "Select meeting time (08:00 - 18:00)",
+  "invalidTime": "⏰ Bookings are allowed only from 08:00 to 18:00!",
+
+  "duration": "Duration",
+  "customDuration": "Custom (hours)",
+
+  "roomLabel": "Meeting room",
+  "roomRequired": "Please select a meeting room",
+
+  "deviceLabel": "Device(s) used",
+  "devicePlaceholder": "Select additional available devices",
+  "deviceNeedDate": "Please pick a date and time first",
+  "deviceAvailable": "Available",
+  "deviceBusy": "Maintenance",
+  "deviceRequiredLabel": "🖥️ Required device:",
+  "deviceRequiredNote": "💡 You can add other devices, but this device cannot be removed.",
+
+  "participants": "Participants (Internal)",
+  "participantsPlaceholder": "Type name or email to find participants",
+  "noUser": "No user found",
+
+  "guestEmail": "Guest email (external)",
+  "guestEmailPlaceholder": "Example: guest@email.com",
+  "invalidEmail": "Invalid email(s): {{list}}",
+
+  "repeat": "Repeat meeting",
+  "frequency": "Frequency",
+  "repeatUntil": "Repeat until",
+  "frequencyRequired": "Please select the repeat frequency",
+  "repeatUntilRequired": "Please select the end date",
+
+  "note": "Notes",
+  "notePlaceholder": "Add notes for the meeting...",
+
+  "cancel": "Cancel",
+  "submit": "Book now",
+
+  "success": "Successfully booked usage of {{name}}!",
+
+  "people": "people",
+  "emailTooltip": "Enter email, then press Enter or comma to add.",
+
+  "daily": "Daily",
+  "weekly": "Weekly",
+  "monthly": "Monthly"
+}
