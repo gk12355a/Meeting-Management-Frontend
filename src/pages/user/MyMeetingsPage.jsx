@@ -459,7 +459,7 @@ const [fixedViewDate, setFixedViewDate] = useState(null);
           borderColor: borderColor,
           extendedProps: {
             roomName: m.room?.name || "Chưa xác định",
-            status: m.status, // <-- thêm status vào extendedProps
+            status: m.status, 
           },
           classNames: isNegativeStatus ? ["meeting-cancelled"] : [],
           hiddenInWeekDayView: isNegativeStatus,
@@ -635,7 +635,7 @@ setTimeout(() => {
     let duration = end.diff(start, "minute");
     if (duration <= 0) duration = 60;
 
-    // ⭐ LOCK NGÀY USER VỪA CHỌN ĐỂ SAU KHI ĐẶT XONG KHÔNG NHẢY VỀ TODAY
+    // LOCK NGÀY USER VỪA CHỌN ĐỂ SAU KHI ĐẶT XONG KHÔNG NHẢY VỀ TODAY
     setLockedViewDate(start.toDate());
 
     setQuickBooking({
