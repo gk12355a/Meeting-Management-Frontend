@@ -1,0 +1,26 @@
+{
+  "qr": {
+    "title": "QR Check-in Code",
+    "subtitle": "Scan to automatically check-in to meeting",
+    "manualCode": "Manual entry code",
+    "buttons": {
+      "download": "Save Image",
+      "copyLink": "Copy Link",
+      "copyCode": "Copy Code"
+    },
+    "instructions": {
+      "title": "Check-in Instructions",
+      "step1": "Open phone Camera or QR scanner app.",
+      "step2": "Scan the code to open Check-in page.",
+      "step3": "If unable to scan, use link or enter code manually above."
+    },
+    "warning": "This code is valid for 30 minutes before meeting time.",
+    "messages": {
+      "downloadSuccess": "QR code downloaded!",
+      "downloadError": "Cannot download QR code!",
+      "copyCodeSuccess": "Check-in code copied!",
+      "copyLinkSuccess": "Check-in link copied!",
+      "generating": "Generating..."
+    }
+  }
+}
