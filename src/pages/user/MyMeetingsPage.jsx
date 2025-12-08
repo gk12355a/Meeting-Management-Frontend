@@ -205,18 +205,25 @@ const getErrorToastConfig = (errorInfo) => {
 // Tooltip: Tên cuộc họp, Thời gian, Địa điểm
 function getEventTooltipContent(event, t) {
   const { title, start, end, extendedProps } = event;
+
   const time = `${dayjs(start).format("HH:mm")} - ${dayjs(end).format(
     "HH:mm, DD/MM/YYYY"
   )}`;
-  const room = extendedProps?.roomName || "Chưa xác định";
+
+  const room = extendedProps?.roomName || t("modal.unknown");
+
   return `
     <div style="line-height: 1.6; min-width: 220px;">
-      <div style="font-weight: 600; margin-bottom: 6px; font-size: 14px;">${title}</div>
-      <div style="font-size: 12px; opacity: 0.9; margin-bottom: 3px;">
-        <strong>${t("modal.time")}:</strong>
+      <div style="font-weight: 600; margin-bottom: 6px; font-size: 14px;">
+        ${title}
       </div>
+
       <div style="font-size: 12px; opacity: 0.9; margin-bottom: 3px;">
-        <strong>${t("modal.location")}:</strong>
+        <strong>${t("modal.time")}:</strong> ${time}
+      </div>
+
+      <div style="font-size: 12px; opacity: 0.9; margin-bottom: 3px;">
+        <strong>${t("modal.location")}:</strong> ${room}
       </div>
     </div>
   `;
