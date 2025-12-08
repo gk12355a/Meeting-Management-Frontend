@@ -1,8 +1,7 @@
-// src/context/AuthContext.jsx
 import { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import * as authApi from "../services/authService";
-import * as userService from "../services/userService"; 
+import * as userService from "../services/userService";
 import api from "../utils/api";
 import { jwtDecode } from "jwt-decode";
 
@@ -10,14 +9,28 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
+
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [initializing, setInitializing] = useState(true);
   const [loading, setLoading] = useState(false);
 
-  // === HÀM QUAN TRỌNG: CHECK AUTH VÀ LẤY PROFILE MỚI NHẤT ===
+  // === HÀM HỖ TRỢ: XÓA COOKIES CLIENT ===
+  const clearAllCookies = () => {
+    const cookies = document.cookie.split(";");
+
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i];
+      const eqPos = cookie.indexOf("=");
+      const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+      // Đặt ngày hết hạn về quá khứ để trình duyệt tự xóa
+      document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+    }
+  };
+
+  // === CHECK AUTH ===
   const checkAuth = async (current_token) => {
-    if (!current_token) return []; // Trả về mảng rỗng nếu không có token
+    if (!current_token) return;
 
     try {
       const decoded = jwtDecode(current_token);
@@ -25,34 +38,36 @@ export const AuthProvider = ({ children }) => {
 
       if (expired) {
         logout(true);
-        return [];
+        return;
       }
 
       api.defaults.headers.common["Authorization"] = current_token;
 
-      // 1. GỌI API ĐỂ LẤY ROLE MỚI NHẤT TỪ DATABASE 8080
-      const profileRes = await userService.getMyProfile();
-      const userProfile = profileRes.data; 
+      // Gọi API lấy thông tin chi tiết (để lấy ID chuẩn từ Backend)
+      try {
+        const profileRes = await userService.getMyProfile();
+        const userProfile = profileRes.data;
 
-      // 2. Ưu tiên dùng Role từ API, nếu không có mới fallback về Token
-      const finalRoles = userProfile.roles && userProfile.roles.length > 0 
-                         ? userProfile.roles 
-                         : (decoded.roles || []);
-
-      setUser({
-        id: userProfile.id,
-        username: userProfile.username || decoded.sub,
-        fullName: userProfile.fullName,
-        roles: finalRoles, // Lưu Role chuẩn vào State
-      });
-
-      // 3. QUAN TRỌNG: Return Role ra ngoài để logic điều hướng sử dụng
-      return finalRoles; 
+        setUser({
+          id: userProfile.id,
+          username: userProfile.username || decoded.sub,
+          fullName: userProfile.fullName,
+          roles: userProfile.roles || decoded.roles || [],
+        });
+        
+        return userProfile.roles || decoded.roles || [];
+      } catch (profileErr) {
+        console.error("Lỗi lấy profile:", profileErr);
+        // Fallback tạm thời nếu API profile lỗi
+        setUser({
+            username: decoded.sub,
+            roles: decoded.roles || []
+        });
+      }
 
     } catch (err) {
-      console.error("AuthCheck failed:", err);
+      console.error("Token invalid:", err);
       logout(true);
-      return [];
     }
   };
 
@@ -61,9 +76,10 @@ export const AuthProvider = ({ children }) => {
       setInitializing(false);
       return;
     }
-    checkAuth(token).then(() => setInitializing(false));
+    checkAuth(token).finally(() => setInitializing(false));
   }, [token]);
 
+  // 🟢 LOGIN
   const login = async (username, password) => {
     setLoading(true);
     try {
@@ -75,9 +91,9 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem("authProvider", "local");
       setToken(fullToken);
 
-      // Gọi checkAuth để lấy Role chuẩn từ DB thay vì decode token cũ
-      const roles = await checkAuth(fullToken); 
-      return roles; // Trả về role chuẩn cho LoginPage
+      const roles = await checkAuth(fullToken);
+      return roles || [];
+
     } catch (error) {
       return Promise.reject(error);
     } finally {
@@ -85,40 +101,58 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // 🔴 LOGOUT (Nâng cấp)
   const logout = (silent = false) => {
+    // 1. Lấy thông tin cần thiết trước khi xóa
     const provider = localStorage.getItem("authProvider");
-    const idToken = localStorage.getItem("id_token"); // <--- Lấy ID Token
+    const idToken = localStorage.getItem("id_token");
 
+    // 2. Dọn dẹp LocalStorage (Frontend)
     localStorage.removeItem("token");
     localStorage.removeItem("authProvider");
-    localStorage.removeItem("id_token"); // <--- Xóa ID Token
-    delete api.defaults.headers.common["Authorization"];
+    localStorage.removeItem("id_token");
     
+    // 3. Dọn dẹp Cookies (Frontend - nếu có)
+    clearAllCookies();
+
+    // 4. Reset State
+    delete api.defaults.headers.common["Authorization"];
     setUser(null);
     setToken(null);
 
+    // 5. Điều hướng & Dọn dẹp Session Server (Backend)
     if (provider === "sso" && !silent) {
-       // Truyền idToken vào hàm để tạo URL đúng chuẩn OIDC
-       // Hàm getSSOLogoutUrl sẽ trả về URL tới Auth Service (port 9000)
+       // Redirect sang Auth Service để xóa Cookie Server
        window.location.href = authApi.getSSOLogoutUrl(idToken);
     } else if (!silent) {
+       // Nếu là Local Login -> Về trang Login
        navigate("/login");
     }
   };
+
   const isAuthenticated = !!token;
   const isAdmin = user?.roles?.includes("ROLE_ADMIN");
 
   if (initializing) {
     return (
       <div className="w-full h-screen flex items-center justify-center text-lg">
-        Đang tải ứng dụng...
+        Đang tải dữ liệu...
       </div>
     );
   }
 
   return (
     <AuthContext.Provider
-      value={{ user, token, login, logout, loading, isAuthenticated, isAdmin, checkAuth }}
+      value={{
+        user,
+        token,
+        login,
+        logout,
+        loading,
+        isAuthenticated,
+        isAdmin,
+        checkAuth,
+      }}
     >
       {children}
     </AuthContext.Provider>

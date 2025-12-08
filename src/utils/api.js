@@ -2,11 +2,15 @@
 import axios from "axios";
 import { toast } from "react-toastify";
 
+// 1. Lấy cấu hình môi trường
 const API_URL = import.meta.env.VITE_BACKEND_URL;
+const AUTH_SERVICE_URL = import.meta.env.VITE_AUTH_SERVICE_URL || "http://localhost:9000";
+
+// Export URL Chatbot để dùng ở các file khác
 export const AI_SERVICE_URL = import.meta.env.VITE_AI_SERVICE_URL || "http://localhost:8000/api/chat";
 
 if (!API_URL) {
-  console.error("❌ VITE_BACKEND_URL is not defined! Check your .env file.");
+  console.error("❌ VITE_BACKEND_URL chưa được định nghĩa trong .env");
 }
 
 const api = axios.create({
@@ -14,7 +18,7 @@ const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
-// Danh sách các route không cần token
+// Danh sách các API không cần gửi Token
 const PUBLIC_AUTH_ROUTES = [
   "/auth/login",
   "/auth/register",
@@ -23,30 +27,29 @@ const PUBLIC_AUTH_ROUTES = [
 ];
 
 // ============================================================
-// 1. REQUEST INTERCEPTOR (SỬA THEO YÊU CẦU BACKEND)
+// 2. REQUEST INTERCEPTOR (Gửi Token đi)
 // ============================================================
 api.interceptors.request.use(
   (config) => {
-    // Lấy token từ localStorage (Key là 'token' như đã thống nhất ở AuthContext)
+    // Lấy token từ localStorage
     let token = localStorage.getItem("token");
 
-    // Kiểm tra xem request này có cần token không
+    // Kiểm tra xem URL hiện tại có thuộc danh sách Public không
     const isPublicAuthRoute = PUBLIC_AUTH_ROUTES.some((route) =>
       config.url.includes(route)
     );
 
     if (token && !isPublicAuthRoute) {
-      // --- 🎯 FIX LOGIC BEARER (QUAN TRỌNG) ---
-      token = token.trim(); // Xóa khoảng trắng thừa (nếu có)
-
-      // Luôn đảm bảo token bắt đầu bằng "Bearer "
+      token = token.trim(); // Xóa khoảng trắng thừa
+      
+      // Kiểm tra và thêm tiền tố Bearer nếu thiếu (Quan trọng cho Backend Java)
       if (!token.startsWith("Bearer ")) {
         token = `Bearer ${token}`;
       }
-
+      
       config.headers.Authorization = token;
     } else {
-      // Nếu không có token hoặc là route public, xóa header để tránh lỗi
+      // Xóa header nếu không cần thiết để tránh gửi rác
       delete config.headers.Authorization;
     }
 
@@ -56,39 +59,59 @@ api.interceptors.request.use(
 );
 
 // ============================================================
-// 2. RESPONSE INTERCEPTOR (GIỮ NGUYÊN LOGIC CHẶN LOOP)
+// 3. RESPONSE INTERCEPTOR (Xử lý lỗi trả về)
 // ============================================================
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    const status = error.response ? error.response.status : null;
-    
-    const errorData = error.response?.data;
-    const errorMessage = (typeof errorData === 'string' ? errorData : errorData?.message || errorData?.error || "").toLowerCase();
+  async (error) => {
+    const { response } = error;
 
+    // Trường hợp mất mạng hoặc Server sập
+    if (!response) {
+      // toast.error("Không thể kết nối đến máy chủ.");
+      return Promise.reject(error);
+    }
+
+    const status = response.status;
+    const errorData = response.data; // Body JSON lỗi từ Backend
+
+    // === XỬ LÝ LỖI 401 (UNAUTHORIZED) ===
     if (status === 401) {
-      // Case 1: Tài khoản bị khóa (Disabled/Inactive)
-      if (errorMessage.includes("disabled") || 
-          errorMessage.includes("locked") || 
-          errorMessage.includes("inactive") ||
-          errorMessage.includes("vô hiệu") ||
-          errorMessage.includes("bị khóa")) {
-          
-        console.error("⛔ Tài khoản bị khóa. Dừng redirect.");
+      
+      // 🔴 CASE 1: TÀI KHOẢN BỊ KHÓA (Backend trả mã: USER_DISABLED)
+      if (errorData?.error === "USER_DISABLED") {
+        console.error("⛔ TÀI KHOẢN BỊ KHÓA - ĐANG ĐĂNG XUẤT...");
+
+        // 1. Dọn dẹp dữ liệu ở Frontend
+        localStorage.clear(); 
+        
+        // 2. Thông báo cho người dùng
+        toast.error("Tài khoản đã bị vô hiệu hóa. Đang đăng xuất...", {
+          toastId: "account-disabled" // Tránh hiện trùng lặp
+        });
+
+        // 3. Force Redirect sang trang Logout của SSO (Port 9000)
+        // Backend (9000) sẽ xóa Cookie và tự động đá về trang Login (5173)
+        const logoutUrl = `${AUTH_SERVICE_URL}/logout`;
+        window.location.href = logoutUrl;
+
+        // 4. Treo Promise để chặn các xử lý tiếp theo của React (tránh lỗi render)
+        return new Promise(() => {}); 
+      }
+
+      // ⚠️ CASE 2: TOKEN HẾT HẠN HOẶC KHÔNG HỢP LỆ
+      // Chỉ xử lý nếu user KHÔNG đang ở trang Login (để tránh vòng lặp vô tận tại trang login)
+      if (!window.location.pathname.startsWith("/login")) {
+        console.warn("⚠️ Token hết hạn. Vui lòng đăng nhập lại.");
+        
+        // Xóa token cũ
         localStorage.removeItem("token");
         localStorage.removeItem("authProvider");
         localStorage.removeItem("id_token");
         
-        toast.error("Tài khoản của bạn đã bị vô hiệu hóa. Vui lòng liên hệ Admin.");
+        // Chuyển về trang login nội bộ
         window.location.href = "/login";
-        
-        return Promise.reject(error);
       }
-
-      // Case 2: Token hết hạn -> Đá về login
-      console.warn("⚠️ Token hết hạn hoặc không hợp lệ.");
-      localStorage.removeItem("token");
-      window.location.href = "/login";
     }
 
     return Promise.reject(error);

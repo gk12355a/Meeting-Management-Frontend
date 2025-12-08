@@ -2,87 +2,58 @@
 import api from "../utils/api";
 import axios from "axios";
 
-// Lấy cấu hình từ biến môi trường (có giá trị mặc định để tránh lỗi nếu quên config)
 const AUTH_SERVICE_URL = import.meta.env.VITE_AUTH_SERVICE_URL || "http://localhost:9000";
 const CLIENT_ID = import.meta.env.VITE_OAUTH2_CLIENT_ID || "meeting-client";
 const CLIENT_SECRET = import.meta.env.VITE_OAUTH2_CLIENT_SECRET || "secret";
 const REDIRECT_URI = import.meta.env.VITE_OAUTH2_REDIRECT_URI || "http://localhost:5173/authorized";
 
 /**
- * [SSO] Lấy URL để đăng xuất khỏi Auth Service
- * Backend cần cấu hình 'postLogoutRedirectUri' khớp với tham số này
- * @param {string} idToken - Token định danh (bắt buộc để redirect tự động)
+ * [CẬP NHẬT] Lấy URL đăng xuất chuẩn Spring Security (/logout)
+ * Thay vì dùng OIDC (/connect/logout) để đảm bảo xóa cookie triệt để.
  */
-export const getSSOLogoutUrl = (idToken) => {
-  // URL đích muốn quay về (phải khớp với whitelist trong backend)
-  const postLogoutRedirectUri = encodeURIComponent(window.location.origin + "/login");
-  
-  // Endpoint logout chuẩn của OIDC là /connect/logout
-  let logoutUrl = `${AUTH_SERVICE_URL}/connect/logout?post_logout_redirect_uri=${postLogoutRedirectUri}`;
-
-  // Nếu có idToken, gửi kèm để server không hỏi xác nhận ("Are you sure you want to logout?")
-  if (idToken) {
-    logoutUrl += `&id_token_hint=${idToken}`;
-  }
-  
-  return logoutUrl;
+export const getSSOLogoutUrl = () => {
+  // Gửi kèm post_logout_redirect_uri nếu Backend có hỗ trợ đọc tham số này tại endpoint /logout
+  // Nếu Backend set cứng logoutSuccessUrl thì tham số này có thể thừa nhưng không gây lỗi.
+  return `${AUTH_SERVICE_URL}/logout`;
 };
 
 /**
- * [SSO] Chuyển hướng người dùng sang trang đăng nhập của Auth Service
+ * [KIỂM TRA] Hàm này đã đúng chuẩn OAuth2 như Backend yêu cầu
  */
 export const loginWithSSO = () => {
-  // Xây dựng URL Authorization Code Flow
-  // Scope phải có 'openid' để nhận về id_token
   const authUrl = `${AUTH_SERVICE_URL}/oauth2/authorize?response_type=code&client_id=${CLIENT_ID}&scope=openid profile meeting:read meeting:write&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
-  
-  // Chuyển hướng trình duyệt
   window.location.href = authUrl;
 };
 
-/**
- * [SSO] Đổi Authorization Code lấy Access Token
- * @param {string} code - Mã code nhận được từ URL callback
- */
+// ... (Các hàm exchangeCodeForToken, login, register... Giữ nguyên không đổi)
 export const exchangeCodeForToken = async (code) => {
-  const tokenUrl = `${AUTH_SERVICE_URL}/oauth2/token`;
+    const tokenUrl = `${AUTH_SERVICE_URL}/oauth2/token`;
+    const basicAuth = btoa(`${CLIENT_ID}:${CLIENT_SECRET}`);
+    const params = new URLSearchParams();
+    params.append("grant_type", "authorization_code");
+    params.append("code", code);
+    params.append("redirect_uri", REDIRECT_URI);
   
-  // Tạo Basic Auth Header (Base64 của client_id:client_secret)
-  const basicAuth = btoa(`${CLIENT_ID}:${CLIENT_SECRET}`);
-
-  const params = new URLSearchParams();
-  params.append("grant_type", "authorization_code");
-  params.append("code", code);
-  params.append("redirect_uri", REDIRECT_URI);
-
-  try {
-    // Gọi trực tiếp bằng axios (không qua interceptor của api.js) vì đây là Auth Server
-    const response = await axios.post(tokenUrl, params, {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "Authorization": `Basic ${basicAuth}`
-      }
-    });
-    return response.data; // Trả về { access_token, id_token, refresh_token, ... }
-  } catch (error) {
-    console.error("SSO Token Exchange Error:", error);
-    throw error;
-  }
+    try {
+      const response = await axios.post(tokenUrl, params, {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Authorization": `Basic ${basicAuth}`
+        }
+      });
+      return response.data; 
+    } catch (error) {
+      console.error("SSO Token Exchange Error:", error);
+      throw error;
+    }
 };
 
-// === CÁC HÀM AUTH CŨ (Giữ nguyên) ===
-
-// Đăng nhập thường (Username/Password)
 export const login = (username, password) => {
   return api.post("/auth/login", { username, password });
 };
-
 export const register = (data) => api.post("/auth/register", data);
 export const forgotPassword = (data) => api.post("/auth/forgot-password", data);
 export const resetPassword = (data) => api.post("/auth/reset-password", data);
 export const changePassword = (oldPassword, newPassword) => {
-  return api.post('/auth/change-password', { 
-    oldPassword,
-    newPassword
-  });
+  return api.post('/auth/change-password', { oldPassword, newPassword });
 };
