@@ -30,6 +30,7 @@ import viThemeToggle from './locales/vi/themeToggle.json';
 import viCheckIn from './locales/vi/checkIn.json';
 import viQr from './locales/vi/qr.json';
 import viUserEdit from './locales/vi/userEdit.json';
+import bookDevices_vi from './locales/vi/bookDevices.json';
 
 import enCommon from './locales/en/common.json';
 import enAdmin from './locales/en/admin.json';
@@ -58,6 +59,7 @@ import enThemeToggle from './locales/en/themeToggle.json';
 import enCheckIn from './locales/en/checkIn.json';
 import enQr from './locales/en/qr.json';
 import enUserEdit from './locales/en/userEdit.json';
+import bookDevices_en from './locales/en/bookDevices.json';
 
 // Lấy ngôn ngữ đã lưu hoặc mặc định là 'vi' (tiếng việt)
 const savedLanguage = localStorage.getItem('language') || 'vi';
@@ -94,6 +96,7 @@ i18n
         checkIn: viCheckIn,
         qr: viQr,
         userEdit: viUserEdit,
+        bookDevices: bookDevices_vi
       },
       en: {
         common: enCommon,
@@ -123,6 +126,7 @@ i18n
         checkIn: enCheckIn,
         qr: enQr,
         userEdit: enUserEdit,
+        bookDevices: bookDevices_en
       },
     },
     lng: savedLanguage,
@@ -159,6 +163,7 @@ i18n
       'checkIn',
       'qr',
       'userEdit',
+      'bookDevices'
     ],
     defaultNS: 'common',
   });
