@@ -31,6 +31,8 @@
   "successDelete": "Meeting deleted successfully",
   "errorLoadMeeting": "Failed to load meeting information",
   "errorTimeInvalid": "End time must be after start time",
+  "meetingNote": "Note",
+  "meetingNotePlaceholder": "Enter meeting description or notes...",
   "modal": {
     "upcomingMeetings": "Upcoming Meetings",
     "location": "Location",
