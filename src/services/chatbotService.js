@@ -17,7 +17,7 @@ export const chatbotService = {
       const response = await axios.post(
         AI_SERVICE_URL, 
         { 
-          message: userMessage // <-- SỬA: Backend yêu cầu key là "message", không phải "query"
+          message: userMessage 
         }, 
         {
           headers: {

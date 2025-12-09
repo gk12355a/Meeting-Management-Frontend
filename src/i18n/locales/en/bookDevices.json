@@ -1,0 +1,83 @@
+{
+  "modal": {
+    "title": "Book device {{name}}"
+  },
+
+  "form": {
+    "title": "Meeting title",
+    "titlePlaceholder": "Enter meeting title...",
+    "titleRequired": "Please enter meeting title",
+    "titleShort": "Meeting title is too short",
+
+    "date": "Meeting date",
+    "dateRequired": "Please select meeting date",
+
+    "time": "Start time",
+    "timeRequired": "Please select start time",
+    "timePickerTitle": "Choose meeting time (08:00 - 18:00)",
+
+    "duration": "Duration",
+    "durationPlaceholder": "-- Select --",
+    "customHour": "Custom(h)",
+
+    "room": "Meeting room",
+    "roomRequired": "Please select meeting room",
+    "roomPlaceholder": "-- Select meeting room --",
+    "roomAvailable": "Available",
+    "roomOffline": "Under maintenance",
+
+    "devices": "Devices",
+    "deviceTooltip": "Initial device cannot be unselected. You can add more devices.",
+    "devicePrimary": "(Selected - Required)",
+
+    "participants": "Participants (Internal)",
+    "participantPlaceholder": "-- Type name or email --",
+    "noUsers": "No users found",
+
+    "guestEmails": "Guest emails (external)",
+    "guestTooltip": "Enter email and press Enter or comma to add.",
+    "invalidEmail": "Invalid email: {{value}}",
+
+    "recurring": "Recurring meeting",
+    "frequency": "Frequency",
+    "repeatUntil": "Repeat until",
+    "repeatRequired": "Please select an end date",
+    "daily": "Daily",
+    "weekly": "Weekly",
+    "monthly": "Monthly",
+
+    "description": "Notes",
+    "descriptionPlaceholder": "Additional notes for the meeting...",
+
+    "selectDateTimeFirst": "Select date and time first",
+    "selectMoreDevices": "Select additional devices",
+
+    "duration30": "30 minutes",
+    "duration60": "1 hour",
+    "duration90": "1.5 hours",
+    "duration120": "2 hours",
+
+    "guestEmailPlaceholder": "Example: guest@email.com"
+  },
+
+  "deviceInfo": {
+    "title": "🖥️ Required device:",
+    "tip": "You can add more devices but cannot remove this one."
+  },
+
+  "submit": {
+    "cancel": "Cancel",
+    "submit": "Book"
+  },
+
+  "notifications": {
+    "loadRoomsError": "Failed to load meeting rooms!",
+    "loadDevicesError": "Failed to load available devices!",
+    "invalidBusinessTime": "⏰ Only allowed from 08:00 to 18:00!",
+    "meetingSuccess": "🎉 Meeting created successfully!",
+    "pendingApproval": "📝 Room reservation request sent and awaiting admin approval.",
+    "meetingFailed": "Unable to create meeting!",
+    "roomConflict": "Meeting room is already booked at this time.",
+    "userConflict": "A participant has a schedule conflict."
+  }
+}

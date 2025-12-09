@@ -138,7 +138,6 @@ const SUGGESTED_DEVICES = DEVICE_KEYS.map((key) => ({
       ) {
         matchStatus = item.status === statusFilter;
       }
-      // Đã bỏ logic lọc VIP tại đây
 
       return matchSearch && matchStatus;
     });
@@ -245,7 +244,7 @@ if (val && !formData.fixedDevices.includes(val)) {
         location: formData.location.trim(),
         capacity: capacityValue,
         status: formData.status,
-        requiresApproval: true, // HARDCODE: Luôn yêu cầu duyệt
+        requiresApproval: true, // Luôn yêu cầu duyệt
         fixedDevices: formData.fixedDevices.map(key => DEVICE_MAP_REVERSE[key] || key),
       };
 
@@ -385,7 +384,6 @@ if (val && !formData.fixedDevices.includes(val)) {
             {/* ({/* <span>Có sẵn/Sẵn sàng sử dụng</span> */}
             <option value="UNDER_MAINTENANCE">{t('rooms:modal.statusOptions.maintenance')}</option>
             {/* ({/* <span>Đang bảo trì</span> */}
-            {/* Đã xóa option VIP */}
           </select>
           <button
             onClick={() => handleOpenModal()}
@@ -500,7 +498,6 @@ if (val && !formData.fixedDevices.includes(val)) {
                       <div className="font-semibold text-gray-900 dark:text-white">
                         {room.name}
                       </div>
-                      {/* Đã xóa nhãn VIP ở đây */}
                     </td>
                     <td className="p-4 text-gray-600 dark:text-gray-400">
                       {room.location || (
@@ -600,7 +597,7 @@ if (val && !formData.fixedDevices.includes(val)) {
               </button>
             </div>
 
-            {/* Modal Body - Scrollable */}
+            {/* Modal Body */}
             <div className="p-6 overflow-y-auto custom-scrollbar">
               <form id="roomForm" onSubmit={handleSubmit} className="space-y-5">
                 {/* Tên phòng */}
@@ -766,8 +763,6 @@ if (val && !formData.fixedDevices.includes(val)) {
                     </div>
                   </div>
                 </div>
-
-                {/* Đã xóa phần VIP Toggle */}
               </form>
             </div>
 

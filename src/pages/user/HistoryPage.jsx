@@ -10,9 +10,7 @@ import { useTranslation } from "react-i18next";
 
 dayjs.locale("vi");
 
-/* ===============================
-   Màu LIGHT MODE
-================================ */
+/* Màu LIGHT MODE */
 const roomColors = [
   { bg: "#FFE0E9", border: "#FF99B2" },
   { bg: "#D6F4FF", border: "#4CB4FF" },
@@ -22,9 +20,7 @@ const roomColors = [
   { bg: "#FFE8F0", border: "#FF6FA5" },
 ];
 
-/* ===============================
-   Màu DARK MODE (đậm hơn)
-================================ */
+/* Màu DARK MODE */
 const roomColorsDark = [
   { bg: "#3B2631", border: "#FF7FA5" },
   { bg: "#112533", border: "#4FABFF" },
@@ -34,9 +30,7 @@ const roomColorsDark = [
   { bg: "#3A1E2A", border: "#FF729A" },
 ];
 
-/* ===============================
-   getRoomColor xử lý theme
-================================ */
+/* getRoomColor xử lý theme */
 const getRoomColor = (roomName, isDark) => {
   const palette = isDark ? roomColorsDark : roomColors;
 
@@ -58,9 +52,7 @@ const HistoryPage = () => {
   const [selectedMeeting, setSelectedMeeting] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  /* ======================================================
-     Theo dõi theme real-time (KHÔNG còn lỗi màu)
-  ======================================================== */
+  /* Theo dõi theme real-time */
   const [isDark, setIsDark] = useState(
     document.documentElement.classList.contains("dark")
   );
@@ -78,9 +70,7 @@ const HistoryPage = () => {
     return () => observer.disconnect();
   }, []);
 
-  /* ===============================
-     LOAD HISTORY
-  ================================= */
+  /* LOAD HISTORY */
   useEffect(() => {
     const fetchHistory = async () => {
       setLoading(true);

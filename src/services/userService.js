@@ -54,4 +54,3 @@ export const getMyProfile = () => {
 export const updateMyProfile = (profileData) => {
   return api.put('/users/profile', profileData);
 };
-

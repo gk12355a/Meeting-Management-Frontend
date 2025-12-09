@@ -22,7 +22,7 @@ const ProfilePage = () => {
   const [saving, setSaving] = useState(false);
   const { user } = useAuth();
 
-  // ⭐ THÊM HÀM KẾT NỐI GOOGLE
+  // THÊM HÀM KẾT NỐI GOOGLE
   const handleConnectGoogle = async () => {
     try {
       const res = await getGoogleAuthorizeUrl();
