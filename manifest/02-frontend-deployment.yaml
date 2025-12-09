@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+  namespace: meeting-system
+  labels:
+    app: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: gk123a/fe:v2 # Image mới đã sửa code
+          imagePullPolicy: IfNotPresent # Hoặc Always
+          ports:
+            - containerPort: 80 # Nginx mặc định port 80
+          
+          # Mount ConfigMap vào file
+          volumeMounts:
+            - name: config-volume
+              mountPath: /usr/share/nginx/html/config.js
+              subPath: config.js
+          
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+      volumes:
+        - name: config-volume
+          configMap:
+            name: frontend-config

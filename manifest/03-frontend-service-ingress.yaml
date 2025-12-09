@@ -1,0 +1,33 @@
+# 1. Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-svc
+  namespace: meeting-system
+spec:
+  selector:
+    app: frontend
+  ports:
+    - port: 80
+      targetPort: 80
+
+---
+# 2. Ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: frontend-ingress
+  namespace: meeting-system
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: npd-meeting.co
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend-svc
+                port:
+                  number: 80
