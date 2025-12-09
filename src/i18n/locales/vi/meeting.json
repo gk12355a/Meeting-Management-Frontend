@@ -10,7 +10,7 @@
   "room": "Phòng họp",
   "device": "Thiết bị",
   "meetingName": "Tên cuộc họp",
-  "description": "Mô tả",
+  "description": "Đừng chờ đợi - Hãy tạo cuộc họp của bạn ngay bây giờ!",
   "organizer": "Người tổ chức",
   "participants": "Người tham gia",
   "startTime": "Thời gian bắt đầu",
@@ -39,5 +39,12 @@
     "unknown": "Chưa xác định",
     "noMeetings": "Không có cuộc họp.",
     "close": "Đóng"
-  }
+  },
+  "timeHour": "Giờ",
+  "timeMinute": "Phút",
+  "customHour": "Khác (giờ)",
+  "seats": "chỗ",
+  "searchUserPlaceholder": "Gõ tên hoặc email để tìm",
+  "noUsersFound": "Không tìm thấy người dùng",
+  "guestEmailTooltip": "Nhập email, nhấn Enter"
 }

@@ -1,0 +1,6 @@
+{
+  "title": "📅 Lịch phòng hiện tại",
+  "empty": "Phòng chưa có buổi họp nào — bạn có thể đặt thoải mái!",
+  "time": "🕒 {{start}} → {{end}}",
+  "organizer": "👤 {{name}}"
+}

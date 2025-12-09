@@ -1,0 +1,18 @@
+{
+  "title": "Trạng thái thiết bị",
+  "subtitle": "Theo dõi tình trạng thiết bị trong các phòng họp",
+  "searchPlaceholder": "Tìm theo tên thiết bị...",
+  "statusLabel": "Trạng thái:",
+  "filters": {
+    "all": "Tất cả",
+    "available": "Sẵn sàng",
+    "maintenance": "Bảo trì"
+  },
+  "deviceType": "Loại thiết bị",
+  "status": "Trạng thái",
+  "button": {
+    "book": "Đặt thiết bị",
+    "maintenance": "Bảo trì"
+  },
+  "noResults": "Không tìm thấy thiết bị nào phù hợp."
+}

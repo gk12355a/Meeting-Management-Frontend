@@ -10,7 +10,7 @@
   "room": "Meeting room",
   "device": "Device",
   "meetingName": "Meeting name",
-  "description": "Description",
+  "description": "Don't wait – Create your meeting now!",
   "organizer": "Organizer",
   "participants": "Participants",
   "startTime": "Start time",
@@ -39,5 +39,12 @@
     "unknown": "Unknown",
     "noMeetings": "No meetings.",
     "close": "Close"
-  }
+  },
+  "timeHour": "Hour",
+  "timeMinute": "Minute",
+  "customHour": "Custom (hours)",
+  "seats": "seats",
+  "searchUserPlaceholder": "Type name or email to search",
+  "noUsersFound": "No users found",
+  "guestEmailTooltip": "Enter email then press Enter"
 }

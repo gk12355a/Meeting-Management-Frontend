@@ -34,6 +34,8 @@ import { useAuth } from "../../context/AuthContext";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+import { useTranslation } from "react-i18next";
+
 import EditMeetingModal from "../../components/user/EditMeetingModal";
 import DeleteMeetingModal from "../../components/user/DeleteMeetingModal";
 import QuickBookingModal from "../../components/user/QuickBookingModal";
@@ -43,7 +45,7 @@ import QRCheckInModal from "../../components/user/QRCheckInModal";
 dayjs.locale("vi");
 dayjs.extend(utc);
 
-// ---- GIỜ HÀNH CHÍNH ----
+// GIỜ HÀNH CHÍNH
 const WORK_HOUR_START = 8; // 8h sáng
 const WORK_HOUR_END = 18; // 18h chiều (6PM), kết thúc lúc 18:00
 
@@ -201,20 +203,27 @@ const getErrorToastConfig = (errorInfo) => {
 };
 
 // Tooltip: Tên cuộc họp, Thời gian, Địa điểm
-function getEventTooltipContent(event) {
+function getEventTooltipContent(event, t) {
   const { title, start, end, extendedProps } = event;
+
   const time = `${dayjs(start).format("HH:mm")} - ${dayjs(end).format(
     "HH:mm, DD/MM/YYYY"
   )}`;
-  const room = extendedProps?.roomName || "Chưa xác định";
+
+  const room = extendedProps?.roomName || t("modal.unknown");
+
   return `
     <div style="line-height: 1.6; min-width: 220px;">
-      <div style="font-weight: 600; margin-bottom: 6px; font-size: 14px;">${title}</div>
-      <div style="font-size: 12px; opacity: 0.9; margin-bottom: 3px;">
-        <strong>Thời gian:</strong> ${time}
+      <div style="font-weight: 600; margin-bottom: 6px; font-size: 14px;">
+        ${title}
       </div>
+
       <div style="font-size: 12px; opacity: 0.9; margin-bottom: 3px;">
-        <strong>Phòng:</strong> ${room}
+        <strong>${t("modal.time")}:</strong> ${time}
+      </div>
+
+      <div style="font-size: 12px; opacity: 0.9; margin-bottom: 3px;">
+        <strong>${t("modal.location")}:</strong> ${room}
       </div>
     </div>
   `;
@@ -298,12 +307,32 @@ function injectNoBusinessTimeStyle() {
 }
 
 const MyMeetingPage = () => {
+  const { t, i18n } = useTranslation("meeting");
+  const calendarLocale = i18n.language === "vi" ? "vi" : "en-gb";
+
+  const buttonText = {
+  day: i18n.language === "vi" ? "Ngày" : "Day",
+  week: i18n.language === "vi" ? "Tuần" : "Week",
+  month: i18n.language === "vi" ? "Tháng" : "Month",
+  today: i18n.language === "vi" ? "Hôm nay" : "Today",
+};
+
   // State quản lý lịch họp
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [softLoading, setSoftLoading] = useState(false);
+  const [initialLoad, setInitialLoad] = useState(true);
 
   // LƯU NGÀY HIỆN TẠI ĐANG XEM TRÊN CALENDAR
   const [currentViewDate, setCurrentViewDate] = useState(new Date());
+
+  const [userSelectedDate, setUserSelectedDate] = useState(null);
+
+  const [lastDatesSet, setLastDatesSet] = useState(null);
+
+  // LƯU NGÀY USER ĐANG XEM (KHÔNG BAO GIỜ BỊ RESET)
+const [fixedViewDate, setFixedViewDate] = useState(null);
+  
   // LOCK NGÀY SAU KHI ĐẶT LỊCH NHANH ĐỂ KHÔNG BỊ NHẢY VỀ HÔM NAY
   const [lockedViewDate, setLockedViewDate] = useState(null);
 
@@ -375,10 +404,10 @@ const MyMeetingPage = () => {
   }, []);
 
   // === TẢI LỊCH HỌP ===
-  const fetchMeetings = async () => {
+  const fetchMeetings = async (silent = false) => {
     if (!user) return; // Đảm bảo user đã tải xong
 
-    setLoading(true);
+    if (!silent) setLoading(true);
     try {
       const res = await getMyMeetings();
       const data = res.data?.content || [];
@@ -437,31 +466,39 @@ const MyMeetingPage = () => {
           borderColor: borderColor,
           extendedProps: {
             roomName: m.room?.name || "Chưa xác định",
-            status: m.status, // <-- thêm status vào extendedProps
+            status: m.status, 
           },
           classNames: isNegativeStatus ? ["meeting-cancelled"] : [],
           hiddenInWeekDayView: isNegativeStatus,
         };
       });
 
-      setEvents(mappedEvents);
+      setSoftLoading(true); // bật hiệu ứng fade
+
+setTimeout(() => {
+  setEvents(mappedEvents);
+  setSoftLoading(false); // tắt hiệu ứng fade
+}, 150);
 
       // GIỮ NGÀY USER ĐANG ĐỨNG (KHÔNG JUMP VỀ TODAY)
-      setTimeout(() => {
-        const api = calendarRef.current?.getApi?.();
-        if (!api) return;
+      // GIỮ NGÀY USER ĐANG ĐỨNG KHI AUTO-REFRESH
+setTimeout(() => {
+  const api = calendarRef.current?.getApi?.();
+  if (!api) return;
 
-        if (lockedViewDate) {
-          api.gotoDate(lockedViewDate);
-        } else if (currentViewDate) {
-          api.gotoDate(currentViewDate);
-        }
-      }, 50);
+  // Luôn ưu tiên fixedViewDate — ngày user đang đứng
+  if (fixedViewDate) {
+    api.gotoDate(fixedViewDate);
+  }
+}, 50);
     } catch (err) {
       console.error("Lỗi tải lịch họp:", err);
-      toast.error("Không thể tải danh sách lịch họp!");
+      toast.error(t("errorLoadMeeting"));
     } finally {
-      setLoading(false);
+      if (initialLoad) {
+    setInitialLoad(false); // Ghi nhớ rằng đã load xong lần đầu
+  }
+  setLoading(false);
     }
   };
 
@@ -484,7 +521,7 @@ const MyMeetingPage = () => {
   const handleEventMouseEnter = (info) => {
     handleEventMouseLeave();
 
-    const tooltipHtml = getEventTooltipContent(info.event);
+    const tooltipHtml = getEventTooltipContent(info.event, t);
     let tooltip = document.createElement("div");
     tooltip.innerHTML = tooltipHtml;
     tooltip.style.position = "absolute";
@@ -578,15 +615,13 @@ const MyMeetingPage = () => {
 
   // RED LINE NOW-INDICATOR
   useEffect(() => {
-    let interval = setInterval(() => {
-      try {
-        if (calendarRef.current && calendarRef.current.getApi) {
-          calendarRef.current.getApi().updateNow();
-        }
-      } catch (e) {}
-    }, 20000);
-    return () => clearInterval(interval);
-  }, []);
+  const id = setInterval(() => {
+    try {
+      calendarRef.current?.getApi()?.updateNow();
+    } catch {}
+  }, 20000);
+  return () => clearInterval(id);
+}, []);
 
   // Xử lý click vào khoảng trống trên calendar để đặt lịch nhanh
   const handleDateSelect = (selection) => {
@@ -607,7 +642,7 @@ const MyMeetingPage = () => {
     let duration = end.diff(start, "minute");
     if (duration <= 0) duration = 60;
 
-    // ⭐ LOCK NGÀY USER VỪA CHỌN ĐỂ SAU KHI ĐẶT XONG KHÔNG NHẢY VỀ TODAY
+    // LOCK NGÀY USER VỪA CHỌN ĐỂ SAU KHI ĐẶT XONG KHÔNG NHẢY VỀ TODAY
     setLockedViewDate(start.toDate());
 
     setQuickBooking({
@@ -658,6 +693,30 @@ const MyMeetingPage = () => {
     );
   }
 
+  // === AUTO REFRESH EVERY 5 SECONDS ===
+useEffect(() => {
+  const interval = setInterval(() => {
+    // Không refresh nếu đang mở modal để tránh nhảy UI
+    if (
+      !isModalOpen &&
+      !isEditModalOpen &&
+      !isDeleteModalOpen &&
+      !isQRModalOpen &&
+      !quickBooking.open
+    ) {
+      fetchMeetings(true); // không bật spinner khi auto refresh
+    }
+  }, 5000); // 5 giây
+
+  return () => clearInterval(interval);
+}, [
+  isModalOpen,
+  isEditModalOpen,
+  isDeleteModalOpen,
+  isQRModalOpen,
+  quickBooking.open,
+]);
+
   // RENDER
   return (
     <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-500">
@@ -670,10 +729,10 @@ const MyMeetingPage = () => {
         </div>
         <div>
           <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100 tracking-tight">
-            Lịch họp của tôi
+            {t("myMeetingsTitle")}
           </h2>
           <p className="text-gray-500 dark:text-gray-400 text-sm">
-            Theo dõi và quản lý các cuộc họp của bạn
+            {t("todayMeetings")}
           </p>
         </div>
       </div>
@@ -689,11 +748,19 @@ const MyMeetingPage = () => {
             ref={calendarRef}
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
             initialView="timeGridWeek"
+            locale={calendarLocale}
+            buttonText={buttonText}
             // BẮT SỰ KIỆN THAY ĐỔI VIEW (CHUYỂN TUẦN / THÁNG / NGÀY)
             datesSet={(arg) => {
-              setCurrentViewDate(arg.start);
-              setCurrentViewType(arg.view.type);
-            }}
+  setCurrentViewDate(arg.start);
+
+  // Nếu user chuyển sang tuần/ngày/tháng khác → cập nhật fixedViewDate
+  if (!fixedViewDate || !dayjs(arg.start).isSame(fixedViewDate, "day")) {
+    setFixedViewDate(arg.start);
+  }
+
+  setCurrentViewType(arg.view.type);
+}}
             headerToolbar={{
               left: "prev,next today",
               center: "title",
@@ -707,7 +774,6 @@ const MyMeetingPage = () => {
             eventMouseEnter={handleEventMouseEnter}
             eventMouseLeave={handleEventMouseLeave}
             height="75vh"
-            locale="vi"
             selectable={true}
             selectMirror={true}
             select={handleDateSelect}
