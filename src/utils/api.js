@@ -4,10 +4,10 @@ import { toast } from "react-toastify";
 
 // 1. Lấy cấu hình môi trường
 const API_URL = import.meta.env.VITE_BACKEND_URL;
-const AUTH_SERVICE_URL = import.meta.env.VITE_AUTH_SERVICE_URL || "http://192.168.23.122:9000";
+const AUTH_SERVICE_URL = import.meta.env.VITE_AUTH_SERVICE_URL || "http://oauth-meeting.co";
 
 // Export URL Chatbot để dùng ở các file khác
-export const AI_SERVICE_URL = import.meta.env.VITE_AI_SERVICE_URL || "http://192.168.23.122:8000/api/chat";
+export const AI_SERVICE_URL = import.meta.env.VITE_AI_SERVICE_URL || "http://ai-meeting.co/api/chat";
 
 if (!API_URL) {
   console.error("❌ VITE_BACKEND_URL chưa được định nghĩa trong .env");

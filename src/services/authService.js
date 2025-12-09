@@ -2,10 +2,10 @@
 import api from "../utils/api";
 import axios from "axios";
 
-const AUTH_SERVICE_URL = import.meta.env.VITE_AUTH_SERVICE_URL || "http://192.168.23.122:9000";
+const AUTH_SERVICE_URL = import.meta.env.VITE_AUTH_SERVICE_URL || "http://oauth-meeting.co";
 const CLIENT_ID = import.meta.env.VITE_OAUTH2_CLIENT_ID || "meeting-client";
 const CLIENT_SECRET = import.meta.env.VITE_OAUTH2_CLIENT_SECRET || "secret";
-const REDIRECT_URI = import.meta.env.VITE_OAUTH2_REDIRECT_URI || "http://192.168.23.122:5173/authorized";
+const REDIRECT_URI = import.meta.env.VITE_OAUTH2_REDIRECT_URI || "http://npd-meeting.co/authorized";
 
 /**
  * [CẬP NHẬT] Lấy URL đăng xuất chuẩn Spring Security (/logout)
