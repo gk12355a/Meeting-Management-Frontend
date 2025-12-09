@@ -1,0 +1,12 @@
+{
+  "title": "MeetFlow User",
+  "subtitle": "Quản lý lịch họp cá nhân",
+  "menu": {
+    "dashboard": "Dashboard",
+    "myMeetings": "Lịch họp của tôi",
+    "createMeeting": "Tạo cuộc họp",
+    "rooms": "Phòng họp",
+    "devices": "Thiết bị",
+    "history": "Lịch sử họp"
+  }
+}

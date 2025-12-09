@@ -3,9 +3,11 @@ import { Spin, Alert } from "antd";
 import dayjs from "dayjs";
 import { getRoomMeetings } from "../../services/roomService";
 import "dayjs/locale/vi";
+import { useTranslation } from "react-i18next";
 dayjs.locale("vi");
 
 const RoomSchedule = ({ roomId }) => {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [meetings, setMeetings] = useState([]);
 
@@ -28,12 +30,12 @@ const RoomSchedule = ({ roomId }) => {
   return (
     <div className="mb-4 p-3 rounded-lg bg-gray-50 dark:bg-slate-800 border dark:border-slate-700">
       <h3 className="text-lg font-bold mb-2 text-gray-800 dark:text-gray-100">
-        📅 Lịch phòng hiện tại
+        {t("roomSchedule:title")}
       </h3>
 
       {meetings.length === 0 ? (
         <Alert
-          message="Phòng chưa có buổi họp nào — bạn có thể đặt thoải mái!"
+          message={t("roomSchedule:empty")}
           type="success"
           showIcon
         />
@@ -49,11 +51,13 @@ const RoomSchedule = ({ roomId }) => {
               </p>
 
               <p className="text-sm text-gray-600 dark:text-gray-300">
-                🕒 {dayjs(m.startTime).format("HH:mm DD/MM")} →{" "}
-                {dayjs(m.endTime).format("HH:mm DD/MM")}
+                {t("roomSchedule:time", {
+  start: dayjs(m.startTime).format("HH:mm DD/MM"),
+  end: dayjs(m.endTime).format("HH:mm DD/MM")
+})}
               </p>
 
-              <p className="text-xs text-gray-400">👤 {m.organizerName}</p>
+              <p className="text-xs text-gray-400">{t("roomSchedule:organizer", { name: m.organizerName })}</p>
             </div>
           ))}
         </div>

@@ -1,0 +1,6 @@
+{
+  "title": "📅 Current Room Schedule",
+  "empty": "This room has no meetings — feel free to book it!",
+  "time": "🕒 {{start}} → {{end}}",
+  "organizer": "👤 {{name}}"
+}

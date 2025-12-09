@@ -1,0 +1,10 @@
+{
+  "title": "Lịch phòng: {{name}}",
+  "loading": "Đang tải lịch phòng...",
+  "invalidSelect": "Khoảng thời gian không hợp lệ",
+  "calendarLabel": {
+    "today": "Hôm nay",
+    "week": "Tuần",
+    "day": "Ngày"
+  }
+}

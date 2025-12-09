@@ -1,0 +1,31 @@
+{
+  "title": "Personal Information",
+  "subtitle": "View and update your profile",
+
+  "email": "Email",
+  "role": "Role",
+  "fullName": "Full Name",
+
+  "placeholders": {
+    "fullName": "Enter your full name"
+  },
+
+  "errors": {
+    "requiredFullName": "Please enter your full name!"
+  },
+
+  "googleCalendar": {
+    "title": "Google Calendar",
+    "connect": "Connect Google Calendar",
+    "linked": "Google Calendar linked"
+  },
+
+  "save": "Save Changes",
+
+  "messages": {
+    "updateSuccess": "🎉 Profile updated successfully!",
+    "updateFail": "Update failed. Please try again.",
+    "loadFail": "Unable to load profile information.",
+    "googleFail": "Failed to connect Google Calendar."
+  }
+}

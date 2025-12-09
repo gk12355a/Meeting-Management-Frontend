@@ -1,0 +1,12 @@
+{
+  "title": "MeetFlow User",
+  "subtitle": "Personal meeting management",
+  "menu": {
+    "dashboard": "Dashboard",
+    "myMeetings": "My Meetings",
+    "createMeeting": "Create Meeting",
+    "rooms": "Rooms",
+    "devices": "Devices",
+    "history": "Meeting History"
+  }
+}

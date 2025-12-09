@@ -21,7 +21,7 @@ dayjs.extend(isSameOrAfter);
 dayjs.extend(isBetween);
 dayjs.extend(isoWeek);
 
-// Template cho thẻ Stats (dùng key i18n)
+// Template cho thẻ Stats 
 const statTemplates = [
   {
     key: "stats.today",
@@ -91,7 +91,7 @@ export default function DashboardPage() {
   const [upcomingMeetingsAll, setUpcomingMeetingsAll] = useState([]);
   const [page, setPage] = useState(1);
 
-  const { user } = useAuth(); // <-- Cần user.id để lọc
+  const { user } = useAuth(); // Cần user.id để lọc
   const navigate = useNavigate();
 
   const [stats, setStats] = useState(statTemplates);
@@ -189,11 +189,11 @@ export default function DashboardPage() {
     };
 
     fetchDashboardData();
-  }, [user]); // <-- THÊM 'user' làm dependency
+  }, [user]); // làm dependency
 
   // Khi selectedMeetingId thay đổi (khi user click), mới fetch chi tiết và show popup (tối ưu tránh nháy)
   useEffect(() => {
-    // Nếu không có id (đã tắt dialog) hoặc đang chưa chọn gì => clear dữ liệu
+    // Nếu không có id (đã tắt dialog) hoặc đang chưa chọn gì thì clear dữ liệu
     if (!selectedMeetingId) {
       setSelectedMeeting(null);
       setLoadingDetail(false);

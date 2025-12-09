@@ -1,0 +1,31 @@
+{
+  "title": "Confirm Meeting Cancellation",
+  "warningTitle": "Warning",
+  "warningLine1": "Are you sure you want to cancel the meeting:",
+  "warningLine2": "This action will send a cancellation notice to all participants.",
+
+  "recurringQuestion": "This is a recurring meeting. You want to cancel:",
+  "deleteSingle": "Only this meeting",
+  "deleteSeries": "Entire recurring series (Future sessions)",
+
+  "chooseReason": "Choose cancellation reason",
+  "reason": {
+    "no_need": "No longer needed",
+    "wrong_schedule": "Wrong room / wrong schedule",
+    "time_change": "Meeting time changed",
+    "lack_members": "Insufficient participants",
+    "other": "Other (enter reason)"
+  },
+
+  "inputOtherReason": "Enter other reason",
+  "otherPlaceholder": "Type your cancellation reason...",
+  "otherRequired": "Please enter the cancellation reason!",
+  "otherMin": "The reason must have at least 5 characters!",
+
+  "cancelBtn": "No, keep it",
+  "confirmBtn": "Confirm cancellation",
+
+  "toastSingle": "Meeting cancelled successfully!",
+  "toastSeries": "Recurring series has been cancelled!",
+  "toastError": "Unable to cancel meeting!"
+}

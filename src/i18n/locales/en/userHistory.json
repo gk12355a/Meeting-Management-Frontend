@@ -1,0 +1,12 @@
+{
+  "title": "Meeting History",
+  "subtitle": "Review meetings you have attended",
+  "tabs": {
+    "joined": "Joined",
+    "cancelled": "Cancelled"
+  },
+  "empty": "No data available.",
+  "errors": {
+    "loadFailed": "Failed to load meeting history."
+  }
+}

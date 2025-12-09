@@ -1,0 +1,12 @@
+{
+  "title": "Lịch sử họp",
+  "subtitle": "Xem lại các cuộc họp bạn đã tham gia",
+  "tabs": {
+    "joined": "Đã tham gia",
+    "cancelled": "Đã hủy"
+  },
+  "empty": "Không có dữ liệu.",
+  "errors": {
+    "loadFailed": "Không thể tải lịch sử cuộc họp."
+  }
+}

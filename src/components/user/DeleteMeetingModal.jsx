@@ -4,10 +4,12 @@ import { Modal, Form, Input, Button, Alert, Radio } from "antd";
 import { FiAlertTriangle } from "react-icons/fi";
 import { deleteMeeting, deleteRecurringSeries } from "../../services/meetingService";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 const { TextArea } = Input;
 
 const DeleteMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
+  const { t } = useTranslation("deleteMeeting");
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
 
@@ -17,12 +19,12 @@ const DeleteMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
   const [reasonType, setReasonType] = useState("nocancel");
 
   const presetReasons = [
-    { value: "no_need", label: "Không còn nhu cầu" },
-    { value: "wrong_schedule", label: "Nhầm phòng / nhầm lịch" },
-    { value: "time_change", label: "Thay đổi thời gian họp" },
-    { value: "lack_members", label: "Thiếu người tham gia" },
-    { value: "other", label: "Khác (nhập lý do)" },
-  ];
+  { value: "no_need", label: t("reason.no_need") },
+  { value: "wrong_schedule", label: t("reason.wrong_schedule") },
+  { value: "time_change", label: t("reason.time_change") },
+  { value: "lack_members", label: t("reason.lack_members") },
+  { value: "other", label: t("reason.other") },
+];
 
   const seriesId = meetingDetail?.seriesId || meetingDetail?.recurrenceSeriesId;
   const isRecurring = !!seriesId;
@@ -46,10 +48,10 @@ const DeleteMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
 
       if (isRecurring && deleteType === "series") {
         await deleteRecurringSeries(seriesId, payload);
-        toast.success("Đã hủy toàn bộ chuỗi cuộc họp định kỳ!");
+        toast.success(t("toastSeries"));
       } else {
         await deleteMeeting(meetingDetail.id, payload);
-        toast.success("Đã hủy cuộc họp thành công!");
+        toast.success(t("toastSingle"));
       }
 
       handleCancel();
@@ -57,7 +59,7 @@ const DeleteMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
 
     } catch (err) {
       console.error("Error:", err);
-      toast.error(err?.response?.data?.message || "Không thể hủy cuộc họp!");
+      toast.error(err?.response?.data?.message || t("toastError"));
     } finally {
       setLoading(false);
     }
@@ -80,7 +82,7 @@ const DeleteMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
       maskClosable={!loading}
       title={
         <span className="flex items-center gap-2 text-red-600 dark:text-red-400 text-lg font-semibold">
-          <FiAlertTriangle /> Xác nhận hủy cuộc họp
+          <FiAlertTriangle /> {t("title")}
         </span>
       }
       className="dark:[&_.ant-modal-content]:bg-gray-800 dark:[&_.ant-modal-content]:text-gray-100 
@@ -89,15 +91,15 @@ const DeleteMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
       <div className="py-2">
 
         <Alert
-          message="Cảnh báo"
+          message={t("warningTitle")}
           description={
             <div className="dark:text-gray-200">
-              <p className="mb-2">Bạn có chắc chắn muốn hủy cuộc họp:</p>
+              <p className="mb-2">{t("warningLine1")}</p>
               <p className="font-semibold text-blue-600 dark:text-blue-400 mb-2">
                 "{meetingDetail?.title}"
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Hành động này sẽ gửi thông báo hủy đến tất cả người tham gia.
+                {t("warningLine2")}
               </p>
             </div>
           }
@@ -110,7 +112,7 @@ const DeleteMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
         {isRecurring && (
           <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
             <p className="text-sm font-medium text-blue-800 dark:text-blue-300 mb-3">
-              Đây là cuộc họp định kỳ. Bạn muốn hủy:
+              {t("recurringQuestion")}
             </p>
 
             <Radio.Group
@@ -119,8 +121,8 @@ const DeleteMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
               disabled={loading}
               className="flex flex-col gap-2"
             >
-              <Radio value="single" className="dark:text-gray-200">Chỉ cuộc họp này</Radio>
-              <Radio value="series" className="dark:text-gray-200">Toàn bộ chuỗi cuộc họp (Các buổi tương lai)</Radio>
+              <Radio value="single" className="dark:text-gray-200">{t("deleteSingle")}</Radio>
+              <Radio value="series" className="dark:text-gray-200">{t("deleteSeries")}</Radio>
             </Radio.Group>
           </div>
         )}
@@ -128,7 +130,7 @@ const DeleteMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
         <Form form={form} layout="vertical" onFinish={handleDelete} disabled={loading}>
           
           {/* Lý do preset */}
-          <Form.Item label="Chọn lý do hủy" required>
+          <Form.Item label={t("chooseReason")} required>
             <Radio.Group
               value={reasonType}
               onChange={(e) => setReasonType(e.target.value)}
@@ -145,16 +147,16 @@ const DeleteMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
           {/* Nếu chọn OTHER thì bắt nhập */}
           {reasonType === "other" && (
             <Form.Item
-              label="Nhập lý do khác"
+              label={t("inputOtherReason")}
               name="reason"
               rules={[
-                { required: true, message: "Vui lòng nhập lý do hủy!" },
-                { min: 5, message: "Lý do phải có ít nhất 5 ký tự!" },
+                { required: true, message: t("otherRequired") },
+                { min: 5, message: t("otherMin") }
               ]}
             >
               <TextArea
                 rows={4}
-                placeholder="Nhập lý do hủy..."
+                placeholder={t("otherPlaceholder")}
                 className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
                 maxLength={500}
                 showCount
@@ -164,7 +166,7 @@ const DeleteMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
 
           <div className="flex justify-end gap-3 mt-4">
             <Button onClick={handleCancel} disabled={loading}>
-              Không, giữ lại
+              {t("cancelBtn")}
             </Button>
             <Button
               danger
@@ -173,7 +175,7 @@ const DeleteMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
               loading={loading}
               className="bg-red-600 hover:bg-red-700"
             >
-              Xác nhận hủy
+              {t("confirmBtn")}
             </Button>
           </div>
         </Form>

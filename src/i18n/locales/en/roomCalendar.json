@@ -1,0 +1,10 @@
+{
+  "title": "Room Schedule: {{name}}",
+  "loading": "Loading room calendar...",
+  "invalidSelect": "Invalid time selection",
+  "calendarLabel": {
+    "today": "Today",
+    "week": "Week",
+    "day": "Day"
+  }
+}

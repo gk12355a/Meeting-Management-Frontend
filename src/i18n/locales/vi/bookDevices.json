@@ -1,0 +1,83 @@
+{
+  "modal": {
+    "title": "Đặt lịch sử dụng {{name}}"
+  },
+
+  "form": {
+    "title": "Tên cuộc họp",
+    "titlePlaceholder": "Nhập tên cuộc họp...",
+    "titleRequired": "Vui lòng nhập tên cuộc họp",
+    "titleShort": "Tên cuộc họp quá ngắn",
+
+    "date": "Ngày họp",
+    "dateRequired": "Chọn ngày họp",
+
+    "time": "Giờ bắt đầu",
+    "timeRequired": "Chọn giờ bắt đầu",
+    "timePickerTitle": "Chọn giờ họp (08:00 - 18:00)",
+
+    "duration": "Thời lượng",
+    "durationPlaceholder": "-- Chọn --",
+    "customHour": "Khác (giờ)",
+
+    "room": "Phòng họp",
+    "roomRequired": "Chọn phòng họp",
+    "roomPlaceholder": "-- Chọn phòng họp --",
+    "roomAvailable": "Có sẵn",
+    "roomOffline": "Bảo trì",
+
+    "devices": "Thiết bị sử dụng",
+    "deviceTooltip": "Thiết bị được chọn ban đầu không thể bỏ chọn. Bạn có thể thêm thiết bị khác.",
+    "devicePrimary": "(Đã chọn - Bắt buộc)",
+
+    "participants": "Người tham gia (Nội bộ)",
+    "participantPlaceholder": "-- Gõ tên hoặc email để tìm người tham gia --",
+    "noUsers": "Không tìm thấy người dùng",
+
+    "guestEmails": "Email khách mời (bên ngoài)",
+    "guestTooltip": "Nhập email, nhấn Enter hoặc dấu phẩy để thêm.",
+    "invalidEmail": "Email không hợp lệ: {{value}}",
+
+    "recurring": "Lặp lại cuộc họp",
+    "frequency": "Tần suất",
+    "repeatUntil": "Lặp đến ngày",
+    "repeatRequired": "Chọn ngày kết thúc",
+    "daily": "Hằng ngày",
+    "weekly": "Hằng tuần",
+    "monthly": "Hằng tháng",
+
+    "description": "Ghi chú",
+    "descriptionPlaceholder": "Ghi chú thêm cho cuộc họp...",
+
+    "selectDateTimeFirst": "Chọn ngày và giờ trước",
+    "selectMoreDevices": "Chọn thêm thiết bị khả dụng",
+
+    "duration30": "30 phút",
+    "duration60": "1 giờ",
+    "duration90": "1.5 giờ",
+    "duration120": "2 giờ",
+
+    "guestEmailPlaceholder": "Ví dụ: guest@email.com"
+  },
+
+  "deviceInfo": {
+    "title": "🖥️ Thiết bị bắt buộc:",
+    "tip": "Bạn có thể chọn thêm thiết bị khác, nhưng không thể bỏ chọn thiết bị này."
+  },
+
+  "submit": {
+    "cancel": "Hủy",
+    "submit": "Đặt lịch"
+  },
+
+  "notifications": {
+    "loadRoomsError": "Không thể tải danh sách phòng họp!",
+    "loadDevicesError": "Không thể tải thiết bị khả dụng!",
+    "invalidBusinessTime": "⏰ Chỉ được đặt 08:00 - 18:00!",
+    "meetingSuccess": "🎉 Tạo cuộc họp thành công!",
+    "pendingApproval": "📝 Yêu cầu đặt phòng đã được gửi và đang chờ Admin phê duyệt.",
+    "meetingFailed": "Không thể tạo cuộc họp!",
+    "roomConflict": "Phòng họp đã được đặt trong khung giờ này",
+    "userConflict": "Người tham gia bị trùng lịch trong khung giờ này"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "date": "Ngày",
+  "time": "Giờ",
+  "room": "Phòng",
+  "status": "Trạng thái",
+  "devicesUsed": "Thiết bị sử dụng",
+  "noDevices": "Không có thiết bị sử dụng",
+  "participants": "Người tham gia",
+  "noParticipants": "Không có người tham gia",
+  "organizer": "Người tổ chức",
+  "unknown": "Không rõ",
+  "meetingConfirmed": "Đã xác nhận",
+  "meetingCancelled": "Đã hủy",
+  "meetingPending": "Chờ duyệt",
+  "participantPending": "Chờ xác nhận",
+  "participantAccepted": "Đã chấp nhận",
+  "participantDeclined": "Từ chối",
+  "close": "Đóng"
+}

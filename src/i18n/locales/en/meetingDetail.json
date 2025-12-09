@@ -1,0 +1,19 @@
+{
+  "date": "Date",
+  "time": "Time",
+  "room": "Room",
+  "status": "Status",
+  "devicesUsed": "Devices Used",
+  "noDevices": "No devices used",
+  "participants": "Participants",
+  "noParticipants": "No participants",
+  "organizer": "Organizer",
+  "unknown": "Unknown",
+  "meetingConfirmed": "Confirmed",
+  "meetingCancelled": "Cancelled",
+  "meetingPending": "Pending approval",
+  "participantPending": "Pending",
+  "participantAccepted": "Accepted",
+  "participantDeclined": "Declined",
+  "close": "Close"
+}

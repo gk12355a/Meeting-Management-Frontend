@@ -1,0 +1,21 @@
+{
+  "processing": {
+    "loading": "Processing check-in...",
+    "verifying": "Verifying check-in...",
+    "pleaseWait": "Please wait a moment"
+  },
+  "success": {
+    "title": "Check-in Successful!",
+    "message": "You have been recorded as attending the meeting."
+  },
+  "error": {
+    "title": "Check-in Failed",
+    "missingCode": "QR code missing. Please scan again or contact the organizer.",
+    "notInvited": "You are not in the guest list for this meeting.",
+    "invalidCode": "Invalid QR code. Please check again or contact the organizer.",
+    "unknown": "Unknown error"
+  },
+  "buttons": {
+    "backToMeetings": "Back to My Meetings"
+  }
+}

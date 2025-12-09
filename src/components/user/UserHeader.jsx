@@ -10,11 +10,13 @@ import {
 import ThemeToggle from "../ThemeToggle";
 import { message } from "antd";
 import LanguageSelector from "../LanguageSelector";
+import { useTranslation } from "react-i18next";
 
 // === COMPONENT CON: NotificationItem ===
 const NotificationItem = ({ notification, onMarkRead }) => {
   const navigate = useNavigate();
   const [isResponding, setIsResponding] = useState(false);
+  const { t } = useTranslation(['userHeader']);
 
   // Thông báo LỜI MỜI họp (người khác mời bạn)
 const isInvite =
@@ -84,7 +86,8 @@ const isInvite =
             className="flex-1 inline-flex justify-center items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-green-600 hover:bg-green-700 disabled:opacity-50"
           >
             <FiCheck size={14} className="mr-1" />
-            Chấp nhận
+            {/* Chấp nhận */}
+            <span>{t('userHeader:notifications.buttons.accept')}</span>
           </button>
           <button
             onClick={() => handleResponse('DECLINED')}
@@ -92,7 +95,8 @@ const isInvite =
             className="flex-1 inline-flex justify-center items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded shadow-sm text-gray-700 bg-white hover:bg-gray-50 dark:bg-slate-600 dark:text-gray-100 dark:border-slate-500 disabled:opacity-50"
           >
             <FiX size={14} className="mr-1" />
-            Từ chối
+            {/* Từ chối */}
+            <span>{t('userHeader:notifications.buttons.decline')}</span>
           </button>
         </div>
       )}
@@ -101,7 +105,8 @@ const isInvite =
       {/* Hiển thị "Đã xem" nếu không có nút hành động VÀ đã đọc (Bỏ điều kiện check meetingId) */}
       {(!showActions && notification.read) && (
          <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 font-medium">
-           Đã xem.
+           {/* Đã xem. */}
+           <span>{t('userHeader:notifications.status.viewed')}</span>
          </div>
       )}
     </div>
@@ -111,6 +116,7 @@ const isInvite =
 // === COMPONENT CHÍNH: UserHeader ===
 const UserHeader = ({ setIsSidebarOpen }) => {
   const { logout, user } = useAuth();
+  const { t } = useTranslation(['userHeader', 'common']);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   
@@ -227,9 +233,11 @@ const UserHeader = ({ setIsSidebarOpen }) => {
           {isNotificationOpen && (
             <div className="absolute top-12 right-0 w-80 max-h-[70vh] flex flex-col bg-white dark:bg-slate-800 rounded-lg shadow-xl border dark:border-slate-700">
               <div className="p-3 border-b dark:border-slate-700 flex justify-between items-center">
-                <h4 className="font-semibold text-gray-800 dark:text-white">Thông báo</h4>
+                {/* Thông báo */}
+                <h4 className="font-semibold text-gray-800 dark:text-white">{t('userHeader:notifications.title')}</h4>
                 <button onClick={handleMarkAllAsRead} className="text-xs text-blue-500 hover:underline disabled:opacity-50" disabled={notifications.every(n => n.read) || notificationLoading}>
-                  Đánh dấu tất cả đã đọc
+                  {/* Đánh dấu tất cả đã đọc */}
+                  <span>{t('userHeader:notifications.markAllRead')}</span>
                 </button>
               </div>
               <div className="flex-1 overflow-y-auto">
@@ -238,7 +246,9 @@ const UserHeader = ({ setIsSidebarOpen }) => {
                 )}
                 {!notificationLoading && notifications.length === 0 && (
                   <div className="p-10 flex flex-col justify-center items-center text-center text-gray-500 dark:text-gray-400">
-                    <FiInbox size={30} /><p className="mt-2 text-sm">Không có thông báo mới.</p>
+                    <FiInbox size={30} />
+                    {/* Không có thông báo mới. */}
+                    <p className="mt-2 text-sm">{t('userHeader:notifications.noNew')}</p>
                   </div>
                 )}
                 {notifications.length > 0 && notifications.map((noti) => (
@@ -248,7 +258,8 @@ const UserHeader = ({ setIsSidebarOpen }) => {
               {hasMoreNotifications && (
                 <div className="p-2 border-t dark:border-slate-700 text-center">
                   <button onClick={() => fetchNotifications(notificationPage + 1)} disabled={notificationLoading} className="text-sm text-blue-600 hover:underline dark:text-blue-400">
-                    {notificationLoading ? 'Đang tải...' : 'Xem thêm'}
+                    {/* 'Đang tải...' : 'Xem thêm' */}
+                    {notificationLoading ? t('userHeader:notifications.loading') : t('userHeader:notifications.viewMore')}
                   </button>
                 </div>
               )}
@@ -278,7 +289,8 @@ const UserHeader = ({ setIsSidebarOpen }) => {
                  dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700"
     >
       <FiUser size={16} />
-      <span>Thông tin cá nhân</span>
+      {/* Thông tin cá nhân */}
+      <span>{t('userHeader:settings.profile')}</span>
     </NavLink>
 
     {/* Change Password */}
@@ -288,7 +300,8 @@ const UserHeader = ({ setIsSidebarOpen }) => {
                  dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700"
     >
       <FiLock size={16} />
-      <span>Đổi mật khẩu</span>
+      {/* Đổi mật khẩu */}
+      <span>{t('userHeader:settings.changePassword')}</span>
     </NavLink>
 
     {/* Logout */}
@@ -298,7 +311,8 @@ const UserHeader = ({ setIsSidebarOpen }) => {
                  text-red-500 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-slate-700"
     >
       <FiLogOut size={16} />
-      <span>Đăng xuất</span>
+      {/* <span>Đăng xuất</span> */}
+      <span>{t('userHeader:settings.logout')}</span>
     </button>
   </div>
 )}

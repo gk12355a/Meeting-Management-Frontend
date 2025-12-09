@@ -5,6 +5,7 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import dayjs from "dayjs";
 import { getRoomMeetings } from "../../services/roomService";
+import { useTranslation } from "react-i18next";
 
 const WORK_START = 8 * 60; // 08:00
 const WORK_END = 18 * 60; // 18:00
@@ -12,6 +13,8 @@ const WORK_END = 18 * 60; // 18:00
 const isSameDay = (d1, d2) => dayjs(d1).isSame(dayjs(d2), "day");
 
 const RoomCalendarModal = ({ open, onClose, room, onSelectSlot }) => {
+  const { i18n, t } = useTranslation("roomCalendar");
+  const calendarLocale = i18n.language === "vi" ? "vi" : "en-gb";
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [readyToShow, setReadyToShow] = useState(false);
@@ -113,7 +116,7 @@ useEffect(() => {
       destroyOnClose
       title={
         <span className="flex items-center gap-2 text-lg font-semibold dark:text-white">
-          📅 Lịch phòng: {room?.name || ""}
+          📅 {t("title", { name: room?.name || "" })}
         </span>
       }
       className="dark:[&_.ant-modal-content]:bg-slate-900 
@@ -124,16 +127,20 @@ useEffect(() => {
       {(loading || !readyToShow) && (
         <div className="flex justify-center items-center h-80">
           <Spin size="large" />
+          <p className="text-gray-600 dark:text-gray-300">{t("loading")}</p>
         </div>
       )}
 
       {!loading && readyToShow && (
         <FullCalendar
           ref={calendarRef}
-          key={room?.id}
+          key={room?.id + i18n.language}  
           plugins={[timeGridPlugin, interactionPlugin]}
           initialView="timeGridWeek"
-          locale="vi"
+          locale={calendarLocale}
+          buttonText={{
+            today: t("calendarLabel.today"),
+          }}
           height={600}
           slotMinTime="08:00:00"
           slotMaxTime="18:00:00"

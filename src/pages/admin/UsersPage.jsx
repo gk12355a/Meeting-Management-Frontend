@@ -348,7 +348,7 @@ export default function UsersPage() {
         </button>
       </motion.div>
 
-      {/* Thống kê người dùng - motion cùng lúc */}
+      {/* Thống kê người dùng */}
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
@@ -402,7 +402,7 @@ export default function UsersPage() {
         </motion.div>
       </motion.div>
 
-      {/* TABLE - DANH SÁCH NGƯỜI DÙNG */}
+      {/* DANH SÁCH NGƯỜI DÙNG */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}

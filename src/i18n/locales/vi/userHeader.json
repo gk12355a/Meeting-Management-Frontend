@@ -1,0 +1,22 @@
+{
+  "notifications": {
+    "title": "Thông báo",
+    "markAllRead": "Đánh dấu tất cả đã đọc",
+    "noNew": "Không có thông báo mới.",
+    "loading": "Đang tải...",
+    "viewMore": "Xem thêm",
+    "buttons": {
+      "accept": "Chấp nhận",
+      "decline": "Từ chối",
+      "approve": "Phê duyệt"
+    },
+    "status": {
+      "viewed": "Đã xem."
+    }
+  },
+  "settings": {
+    "profile": "Thông tin cá nhân",
+    "changePassword": "Đổi mật khẩu",
+    "logout": "Đăng xuất"
+  }
+}

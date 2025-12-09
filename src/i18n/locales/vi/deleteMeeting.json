@@ -1,0 +1,31 @@
+{
+  "title": "Xác nhận hủy cuộc họp",
+  "warningTitle": "Cảnh báo",
+  "warningLine1": "Bạn có chắc chắn muốn hủy cuộc họp:",
+  "warningLine2": "Hành động này sẽ gửi thông báo hủy đến tất cả người tham gia.",
+
+  "recurringQuestion": "Đây là cuộc họp định kỳ. Bạn muốn hủy:",
+  "deleteSingle": "Chỉ cuộc họp này",
+  "deleteSeries": "Toàn bộ chuỗi cuộc họp (Các buổi tương lai)",
+
+  "chooseReason": "Chọn lý do hủy",
+  "reason": {
+    "no_need": "Không còn nhu cầu",
+    "wrong_schedule": "Nhầm phòng / nhầm lịch",
+    "time_change": "Thay đổi thời gian họp",
+    "lack_members": "Thiếu người tham gia",
+    "other": "Khác (nhập lý do)"
+  },
+
+  "inputOtherReason": "Nhập lý do khác",
+  "otherPlaceholder": "Nhập lý do hủy...",
+  "otherRequired": "Vui lòng nhập lý do hủy!",
+  "otherMin": "Lý do phải có ít nhất 5 ký tự!",
+
+  "cancelBtn": "Không, giữ lại",
+  "confirmBtn": "Xác nhận hủy",
+
+  "toastSingle": "Đã hủy cuộc họp thành công!",
+  "toastSeries": "Đã hủy toàn bộ chuỗi cuộc họp định kỳ!",
+  "toastError": "Không thể hủy cuộc họp!"
+}

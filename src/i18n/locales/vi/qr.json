@@ -1,0 +1,26 @@
+{
+  "qr": {
+    "title": "Mã QR Check-in",
+    "subtitle": "Quét mã để điểm danh tự động vào cuộc họp",
+    "manualCode": "Mã nhập thủ công",
+    "buttons": {
+      "download": "Lưu ảnh",
+      "copyLink": "Copy Link",
+      "copyCode": "Sao chép mã"
+    },
+    "instructions": {
+      "title": "Hướng dẫn điểm danh",
+      "step1": "Mở Camera điện thoại hoặc ứng dụng quét QR.",
+      "step2": "Quét mã bên cạnh để mở trang Check-in.",
+      "step3": "Nếu không quét được, hãy truy cập đường dẫn hoặc nhập mã thủ công ở trên."
+    },
+    "warning": "Mã này chỉ hiệu lực trong 30 phút trước thời gian diễn ra cuộc họp.",
+    "messages": {
+      "downloadSuccess": "Đã tải xuống mã QR!",
+      "downloadError": "Không thể tải xuống mã QR!",
+      "copyCodeSuccess": "Đã sao chép mã check-in!",
+      "copyLinkSuccess": "Đã sao chép đường dẫn check-in!",
+      "generating": "Đang tạo mã..."
+    }
+  }
+}

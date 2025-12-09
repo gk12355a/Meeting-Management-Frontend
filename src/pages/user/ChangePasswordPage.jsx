@@ -2,8 +2,10 @@ import { useState } from "react";
 import * as authService from "../../services/authService";
 import { FiLock, FiSave, FiEye, FiEyeOff } from "react-icons/fi";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 export default function ChangePasswordPage() {
+  const { t } = useTranslation("changePassword");
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -24,27 +26,24 @@ export default function ChangePasswordPage() {
 
     // Logic giữ nguyên
     if (newPassword !== confirmPassword) {
-      setError("Mật khẩu mới và mật khẩu xác nhận không khớp.");
+      setError(t("errors.mismatch"));
       return;
     }
 
     if (newPassword.length < 6) {
-      setError("Mật khẩu mới phải có ít nhất 6 ký tự.");
+      setError(t("errors.minLength"));
       return;
     }
 
     setLoading(true);
     try {
       await authService.changePassword(oldPassword, newPassword);
-      setSuccess("Đổi mật khẩu thành công!");
+      setSuccess(t("messages.success"));
       setOldPassword("");
       setNewPassword("");
       setConfirmPassword("");
     } catch (err) {
-      setError(
-        err.response?.data?.message ||
-          "Đổi mật khẩu thất bại. Vui lòng kiểm tra lại mật khẩu cũ."
-      );
+      setError(err.response?.data?.message || t("messages.failed"));
     } finally {
       setLoading(false);
     }
@@ -59,7 +58,7 @@ export default function ChangePasswordPage() {
         transition={{ duration: 0.4 }}
       >
         <h2 className="text-3xl font-bold text-center mb-8 text-blue-700 flex items-center justify-center gap-2">
-          <FiLock /> Đổi mật khẩu
+          <FiLock /> {t("title")}
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -79,7 +78,7 @@ export default function ChangePasswordPage() {
           {/* Mật khẩu cũ */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Mật khẩu cũ
+              {t("oldPassword")}
             </label>
             <div className="relative">
               <input
@@ -104,7 +103,7 @@ export default function ChangePasswordPage() {
           {/* Mật khẩu mới */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Mật khẩu mới
+              {t("newPassword")}
             </label>
             <div className="relative">
               <input
@@ -129,7 +128,7 @@ export default function ChangePasswordPage() {
           {/* Xác nhận mật khẩu */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Xác nhận mật khẩu mới
+              {t("confirmPassword")}
             </label>
             <div className="relative">
               <input
@@ -159,7 +158,7 @@ export default function ChangePasswordPage() {
             className="w-full bg-blue-600 text-white font-semibold py-3 mt-4 rounded-lg hover:bg-blue-700 transition duration-300 disabled:opacity-60 flex items-center justify-center gap-2"
           >
             <FiSave />
-            {loading ? "Đang lưu..." : "Lưu thay đổi"}
+            {loading ? t("saving") : t("save")}
           </motion.button>
         </form>
       </motion.div>
