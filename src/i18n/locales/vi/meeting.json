@@ -31,6 +31,8 @@
   "successDelete": "Xóa cuộc họp thành công",
   "errorLoadMeeting": "Không tải được thông tin cuộc họp",
   "errorTimeInvalid": "Thời gian kết thúc phải lớn hơn thời gian bắt đầu",
+  "meetingNote": "Ghi chú",
+  "meetingNotePlaceholder": "Nhập mô tả hoặc ghi chú cho cuộc họp...",
   "modal": {
     "upcomingMeetings": "Cuộc họp sắp tới",
     "location": "Địa điểm",
