@@ -2,10 +2,13 @@
 import api from "../utils/api";
 import axios from "axios";
 
-const AUTH_SERVICE_URL = import.meta.env.VITE_AUTH_SERVICE_URL || "http://oauth-meeting.co";
-const CLIENT_ID = import.meta.env.VITE_OAUTH2_CLIENT_ID || "meeting-client";
-const CLIENT_SECRET = import.meta.env.VITE_OAUTH2_CLIENT_SECRET || "secret";
-const REDIRECT_URI = import.meta.env.VITE_OAUTH2_REDIRECT_URI || "http://npd-meeting.co/authorized";
+// Helper function to get environment variables (Runtime > Build time)
+const getEnv = (key) => window.ENV?.[key] || import.meta.env[key];
+
+const AUTH_SERVICE_URL = getEnv("VITE_AUTH_SERVICE_URL") || "http://oauth-meeting.co";
+const CLIENT_ID = getEnv("VITE_OAUTH2_CLIENT_ID") || "meeting-client";
+const CLIENT_SECRET = getEnv("VITE_OAUTH2_CLIENT_SECRET") || "secret";
+const REDIRECT_URI = getEnv("VITE_OAUTH2_REDIRECT_URI") || "http://npd-meeting.co/authorized";
 
 /**
  * [CẬP NHẬT] Lấy URL đăng xuất chuẩn Spring Security (/logout)
