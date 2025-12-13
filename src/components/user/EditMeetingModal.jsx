@@ -510,6 +510,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
             >
               <Select
                 mode="multiple"
+                optionLabelProp="label"
                 placeholder={
                   !watchedDate || !watchedTime
                     ? t('userEdit:edit.placeholders.selectDatetimeFirst')
@@ -521,7 +522,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
                 classNames={{ popup: "dark:bg-gray-700 dark:text-gray-100" }}
               >
                 {availableDevices.map((d) => (
-                  <Option key={d.id} value={d.id} disabled={d.status !== "AVAILABLE"}>
+                  <Option key={d.id} value={d.id} label={d.name} disabled={d.status !== "AVAILABLE"}>
                     <div className="flex justify-between items-center">
                       <span>{d.name}</span>
                       <Tag color={d.status === "AVAILABLE" ? "green" : "red"}>
