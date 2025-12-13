@@ -23,7 +23,9 @@
       "selectTime": "Please select time first",
       "devicesAvailable": "Select available equipment (current kept)",
       "searchUsers": "Search users...",
-      "enterEmail": "Enter email..."
+      "enterEmail": "Enter email...",
+      "selectDatetimeFirst": "Please select date and time first",
+      "selectDevices": "Select equipment"
     },
     "durations": {
       "15min": "15 minutes",
