@@ -583,7 +583,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
               <Select 
                 mode="tags" 
                 tokenSeparators={[',', ';', ' ']} 
-                placeholder={t('userEdit:edit.placeholders.enterEmails')}
+                placeholder={t('userEdit:edit.placeholders.enterEmail')}
                 className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
                 classNames={{ popup: "dark:bg-gray-700 dark:text-gray-100" }}
               />
