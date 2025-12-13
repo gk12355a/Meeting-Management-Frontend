@@ -22,7 +22,9 @@
       "selectTime": "Vui lòng chọn thời gian trước",
       "devicesAvailable": "Chọn thiết bị khả dụng (hiện tại được giữ lại)",
       "searchUsers": "Tìm kiếm người dùng...",
-      "enterEmail": "Nhập email..."
+      "enterEmail": "Nhập email...",
+      "selectDatetimeFirst": "Vui lòng chọn ngày và giờ trước",
+      "selectDevices": "Chọn thiết bị sử dụng"
     },
     "durations": {
       "15min": "15 phút",
