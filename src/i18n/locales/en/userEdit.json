@@ -67,6 +67,12 @@
       "rejectTitle": "Rejection Reason",
       "rejectPlaceholder": "Please enter rejection reason...",
       "confirmReject": "Confirm Rejection"
+    },
+     "confirmModal": {
+      "title": "Update recurring meeting",
+      "desc": "You are changing a meeting in a recurring series. Apply this change to:",
+      "single": "This meeting only",
+      "series": "Entire series (Future meetings)"
     }
   }
 }  
