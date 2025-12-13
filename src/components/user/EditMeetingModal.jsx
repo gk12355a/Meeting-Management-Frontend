@@ -285,7 +285,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
 
         // Thêm thông tin Recurrence Rule vào payload
         payload.recurrenceRule = {
-          frequencies: values.frequencies || "DAILY",
+          frequency: values.frequencies || "DAILY",
           interval: 1,
           repeatUntil: dayjs(values.repeatUntil).format("YYYY-MM-DD"),
           daysOfWeek: values.frequencies === 'WEEKLY' ? values.daysOfWeek : null
