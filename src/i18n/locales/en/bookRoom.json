@@ -42,7 +42,7 @@
   "cancel": "Cancel",
   "submit": "Book room",
 
-  "success": "Successfully booked room {{name}}!",
+  "success": "Your booking request for {{name}} has been submitted and is pending admin approval!",
 
   "people": "people",
   "emailTooltip": "Enter email, press Enter or comma to add.",
