@@ -66,6 +66,12 @@
       "rejectTitle": "Lý do từ chối",
       "rejectPlaceholder": "Vui lòng nhập lý do từ chối...",
       "confirmReject": "Xác nhận từ chối"
+    },
+    "confirmModal": {
+      "title": "Cập nhật cuộc họp định kỳ",
+      "desc": "Bạn đang thay đổi một cuộc họp trong chuỗi định kỳ. Bạn muốn áp dụng thay đổi này cho:",
+      "single": "Chỉ cuộc họp này",
+      "series": "Toàn bộ chuỗi (Các cuộc họp tương lai)"
     }
   }
 }  
