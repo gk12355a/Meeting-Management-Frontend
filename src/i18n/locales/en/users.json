@@ -11,7 +11,9 @@
     "fullName": "Full Name",
     "email": "Email",
     "role": "Role",
-    "status": "Status"
+    "status": "Status",
+    "edit": "Edit user",
+    "delete": "Delete user"
   },
   "roles": {
     "admin": "Admin",
@@ -21,6 +23,7 @@
     "addTitle": "Add New User",
     "editTitle": "Update Role / Status",
     "deleteTitle": "Confirm Delete User?",
+    "confirmDelete": "Confirm delete user?",
     "fields": {
       "fullName": "Full Name",
       "email": "Email",
