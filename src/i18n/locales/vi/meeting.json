@@ -48,5 +48,11 @@
   "seats": "chỗ",
   "searchUserPlaceholder": "Gõ tên hoặc email để tìm",
   "noUsersFound": "Không tìm thấy người dùng",
-  "guestEmailTooltip": "Nhập email, nhấn Enter"
+  "guestEmailTooltip": "Nhập email, nhấn Enter",
+  "buttons": {
+    "qrCheckIn": "QR Check-in",
+    "edit": "Sửa",
+    "cancelMeeting": "Hủy họp",
+    "close": "Đóng"
+  }
 }
