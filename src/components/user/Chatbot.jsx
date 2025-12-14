@@ -16,8 +16,9 @@ const Chatbot = () => {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
+  const textareaRef = useRef(null);
 
-  // Tự động cuộn xuống cuối
+    // Tự động cuộn xuống cuối
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -27,6 +28,15 @@ const Chatbot = () => {
   }, [messages, isLoading]);
 
   // Gửi tin nhắn
+  const handleInputChange = (e) => {
+    setInput(e.target.value);
+
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 120) + "px";
+    }
+  };
+
   const handleSend = async (e, manualText = null) => {
     if (e) e.preventDefault();
     
@@ -39,13 +49,18 @@ const Chatbot = () => {
     setInput("");
     setIsLoading(true);
 
+    // Reset textarea height
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+    }
+
     try {
       // 2. Gọi API sang Python Service
       const data = await chatbotService.sendMessage(textToSend);
 
       const botMessage = {
         id: Date.now() + 1,
-        text: data.reply, // AI trả về Markdown
+        text: data.reply,
         sender: "bot",
       };
       setMessages((prev) => [...prev, botMessage]);
@@ -112,7 +127,7 @@ const Chatbot = () => {
                 )}
                 
                 <div
-                  className={`max-w-[85%] p-3 rounded-2xl text-sm leading-relaxed shadow-sm ${
+                  className={`max-w-[85%] p-3 rounded-2xl text-sm leading-relaxed shadow-sm break-words overflow-hidden ${
                     msg.sender === "user"
                       ? "bg-blue-600 text-white rounded-br-none"
                       : `bg-white text-gray-800 border border-gray-200 rounded-bl-none ${msg.isError ? "border-red-200 bg-red-50 text-red-800" : ""}`
@@ -172,21 +187,27 @@ const Chatbot = () => {
           {/* Input Area */}
           <form
             onSubmit={handleSend}
-            className="p-3 bg-white border-t border-gray-100 flex gap-2 items-center"
+            className="p-3 bg-white border-t border-gray-100 flex gap-2 items-end"
           >
-            <input
-              type="text"
+            <textarea
+              ref={textareaRef}
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={handleInputChange}
               placeholder="Nhập yêu cầu (vd: đặt phòng...)"
-              className="flex-1 px-4 py-2.5 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-gray-700 transition-all placeholder:text-gray-400"
+              className="flex-1 px-4 py-2.5 bg-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-gray-700 transition-all placeholder:text-gray-400 resize-none min-h-[40px] max-h-[120px] overflow-y-auto"
               disabled={isLoading}
               autoFocus
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSend(e);
+                }
+              }}
             />
             <button
               type="submit"
               disabled={isLoading || !input.trim()}
-              className="bg-blue-600 hover:bg-blue-700 text-white p-2.5 rounded-full transition-all disabled:bg-gray-300 disabled:cursor-not-allowed shadow-sm hover:shadow-md active:scale-95"
+              className="bg-blue-600 hover:bg-blue-700 text-white p-2.5 rounded-full transition-all disabled:bg-gray-300 disabled:cursor-not-allowed shadow-sm hover:shadow-md active:scale-95 shrink-0"
             >
               <FaPaperPlane className="text-sm ml-0.5" />
             </button>
