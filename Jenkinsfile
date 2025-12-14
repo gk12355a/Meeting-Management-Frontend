@@ -81,20 +81,23 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: "${GIT_CREDENTIALS_ID}", usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
                     sh """
-                        # Cấu hình user commit ảo cho Jenkins
+                        # Cấu hình Git user
                         git config user.name "jenkins-bot"
                         git config user.email "jenkins@ci.com"
                         
-                        # Cấu hình URL có chứa token/pass để push được code
+                        # Cấu hình URL remote
                         git remote set-url origin https://${GIT_USER}:${GIT_PASS}@github.com/gk12355a/meeting-management-frontend.git
                         
-                        # Chỉ add các file thay đổi trong thư mục manifest
+                        # Add các file manifest đã sửa
                         git add ${YAML_DIR}/*.yaml
                         
-                        # Commit với [ci skip] để tránh lặp pipeline
+                        # Commit
                         git commit -m "GitOps: Update Frontend image to ${params.BUILD_TAG} [ci skip]" || echo "No changes to commit"
                         
-                        # Pull code mới nhất về trước khi push (tránh conflict)
+                        # [MỚI] Reset các file thừa (như chmod script) để clean workspace trước khi pull
+                        git reset --hard HEAD
+                        
+                        # Pull code mới nhất về (Rebase)
                         git pull origin ${BRANCH} --rebase
                         
                         # Push lên GitHub
