@@ -2,22 +2,23 @@
 import React, { useState, useRef, useEffect } from "react";
 import { chatbotService } from "../../services/chatbotService";
 import { FaRobot, FaPaperPlane, FaMinus, FaUser } from "react-icons/fa";
-import ReactMarkdown from "react-markdown"; // <-- Import thư viện Markdown
+import ReactMarkdown from "react-markdown";
 
 const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Xin chào! Tôi là trợ lý ảo AI. Tôi có thể giúp bạn đặt lịch, tra cứu phòng họp hoặc giải đáp quy định công ty.",
+      text: "Chào bạn! Tôi là trợ lý AI của MeetFlow, giúp bạn đặt lịch họp và quản lý cuộc họp dễ dàng hơn. Tôi có thể hỗ trợ gì cho bạn?",
       sender: "bot",
     },
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
+  const textareaRef = useRef(null);
 
-  // Tự động cuộn xuống cuối
+    // Tự động cuộn xuống
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -27,25 +28,37 @@ const Chatbot = () => {
   }, [messages, isLoading]);
 
   // Gửi tin nhắn
+  const handleInputChange = (e) => {
+    setInput(e.target.value);
+
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 120) + "px";
+    }
+  };
+
   const handleSend = async (e, manualText = null) => {
     if (e) e.preventDefault();
     
     const textToSend = manualText || input;
     if (!textToSend.trim()) return;
 
-    // 1. UI: Hiển thị tin nhắn user ngay lập tức
     const userMessage = { id: Date.now(), text: textToSend, sender: "user" };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
 
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+    }
+
     try {
-      // 2. Gọi API sang Python Service
+      // Gọi API sang Python Service
       const data = await chatbotService.sendMessage(textToSend);
 
       const botMessage = {
         id: Date.now() + 1,
-        text: data.reply, // AI trả về Markdown
+        text: data.reply,
         sender: "bot",
       };
       setMessages((prev) => [...prev, botMessage]);
@@ -62,7 +75,7 @@ const Chatbot = () => {
     }
   };
 
-  // Các câu hỏi gợi ý (Optional - Theo báo cáo)
+  // Các câu hỏi gợi ý 
   const suggestedQuestions = [
     "Tìm phòng trống chiều nay",
     "Lịch họp của tôi hôm nay",
@@ -81,7 +94,7 @@ const Chatbot = () => {
                 <FaRobot className="text-xl" />
               </div>
               <div>
-                <h3 className="font-bold text-sm">Trợ lý AI (Beta)</h3>
+                <h3 className="font-bold text-sm">Trợ lý AI</h3>
                 <span className="text-[10px] text-blue-100 flex items-center gap-1 opacity-90">
                   <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
                   Sẵn sàng hỗ trợ
@@ -112,7 +125,7 @@ const Chatbot = () => {
                 )}
                 
                 <div
-                  className={`max-w-[85%] p-3 rounded-2xl text-sm leading-relaxed shadow-sm ${
+                  className={`max-w-[85%] p-3 rounded-2xl text-sm leading-relaxed shadow-sm break-words overflow-hidden ${
                     msg.sender === "user"
                       ? "bg-blue-600 text-white rounded-br-none"
                       : `bg-white text-gray-800 border border-gray-200 rounded-bl-none ${msg.isError ? "border-red-200 bg-red-50 text-red-800" : ""}`
@@ -136,7 +149,7 @@ const Chatbot = () => {
               </div>
             ))}
 
-            {/* Loading Indicator (Typing...) */}
+            {/* Loading Indicator */}
             {isLoading && (
               <div className="flex justify-start items-center gap-2">
                  <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
@@ -154,7 +167,7 @@ const Chatbot = () => {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Gợi ý câu hỏi (Chỉ hiện khi không loading và chưa nhập gì) */}
+          {/* Gợi ý câu hỏi */}
           {!isLoading && messages.length < 5 && (
              <div className="px-4 pb-2 bg-gray-50 flex gap-2 overflow-x-auto no-scrollbar">
                 {suggestedQuestions.map((q, idx) => (
@@ -172,21 +185,27 @@ const Chatbot = () => {
           {/* Input Area */}
           <form
             onSubmit={handleSend}
-            className="p-3 bg-white border-t border-gray-100 flex gap-2 items-center"
+            className="p-3 bg-white border-t border-gray-100 flex gap-2 items-end"
           >
-            <input
-              type="text"
+            <textarea
+              ref={textareaRef}
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={handleInputChange}
               placeholder="Nhập yêu cầu (vd: đặt phòng...)"
-              className="flex-1 px-4 py-2.5 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-gray-700 transition-all placeholder:text-gray-400"
+              className="flex-1 px-4 py-2.5 bg-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-gray-700 transition-all placeholder:text-gray-400 resize-none min-h-[40px] max-h-[120px] overflow-y-auto"
               disabled={isLoading}
               autoFocus
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSend(e);
+                }
+              }}
             />
             <button
               type="submit"
               disabled={isLoading || !input.trim()}
-              className="bg-blue-600 hover:bg-blue-700 text-white p-2.5 rounded-full transition-all disabled:bg-gray-300 disabled:cursor-not-allowed shadow-sm hover:shadow-md active:scale-95"
+              className="bg-blue-600 hover:bg-blue-700 text-white p-2.5 rounded-full transition-all disabled:bg-gray-300 disabled:cursor-not-allowed shadow-sm hover:shadow-md active:scale-95 shrink-0"
             >
               <FaPaperPlane className="text-sm ml-0.5" />
             </button>
@@ -202,7 +221,7 @@ const Chatbot = () => {
         >
           <FaRobot className="text-2xl animate-bounce-slow" />
           
-          {/* Badge thông báo (Giả lập) */}
+          {/* Badge thông báo */}
           <span className="absolute top-0 right-0 flex h-3 w-3">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
             <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
@@ -216,7 +235,7 @@ const Chatbot = () => {
         </button>
       )}
 
-      {/* CSS cho Markdown (đơn giản hóa) */}
+      {/* Markdown */}
       <style>{`
         .markdown-body ul { list-style-type: disc; padding-left: 1.5em; margin: 0.5em 0; }
         .markdown-body ol { list-style-type: decimal; padding-left: 1.5em; margin: 0.5em 0; }
