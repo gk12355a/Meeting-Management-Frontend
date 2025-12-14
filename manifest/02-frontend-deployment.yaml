@@ -30,7 +30,7 @@ spec:
           
           resources:
             requests:
-              cpu: 50m
+              cpu: 200m
               memory: 128Mi
       volumes:
         - name: config-volume
