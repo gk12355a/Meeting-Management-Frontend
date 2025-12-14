@@ -43,7 +43,6 @@ const Chatbot = () => {
     const textToSend = manualText || input;
     if (!textToSend.trim()) return;
 
-    // 1. UI: Hiển thị tin nhắn user ngay lập tức
     const userMessage = { id: Date.now(), text: textToSend, sender: "user" };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
@@ -55,7 +54,7 @@ const Chatbot = () => {
     }
 
     try {
-      // 2. Gọi API sang Python Service
+      // Gọi API sang Python Service
       const data = await chatbotService.sendMessage(textToSend);
 
       const botMessage = {
@@ -77,7 +76,7 @@ const Chatbot = () => {
     }
   };
 
-  // Các câu hỏi gợi ý (Optional - Theo báo cáo)
+  // Các câu hỏi gợi ý 
   const suggestedQuestions = [
     "Tìm phòng trống chiều nay",
     "Lịch họp của tôi hôm nay",
