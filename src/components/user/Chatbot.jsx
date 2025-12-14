@@ -2,14 +2,14 @@
 import React, { useState, useRef, useEffect } from "react";
 import { chatbotService } from "../../services/chatbotService";
 import { FaRobot, FaPaperPlane, FaMinus, FaUser } from "react-icons/fa";
-import ReactMarkdown from "react-markdown"; // <-- Import thư viện Markdown
+import ReactMarkdown from "react-markdown";
 
 const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Xin chào! Tôi là trợ lý ảo AI. Tôi có thể giúp bạn đặt lịch, tra cứu phòng họp hoặc giải đáp quy định công ty.",
+      text: "Chào bạn! Tôi là trợ lý AI của MeetFlow, giúp bạn đặt lịch họp và quản lý cuộc họp dễ dàng hơn. Tôi có thể hỗ trợ gì cho bạn?",
       sender: "bot",
     },
   ]);
@@ -18,7 +18,7 @@ const Chatbot = () => {
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
 
-    // Tự động cuộn xuống cuối
+    // Tự động cuộn xuống
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -48,7 +48,6 @@ const Chatbot = () => {
     setInput("");
     setIsLoading(true);
 
-    // Reset textarea height
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
     }
@@ -95,7 +94,7 @@ const Chatbot = () => {
                 <FaRobot className="text-xl" />
               </div>
               <div>
-                <h3 className="font-bold text-sm">Trợ lý AI (Beta)</h3>
+                <h3 className="font-bold text-sm">Trợ lý AI</h3>
                 <span className="text-[10px] text-blue-100 flex items-center gap-1 opacity-90">
                   <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
                   Sẵn sàng hỗ trợ
@@ -150,7 +149,7 @@ const Chatbot = () => {
               </div>
             ))}
 
-            {/* Loading Indicator (Typing...) */}
+            {/* Loading Indicator */}
             {isLoading && (
               <div className="flex justify-start items-center gap-2">
                  <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
@@ -168,7 +167,7 @@ const Chatbot = () => {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Gợi ý câu hỏi (Chỉ hiện khi không loading và chưa nhập gì) */}
+          {/* Gợi ý câu hỏi */}
           {!isLoading && messages.length < 5 && (
              <div className="px-4 pb-2 bg-gray-50 flex gap-2 overflow-x-auto no-scrollbar">
                 {suggestedQuestions.map((q, idx) => (
@@ -222,7 +221,7 @@ const Chatbot = () => {
         >
           <FaRobot className="text-2xl animate-bounce-slow" />
           
-          {/* Badge thông báo (Giả lập) */}
+          {/* Badge thông báo */}
           <span className="absolute top-0 right-0 flex h-3 w-3">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
             <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
@@ -236,7 +235,7 @@ const Chatbot = () => {
         </button>
       )}
 
-      {/* CSS cho Markdown (đơn giản hóa) */}
+      {/* Markdown */}
       <style>{`
         .markdown-body ul { list-style-type: disc; padding-left: 1.5em; margin: 0.5em 0; }
         .markdown-body ol { list-style-type: decimal; padding-left: 1.5em; margin: 0.5em 0; }
