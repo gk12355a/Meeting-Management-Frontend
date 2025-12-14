@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: gk123a/fe:v2 # Image mới đã sửa code
+          image: gk123a/fe:v2 
           imagePullPolicy: IfNotPresent # Hoặc Always
           ports:
             - containerPort: 80 # Nginx mặc định port 80
