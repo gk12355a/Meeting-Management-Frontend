@@ -316,7 +316,7 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
             name="title"
             label={t("form.title")}
             rules={[
-              { required: true, message: t("form.titleRequired") },,
+              { required: true, message: t("form.titleRequired") },
               { min: 3, message: t("form.titleShort") },
             ]}
           >
@@ -588,6 +588,7 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
           {/* GUEST EMAIL */}
           <Form.Item
             name="guestEmails"
+            initialValue={[]} 
             label={t("form.guestEmails")}
             tooltip={t("form.guestTooltip")}
             rules={[

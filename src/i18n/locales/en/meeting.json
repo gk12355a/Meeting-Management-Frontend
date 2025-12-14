@@ -48,5 +48,11 @@
   "seats": "seats",
   "searchUserPlaceholder": "Type name or email to search",
   "noUsersFound": "No users found",
-  "guestEmailTooltip": "Enter email then press Enter"
+  "guestEmailTooltip": "Enter email then press Enter",
+  "buttons": {
+    "qrCheckIn": "QR Check-in",
+    "edit": "Edit",
+    "cancelMeeting": "Cancel meeting",
+    "close": "Close"
+  }
 }

@@ -23,7 +23,9 @@
       "selectTime": "Please select time first",
       "devicesAvailable": "Select available equipment (current kept)",
       "searchUsers": "Search users...",
-      "enterEmail": "Enter email..."
+      "enterEmail": "Enter email...",
+      "selectDatetimeFirst": "Please select date and time first",
+      "selectDevices": "Select equipment"
     },
     "durations": {
       "15min": "15 minutes",
@@ -67,6 +69,12 @@
       "rejectTitle": "Rejection Reason",
       "rejectPlaceholder": "Please enter rejection reason...",
       "confirmReject": "Confirm Rejection"
+    },
+     "confirmModal": {
+      "title": "Update recurring meeting",
+      "desc": "You are changing a meeting in a recurring series. Apply this change to:",
+      "single": "This meeting only",
+      "series": "Entire series (Future meetings)"
     }
   }
 }  

@@ -3,7 +3,7 @@
   "subtitle": "Overview of meeting system and activities",
   "cards": {
     "todayMeetings": "Today's Meetings",
-    "avgDuration": "Average Duration",
+    "avgDuration": "Total meeting duration",
     "upcomingMeetings": "Upcoming Meetings"
   },
   "charts": {

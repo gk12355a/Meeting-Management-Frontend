@@ -750,6 +750,14 @@ useEffect(() => {
             initialView="timeGridWeek"
             locale={calendarLocale}
             buttonText={buttonText}
+            buttonHints={{
+    prev: i18n.language === "vi" ? "Tuần trước" : "Previous",
+    next: i18n.language === "vi" ? "Tuần sau" : "Next",
+    today: i18n.language === "vi" ? "Hôm nay" : "Today",
+    day: i18n.language === "vi" ? "Xem theo ngày" : "Day view",
+    week: i18n.language === "vi" ? "Xem theo tuần" : "Week view",
+    month: i18n.language === "vi" ? "Xem theo tháng" : "Month view",
+  }}
             // BẮT SỰ KIỆN THAY ĐỔI VIEW (CHUYỂN TUẦN / THÁNG / NGÀY)
             datesSet={(arg) => {
   setCurrentViewDate(arg.start);
@@ -866,7 +874,7 @@ useEffect(() => {
               }}
               className="bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/30 dark:hover:bg-purple-800/40 border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300"
             >
-              QR Check-in
+              {t("buttons.qrCheckIn")}
             </Button>
             <Button
               type="primary"
@@ -877,7 +885,7 @@ useEffect(() => {
               }}
               className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500"
             >
-              Sửa
+              {t("buttons.edit")}
             </Button>
             <Button
               danger
@@ -887,7 +895,7 @@ useEffect(() => {
                 setIsModalOpen(false);
               }}
             >
-              Hủy họp
+              {t("buttons.cancelMeeting")}
             </Button>
           </div>
         ) : (
