@@ -37,7 +37,7 @@ const RoomsPage = () => {
         setRooms(res.data || []);
         setProcessedRooms(res.data || []);
       } catch (err) {
-        console.error("Lỗi tải phòng:", err);
+        console.error("Lỗi tải danh sách phòng:", err);
         message.error(t("errorLoadRooms"));
       } finally {
         setLoading(false);
