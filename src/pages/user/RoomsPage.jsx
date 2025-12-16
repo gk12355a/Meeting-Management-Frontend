@@ -37,7 +37,7 @@ const RoomsPage = () => {
         setRooms(res.data || []);
         setProcessedRooms(res.data || []);
       } catch (err) {
-        console.error("Lỗi tải danh sách phòng:", err);
+        console.error("Lỗi tải phòng:", err);
         message.error(t("errorLoadRooms"));
       } finally {
         setLoading(false);
@@ -130,35 +130,35 @@ const RoomsPage = () => {
           />
         </div>
 
-       {/* FILTER SECTION - UI GIỐNG ẢNH MẪU */}
-<div className="flex items-center gap-3">
-  <span className="font-medium text-gray-700 dark:text-gray-300">
-    {t("filterStatus")}
-  </span>
+        {/* FILTER SECTION - UI GIỐNG ẢNH MẪU */}
+        <div className="flex items-center gap-3">
+          <span className="font-medium text-gray-700 dark:text-gray-300">
+            {t("filterStatus")}
+          </span>
 
-  {[
-    { key: "ALL", label: t("filterAll") },
-    { key: "AVAILABLE", label: t("filterAvailable") },
-    { key: "UNDER_MAINTENANCE", label: t("filterMaintenance") },
-  ].map((btn) => {
-    const isAll = btn.key === "ALL";
-    const isActive =
-      (isAll && filterStatus.length === 0) ||
-      (!isAll && filterStatus[0] === btn.key);
+          {[
+            { key: "ALL", label: t("filterAll") },
+            { key: "AVAILABLE", label: t("filterAvailable") },
+            { key: "UNDER_MAINTENANCE", label: t("filterMaintenance") },
+          ].map((btn) => {
+            const isAll = btn.key === "ALL";
+            const isActive =
+              (isAll && filterStatus.length === 0) ||
+              (!isAll && filterStatus[0] === btn.key);
 
-    const handleClick = () => {
-      if (isAll) {
-        setFilterStatus([]);
-      } else {
-        setFilterStatus([btn.key]);  // CHỈ GIỮ 1 GIÁ TRỊ
-      }
-    };
+            const handleClick = () => {
+              if (isAll) {
+                setFilterStatus([]);
+              } else {
+                setFilterStatus([btn.key]); // CHỈ GIỮ 1 GIÁ TRỊ
+              }
+            };
 
-    return (
-      <button
-        key={btn.key}
-        onClick={handleClick}
-        className={`
+            return (
+              <button
+                key={btn.key}
+                onClick={handleClick}
+                className={`
           flex items-center gap-2 px-4 py-1.5 rounded-xl border text-sm font-medium transition-all
           ${
             isActive
@@ -166,9 +166,9 @@ const RoomsPage = () => {
               : "bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700"
           }
         `}
-      >
-        <span
-          className={`
+              >
+                <span
+                  className={`
             w-3.5 h-3.5 rounded-sm border-2 flex-shrink-0
             ${
               isActive
@@ -176,13 +176,13 @@ const RoomsPage = () => {
                 : "border-gray-400 dark:border-gray-500"
             }
           `}
-        />
-        {btn.label}
-      </button>
-    );
-  })}
-</div>
-</div>
+                />
+                {btn.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
       {/* ROOM LIST */}
       {loading ? (
@@ -224,9 +224,10 @@ const RoomsPage = () => {
                   </div>
 
                   <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300 mt-2">
-                    <FiUsers size={14} /> {t("capacity")}: {room.capacity} {t("people")}
+                    <FiUsers size={14} /> {t("capacity")}: {room.capacity}{" "}
+                    {t("people")}
                   </p>
-                  
+
                   {/* === HIỂN THỊ THIẾT BỊ === */}
                   <div className="flex items-start gap-2 text-gray-700 dark:text-gray-300 mt-2">
                     <FiMonitor size={14} className="mt-1.5 flex-shrink-0" />
