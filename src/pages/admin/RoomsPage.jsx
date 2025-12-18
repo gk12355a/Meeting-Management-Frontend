@@ -519,7 +519,9 @@ if (val && !formData.fixedDevices.includes(val)) {
       key={i}
       className="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 rounded text-xs border border-blue-100 dark:border-blue-800"
     >
-      {t(`rooms:modal.equipment.list.${key}`)}
+      {DEVICE_MAP_REVERSE[key]
+  ? t(`rooms:modal.equipment.list.${key}`)
+  : key}
     </span>
   );
 })}
@@ -717,7 +719,9 @@ if (val && !formData.fixedDevices.includes(val)) {
                         key={index}
                         className="inline-flex items-center gap-1 px-2.5 py-1 bg-white dark:bg-gray-800 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 rounded-full text-sm shadow-sm"
                       >
-                        {t(`rooms:modal.equipment.list.${device}`)}
+                        {DEVICE_MAP_REVERSE[device]
+  ? t(`rooms:modal.equipment.list.${device}`)
+  : device}
                         <button
                           type="button"
                           onClick={() => handleRemoveDevice(device)}
