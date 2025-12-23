@@ -10,7 +10,7 @@
   "room": "Phòng họp",
   "device": "Thiết bị",
   "meetingName": "Tên cuộc họp",
-  "description": "Mô tả",
+  "description": "Đừng chờ đợi - Hãy tạo cuộc họp của bạn ngay bây giờ!",
   "organizer": "Người tổ chức",
   "participants": "Người tham gia",
   "startTime": "Thời gian bắt đầu",
@@ -31,6 +31,8 @@
   "successDelete": "Xóa cuộc họp thành công",
   "errorLoadMeeting": "Không tải được thông tin cuộc họp",
   "errorTimeInvalid": "Thời gian kết thúc phải lớn hơn thời gian bắt đầu",
+  "meetingNote": "Ghi chú",
+  "meetingNotePlaceholder": "Nhập mô tả hoặc ghi chú cho cuộc họp...",
   "modal": {
     "upcomingMeetings": "Cuộc họp sắp tới",
     "location": "Địa điểm",
@@ -38,6 +40,19 @@
     "organizer": "Người tổ chức",
     "unknown": "Chưa xác định",
     "noMeetings": "Không có cuộc họp.",
+    "close": "Đóng"
+  },
+  "timeHour": "Giờ",
+  "timeMinute": "Phút",
+  "customHour": "Khác (giờ)",
+  "seats": "chỗ",
+  "searchUserPlaceholder": "Gõ tên hoặc email để tìm",
+  "noUsersFound": "Không tìm thấy người dùng",
+  "guestEmailTooltip": "Nhập email, nhấn Enter",
+  "buttons": {
+    "qrCheckIn": "QR Check-in",
+    "edit": "Sửa",
+    "cancelMeeting": "Hủy họp",
     "close": "Đóng"
   }
 }

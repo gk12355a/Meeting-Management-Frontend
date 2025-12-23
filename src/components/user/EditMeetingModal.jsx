@@ -26,7 +26,12 @@ import {
 import { searchUsers } from "../../services/userService";
 import { getAvailableDevices } from "../../services/deviceService";
 import { useAuth } from "../../context/AuthContext";
-import { Underline } from "lucide-react";
+import { useTranslation } from "react-i18next";
+
+// MUI STATIC TIME PICKER
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { StaticTimePicker } from "@mui/x-date-pickers/StaticTimePicker";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 dayjs.locale("vi");
 dayjs.extend(utc);
@@ -46,6 +51,8 @@ const DAYS_OF_WEEK_OPTIONS = [
 ];
 
 const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
+  const { t } = useTranslation(['userEdit', 'common']);
+
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [rooms, setRooms] = useState([]);
@@ -73,8 +80,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
 
   // Watch form values
   const watchedDate = Form.useWatch("date", form);
-  const watchedHour = Form.useWatch("hour", form);
-  const watchedMinute = Form.useWatch("minute", form);
+  const watchedTime = Form.useWatch("time", form);
   const watchedDuration = Form.useWatch("duration", form);
   
   /* LOAD ROOMS */
@@ -86,11 +92,11 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
         const res = await getRooms();
         setRooms(res.data || []);
       } catch (e) {
-        toast.error("Không thể tải danh sách phòng họp!");
+        toast.error(t('userEdit:edit.messages.loadRoomsError')); // ({/* "Không thể tải danh sách phòng họp!" */})
       }
     };
     fetchData();
-  }, [open, meetingDetail]);
+  }, [open, meetingDetail]); 
 
   /* POPULATE FORM */
   useEffect(() => {
@@ -105,15 +111,14 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
     setIsRecurring(isSeries); // Cập nhật state
 
     // Mặc định ẩn tùy chọn lặp lại cho gọn, user check vào mới hiện
-    setShowRecurringOptions(false); 
+    setShowRecurringOptions(false);
 
     setClockValue(startTime);
 
     form.setFieldsValue({
       title: meetingDetail.title,
       date: startTime,
-      hour: startTime.hour(),
-      minute: startTime.minute(),
+      time: startTime,
       duration: duration,
       roomId: meetingDetail.room?.id,
       deviceIds: meetingDetail.devices?.map((d) => d.id) || [],
@@ -125,7 +130,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
 
       // Recurrence fields
       isRecurring: isSeries, // Set giá trị cho checkbox
-      frequency: meetingDetail.recurrenceRule?.frequency || "DAILY",
+      frequencies: meetingDetail.recurrenceRule?.frequencies || "DAILY",
       repeatUntil: meetingDetail.recurrenceRule?.repeatUntil
         ? dayjs(meetingDetail.recurrenceRule.repeatUntil)
         : undefined,
@@ -147,7 +152,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
   }, [meetingDetail, open, form, user]);
 
   /* LOAD DEVICES */
-  const loadDevicesForTime = async (dateObj, timeObj, duration) => {
+  const loadDevicesForTime = async (date, time, duration) => {
     if (!date || !time || !duration) {
       setAvailableDevices([]);
       return;
@@ -175,24 +180,19 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
       setAvailableDevices(merged);
     } catch (err) {
       console.error(err);
-      toast.error("Không thể tải thiết bị khả dụng!");
+      toast.error(t('userEdit:edit.messages.loadDevicesError')); // ({/* "Không thể tải thiết bị khả dụng!" */})
     } finally {
       setDevicesLoading(false);
     }
   };
 
   useEffect(() => {
-  if (watchedDate == null || watchedHour == null || watchedMinute == null || watchedDuration == null) return;
-
-  const dateObj = dayjs(watchedDate);
-  const timeObj = dayjs().hour(watchedHour).minute(watchedMinute);
-
-  const t = setTimeout(() => {
-    loadDevicesForTime(dateObj, timeObj, watchedDuration);
-  }, 500);
-
-  return () => clearTimeout(t);
-}, [watchedDate, watchedHour, watchedMinute, watchedDuration]);
+    if (!watchedDate || !watchedTime || !watchedDuration) return;
+    const t = setTimeout(() => {
+      loadDevicesForTime(watchedDate, watchedTime, watchedDuration);
+    }, 500);
+    return () => clearTimeout(t);
+  }, [watchedDate, watchedTime, watchedDuration]);
 
   /* SEARCH USERS */
   const handleSearchUsers = (query) => {
@@ -207,15 +207,16 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
         const res = await searchUsers(query);
         setSearchResults((res.data || []).filter((u) => u.id !== user?.id));
       } catch {
-        toast.error("Không thể tìm kiếm người dùng.");
+        toast.error(t('userEdit:edit.messages.searchUserError')); // ({/* "Không thể tìm kiếm người dùng." */})
       } finally {
         setIsSearching(false);
       }
     }, 500);
   };
 
-  const validateBusinessTime = (hour,minute) => {
-    const totalMin = hour * 60 + minute;
+  const validateBusinessTime = (value) => {
+    if (!value) return false;
+    const totalMin = value.hour() * 60 + value.minute();
     return totalMin >= 480 && totalMin <= 1080;
   };
 
@@ -223,9 +224,9 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
   const handleSubmit = async (values) => {
     // 1. Validate cơ bản
     const date = values.date;
-    const time = dayjs().hour(values.hour).minute(values.minute);
-    if (!validateBusinessTime(values.hour, values.minute)) {
-      toast.error("Chỉ được đặt lịch từ 08:00 đến 18:00!");
+    const time = dayjs(values.time);
+    if (!validateBusinessTime(time)) {
+      toast.error(t('userEdit:edit.messages.businessHoursOnly')); // ({/* "Chỉ được đặt lịch từ 08:00 đến 18:00!" */})
       return;
     }
 
@@ -246,7 +247,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
 
     try {
       const date = values.date;
-      const time = dayjs().hour(values.hour).minute(values.minute);
+      const time = dayjs(values.time);
 
       const startUTC = dayjs.utc()
         .year(date.year()).month(date.month()).date(date.date())
@@ -277,17 +278,17 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
       else if (mode === 'SERIES') {
         // Validate ngày kết thúc cho chuỗi
         if (!values.repeatUntil || dayjs(values.repeatUntil).isBefore(dayjs(), 'day')) {
-            toast.error("Ngày kết thúc lặp lại không hợp lệ (phải ở tương lai)!");
+            toast.error(t('userEdit:edit.messages.invalidRepeatUntil')); // ({/* "Ngày kết thúc lặp lại không hợp lệ (phải ở tương lai)!" */})
             setLoading(false);
             return;
         }
 
         // Thêm thông tin Recurrence Rule vào payload
         payload.recurrenceRule = {
-          frequency: values.frequency || "DAILY",
+          frequency: values.frequencies || "DAILY",
           interval: 1,
           repeatUntil: dayjs(values.repeatUntil).format("YYYY-MM-DD"),
-          daysOfWeek: values.frequency === 'WEEKLY' ? values.daysOfWeek : null
+          daysOfWeek: values.frequencies === 'WEEKLY' ? values.daysOfWeek : null
         };
 
         // Gọi API seriesId
@@ -296,20 +297,23 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
 
       // Xử lý phản hồi
       if (res.data?.status === "PENDING_APPROVAL") {
-        toast.info("📝 Yêu cầu chỉnh sửa đã được gửi và đang chờ Admin phê duyệt.", { autoClose: 5000 });
+        toast.info(t('userEdit:edit.messages.pendingApproval'), { autoClose: 5000 }); // ({/* "📝 Yêu cầu chỉnh sửa..." */})
       } else {
-        toast.success(mode === 'SERIES' ? "Cập nhật chuỗi cuộc họp thành công!" : "Cập nhật cuộc họp thành công!");
+        toast.success(mode === 'SERIES'
+          ? t('userEdit:edit.messages.updateSeriesSuccess') // ({/* "Cập nhật chuỗi cuộc họp thành công!" */})
+          : t('userEdit:edit.messages.updateSuccess') // ({/* "Cập nhật cuộc họp thành công!" */})
+        );
       }
 
       onSuccess?.();
       onCancel();
     } catch (err) {
       console.error("Lỗi update:", err);
-      const msg = err?.response?.data?.message || "Không thể cập nhật cuộc họp!";
+      const msg = err?.response?.data?.message || t('userEdit:edit.messages.updateError'); // ({/* "Không thể cập nhật cuộc họp!" */})
       if (err.response?.status === 409) {
-        toast.error(`Xung đột lịch: ${msg}`);
-      } else if (msg.toLowerCase().includes("bảo trì")) {
-        toast.error("Phòng hoặc thiết bị đang bảo trì!");
+        toast.error(t('userEdit:edit.messages.conflict', { msg })); // ({/* Xung đột lịch: ${msg} */})
+      } else if ((msg || "").toLowerCase().includes("bảo trì")) {
+        toast.error(t('userEdit:edit.messages.maintenanceError')); // ({/* "Phòng hoặc thiết bị đang bảo trì!" */})
       } else {
         toast.error(msg);
       }
@@ -329,9 +333,11 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
         closable={!loading}
         maskClosable={!loading}
         title={
+          // ({/* <span>Chỉnh sửa cuộc họp</span> */}
           <span className="flex items-center gap-2 dark:text-white text-lg font-semibold">
-            <FiEdit /> Chỉnh sửa cuộc họp
+            <FiEdit /> {t('userEdit:edit.title')}
           </span>
+          // )
         }
         className="dark:[&_.ant-modal-content]:bg-gray-800 dark:[&_.ant-modal-content]:text-gray-100 
                   dark:[&_.ant-modal-header]:bg-gray-800 dark:[&_.ant-modal-header]:border-b-gray-700"
@@ -353,102 +359,120 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
             {/* TITLE */}
             <Form.Item
               name="title"
-              label="Tên cuộc họp"
+              // ({/* label="Tên cuộc họp" */}
+              label={t('userEdit:edit.fields.meetingName')}
+              // )
               rules={[{ required: true }, { min: 3 }]}
             >
-              <Input placeholder="Nhập tên cuộc họp..." className="dark:bg-gray-700 dark:text-white dark:border-gray-600" />
+              {/* <Input placeholder="Nhập tên cuộc họp..." ... */}
+              <Input placeholder={t('userEdit:edit.placeholders.meetingName')} className="dark:bg-gray-700 dark:text-white dark:border-gray-600" />
+              {/* ) */}
             </Form.Item>
 
             {/* DATE - TIME - DURATION */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <Form.Item
                 name="date"
-                label="Ngày họp"
+                // ({/* label="Ngày họp" */}
+                label={t('userEdit:edit.fields.date')}
+                // )
                 rules={[{ required: true }]}
               >
                 <DatePicker
                   className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
                   format="DD/MM/YYYY"
                   disabledDate={(d) =>
-                    d &&
-                    (d < dayjs().startOf("day") ||
-                      d.day() === 0 ||
-                      d.day() === 6)
+                    d && d < dayjs().startOf("day")
                   }
                 />
               </Form.Item>
 
-              {/* TIME PICKER */}
-                          <Form.Item label="Giờ bắt đầu" required>
-                <div className="grid grid-cols-2 gap-2">
-                  {/* SELECT GIỜ */}
-                  <Form.Item
-                    name="hour"
-                    noStyle
-                    rules={[{ required: true, message: "Chọn giờ" }]}
-                  >
-                    <Select
-                      placeholder="Giờ"
-                      onChange={(h) => {
-                        const m = form.getFieldValue("minute") ?? 0;
-                        form.setFieldsValue({
-                          time: dayjs().hour(h).minute(m),
-                        });
-                      }}
-                    >
-                      {Array.from({ length: 11 }, (_, i) => i + 8 ).map((h) => (
-                        <Select.Option key={h} value={h}>
-                          {String(h).padStart(2, "0")}
-                        </Select.Option>
-                      ))}
-                    </Select>
-                  </Form.Item>
-              
-                  {/* SELECT PHÚT */}
-                  <Form.Item
-                    name="minute"
-                    noStyle
-                    rules={[{ required: true, message: "Chọn phút" }]}
-                  >
-                    <Select
-                      placeholder="Phút"
-                      onChange={(m) => {
-                        const h = form.getFieldValue("hour") ?? 8;
-                        form.setFieldsValue({
-                          time: dayjs().hour(h).minute(m),
-                        });
-                      }}
-                    >
-                      {Array.from({ length: 60 }, (_, i) => i).map((m) => (
-                        <Select.Option key={m} value={m}>
-                          {String(m).padStart(2, "0")}
-                        </Select.Option>
-                      ))}
-                    </Select>
-                  </Form.Item>
+              <Form.Item
+                name="time"
+                // ({/* label="Giờ bắt đầu" */}
+                label={t('userEdit:edit.fields.startTime')}
+                // )
+                rules={[{ required: true }]}
+              >
+                <div className="flex gap-2">
+                  <Input
+                    readOnly
+                    value={clockValue.format("HH:mm")}
+                    onClick={() => setClockOpen(true)}
+                    className="dark:bg-gray-700 dark:text-white dark:border-gray-600 cursor-pointer"
+                  />
+
+                  {/* <Button onClick={() => setClockOpen(true)}>Chọn giờ</Button> */}
+                  <Button onClick={() => setClockOpen(true)}>{t('userEdit:edit.buttons.selectTime')}</Button>
+                  {/* ) */}
                 </div>
+                <Modal
+                  // ({/* title="Chọn giờ họp (08:00 - 18:00)" */}
+                  title={t('userEdit:edit.placeholders.selectTimeModal')}
+                  // )
+                  open={clockOpen}
+                  onCancel={() => setClockOpen(false)}
+                  onOk={() => {
+                    if (!validateBusinessTime(clockValue)) {
+                      toast.error(t('userEdit:edit.messages.businessHoursOnly')); // ({/* "Chỉ được đặt 08:00 - 18:00!" */})
+                      return;
+                    }
+                    form.setFieldsValue({ time: clockValue });
+                    setClockOpen(false);
+                  }}
+                  width={350}
+                  centered
+                >
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <StaticTimePicker
+                      orientation="portrait"
+                      ampm={false}
+                      value={clockValue}
+                      onChange={(v) => setClockValue(v)}
+                      slotProps={{ actionBar: { actions: [] } }}
+                    />
+                  </LocalizationProvider>
+                </Modal>
               </Form.Item>
 
               <Form.Item
                 name="duration"
-                label="Thời lượng"
+                // ({/* label="Thời lượng" */}
+                label={t('userEdit:edit.fields.duration')}
+                // )
                 rules={[{ required: true }]}
               >
                 <Select className="dark:bg-gray-700 dark:text-white dark:border-gray-600">
+                  {/* 
                   <Option value={15}>15 phút</Option>
                   <Option value={30}>30 phút</Option>
                   <Option value={45}>45 phút</Option>
                   <Option value={60}>1 giờ</Option>
                   <Option value={90}>1 giờ 30 phút</Option>
                   <Option value={120}>2 giờ</Option>
+                  */}
+                  <Option value={15}>{t('userEdit:edit.durations.15min')}</Option>
+                  <Option value={30}>{t('userEdit:edit.durations.30min')}</Option>
+                  <Option value={45}>{t('userEdit:edit.durations.45min')}</Option>
+                  <Option value={60}>{t('userEdit:edit.durations.1hour')}</Option>
+                  <Option value={90}>{t('userEdit:edit.durations.1hour30')}</Option>
+                  <Option value={120}>{t('userEdit:edit.durations.2hours')}</Option>
                 </Select>
               </Form.Item>
             </div>
 
             {/* ROOM SELECT */}
-            <Form.Item name="roomId" label="Phòng họp" rules={[{ required: true }]}>
+            <Form.Item 
+              name="roomId" 
+              // ({/* label="Phòng họp" */}
+              label={t('userEdit:edit.fields.room')}
+              // )
+              rules={[{ required: true }]}
+            >
               <Select
-                placeholder="-- Chọn phòng họp --"
+                // ({/* placeholder="-- Chọn phòng họp --" */})
+                placeholder={t('userEdit:edit.placeholders.selectRoom')}
+                // )
                 optionLabelProp="label"
                 className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
                 classNames={{ popup: "dark:bg-gray-700 dark:text-gray-100" }}
@@ -462,10 +486,14 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
                   >
                     <div className="flex justify-between items-center">
                       <span>
-                        {r.name} ({r.capacity} chỗ)
+                        {r.name} ({r.capacity} {/* chỗ giữ nguyên */})
                       </span>
                       <Tag color={r.status === "AVAILABLE" ? "green" : "red"}>
-                        {r.status === "AVAILABLE" ? "Có sẵn" : "Bảo trì"}
+                        {/* {r.status === "AVAILABLE" ? "Có sẵn" : "Bảo trì"} */}
+                        {r.status === "AVAILABLE"
+                          ? t('userEdit:edit.status.available')
+                          : t('userEdit:edit.status.maintenance')}
+                        {/* ) */}
                       </Tag>
                     </div>
                   </Option>
@@ -474,13 +502,19 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
             </Form.Item>
 
             {/* DEVICES */}
-            <Form.Item name="deviceIds" label="Thiết bị sử dụng">
+            <Form.Item 
+              name="deviceIds" 
+              // ({/* label="Thiết bị sử dụng" */}
+              label={t('userEdit:edit.fields.devices')}
+              // )
+            >
               <Select
                 mode="multiple"
+                optionLabelProp="label"
                 placeholder={
-                  !watchedDate || !watchedHour == null || !watchedMinute == null
-                    ? "Vui lòng chọn thời gian trước"
-                    : "Chọn thiết bị khả dụng (hiện tại được giữ lại)"
+                  !watchedDate || !watchedTime
+                    ? t('userEdit:edit.placeholders.selectDatetimeFirst')
+                    : t('userEdit:edit.placeholders.selectDevices')
                 }
                 loading={devicesLoading}
                 disabled={devicesLoading}
@@ -488,10 +522,16 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
                 classNames={{ popup: "dark:bg-gray-700 dark:text-gray-100" }}
               >
                 {availableDevices.map((d) => (
-                  <Option key={d.id} value={d.id} disabled={d.status !== "AVAILABLE"}>
+                  <Option key={d.id} value={d.id} label={d.name} disabled={d.status !== "AVAILABLE"}>
                     <div className="flex justify-between items-center">
                       <span>{d.name}</span>
-                      <Tag color={d.status === "AVAILABLE" ? "green" : "red"}>{d.status === "AVAILABLE" ? "Có sẵn" : "Bảo trì"}</Tag>
+                      <Tag color={d.status === "AVAILABLE" ? "green" : "red"}>
+                        {/* {d.status === "AVAILABLE" ? "Có sẵn" : "Bảo trì"} */}
+                        {d.status === "AVAILABLE"
+                          ? t('userEdit:edit.status.available')
+                          : t('userEdit:edit.status.maintenance')}
+                        {/* ) */}
+                      </Tag>
                     </div>
                   </Option>
                 ))}
@@ -501,11 +541,15 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
             <Divider className="dark:border-gray-700" />
 
             {/* PARTICIPANTS */}
-            <Form.Item label="Người tham gia (Nội bộ)" name="participantIds">
+            <Form.Item 
+              // ({/* label="Người tham gia (Nội bộ)" */}
+              label={t('userEdit:edit.fields.participants')}
+              // ) 
+              name="participantIds">
               <Select
                 mode="multiple"
                 showSearch
-                placeholder="Tìm kiếm người dùng..."
+                placeholder={t('userEdit:edit.placeholders.searchUsers')}
                 filterOption={false}
                 onSearch={handleSearchUsers}
                 loading={isSearching}
@@ -521,19 +565,26 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
             {/* GUEST EMAILS */}
             <Form.Item 
               name="guestEmails" 
-              label={<span><FiMail className="inline mr-2" />Email khách mời</span>}
+              // ({/* label={<span><FiMail className="inline mr-2" />Email khách mời</span>} */}
+              label={
+                <span>
+                  <FiMail className="inline mr-2" />
+                  {t('userEdit:edit.fields.guestEmails')}
+                </span>
+              }
+              // )
               rules={[{
                 validator: (_, v) => {
                   if (!v || !v.length) return Promise.resolve();
                   const invalid = v.filter(e => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e));
-                  return invalid.length ? Promise.reject(`Email sai: ${invalid.join(', ')}`) : Promise.resolve();
+                  return invalid.length ? Promise.reject(`${t('userEdit:edit.messages.invalidEmail')}: ${invalid.join(', ')}`) : Promise.resolve();
                 }
               }]}
             >
               <Select 
                 mode="tags" 
                 tokenSeparators={[',', ';', ' ']} 
-                placeholder="Nhập email..." 
+                placeholder={t('userEdit:edit.placeholders.enterEmail')}
                 className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
                 classNames={{ popup: "dark:bg-gray-700 dark:text-gray-100" }}
               />
@@ -544,36 +595,55 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
             {meetingDetail?.seriesId && (
               <>
                 <Form.Item name="isRecurring" valuePropName="checked" className="mb-1">
+                  {/* ({/* "Cập nhật lặp lại (Áp dụng cho toàn bộ chuỗi)" */}
                   <Checkbox className="dark:text-gray-200">
-                    Cập nhật lặp lại (Áp dụng cho toàn bộ chuỗi)
+                    {t('userEdit:edit.fields.recurring')}
                   </Checkbox>
+                  {/* ) */}
                 </Form.Item>
 
                 {showRecurringOptions && (
                   <div className="bg-gray-50 dark:bg-slate-800 p-4 rounded-lg mb-4 border border-gray-200 dark:border-gray-700">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                      <Form.Item name="frequency" label="Tần suất">
+                      <Form.Item 
+                        name="frequencies" 
+                        // ({/* label="Tần suất" */}
+                        label={t('userEdit:edit.fields.frequency')}
+                        // )
+                      >
                         <Select className="dark:bg-gray-700 dark:text-white dark:border-gray-600">
-                          <Option value="DAILY">Hằng ngày</Option>
-                          <Option value="WEEKLY">Hằng tuần</Option>
-                          <Option value="MONTHLY">Hằng tháng</Option>
+                          <Option value="DAILY">{t('userEdit:edit.frequencies.daily')}</Option>
+                          <Option value="WEEKLY">{t('userEdit:edit.frequencies.weekly')}</Option>
+                          <Option value="MONTHLY">{t('userEdit:edit.frequencies.monthly')}</Option>
                         </Select>
                       </Form.Item>
-                      <Form.Item name="repeatUntil" label="Đến ngày" rules={[{ required: isRecurring }]}>
+                      <Form.Item 
+                        name="repeatUntil" 
+                        // ({/* label="Đến ngày" */}
+                        label={t('userEdit:edit.fields.repeatUntil')}
+                        // )
+                        rules={[{ required: isRecurring }]}
+                      >
                         <DatePicker
                           format="DD/MM/YYYY"
                           className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                          disabledDate={(c) => c && (c <= dayjs().startOf("day") || c.day() === 0 || c.day() === 6)}
+                          disabledDate={(c) => c && c <= dayjs().startOf("day")}
                         />
                       </Form.Item>
                     </div>
                     {/* CHỌN THỨ (NẾU LÀ WEEKLY) */}
                     <Form.Item 
-                      shouldUpdate={(prev, curr) => prev.frequency !== curr.frequency}
+                      shouldUpdate={(prev, curr) => prev.frequencies !== curr.frequencies}
                     >
                       {({ getFieldValue }) => 
-                        getFieldValue('frequency') === 'WEEKLY' ? (
-                          <Form.Item name="daysOfWeek" label="Lặp lại vào các thứ" rules={[{ required: true, message: "Chọn ít nhất một ngày" }]}>
+                        getFieldValue('frequencies') === 'WEEKLY' ? (
+                          <Form.Item 
+                            name="daysOfWeek" 
+                            // ({/* label="Lặp lại vào các thứ" */}
+                            label={t('userEdit:edit.fields.daysOfWeek')}
+                            // )
+                            rules={[{ required: true, message: t('userEdit:edit.messages.selectDayOfWeek') }]}
+                          >
                             <Checkbox.Group options={DAYS_OF_WEEK_OPTIONS} className="dark:text-gray-200" />
                           </Form.Item>
                         ) : null
@@ -584,13 +654,20 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
               </>
             )}
 
-            <Form.Item name="description" label="Ghi chú">
+            <Form.Item 
+              name="description" 
+              // ({/* label="Ghi chú" */}
+              label={t('userEdit:edit.fields.notes')}
+              // )
+            >
               <TextArea rows={3} className="dark:bg-gray-700 dark:text-white dark:border-gray-600" />
             </Form.Item>
 
             <div className="flex justify-end gap-3 mt-6">
               <Button onClick={onCancel} disabled={loading}>
-                Hủy
+                {/* ({/* "Hủy" */}
+                <span>{t('common:buttons.cancel')}</span>
+                {/* ) */}
               </Button>
               <Button
                 type="primary"
@@ -598,7 +675,9 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
                 loading={loading}
                 className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600"
               >
-                Cập nhật
+                {/* ({/* "Cập nhật" */}
+                <span>{t('userEdit:edit.buttons.update')}</span>
+                {/* ) */}
               </Button>
             </div>
           </Form>
@@ -607,7 +686,13 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
 
       {/* MODAL XÁC NHẬN SỬA 1 HAY SỬA CHUỖI */}
       <Modal
-        title={<span className="flex items-center gap-2"><FiCalendar /> Cập nhật cuộc họp định kỳ</span>}
+        // ({/* title={<span className="flex items-center gap-2"><FiCalendar /> Cập nhật cuộc họp định kỳ</span>} */}
+        title={
+          <span className="flex items-center gap-2">
+            <FiCalendar /> {t('userEdit:edit.confirmModal.title')}
+          </span>
+        }
+        // )
         open={confirmModalOpen}
         onCancel={() => setConfirmModalOpen(false)}
         footer={null}
@@ -617,7 +702,9 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
       >
         <div className="p-2">
           <p className="mb-4 text-gray-600 dark:text-gray-300">
-            Bạn đang thay đổi một cuộc họp trong chuỗi định kỳ. Bạn muốn áp dụng thay đổi này cho:
+            {/* ({/* "Bạn đang thay đổi một cuộc họp trong chuỗi định kỳ. Bạn muốn áp dụng thay đổi này cho:" */}
+            {t('userEdit:edit.confirmModal.desc')}
+            {/* ) */}
           </p>
           <div className="flex flex-col gap-3">
             <Button 
@@ -626,7 +713,9 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
               onClick={() => executeUpdate(pendingValues, 'SINGLE')}
               className="dark:bg-gray-700 dark:text-white dark:border-gray-600 h-12 font-medium"
             >
-              Chỉ cuộc họp này
+              {/* ({/* "Chỉ cuộc họp này" */}
+              <span>{t('userEdit:edit.confirmModal.single')}</span>
+              {/* ) */}
             </Button>
             <Button 
               block 
@@ -635,11 +724,17 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
               onClick={() => executeUpdate(pendingValues, 'SERIES')}
               className="bg-blue-600 h-12 font-medium"
             >
-              Toàn bộ chuỗi (Các cuộc họp tương lai)
+              {/* ({/* "Toàn bộ chuỗi (Các cuộc họp tương lai)" */}
+              <span>{t('userEdit:edit.confirmModal.series')}</span>
+              {/* ) */}
             </Button>
           </div>
           <div className="mt-4 text-right">
-             <Button type="text" onClick={() => setConfirmModalOpen(false)}>Hủy bỏ</Button>
+             <Button type="text" onClick={() => setConfirmModalOpen(false)}>
+                {/* ({/* "Hủy bỏ" */}
+                <span>{t('common:buttons.cancel')}</span>
+                {/* ) */}
+             </Button>
           </div>
         </div>
       </Modal>

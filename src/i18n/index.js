@@ -13,6 +13,24 @@ import viReports from './locales/vi/reports.json';
 import viAuth from './locales/vi/auth.json';      
 import viMeeting from './locales/vi/meeting.json';
 import viUserDashboard from './locales/vi/userDashboard.json';
+import userSidebar_vi from "./locales/vi/userSidebar.json";
+import meetingDetail_vi from "./locales/vi/meetingDetail.json";
+import userRooms_vi from "./locales/vi/userRooms.json";
+import userDevices_vi from "./locales/vi/userDevices.json";
+import userHistory_vi from "./locales/vi/userHistory.json";
+import quickBook_vi from "./locales/vi/quickBook.json";
+import profile_vi from "./locales/vi/profile.json";
+import changePassword_vi from "./locales/vi/changePassword.json";
+import roomCalendar_vi from "./locales/vi/roomCalendar.json";
+import roomSchedule_vi from "./locales/vi/roomSchedule.json";
+import bookRoom_vi from "./locales/vi/bookRoom.json";
+import deleteMeeting_vi from "./locales/vi/deleteMeeting.json";
+import viUserHeader from './locales/vi/userHeader.json';
+import viThemeToggle from './locales/vi/themeToggle.json';
+import viCheckIn from './locales/vi/checkIn.json';
+import viQr from './locales/vi/qr.json';
+import viUserEdit from './locales/vi/userEdit.json';
+import bookDevices_vi from './locales/vi/bookDevices.json';
 
 import enCommon from './locales/en/common.json';
 import enAdmin from './locales/en/admin.json';
@@ -24,6 +42,24 @@ import enReports from './locales/en/reports.json';
 import enAuth from './locales/en/auth.json';         
 import enMeeting from './locales/en/meeting.json';
 import enUserDashboard from './locales/en/userDashboard.json';
+import userSidebar_en from "./locales/en/userSidebar.json";
+import meetingDetail_en from "./locales/en/meetingDetail.json";
+import userRooms_en from "./locales/en/userRooms.json";
+import userDevices_en from "./locales/en/userDevices.json";
+import userHistory_en from "./locales/en/userHistory.json";
+import quickBook_en from "./locales/en/quickBook.json";
+import profile_en from "./locales/en/profile.json";
+import changePassword_en from "./locales/en/changePassword.json";
+import roomCalendar_en from "./locales/en/roomCalendar.json";
+import roomSchedule_en from "./locales/en/roomSchedule.json";
+import bookRoom_en from "./locales/en/bookRoom.json";
+import deleteMeeting_en from "./locales/en/deleteMeeting.json";
+import enUserHeader from './locales/en/userHeader.json';
+import enThemeToggle from './locales/en/themeToggle.json';
+import enCheckIn from './locales/en/checkIn.json';
+import enQr from './locales/en/qr.json';
+import enUserEdit from './locales/en/userEdit.json';
+import bookDevices_en from './locales/en/bookDevices.json';
 
 // Lấy ngôn ngữ đã lưu hoặc mặc định là 'vi' (tiếng việt)
 const savedLanguage = localStorage.getItem('language') || 'vi';
@@ -42,7 +78,25 @@ i18n
         reports: viReports,
         auth: viAuth,            
         meeting: viMeeting,   
-        userDashboard: viUserDashboard
+        userDashboard: viUserDashboard,
+        userSidebar: userSidebar_vi,
+        meetingDetail: meetingDetail_vi,
+        userRooms: userRooms_vi,
+        userDevices: userDevices_vi,
+        userHistory: userHistory_vi,
+        quickBook: quickBook_vi,
+        profile: profile_vi,
+        changePassword: changePassword_vi,
+        roomCalendar: roomCalendar_vi,
+        roomSchedule: roomSchedule_vi,
+        deleteMeeting: deleteMeeting_vi,
+        bookRoom: bookRoom_vi,
+        userHeader: viUserHeader,
+        themeToggle: viThemeToggle,
+        checkIn: viCheckIn,
+        qr: viQr,
+        userEdit: viUserEdit,
+        bookDevices: bookDevices_vi
       },
       en: {
         common: enCommon,
@@ -54,7 +108,25 @@ i18n
         reports: enReports,
         auth: enAuth,           
         meeting: enMeeting,
-        userDashboard: enUserDashboard 
+        userDashboard: enUserDashboard,
+        userSidebar: userSidebar_en,
+        meetingDetail: meetingDetail_en,
+        userRooms: userRooms_en,
+        userDevices: userDevices_en,
+        userHistory: userHistory_en,
+        quickBook: quickBook_en,
+        profile: profile_en,
+        changePassword: changePassword_en,
+        roomCalendar: roomCalendar_en,
+        roomSchedule: roomSchedule_en,
+        deleteMeeting: deleteMeeting_en,
+        bookRoom: bookRoom_en,
+        userHeader: enUserHeader,
+        themeToggle: enThemeToggle,
+        checkIn: enCheckIn,
+        qr: enQr,
+        userEdit: enUserEdit,
+        bookDevices: bookDevices_en
       },
     },
     lng: savedLanguage,
@@ -73,7 +145,25 @@ i18n
       'reports',
       'auth',     
       'meeting' ,
-      'userDashboard'
+      'userDashboard',
+      'userSidebar',
+      'meetingDetail',
+      'userRooms',
+      'userDevices',
+      'userHistory',
+      'quickBook',
+      'profile',
+      'changePassword',
+      'roomCalendar',
+      'roomSchedule',
+      'bookRoom',
+      'deleteMeeting',
+      'userHeader',
+      'themeToggle',
+      'checkIn',
+      'qr',
+      'userEdit',
+      'bookDevices'
     ],
     defaultNS: 'common',
   });

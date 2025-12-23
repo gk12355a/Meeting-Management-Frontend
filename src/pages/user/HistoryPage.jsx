@@ -6,11 +6,11 @@ import { getMyMeetings } from "../../services/meetingService";
 import dayjs from "dayjs";
 import "dayjs/locale/vi";
 import MeetingDetailModal from "../../components/user/MeetingDetailModal";
+import { useTranslation } from "react-i18next";
+
 dayjs.locale("vi");
 
-/* ===============================
-   Màu LIGHT MODE
-================================ */
+/* Màu LIGHT MODE */
 const roomColors = [
   { bg: "#FFE0E9", border: "#FF99B2" },
   { bg: "#D6F4FF", border: "#4CB4FF" },
@@ -20,9 +20,7 @@ const roomColors = [
   { bg: "#FFE8F0", border: "#FF6FA5" },
 ];
 
-/* ===============================
-   Màu DARK MODE (đậm hơn)
-================================ */
+/* Màu DARK MODE */
 const roomColorsDark = [
   { bg: "#3B2631", border: "#FF7FA5" },
   { bg: "#112533", border: "#4FABFF" },
@@ -32,9 +30,7 @@ const roomColorsDark = [
   { bg: "#3A1E2A", border: "#FF729A" },
 ];
 
-/* ===============================
-   getRoomColor xử lý theme
-================================ */
+/* getRoomColor xử lý theme */
 const getRoomColor = (roomName, isDark) => {
   const palette = isDark ? roomColorsDark : roomColors;
 
@@ -49,15 +45,14 @@ const getRoomColor = (roomName, isDark) => {
 };
 
 const HistoryPage = () => {
+  const { t } = useTranslation("userHistory");
   const [activeTab, setActiveTab] = useState("joined");
   const [joinedMeetings, setJoinedMeetings] = useState([]);
   const [cancelledMeetings, setCancelledMeetings] = useState([]);
   const [selectedMeeting, setSelectedMeeting] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  /* ======================================================
-     Theo dõi theme real-time (KHÔNG còn lỗi màu)
-  ======================================================== */
+  /* Theo dõi theme real-time */
   const [isDark, setIsDark] = useState(
     document.documentElement.classList.contains("dark")
   );
@@ -75,9 +70,7 @@ const HistoryPage = () => {
     return () => observer.disconnect();
   }, []);
 
-  /* ===============================
-     LOAD HISTORY
-  ================================= */
+  /* LOAD HISTORY */
   useEffect(() => {
     const fetchHistory = async () => {
       setLoading(true);
@@ -92,7 +85,7 @@ const HistoryPage = () => {
         setJoinedMeetings(past.filter((m) => m.status !== "CANCELLED"));
         setCancelledMeetings(cancelled);
       } catch (err) {
-        message.error("Không thể tải lịch sử cuộc họp.");
+        message.error(t("errors.loadFailed"));
       } finally {
         setLoading(false);
       }
@@ -112,9 +105,9 @@ const HistoryPage = () => {
           <FiCalendar className="text-white text-2xl" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold dark:text-gray-100">Lịch sử họp</h1>
+          <h1 className="text-3xl font-bold dark:text-gray-100">{t("title")}</h1>
           <p className="text-gray-500 dark:text-gray-400">
-            Xem lại các cuộc họp bạn đã tham gia
+            {t("subtitle")}
           </p>
         </div>
       </div>
@@ -129,7 +122,7 @@ const HistoryPage = () => {
           }`}
           onClick={() => setActiveTab("joined")}
         >
-          Đã tham gia
+          {t("tabs.joined")}
         </button>
 
         <button
@@ -140,7 +133,7 @@ const HistoryPage = () => {
           }`}
           onClick={() => setActiveTab("cancelled")}
         >
-          Đã hủy
+          {t("tabs.cancelled")}
         </button>
       </div>
 
@@ -154,7 +147,7 @@ const HistoryPage = () => {
         ) : meetings.length === 0 ? (
           <div className="flex flex-col items-center py-16 text-gray-500 dark:text-gray-400">
             <FiCalendar size={32} className="mb-3" />
-            Không có dữ liệu.
+            {t("empty")}
           </div>
         ) : (
           <ul className="flex flex-col gap-4">

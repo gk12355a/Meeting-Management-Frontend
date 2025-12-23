@@ -1,21 +1,28 @@
 // src/components/user/Sidebar.jsx
 import React from "react";
 import { NavLink } from "react-router-dom";
-import ThemeToggle from "../ThemeToggle";
-import { 
-  FiHome, FiCalendar, FiPlusCircle, FiBriefcase, FiClock, FiMonitor 
+import { useTranslation } from "react-i18next";
+import {
+  FiHome,
+  FiCalendar,
+  FiPlusCircle,
+  FiBriefcase,
+  FiClock,
+  FiMonitor
 } from "react-icons/fi";
 
-const userMenu = [
-  { to: "/user", label: "Dashboard", icon: <FiHome size={18} /> },
-  { to: "/user/my-meetings", label: "Lịch họp của tôi", icon: <FiCalendar size={18} /> },
-  { to: "/user/create-meeting", label: "Tạo cuộc họp", icon: <FiPlusCircle size={18} /> },
-  { to: "/user/rooms", label: "Phòng họp", icon: <FiBriefcase size={18} /> },
-  { to: "/user/devices", label: "Thiết bị", icon: <FiMonitor size={18} /> },
-  { to: "/user/history", label: "Lịch sử họp", icon: <FiClock size={18} /> },
-];
-
 const Sidebar = ({ isOpen, setIsOpen }) => {
+  const { t } = useTranslation("userSidebar"); // namespace bạn đã tạo
+
+  const userMenu = [
+    { to: "/user", label: t("menu.dashboard"), icon: <FiHome size={18} /> },
+    { to: "/user/my-meetings", label: t("menu.myMeetings"), icon: <FiCalendar size={18} /> },
+    { to: "/user/create-meeting", label: t("menu.createMeeting"), icon: <FiPlusCircle size={18} /> },
+    { to: "/user/rooms", label: t("menu.rooms"), icon: <FiBriefcase size={18} /> },
+    { to: "/user/devices", label: t("menu.devices"), icon: <FiMonitor size={18} /> },
+    { to: "/user/history", label: t("menu.history"), icon: <FiClock size={18} /> }
+  ];
+
   return (
     <>
       <aside
@@ -27,13 +34,14 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         <div className="flex flex-col items-center py-5 border-b border-gray-100 dark:border-slate-800">
           <div className="text-center">
             <p className="font-semibold text-gray-700 dark:text-gray-100 text-base">
-              MeetFlow User
+              {t("title")}
             </p>
-            <p className="text-xs text-gray-400 dark:text-gray-500">
-              Quản lý lịch họp cá nhân
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {t("subtitle")}
             </p>
           </div>
         </div>
+
         <nav className="mt-3 px-2">
           {userMenu.map((m) => (
             <NavLink
@@ -53,9 +61,9 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             </NavLink>
           ))}
         </nav>
-
       </aside>
 
+      {/* Overlay mobile */}
       {isOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-30 md:hidden z-20"

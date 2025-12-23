@@ -1,0 +1,54 @@
+{
+  "title": "Book room {{name}}",
+  "meetingTitle": "Meeting title",
+  "meetingTitlePlaceholder": "Enter meeting title...",
+  "meetingTitleRequired": "Please enter meeting title",
+  "meetingTitleShort": "Title is too short",
+
+  "date": "Meeting date",
+  "dateRequired": "Select meeting date",
+
+  "startTime": "Start time",
+  "chooseClock": "Clock",
+  "chooseTimeTitle": "Select meeting time (08:00 - 18:00)",
+  "invalidTime": "Allowed time is 08:00 - 18:00!",
+
+  "duration": "Duration",
+
+  "roomLabel": "Room",
+  "deviceLabel": "Devices",
+  "devicePlaceholder": "Select available device",
+  "deviceNeedDate": "Select date and time first",
+  "deviceAvailable": "Available",
+  "deviceBusy": "Maintenance",
+
+  "participants": "Participants (Internal)",
+  "participantsPlaceholder": "Type name or email to search",
+  "noUser": "No users found",
+
+  "guestEmail": "Guest emails (external)",
+  "guestEmailPlaceholder": "Example: guest@email.com",
+  "invalidEmail": "Invalid email: {{list}}",
+
+  "repeat": "Recurring meeting",
+  "frequency": "Frequency",
+  "repeatUntil": "Repeat until",
+  "frequencyRequired": "Select repeating frequency",
+  "repeatUntilRequired": "Select end date",
+
+  "note": "Notes",
+  "notePlaceholder": "Extra notes for the meeting...",
+
+  "cancel": "Cancel",
+  "submit": "Book room",
+
+  "success": "Your booking request for {{name}} has been submitted and is pending admin approval!",
+
+  "people": "people",
+  "emailTooltip": "Enter email, press Enter or comma to add.",
+
+  "daily": "Daily",
+  "weekly": "Weekly",
+  "monthly": "Monthly"
+
+}

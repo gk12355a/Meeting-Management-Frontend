@@ -1,5 +1,6 @@
 // src/components/user/MeetingDetailModal.jsx
 import React, { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { FiX, FiCalendar, FiClock, FiMapPin, FiCpu, FiUsers, FiInfo } from "react-icons/fi";
 import dayjs from "dayjs";
 import "dayjs/locale/vi";
@@ -7,6 +8,7 @@ import "dayjs/locale/vi";
 dayjs.locale("vi");
 
 const MeetingDetailModal = ({ open, onClose, meeting, children }) => {
+  const { t } = useTranslation("meetingDetail"); 
   const modalOverlayRef = useRef(null);
   const modalContentRef = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -123,15 +125,15 @@ const MeetingDetailModal = ({ open, onClose, meeting, children }) => {
     const statusMap = {
       PENDING: {
         color: "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/50",
-        label: "Chờ xác nhận"
+        label: t("participantPending")
       },
       ACCEPTED: {
         color: "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/50",
-        label: "Đã chấp nhận"
+        label: t("participantAccepted")
       },
       DECLINED: {
         color: "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/50",
-        label: "Từ chối"
+        label: t("participantDeclined")
       }
     };
 
@@ -146,15 +148,15 @@ const MeetingDetailModal = ({ open, onClose, meeting, children }) => {
     const statusMap = {
       CONFIRMED: {
         color: "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/50",
-        label: "Đã xác nhận"
+        label: t("meetingConfirmed")
       },
       CANCELLED: {
         color: "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/50",
-        label: "Đã hủy"
+        label: t("meetingCancelled")
       },
       PENDING_APPROVAL: {
         color: "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/50",
-        label: "Chờ duyệt"
+        label: t("meetingPending")
       }
     };
 
@@ -194,7 +196,7 @@ const MeetingDetailModal = ({ open, onClose, meeting, children }) => {
             </span>
             <div className="flex items-center gap-2">
               <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-200 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300">
-                Người tổ chức
+                {t("organizer")}
               </span>
               {organizer.status && (
                 <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatus(organizer.status).color}`}>
@@ -214,7 +216,7 @@ const MeetingDetailModal = ({ open, onClose, meeting, children }) => {
                 className="flex items-center justify-between bg-gray-50 dark:bg-slate-700 p-2.5 rounded-lg"
               >
                 <span className="text-gray-900 dark:text-gray-100">
-                  {p.fullName || "Không rõ"}
+                  {p.fullName || t("unknown")}
                 </span>
                 <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${status.color}`}>
                   {status.label}
@@ -224,7 +226,7 @@ const MeetingDetailModal = ({ open, onClose, meeting, children }) => {
           })
         ) : !organizer ? (
           <li className="italic text-gray-500 dark:text-gray-400 text-center py-2">
-            Không có người tham gia
+            {t("noParticipants")}
           </li>
         ) : null}
       </>
@@ -254,7 +256,7 @@ const MeetingDetailModal = ({ open, onClose, meeting, children }) => {
           onClick={handleClose}
           className="absolute top-4 right-4 text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white z-10 transition-colors duration-200"
           tabIndex={0}
-          aria-label="Đóng"
+          aria-label={t("close")}
         >
           <FiX size={22} />
         </button>
@@ -275,7 +277,7 @@ const MeetingDetailModal = ({ open, onClose, meeting, children }) => {
                   <FiCalendar className="text-blue-600 dark:text-blue-400" size={18} />
                 </div>
                 <div className="min-w-0">
-                  <span className="text-xs text-gray-500 dark:text-gray-400 block">Ngày</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400 block">{t("date")}</span>
                   <p className="font-medium text-gray-900 dark:text-gray-100">
                     {dayjs(meeting.startTime).format("DD/MM/YYYY")}
                   </p>
@@ -288,7 +290,7 @@ const MeetingDetailModal = ({ open, onClose, meeting, children }) => {
                   <FiClock className="text-green-600 dark:text-green-400" size={18} />
                 </div>
                 <div className="min-w-0">
-                  <span className="text-xs text-gray-500 dark:text-gray-400 block">Giờ</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400 block">{t("time")}</span>
                   <p className="font-medium text-gray-900 dark:text-gray-100">
                     {dayjs(meeting.startTime).format("HH:mm")} – {dayjs(meeting.endTime).format("HH:mm")}
                   </p>
@@ -301,7 +303,7 @@ const MeetingDetailModal = ({ open, onClose, meeting, children }) => {
                   <FiMapPin className="text-purple-600 dark:text-purple-400" size={18} />
                 </div>
                 <div className="min-w-0">
-                  <span className="text-xs text-gray-500 dark:text-gray-400 block">Phòng</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400 block">{t("room")}</span>
                   <p className="font-medium text-gray-900 dark:text-gray-100 truncate">
                     {meeting.room?.name || "Chưa xác định"}
                   </p>
@@ -314,7 +316,7 @@ const MeetingDetailModal = ({ open, onClose, meeting, children }) => {
                   <FiInfo className="text-indigo-600 dark:text-indigo-400" size={18} />
                 </div>
                 <div className="min-w-0">
-                  <span className="text-xs text-gray-500 dark:text-gray-400 block">Trạng thái</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400 block">{t("status")}</span>
                   <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${meetingStatus.color}`}>
                     {meetingStatus.label}
                   </span>
@@ -333,7 +335,7 @@ const MeetingDetailModal = ({ open, onClose, meeting, children }) => {
                 <FiCpu className="text-pink-600 dark:text-pink-400" size={16} />
               </div>
               <span className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
-                Thiết bị sử dụng
+                {t("devicesUsed")}
               </span>
             </div>
             {
@@ -350,7 +352,7 @@ const MeetingDetailModal = ({ open, onClose, meeting, children }) => {
                 </ul>
               ) : (
                 <p className="italic text-gray-400 dark:text-gray-500 text-sm">
-                  Không có thiết bị sử dụng
+                  {t("noDevices")}
                 </p>
               )
             }
@@ -366,7 +368,7 @@ const MeetingDetailModal = ({ open, onClose, meeting, children }) => {
                 <FiUsers className="text-orange-600 dark:text-orange-400" size={16} />
               </div>
               <span className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
-                Người tham gia
+                {t("participants")}
               </span>
             </div>
             <ul className="flex flex-col gap-2">

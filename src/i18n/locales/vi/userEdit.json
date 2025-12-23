@@ -1,0 +1,79 @@
+{"edit": {
+    "title": "Chỉnh sửa cuộc họp",
+    "titleRecurring": "Cập nhật cuộc họp định kỳ",
+    "fields": {
+      "meetingName": "Tên cuộc họp",
+      "date": "Ngày họp",
+      "startTime": "Giờ bắt đầu",
+      "duration": "Thời lượng",
+      "room": "Phòng họp",
+      "devices": "Thiết bị sử dụng",
+      "participants": "Người tham gia (Nội bộ)",
+      "guestEmails": "Email khách mời",
+      "notes": "Ghi chú",
+      "recurring": "Cập nhật lặp lại (Áp dụng cho toàn bộ chuỗi)",
+      "frequency": "Tần suất",
+      "repeatUntil": "Đến ngày",
+      "daysOfWeek": "Lặp lại vào các thứ"
+    },
+    "placeholders": {
+      "meetingName": "Nhập tên cuộc họp...",
+      "selectRoom": "-- Chọn phòng họp --",
+      "selectTime": "Vui lòng chọn thời gian trước",
+      "devicesAvailable": "Chọn thiết bị khả dụng (hiện tại được giữ lại)",
+      "searchUsers": "Tìm kiếm người dùng...",
+      "enterEmail": "Nhập email...",
+      "selectDatetimeFirst": "Vui lòng chọn ngày và giờ trước",
+      "selectDevices": "Chọn thiết bị sử dụng"
+    },
+    "durations": {
+      "15min": "15 phút",
+      "30min": "30 phút",
+      "45min": "45 phút",
+      "1hour": "1 giờ",
+      "1hour30": "1 giờ 30 phút",
+      "2hours": "2 giờ"
+    },
+    "frequencies": {
+      "daily": "Hằng ngày",
+      "weekly": "Hằng tuần",
+      "monthly": "Hằng tháng"
+    },
+    "buttons": {
+      "cancel": "Hủy",
+      "update": "Cập nhật",
+      "selectTime": "Chọn giờ",
+      "thisOne": "Chỉ cuộc họp này",
+      "wholeSeries": "Toàn bộ chuỗi (Các cuộc họp tương lai)"
+    },
+    "messages": {
+      "businessHoursOnly": "Chỉ được đặt lịch từ 08:00 đến 18:00!",
+      "selectTimeTitle": "Chọn giờ họp (08:00 - 18:00)",
+      "updateSuccess": "Cập nhật cuộc họp thành công!",
+      "updateSeriesSuccess": "Cập nhật chuỗi cuộc họp thành công!",
+      "pendingApproval": "📝 Yêu cầu chỉnh sửa đã được gửi và đang chờ Admin phê duyệt.",
+      "updateError": "Không thể cập nhật cuộc họp!",
+      "conflictError": "Xung đột lịch",
+      "maintenanceError": "Phòng hoặc thiết bị đang bảo trì!",
+      "invalidEndDate": "Ngày kết thúc lặp lại không hợp lệ (phải ở tương lai)!",
+      "confirmQuestion": "Bạn đang thay đổi một cuộc họp trong chuỗi định kỳ. Bạn muốn áp dụng thay đổi này cho:"
+    },
+    "status": {
+      "available": "Có sẵn",
+      "maintenance": "Bảo trì",
+      "processed": "Đã xử lý.",
+      "responded": "Đã phản hồi."
+    },
+    "modal": {
+      "rejectTitle": "Lý do từ chối",
+      "rejectPlaceholder": "Vui lòng nhập lý do từ chối...",
+      "confirmReject": "Xác nhận từ chối"
+    },
+    "confirmModal": {
+      "title": "Cập nhật cuộc họp định kỳ",
+      "desc": "Bạn đang thay đổi một cuộc họp trong chuỗi định kỳ. Bạn muốn áp dụng thay đổi này cho:",
+      "single": "Chỉ cuộc họp này",
+      "series": "Toàn bộ chuỗi (Các cuộc họp tương lai)"
+    }
+  }
+}  

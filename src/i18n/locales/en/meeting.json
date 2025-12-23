@@ -10,7 +10,7 @@
   "room": "Meeting room",
   "device": "Device",
   "meetingName": "Meeting name",
-  "description": "Description",
+  "description": "Don't wait – Create your meeting now!",
   "organizer": "Organizer",
   "participants": "Participants",
   "startTime": "Start time",
@@ -31,6 +31,8 @@
   "successDelete": "Meeting deleted successfully",
   "errorLoadMeeting": "Failed to load meeting information",
   "errorTimeInvalid": "End time must be after start time",
+  "meetingNote": "Note",
+  "meetingNotePlaceholder": "Enter meeting description or notes...",
   "modal": {
     "upcomingMeetings": "Upcoming Meetings",
     "location": "Location",
@@ -38,6 +40,19 @@
     "organizer": "Organizer",
     "unknown": "Unknown",
     "noMeetings": "No meetings.",
+    "close": "Close"
+  },
+  "timeHour": "Hour",
+  "timeMinute": "Minute",
+  "customHour": "Custom (hours)",
+  "seats": "seats",
+  "searchUserPlaceholder": "Type name or email to search",
+  "noUsersFound": "No users found",
+  "guestEmailTooltip": "Enter email then press Enter",
+  "buttons": {
+    "qrCheckIn": "QR Check-in",
+    "edit": "Edit",
+    "cancelMeeting": "Cancel meeting",
     "close": "Close"
   }
 }

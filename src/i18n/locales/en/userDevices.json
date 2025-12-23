@@ -1,0 +1,18 @@
+{
+  "title": "Device Status",
+  "subtitle": "Monitor the condition of devices in meeting rooms",
+  "searchPlaceholder": "Search device by name...",
+  "statusLabel": "Status:",
+  "filters": {
+    "all": "All",
+    "available": "Available",
+    "maintenance": "Under maintenance"
+  },
+  "deviceType": "Device type",
+  "status": "Status",
+  "button": {
+    "book": "Book device",
+    "maintenance": "Maintenance"
+  },
+  "noResults": "No matching devices found."
+}

@@ -1,0 +1,27 @@
+{
+  "pageTitle": "Meeting rooms",
+  "pageSubtitle": "View and book available meeting rooms",
+
+  "searchPlaceholder": "Search rooms by name...",
+
+  "filterStatus": "Status:",
+  "filterAll": "All",
+  "filterAvailable": "Available",
+  "filterMaintenance": "Under maintenance",
+
+  "capacity": "Capacity",
+  "people": "people",
+
+  "deviceLabel": "Devices",
+  "noDevice": "None",
+
+  "statusLabel": "Status",
+  "statusAvailable": "Available",
+  "statusMaintenance": "Under maintenance",
+
+  "bookRoom": "Book now",
+
+  "noRoomMatch": "No rooms match the filter.",
+
+  "errorLoadRooms": "Failed to load meeting rooms."
+}

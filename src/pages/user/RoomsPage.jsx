@@ -4,13 +4,14 @@ import { FiSearch, FiTool, FiMonitor, FiUsers } from "react-icons/fi";
 import { Spin, message, Tag, Tooltip } from "antd";
 import { getAllRooms } from "../../services/roomService";
 import { HiBuildingOffice } from "react-icons/hi2";
-// Đã xóa import FaCrown
 import BookRoomModal from "../../components/user/BookRoomModal";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import RoomCalendarModal from "../../components/user/RoomCalendarModal";
+import { useTranslation } from "react-i18next";
 
 const RoomsPage = () => {
+  const { t } = useTranslation("userRooms");
   const [rooms, setRooms] = useState([]);
   const [processedRooms, setProcessedRooms] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -37,7 +38,7 @@ const RoomsPage = () => {
         setProcessedRooms(res.data || []);
       } catch (err) {
         console.error("Lỗi tải danh sách phòng:", err);
-        message.error("Không thể tải danh sách phòng họp.");
+        message.error(t("errorLoadRooms"));
       } finally {
         setLoading(false);
       }
@@ -48,13 +49,13 @@ const RoomsPage = () => {
   const getStatusDisplay = (apiStatus) => {
     if (apiStatus === "AVAILABLE") {
       return {
-        text: "Trống",
+        text: t("statusAvailable"),
         color: "text-green-700 dark:text-green-400 font-semibold",
       };
     }
     if (apiStatus === "UNDER_MAINTENANCE") {
       return {
-        text: "Đang bảo trì",
+        text: t("statusMaintenance"),
         color: "text-orange-500 dark:text-orange-400 font-semibold",
       };
     }
@@ -106,10 +107,10 @@ const RoomsPage = () => {
 
         <div>
           <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100">
-            Danh sách phòng họp
+            {t("pageTitle")}
           </h2>
           <p className="text-gray-500 dark:text-gray-400">
-            Xem và đặt phòng họp có sẵn trong hệ thống
+            {t("pageSubtitle")}
           </p>
         </div>
       </div>
@@ -120,7 +121,7 @@ const RoomsPage = () => {
           <FiSearch className="absolute top-3 left-3 text-gray-500 dark:text-gray-400" />
           <input
             type="text"
-            placeholder="Tìm kiếm theo tên phòng..."
+            placeholder={t("searchPlaceholder")}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-700 
@@ -132,13 +133,13 @@ const RoomsPage = () => {
        {/* FILTER SECTION - UI GIỐNG ẢNH MẪU */}
 <div className="flex items-center gap-3">
   <span className="font-medium text-gray-700 dark:text-gray-300">
-    Trạng thái:
+    {t("filterStatus")}
   </span>
 
   {[
-    { key: "ALL", label: "Tất cả" },
-    { key: "AVAILABLE", label: "Sẵn sàng" },
-    { key: "UNDER_MAINTENANCE", label: "Bảo trì" },
+    { key: "ALL", label: t("filterAll") },
+    { key: "AVAILABLE", label: t("filterAvailable") },
+    { key: "UNDER_MAINTENANCE", label: t("filterMaintenance") },
   ].map((btn) => {
     const isAll = btn.key === "ALL";
     const isActive =
@@ -213,25 +214,24 @@ const RoomsPage = () => {
                       <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
                         {room.name}
                       </h2>
-                      {/* Đã xóa hiển thị Tag VIP */}
                     </div>
 
                     {room.status === "UNDER_MAINTENANCE" && (
                       <span className="flex items-center gap-1 text-xs text-orange-500 dark:text-orange-400 font-medium">
-                        <FiTool size={12} /> Bảo trì
+                        <FiTool size={12} /> {t("filterMaintenance")}
                       </span>
                     )}
                   </div>
 
                   <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300 mt-2">
-                    <FiUsers size={14} /> Sức chứa: {room.capacity} người
+                    <FiUsers size={14} /> {t("capacity")}: {room.capacity} {t("people")}
                   </p>
                   
                   {/* === HIỂN THỊ THIẾT BỊ === */}
                   <div className="flex items-start gap-2 text-gray-700 dark:text-gray-300 mt-2">
                     <FiMonitor size={14} className="mt-1.5 flex-shrink-0" />
                     <div className="flex flex-wrap gap-1 items-center">
-                      <span className="mr-1">Thiết bị:</span>
+                      <span className="mr-1">{t("deviceLabel")}:</span>
                       {room.fixedDevices && room.fixedDevices.length > 0 ? (
                         <>
                           {/* Chỉ hiện tối đa 3 thiết bị */}
@@ -255,15 +255,14 @@ const RoomsPage = () => {
                           )}
                         </>
                       ) : (
-                        <span>Không có</span>
+                        <span>{t("noDevice")}</span>
                       )}
                     </div>
                   </div>
-                  {/* ================================================= */}
 
                   <div className="flex items-center justify-between mt-3">
                     <p className="text-gray-700 dark:text-gray-300 text-sm">
-                      Trạng thái:{" "}
+                      {t("statusLabel")}:{" "}
                       <span className={statusDisplay.color}>
                         {statusDisplay.text}
                       </span>
@@ -282,7 +281,7 @@ const RoomsPage = () => {
                           : "bg-gray-400 text-gray-700 cursor-not-allowed"
                       }`}
                     >
-                      Đặt phòng
+                      {t("bookRoom")}
                     </button>
                   </div>
                 </div>
@@ -290,7 +289,7 @@ const RoomsPage = () => {
             })
           ) : (
             <div className="col-span-full text-center text-gray-500 dark:text-gray-400 py-10">
-              Không có phòng nào phù hợp với bộ lọc.
+              {t("noRoomMatch")}
             </div>
           )}
         </div>

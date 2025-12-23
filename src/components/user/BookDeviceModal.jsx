@@ -25,6 +25,10 @@ import { searchUsers } from "../../services/userService";
 import { getAvailableDevices } from "../../services/deviceService";
 import { useAuth } from "../../context/AuthContext";
 
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { StaticTimePicker } from "@mui/x-date-pickers/StaticTimePicker";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { useTranslation } from "react-i18next";
 
 dayjs.locale("vi");
 dayjs.extend(utc);
@@ -33,6 +37,7 @@ const { TextArea } = Input;
 const { Option } = Select;
 
 const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
+  const { t } = useTranslation("bookDevices");
   const [loading, setLoading] = useState(false);
   const [isRecurring, setIsRecurring] = useState(false);
   const [rooms, setRooms] = useState([]);
@@ -286,7 +291,7 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
       maskClosable={!loading}
       title={
         <span className="flex items-center gap-2 dark:text-white text-lg font-semibold">
-          <FiPlusCircle /> Đặt lịch sử dụng {prefilledDevice?.name}
+          <FiPlusCircle /> {t("modal.title", { name: prefilledDevice?.name })}
         </span>
       }
        className="dark:[&_.ant-modal-content]:bg-gray-800 dark:[&_.ant-modal-content]:text-gray-100 
@@ -309,129 +314,152 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
           {/* TITLE */}
           <Form.Item
             name="title"
-            label="Tên cuộc họp"
+            label={t("form.title")}
             rules={[
-              { required: true, message: "Vui lòng nhập tên cuộc họp" },
-              { min: 3, message: "Tên cuộc họp quá ngắn" },
+              { required: true, message: t("form.titleRequired") },
+              { min: 3, message: t("form.titleShort") },
             ]}
           >
             <Input
-              placeholder="Nhập tên cuộc họp..."
+              placeholder={t("form.titlePlaceholder")}
               className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
             />
           </Form.Item>
 
           {/* DATE - TIME - DURATION */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {/* DATE */}
-            <Form.Item name="date" label="Ngày họp" rules={[{ required: true }]}>
-              <DatePicker
-                format="DD/MM/YYYY"
-                className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                disabledDate={(d) =>
-                  !d ||
-                  d < dayjs().startOf("day") ||
-                  d.day() === 0 ||
-                  d.day() === 6
-                }
-              />
-            </Form.Item>
+<div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
 
-            
-            <Form.Item name="hour" hidden><Input /></Form.Item>
-                                      <Form.Item name="minute" hidden><Input /></Form.Item>
-                        
-                                      <Form.Item name="time" label="Giờ bắt đầu" rules={[{ required: true }]}>
-                                      <div className="grid grid-cols-2 gap-2">
-                        
-                                      {/* Chọn giờ */}
-                                      <Select
-                                    placeholder="Giờ"
-                                    value={form.getFieldValue("hour")}
-                                    onChange={(h) => {
-                                      const m = form.getFieldValue("minute") || 0;
-                                      const time = dayjs().hour(h).minute(m);
-                                      form.setFieldsValue({ time, hour: h });
-                                    }}
-                                    className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                                    options={Array.from({ length: 11 }, (_, i) => {
-                                      const hour = i + 8; // 8 → 18
-                                      return {
-                                        label: hour.toString().padStart(2, "0"),
-                                        value: hour,
-                                      };
-                                    })}
-                                  />
-                        
-                                      <Select
-                                    placeholder="Phút"
-                                    value={form.getFieldValue("minute")}
-                                    onChange={(m) => {
-                                      const h = form.getFieldValue("hour") || 8;
-                                      const time = dayjs().hour(h).minute(m);
-                                      form.setFieldsValue({ time, minute: m });
-                                    }}
-                                    className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                                    options={Array.from({ length: 60 }, (_, i) => ({
-                                      label: i.toString().padStart(2, "0"),
-                                      value: i,
-                                    }))}
-                                  />
-                        
-                                    </div>
-                                  </Form.Item>
+  {/* DATE */}
+  <Form.Item 
+    name="date" 
+    label={t("form.date")}
+    rules={[{ required: true, message: t("form.dateRequired") }]}
+  >
+    <DatePicker
+      format="DD/MM/YYYY"
+      className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
+      disabledDate={(d) =>
+        !d || d < dayjs().startOf("day")
+      }
+    />
+  </Form.Item>
 
-            <div className="flex gap-2 items-end">
-              <Form.Item
-                name="duration"
-                label="Thời lượng"
-                style={{ flex: 1 }}
-                initialValue={60}
-              >
-                <Select
-                  className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                  onChange={() => form.setFieldsValue({ customHour: undefined })}
-                  placeholder="-- Chọn --"
-                  allowClear
-                >
-                  <Option value={30}>30 phút</Option>
-                  <Option value={60}>1 giờ</Option>
-                  <Option value={90}>1.5 giờ</Option>
-                  <Option value={120}>2 giờ</Option>
-                </Select>
-              </Form.Item>
+  {/* TIME PICKER - MUI CLOCK */}
+<Form.Item
+  name="time"
+  label={t("form.time")}
+  rules={[{ required: true, message: t("form.timeRequired") }]}>
+  <>
+    <div className="flex gap-2">
+      <Input
+        readOnly
+        value={clockValue.format("HH:mm")}
+        onClick={() => setClockOpen(true)}
+        className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+      />
+      <Button
+        onClick={() => setClockOpen(true)}
+        className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+      >
+        🕒 Đồng hồ
+      </Button>
+    </div>
 
-              <Form.Item
-                name="customHour"
-                label="Khác (giờ)"
-                style={{ flex: '0 0 80px' }}
-              >
-                <Input
-                  type="number"
-                  step={0.5}
-                  min={0.5}
-                  max={8}
-                  className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                  onChange={(e) => {
-                    const hour = parseFloat(e.target.value || 0);
+    <Modal
+      title={t("form.timePickerTitle")}
+      open={clockOpen}
+      onCancel={() => setClockOpen(false)}
+      onOk={() => {
+        if (!validateBusinessTime(clockValue)) {
+          toast.error("⏰ Chỉ được đặt 08:00 - 18:00!");
+          return;
+        }
+        form.setFieldsValue({ time: clockValue });
+        setClockOpen(false);
+      }}
+      width={520}
+      style={{ overflow: "visible" }}
+      bodyStyle={{ overflow: "visible", paddingTop: 8 }}
+      className="dark:[&_.ant-modal-content]:bg-gray-800 dark:[&_.ant-modal-header]:bg-gray-800"
+    >
+      <div className="text-center text-gray-500 dark:text-gray-300 mb-2 text-sm">
+        <span className="font-medium text-indigo-600 dark:text-indigo-400">
+          Giờ (HH)
+        </span>{" "}
+        :{" "}
+        <span className="font-medium text-indigo-600 dark:text-indigo-400">
+          Phút (MM)
+        </span>
+      </div>
 
-                    if (hour > 0) {
-                      form.setFieldsValue({ duration: undefined });
-                    }
-                  }}
-                />
-              </Form.Item>
-            </div>
-          </div>
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <StaticTimePicker
+          orientation="landscape"
+          ampm={false}
+          value={clockValue}
+          onChange={(v) => setClockValue(v)}
+          slotProps={{
+            actionBar: { actions: [] },
+          }}
+        />
+      </LocalizationProvider>
+    </Modal>
+  </>
+</Form.Item>
+
+  {/* DURATION + CUSTOM HOUR */}
+  <div className="flex gap-2 items-end">
+    {/* DURATION SELECT */}
+    <Form.Item
+      name="duration"
+      label={t("form.duration")}
+      style={{ flex: 1 }}
+      initialValue={60}
+    >
+      <Select
+        className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+        onChange={() => form.setFieldsValue({ customHour: undefined })}
+        placeholder={t("form.durationPlaceholder")}
+        allowClear
+      >
+        <Option value={30}>{t("form.duration30")}</Option>
+        <Option value={60}>{t("form.duration60")}</Option>
+        <Option value={90}>{t("form.duration90")}</Option>
+        <Option value={120}>{t("form.duration120")}</Option>
+      </Select>
+    </Form.Item>
+
+    {/* CUSTOM HOUR INPUT */}
+    <Form.Item
+      name="customHour"
+      label={t("form.customHour")}
+      style={{ flex: "0 0 80px" }}
+    >
+      <Input
+        type="number"
+        step={0.5}
+        min={0.5}
+        max={8}
+        className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+        onChange={(e) => {
+          const hour = parseFloat(e.target.value || 0);
+          if (hour > 0) {
+            form.setFieldsValue({ duration: undefined });
+          }
+        }}
+      />
+    </Form.Item>
+  </div>
+  </div>
           
           {/* ROOM */}
           <Form.Item
             name="roomId"
-            label="Phòng họp"
+            label={t("form.room")}
             rules={[{ required: true, message: "Chọn phòng họp" }]}
           >
             <Select
-              placeholder="-- Chọn phòng họp --"
+              placeholder={t("form.roomPlaceholder")}
               optionLabelProp="label"
               className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
               popupClassName="dark:bg-gray-700 dark:text-gray-100"
@@ -449,7 +477,7 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
                     </span>
 
                     <Tag color={r.status === "AVAILABLE" ? "green" : "red"}>
-                      {r.status === "AVAILABLE" ? "Có sẵn" : "Bảo trì"}
+                      {r.status === "AVAILABLE" ? t("form.roomAvailable") : t("form.roomOffline")}
                     </Tag>
                   </div>
                 </Option>
@@ -460,8 +488,8 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
 
           <Form.Item
             name="deviceIds"
-            label="Thiết bị sử dụng"
-            tooltip="Thiết bị được chọn ban đầu không thể bỏ chọn. Bạn có thể thêm các thiết bị khác."
+            label={t("form.devices")}
+            tooltip={t("form.deviceTooltip")}
           >
             <Select
               mode="multiple"
@@ -469,8 +497,8 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
               loading={devicesLoading}
               placeholder={
                 !watchedDate || !watchedTime
-                  ? "Chọn ngày và giờ trước"
-                  : "Chọn thêm thiết bị khả dụng"
+                  ? t("form.selectDateTimeFirst")
+                  : t("form.selectMoreDevices")
               }
               className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
               popupClassName="dark:bg-gray-700 dark:text-gray-100"
@@ -518,11 +546,11 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
           {/* Device Info Display */}
           <div className="mb-4 p-3 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-lg">
             <p className="text-sm text-purple-800 dark:text-purple-300">
-              <span className="font-semibold">🖥️ Thiết bị bắt buộc:</span> {prefilledDevice?.name}
+              <span className="font-semibold">{t("deviceInfo.title")}</span> {prefilledDevice?.name}
               {prefilledDevice?.description && ` - ${prefilledDevice.description}`}
             </p>
             <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">
-              💡 Bạn có thể chọn thêm thiết bị khác, nhưng không thể bỏ chọn thiết bị này.
+              💡 {t("deviceInfo.tip")}
             </p>
           </div>
 
@@ -534,7 +562,7 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
             label={
               <span>
                 <FiUsers className="inline mr-2" />
-                Người tham gia (Nội bộ)
+                {t("form.participants")}
               </span>
             }
           >
@@ -544,10 +572,10 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
               loading={isSearching}
               filterOption={false}
               onSearch={handleSearchUsers}
-              placeholder="-- Gõ tên hoặc email để tìm người tham gia --"
+              placeholder={t("form.participantPlaceholder")}
               className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
               popupClassName="dark:bg-gray-700 dark:text-gray-100"
-              notFoundContent={isSearching ? <Spin size="small" /> : "Không tìm thấy người dùng"}
+              notFoundContent={isSearching ? <Spin size="small" /> : t("form.noUsers")}
             >
               {searchResults.map((u) => (
                 <Option key={u.id} value={u.id}>
@@ -560,8 +588,9 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
           {/* GUEST EMAIL */}
           <Form.Item
             name="guestEmails"
-            label="Email khách mời (bên ngoài)"
-            tooltip="Nhập email, nhấn Enter hoặc dấu phẩy để thêm."
+            initialValue={[]} 
+            label={t("form.guestEmails")}
+            tooltip={t("form.guestTooltip")}
             rules={[
               {
                 validator(_, list) {
@@ -579,7 +608,7 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
             <Select
               mode="tags"
               tokenSeparators={[",", ";", " "]}
-              placeholder="Ví dụ: guest@email.com"
+              placeholder={t("form.guestEmailPlaceholder")}
               className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
               popupClassName="dark:bg-gray-700 dark:text-gray-100"
             />
@@ -598,7 +627,7 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
               onChange={(e) => setIsRecurring(e.target.checked)}
               className="dark:text-gray-200"
             >
-              Lặp lại cuộc họp
+              {t("form.recurring")}
             </Checkbox>
           </Form.Item>
 
@@ -606,29 +635,29 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Form.Item
                 name="frequency"
-                label="Tần suất"
+                label={t("form.frequency")}
                 rules={[{ required: true, message: "Chọn tần suất lặp" }]}
               >
                 <Select
                   className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
                   popupClassName="dark:bg-gray-700 dark:text-gray-100"
                 >
-                  <Option value="DAILY">Hằng ngày</Option>
-                  <Option value="WEEKLY">Hằng tuần</Option>
-                  <Option value="MONTHLY">Hằng tháng</Option>
+                  <Option value="DAILY">{t("form.daily")}</Option>
+                  <Option value="WEEKLY">{t("form.weekly")}</Option>
+                  <Option value="MONTHLY">{t("form.monthly")}</Option>
                 </Select>
               </Form.Item>
 
               <Form.Item
                 name="repeatUntil"
-                label="Lặp đến ngày"
+                label={t("form.repeatUntil")}
                 rules={[{ required: true, message: "Chọn ngày kết thúc" }]}
               >
                 <DatePicker
                   format="DD/MM/YYYY"
                   className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
                   disabledDate={(current) =>
-                    current && (current <= dayjs().startOf("day") || current.day() === 0 || current.day() === 6)
+                    current && current <= dayjs().startOf("day")
                   }
                 />
               </Form.Item>
@@ -636,10 +665,10 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
           )}
 
           {/* DESCRIPTION */}
-          <Form.Item name="description" label="Ghi chú">
+          <Form.Item name="description" label={t("form.description")}>
             <TextArea
               rows={3}
-              placeholder="Ghi chú thêm cho cuộc họp..."
+              placeholder={t("form.descriptionPlaceholder")}
               className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
             />
           </Form.Item>
@@ -647,7 +676,7 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
           {/* SUBMIT */}
           <div className="flex justify-end gap-3 mt-6">
             <Button onClick={handleCancel} disabled={loading}>
-              Hủy
+              {t("submit.cancel")}
             </Button>
             <Button
               type="primary"
@@ -655,7 +684,7 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
               loading={loading}
               className="bg-purple-600 hover:bg-purple-700 text-white dark:bg-purple-500 dark:hover:bg-purple-600"
             >
-              Đặt lịch
+              {t("submit.submit")}
             </Button>
           </div>
 
