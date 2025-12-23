@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: gk123a/meeting-management-frontend:v1.0.0-prod
+          image: gk123a/meeting-management-frontend:v1.0.1-prod
           imagePullPolicy: IfNotPresent # Hoặc Always
           ports:
             - containerPort: 80 # Nginx mặc định port 80
