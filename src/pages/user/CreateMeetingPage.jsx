@@ -508,8 +508,8 @@ const CreateMeetingPage = () => {
               </div>
             )}
 
-            <Form.Item name="description" label={t("description")}>
-              <TextArea rows={3} placeholder={t("description")}
+            <Form.Item name="description" label={t("meetingNote")}>
+              <TextArea rows={3} placeholder={t("meetingNotePlaceholder")}
                 className="dark:bg-gray-700 dark:text-white dark:border-gray-600" />
             </Form.Item>
 

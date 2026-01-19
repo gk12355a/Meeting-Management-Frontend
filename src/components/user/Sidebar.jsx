@@ -36,7 +36,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             <p className="font-semibold text-gray-700 dark:text-gray-100 text-base">
               {t("title")}
             </p>
-            <p className="text-xs text-gray-400 dark:text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               {t("subtitle")}
             </p>
           </div>

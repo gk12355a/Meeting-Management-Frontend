@@ -3,7 +3,7 @@
   "subtitle": "Tổng quan hệ thống cuộc họp và hoạt động",
   "cards": {
     "todayMeetings": "Cuộc họp hôm nay",
-    "avgDuration": "Thời lượng họp TB",
+    "avgDuration": "Tổng thời lượng họp",
     "upcomingMeetings": "Cuộc họp sắp tới"
   },
   "charts": {

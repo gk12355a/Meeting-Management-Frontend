@@ -11,7 +11,9 @@
     "fullName": "Họ và tên",
     "email": "Email",
     "role": "Vai trò",
-    "status": "Trạng thái"
+    "status": "Trạng thái",
+    "edit": "Chỉnh sửa người dùng",
+    "delete": "Xóa người dùng"
   },
   "roles": {
     "admin": "Admin",
@@ -21,6 +23,7 @@
     "addTitle": "Thêm người dùng mới",
     "editTitle": "Cập nhật quyền / trạng thái",
     "deleteTitle": "Xác nhận xóa người dùng?",
+    "confirmDelete": "Xác nhận xóa người dùng?",
     "fields": {
       "fullName": "Họ và tên",
       "email": "Email",

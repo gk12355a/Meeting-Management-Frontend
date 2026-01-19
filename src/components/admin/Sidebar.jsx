@@ -34,7 +34,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
               {t('sidebar.title')}
             </p>
             {/* <span>Quản lý cuộc họp</span> */}
-            <p className="text-xs text-gray-400 dark:text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               {t('sidebar.subtitle')}
             </p>
           </div>

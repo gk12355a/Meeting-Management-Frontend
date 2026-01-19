@@ -42,7 +42,7 @@
   "cancel": "Hủy",
   "submit": "Đặt phòng",
 
-  "success": "Đã đặt phòng {{name}} thành công!",
+  "success": "Yêu cầu đặt phòng {{name}} của bạn đã được gửi và đang chờ Admin phê duyệt!",
 
   "people": "người",
   "emailTooltip": "Nhập email, nhấn Enter hoặc dấu phẩy để thêm.",
