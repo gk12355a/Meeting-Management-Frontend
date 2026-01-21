@@ -2,15 +2,142 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  @apply bg-gray-100 font-sans;
+/* =========================================
+   1. CẤU HÌNH HIỂN THỊ TRÊN LƯỚI VIDEO (GRID)
+   ========================================= */
+
+/* Khi Mic Tắt (Muted) -> Hiện nền đỏ, icon trắng */
+.str-video__participant-details__status-icon--muted {
+    background-color: #ea4335 !important;
+    border-radius: 50% !important;
+    width: 28px !important;
+    height: 28px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 6px !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.2);
 }
 
-/* Tô xám đậm phần ngoài giờ hành chính trong calendar */
-.fc-non-business {
-  background-color: #e5e7eb !important; /* gray-200 */
+/* Đổi màu icon SVG mic bên trong thành trắng */
+.str-video__participant-details__status-icon--muted svg {
+    fill: white !important;
+    width: 14px !important;
+    height: 14px !important;
 }
 
-.dark .fc-non-business {
-  background-color: #1f2937 !important; /* slate-800 */
+/* Khi Mic Bật (Đang nói) -> Nền xám */
+.str-video__participant-details__status-icon--audio-level {
+    background-color: #3c4043 !important;
+    border-radius: 50% !important;
+    padding: 6px !important;
+}
+
+.str-video__participant-details__name {
+    font-weight: 500 !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.9);
+    font-size: 14px !important;
+    margin-left: 4px;
+}
+
+
+/* =========================================
+   2. STYLE CHO KHUNG CHAT
+   ========================================= */
+.str-chat__theme-dark {
+    --str-chat__primary-color: #8ab4f8;
+    --str-chat__surface-color: #202124;
+    --str-chat__secondary-surface-color: #3c4043;
+    --str-chat__text-color: #e8eaed;
+}
+.str-chat__input-flat {
+    background-color: #202124 !important;
+    border-top: 1px solid #3c4043 !important;
+}
+.custom-chat-dark .str-chat__list::-webkit-scrollbar {
+    width: 6px;
+}
+.custom-chat-dark .str-chat__list::-webkit-scrollbar-thumb {
+    background-color: #3c4043;
+    border-radius: 4px;
+}
+
+/* =========================================
+   3. ANIMATIONS
+   ========================================= */
+@keyframes slideLeft {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+.animate-slide-left {
+    animation: slideLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes slideDownFade {
+    from { opacity: 0; transform: translate(-50%, -20px); }
+    to { opacity: 1; transform: translate(-50%, 0); }
+}
+.animate-slide-down {
+    animation: slideDownFade 0.3s ease-out forwards;
+}
+
+/* =========================================
+   4. FIX SIDEBAR PARTICIPANTS (QUAN TRỌNG)
+   ========================================= */
+
+/* 4.1. Ép tên người dùng màu trắng */
+.str-video__participant-list-item__name,
+.str-video__participant-list-item span {
+    color: white !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+}
+
+/* 4.2. ÉP HIỂN THỊ MỌI ICON TRONG DANH SÁCH */
+/* Target vào tất cả SVG nằm trong item danh sách (ngoại trừ avatar nếu có) */
+.str-video__participant-list-item svg {
+    fill: white !important; /* Đổi màu icon thành trắng */
+    width: 16px !important;
+    height: 16px !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+}
+
+/* 4.3. TẠO KHUNG NỀN CHO ICON (Mic/Cam) */
+/* Tìm các thẻ div bao quanh icon (thường có class chứa 'status' hoặc 'icon') */
+.str-video__participant-list-item [class*="status-icon"],
+.str-video__participant-list-item [class*="device-status"] {
+    background-color: #3c4043 !important; /* Mặc định xám */
+    border-radius: 50% !important;
+    width: 28px !important;
+    height: 28px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin-left: 8px !important;
+}
+
+/* 4.4. XỬ LÝ TRẠNG THÁI TẮT (MUTE) -> MÀU ĐỎ */
+/* Nếu SDK thêm class --muted */
+.str-video__participant-list-item [class*="--muted"],
+.str-video__participant-list-item [data-stream-muted="true"] {
+    background-color: #ea4335 !important;
+    box-shadow: 0 0 4px rgba(234, 67, 53, 0.5);
+}
+
+/* Nếu SDK dùng data attribute để đánh dấu tắt mic (hack) */
+.str-video__participant-list-item:has(svg[data-testid="mic-off"]),
+.str-video__participant-list-item:has(svg[data-testid="audio-off"]) [class*="status-icon"] {
+    background-color: #ea4335 !important;
+}
+
+/* 4.5. Đảm bảo container chứa icon luôn hiển thị */
+.str-video__participant-list-item__icons,
+.str-video__participant-list-item__media-states {
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    opacity: 1 !important;
+    visibility: visible !important;
 }

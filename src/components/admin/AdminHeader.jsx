@@ -27,9 +27,11 @@ const NotificationItem = ({ notification, onMarkRead }) => {
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
 
-  const isApprovalRequest = notification.message.includes(
-    "Yêu cầu duyệt phòng"
-  );
+  const isApprovalRequest = 
+    notification.message.includes("Yêu cầu duyệt phòng") || 
+    notification.message.includes("CẬP NHẬT") || 
+    notification.message.includes("duyệt lại");
+
   const showActions = notification.meetingId && !notification.read;
 
   const handleAccept = async (e) => {

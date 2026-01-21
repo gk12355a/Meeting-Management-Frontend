@@ -4,10 +4,7 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
-import {
-  getMyMeetings,
-  getMeetingById,
-} from "../../services/meetingService";
+import { getMyMeetings, getMeetingById } from "../../services/meetingService";
 import {
   Modal,
   Spin,
@@ -311,11 +308,11 @@ const MyMeetingPage = () => {
   const calendarLocale = i18n.language === "vi" ? "vi" : "en-gb";
 
   const buttonText = {
-  day: i18n.language === "vi" ? "Ngày" : "Day",
-  week: i18n.language === "vi" ? "Tuần" : "Week",
-  month: i18n.language === "vi" ? "Tháng" : "Month",
-  today: i18n.language === "vi" ? "Hôm nay" : "Today",
-};
+    day: i18n.language === "vi" ? "Ngày" : "Day",
+    week: i18n.language === "vi" ? "Tuần" : "Week",
+    month: i18n.language === "vi" ? "Tháng" : "Month",
+    today: i18n.language === "vi" ? "Hôm nay" : "Today",
+  };
 
   // State quản lý lịch họp
   const [events, setEvents] = useState([]);
@@ -331,8 +328,8 @@ const MyMeetingPage = () => {
   const [lastDatesSet, setLastDatesSet] = useState(null);
 
   // LƯU NGÀY USER ĐANG XEM (KHÔNG BAO GIỜ BỊ RESET)
-const [fixedViewDate, setFixedViewDate] = useState(null);
-  
+  const [fixedViewDate, setFixedViewDate] = useState(null);
+
   // LOCK NGÀY SAU KHI ĐẶT LỊCH NHANH ĐỂ KHÔNG BỊ NHẢY VỀ HÔM NAY
   const [lockedViewDate, setLockedViewDate] = useState(null);
 
@@ -405,100 +402,69 @@ const [fixedViewDate, setFixedViewDate] = useState(null);
 
   // === TẢI LỊCH HỌP ===
   const fetchMeetings = async (silent = false) => {
-    if (!user) return; // Đảm bảo user đã tải xong
+    if (!user) return;
 
     if (!silent) setLoading(true);
     try {
       const res = await getMyMeetings();
       const data = res.data?.content || [];
 
+      // --- 1. NÂNG CẤP BỘ LỌC (Fix lỗi không thấy họp vừa tạo) ---
       const filteredData = data.filter((m) => {
-        // 2. Kiểm tra xem user có phải người tổ chức không
+        // Check cả người tạo (creator) phòng trường hợp organizer bị null
+        const isCreator = m.creator?.id === user.id;
         const isOrganizer = m.organizer?.id === user.id;
-        // 3. Tìm trạng thái của user (nếu là người tham gia)
         const userParticipant = m.participants?.find((p) => p.id === user.id);
 
-        // 4. LOGIC QUYẾT ĐỊNH:
-        // NẾU TÔI LÀ NGƯỜI TỔ CHỨC: Luôn hiển thị
-        if (isOrganizer) {
-          return true;
-        }
-        // NẾU TÔI CHỈ LÀ NGƯỜI THAM GIA: Chỉ hiển thị nếu không từ chối
-        if (userParticipant) {
-          return userParticipant.status !== "DECLINED";
-        }
+        // Nếu tôi là người tạo HOẶC người tổ chức -> Luôn hiện
+        if (isCreator || isOrganizer) return true;
 
-        // Nếu không phải organizer và không có trong participants → Ẩn
+        // Nếu tôi là người tham gia và chưa từ chối -> Hiện
+        if (userParticipant) return userParticipant.status !== "DECLINED";
+
         return false;
       });
 
-      // 🔥 ẨN HOÀN TOÀN CÁC CUỘC HỌP BỊ HỦY / BỊ TỪ CHỐI Ở TẤT CẢ VIEW
+      // Ẩn cuộc họp đã Hủy hoặc Bị từ chối
       let cleanedData = filteredData.filter(
         (m) => m.status !== "CANCELLED" && m.status !== "REJECTED"
       );
 
+      // --- 2. MAP DỮ LIỆU ---
       const mappedEvents = cleanedData.map((m) => {
-        const startLocal = dayjs(m.startTime).local().format();
-        const endLocal = dayjs(m.endTime).local().format();
+        // Logic màu sắc
+        let bgColor = "#3b82f6"; // Xanh (CONFIRMED)
+        let borderColor = "#2563eb";
 
-        const isNegativeStatus =
-          m.status === "CANCELLED" || m.status === "REJECTED";
-
-        let bgColor, borderColor;
-
-        if (isNegativeStatus) {
-          bgColor = "#ef4444"; // đỏ
-          borderColor = "#b91c1c"; // đỏ đậm
-        } else if (m.status === "CONFIRMED") {
-          bgColor = "#3b82f6";
-          borderColor = "#2563eb";
-        } else {
-          bgColor = "#f59e0b";
+        if (m.status === "PENDING_APPROVAL") {
+          bgColor = "#f59e0b"; // Cam (PENDING)
           borderColor = "#d97706";
         }
 
         return {
           id: m.id,
           title: m.title || "Cuộc họp",
-          start: startLocal,
-          end: endLocal,
+
+          // Dùng toISOString() để đảm bảo an toàn tuyệt đối về format ngày
+          start: dayjs(m.startTime).toISOString(),
+          end: dayjs(m.endTime).toISOString(),
+
           backgroundColor: bgColor,
           borderColor: borderColor,
           extendedProps: {
             roomName: m.room?.name || "Chưa xác định",
-            status: m.status, 
+            status: m.status,
+            ...m,
           },
-          classNames: isNegativeStatus ? ["meeting-cancelled"] : [],
-          hiddenInWeekDayView: isNegativeStatus,
         };
       });
 
-      setSoftLoading(true); // bật hiệu ứng fade
-
-setTimeout(() => {
-  setEvents(mappedEvents);
-  setSoftLoading(false); // tắt hiệu ứng fade
-}, 150);
-
-      // GIỮ NGÀY USER ĐANG ĐỨNG (KHÔNG JUMP VỀ TODAY)
-      // GIỮ NGÀY USER ĐANG ĐỨNG KHI AUTO-REFRESH
-setTimeout(() => {
-  const api = calendarRef.current?.getApi?.();
-  if (!api) return;
-
-  // Luôn ưu tiên fixedViewDate — ngày user đang đứng
-  if (fixedViewDate) {
-    api.gotoDate(fixedViewDate);
-  }
-}, 50);
+      setEvents(mappedEvents);
     } catch (err) {
       console.error("Lỗi tải lịch họp:", err);
-      toast.error(t("errorLoadMeeting"));
     } finally {
-      if (initialLoad) {
-    setInitialLoad(false); // Ghi nhớ rằng đã load xong lần đầu
-  }
-  setLoading(false);
+      if (initialLoad) setInitialLoad(false);
+      setLoading(false);
     }
   };
 
@@ -615,13 +581,13 @@ setTimeout(() => {
 
   // RED LINE NOW-INDICATOR
   useEffect(() => {
-  const id = setInterval(() => {
-    try {
-      calendarRef.current?.getApi()?.updateNow();
-    } catch {}
-  }, 20000);
-  return () => clearInterval(id);
-}, []);
+    const id = setInterval(() => {
+      try {
+        calendarRef.current?.getApi()?.updateNow();
+      } catch {}
+    }, 20000);
+    return () => clearInterval(id);
+  }, []);
 
   // Xử lý click vào khoảng trống trên calendar để đặt lịch nhanh
   const handleDateSelect = (selection) => {
@@ -694,28 +660,28 @@ setTimeout(() => {
   }
 
   // === AUTO REFRESH EVERY 5 SECONDS ===
-useEffect(() => {
-  const interval = setInterval(() => {
-    // Không refresh nếu đang mở modal để tránh nhảy UI
-    if (
-      !isModalOpen &&
-      !isEditModalOpen &&
-      !isDeleteModalOpen &&
-      !isQRModalOpen &&
-      !quickBooking.open
-    ) {
-      fetchMeetings(true); // không bật spinner khi auto refresh
-    }
-  }, 5000); // 5 giây
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     // Không refresh nếu đang mở modal để tránh nhảy UI
+  //     if (
+  //       !isModalOpen &&
+  //       !isEditModalOpen &&
+  //       !isDeleteModalOpen &&
+  //       !isQRModalOpen &&
+  //       !quickBooking.open
+  //     ) {
+  //       fetchMeetings(true); // không bật spinner khi auto refresh
+  //     }
+  //   }, 5000); // 5 giây
 
-  return () => clearInterval(interval);
-}, [
-  isModalOpen,
-  isEditModalOpen,
-  isDeleteModalOpen,
-  isQRModalOpen,
-  quickBooking.open,
-]);
+  //   return () => clearInterval(interval);
+  // }, [
+  //   isModalOpen,
+  //   isEditModalOpen,
+  //   isDeleteModalOpen,
+  //   isQRModalOpen,
+  //   quickBooking.open,
+  // ]);
 
   // RENDER
   return (
@@ -751,24 +717,27 @@ useEffect(() => {
             locale={calendarLocale}
             buttonText={buttonText}
             buttonHints={{
-    prev: i18n.language === "vi" ? "Tuần trước" : "Previous",
-    next: i18n.language === "vi" ? "Tuần sau" : "Next",
-    today: i18n.language === "vi" ? "Hôm nay" : "Today",
-    day: i18n.language === "vi" ? "Xem theo ngày" : "Day view",
-    week: i18n.language === "vi" ? "Xem theo tuần" : "Week view",
-    month: i18n.language === "vi" ? "Xem theo tháng" : "Month view",
-  }}
+              prev: i18n.language === "vi" ? "Tuần trước" : "Previous",
+              next: i18n.language === "vi" ? "Tuần sau" : "Next",
+              today: i18n.language === "vi" ? "Hôm nay" : "Today",
+              day: i18n.language === "vi" ? "Xem theo ngày" : "Day view",
+              week: i18n.language === "vi" ? "Xem theo tuần" : "Week view",
+              month: i18n.language === "vi" ? "Xem theo tháng" : "Month view",
+            }}
             // BẮT SỰ KIỆN THAY ĐỔI VIEW (CHUYỂN TUẦN / THÁNG / NGÀY)
             datesSet={(arg) => {
-  setCurrentViewDate(arg.start);
+              setCurrentViewDate(arg.start);
 
-  // Nếu user chuyển sang tuần/ngày/tháng khác → cập nhật fixedViewDate
-  if (!fixedViewDate || !dayjs(arg.start).isSame(fixedViewDate, "day")) {
-    setFixedViewDate(arg.start);
-  }
+              // Nếu user chuyển sang tuần/ngày/tháng khác → cập nhật fixedViewDate
+              if (
+                !fixedViewDate ||
+                !dayjs(arg.start).isSame(fixedViewDate, "day")
+              ) {
+                setFixedViewDate(arg.start);
+              }
 
-  setCurrentViewType(arg.view.type);
-}}
+              setCurrentViewType(arg.view.type);
+            }}
             headerToolbar={{
               left: "prev,next today",
               center: "title",
@@ -791,10 +760,7 @@ useEffect(() => {
               const validStart = isBusinessTime(start);
               const validEnd = isBusinessTime(end);
               // chỉ cho phép chọn nếu trong cùng 1 ngày
-              const sameDay = isSameDay(
-                start,
-                end.subtract(1, "minute")
-              ); // subtract 1 minute to avoid end 00:00 of next day
+              const sameDay = isSameDay(start, end.subtract(1, "minute")); // subtract 1 minute to avoid end 00:00 of next day
               return validStart && validEnd && sameDay;
             }}
             eventAllow={function (dropInfo, draggedEvent) {
@@ -803,10 +769,7 @@ useEffect(() => {
               const validStart = isBusinessTime(start);
               const validEnd = isBusinessTime(end);
               // CHỈ CHO KÉO THẢ TRONG 1 NGÀY
-              const sameDay = isSameDay(
-                start,
-                end.subtract(1, "minute")
-              );
+              const sameDay = isSameDay(start, end.subtract(1, "minute"));
               return validStart && validEnd && sameDay;
             }}
             businessHours={{

@@ -1,7 +1,18 @@
 // src/components/user/MeetingDetailModal.jsx
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { FiX, FiCalendar, FiClock, FiMapPin, FiCpu, FiUsers, FiInfo } from "react-icons/fi";
+import { useNavigate } from "react-router-dom"; // [Mới] Import hook điều hướng
+import { Button } from "antd"; // [Mới] Import Button Antd
+import { 
+  FiX, 
+  FiCalendar, 
+  FiClock, 
+  FiMapPin, 
+  FiCpu, 
+  FiUsers, 
+  FiInfo, 
+  FiVideo // [Mới] Import icon video
+} from "react-icons/fi";
 import dayjs from "dayjs";
 import "dayjs/locale/vi";
 
@@ -9,6 +20,7 @@ dayjs.locale("vi");
 
 const MeetingDetailModal = ({ open, onClose, meeting, children }) => {
   const { t } = useTranslation("meetingDetail"); 
+  const navigate = useNavigate(); // [Mới] Khởi tạo navigate
   const modalOverlayRef = useRef(null);
   const modalContentRef = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -235,6 +247,14 @@ const MeetingDetailModal = ({ open, onClose, meeting, children }) => {
 
   const meetingStatus = getMeetingStatus(meeting.status);
 
+  // [Mới] Hàm xử lý khi bấm vào họp
+  const handleJoinMeeting = () => {
+    handleClose(); // Đóng modal với animation
+    // Đợi animation đóng modal chạy xong (khoảng 200ms) rồi mới chuyển trang cho mượt
+    // Hoặc chuyển luôn cũng được, tùy trải nghiệm. Ở đây chuyển luôn cho nhanh.
+    navigate(`/meeting/${meeting.id}`);
+  };
+
   return (
     <div
       className={`fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[9999] ${
@@ -378,8 +398,21 @@ const MeetingDetailModal = ({ open, onClose, meeting, children }) => {
         </div>
 
         {/* Footer with custom buttons */}
-        {children && (
+        {(children || meeting.status === "APPROVED" || meeting.status === "CONFIRMED") && (
           <div className="border-t border-gray-200 dark:border-slate-700 p-4 flex justify-end gap-2 bg-gray-50 dark:bg-slate-800/50">
+            
+            {/* [Mới] Nút vào họp Online */}
+            {(meeting.status === "APPROVED" || meeting.status === "CONFIRMED") && (
+              <Button
+                type="primary"
+                className="bg-green-600 hover:bg-green-700 border-green-600 flex items-center gap-2"
+                onClick={handleJoinMeeting}
+                icon={<FiVideo />}
+              >
+                {t("joinOnline") || "Vào họp Online"}
+              </Button>
+            )}
+
             {children}
           </div>
         )}

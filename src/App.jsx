@@ -20,7 +20,6 @@ import Rooms from "./pages/admin/RoomsPage";
 import Devices from "./pages/admin/DevicesPage";
 import Reports from "./pages/admin/ReportsPage";
 import ChangePasswordPageAdmin from "./pages/admin/ChangePasswordPage";
-
 // ===== User Pages =====
 import UserDashboard from "./pages/user/DashboardPage";
 import MyMeetingsPage from "./pages/user/MyMeetingsPage";
@@ -31,7 +30,7 @@ import ProfilePage from "./pages/user/ProfilePage";
 import ChangePasswordPageUser from "./pages/user/ChangePasswordPage";
 import DevicePage from "./pages/user/DevicePage";
 import CheckInProcessingPage from "./pages/user/CheckInProcessingPage";
-
+import VideoPage from "./pages/user/VideoPage";
 // ===== Guards =====
 import ProtectedRoute from "./routes/ProtectedRoute";
 import AdminOnlyRoute from "./routes/AdminOnlyRoute";
@@ -118,7 +117,7 @@ export default function App() {
           <Route path="profile" element={<ProfilePage />} />
           <Route path="change-password" element={<ChangePasswordPageUser />} />
         </Route>
-
+        <Route path="/meeting/:meetingId" element={<VideoPage />} />
         {/* === GOOGLE OAUTH CALLBACK === */}
         <Route path="/google-callback" element={<GoogleCallbackPage />} />
 
