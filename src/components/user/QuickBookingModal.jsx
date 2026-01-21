@@ -39,14 +39,14 @@ const { Option } = Select;
 const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLockViewDate }) => {
   const { t } = useTranslation("quickBook");
   const DAYS_OF_WEEK = [
-  { value: "MONDAY", label: t("week.mon") },
-  { value: "TUESDAY", label: t("week.tue") },
-  { value: "WEDNESDAY", label: t("week.wed") },
-  { value: "THURSDAY", label: t("week.thu") },
-  { value: "FRIDAY", label: t("week.fri") },
-  { value: "SATURDAY", label: t("week.sat") },
-  { value: "SUNDAY", label: t("week.sun") },
-];
+    { value: "MONDAY", label: t("week.mon") },
+    { value: "TUESDAY", label: t("week.tue") },
+    { value: "WEDNESDAY", label: t("week.wed") },
+    { value: "THURSDAY", label: t("week.thu") },
+    { value: "FRIDAY", label: t("week.fri") },
+    { value: "SATURDAY", label: t("week.sat") },
+    { value: "SUNDAY", label: t("week.sun") },
+  ];
   const [loading, setLoading] = useState(false);
   const [rooms, setRooms] = useState([]);
 
@@ -195,9 +195,9 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
   /* SUBMIT MEETING */
   const handleCreateMeeting = async (values) => {
     if (!user?.id) {
-    toast.error("Không thể tạo cuộc họp: Tài khoản của bạn chưa được đồng bộ đầy đủ. Vui lòng đăng xuất và đăng nhập lại!");
-    return;
-  }
+      toast.error("Không thể tạo cuộc họp: Tài khoản của bạn chưa được đồng bộ đầy đủ. Vui lòng đăng xuất và đăng nhập lại!");
+      return;
+    }
     try {
       setLoading(true);
 
@@ -232,13 +232,13 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
         recurrenceRule:
           values.isRecurring === true
             ? {
-                frequency: values.frequency,
-                interval: 1,
-                repeatUntil: dayjs(values.repeatUntil).format("YYYY-MM-DD"),
-                ...(values.frequency === "WEEKLY" && values.daysOfWeek?.length > 0
-                  ? { daysOfWeek: values.daysOfWeek }
-                  : {}),
-              }
+              frequency: values.frequency,
+              interval: 1,
+              repeatUntil: dayjs(values.repeatUntil).format("YYYY-MM-DD"),
+              ...(values.frequency === "WEEKLY" && values.daysOfWeek?.length > 0
+                ? { daysOfWeek: values.daysOfWeek }
+                : {}),
+            }
             : null,
         onBehalfOfUserId: null,
       };
@@ -251,8 +251,8 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
         toast.success(t("messages.createSuccess"));
 
         if (onLockViewDate && quickBookingData?.start) {
-        onLockViewDate(quickBookingData.start.toDate());
-}
+          onLockViewDate(quickBookingData.start.toDate());
+        }
 
       }
 
@@ -314,7 +314,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
     setClockValue(dayjs());
     setAvailableDevices([]);
     setIsRecurring(false);
-    setSelectedDays([]); 
+    setSelectedDays([]);
     onCancel();
   };
 
@@ -354,9 +354,9 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
             name="title"
             label={t("fields.meetingTitle")}
             rules={[
-  { required: true, message: t("fields.meetingTitleRequired") },
-  { min: 3, message: t("fields.meetingTitleTooShort") }
-]}
+              { required: true, message: t("fields.meetingTitleRequired") },
+              { min: 3, message: t("fields.meetingTitleTooShort") }
+            ]}
           >
             <Input
               placeholder={t("fields.meetingTitlePlaceholder")}
@@ -379,50 +379,50 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
             </Form.Item>
 
             {/* TIME PICKER MỚI - MUI STATIC TIME PICKER */}
-<Form.Item
-  name="time"
-  label={t("fields.startTime")}
-  rules={[{ required: true }]}
->
-  <div className="flex gap-2">
-    <Input
-      readOnly
-      value={clockValue.format("HH:mm")}
-      onClick={() => setClockOpen(true)}
-      placeholder={t("fields.startTime")}
-      className="cursor-pointer dark:bg-gray-700 dark:text-white dark:border-gray-600"
-    />
-    <Button onClick={() => setClockOpen(true)}>🕒 {t("fields.pickTime")}</Button>
-  </div>
+            <Form.Item
+              name="time"
+              label={t("fields.startTime")}
+              rules={[{ required: true }]}
+            >
+              <div className="flex gap-2">
+                <Input
+                  readOnly
+                  value={clockValue.format("HH:mm")}
+                  onClick={() => setClockOpen(true)}
+                  placeholder={t("fields.startTime")}
+                  className="cursor-pointer dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                />
+                <Button onClick={() => setClockOpen(true)}>🕒 {t("fields.pickTime")}</Button>
+              </div>
 
-  <Modal
-    title={t("fields.pickTimeRange")} // "Chọn giờ (08:00 - 18:00)"
-    open={clockOpen}
-    onCancel={() => setClockOpen(false)}
-    onOk={() => {
-      if (!validateBusinessTime(clockValue)) {
-        toast.error(t("errors.outsideBusiness"));
-        return;
-      }
-      form.setFieldsValue({ time: clockValue });
-      setClockOpen(false);
-    }}
-    width={350}
-    centered
-  >
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <StaticTimePicker
-        orientation="portrait"
-        ampm={false}
-        value={clockValue}
-        onChange={(v) => setClockValue(v)}
-        slotProps={{
-          actionBar: { actions: [] }, // Ẩn nút OK/Cancel của MUI
-        }}
-      />
-    </LocalizationProvider>
-  </Modal>
-</Form.Item>
+              <Modal
+                title={t("fields.pickTimeRange")} // "Chọn giờ (08:00 - 18:00)"
+                open={clockOpen}
+                onCancel={() => setClockOpen(false)}
+                onOk={() => {
+                  if (!validateBusinessTime(clockValue)) {
+                    toast.error(t("errors.outsideBusiness"));
+                    return;
+                  }
+                  form.setFieldsValue({ time: clockValue });
+                  setClockOpen(false);
+                }}
+                width={350}
+                centered
+              >
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <StaticTimePicker
+                    orientation="portrait"
+                    ampm={false}
+                    value={clockValue}
+                    onChange={(v) => setClockValue(v)}
+                    slotProps={{
+                      actionBar: { actions: [] }, // Ẩn nút OK/Cancel của MUI
+                    }}
+                  />
+                </LocalizationProvider>
+              </Modal>
+            </Form.Item>
 
             <Form.Item
               name="duration"
@@ -500,8 +500,8 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
                     <span>{d.name}</span>
                     <Tag color={d.status === "AVAILABLE" ? "green" : "red"}>
                       {d.status === "AVAILABLE"
-                          ? t("fields.deviceAvailable")
-                          : t("fields.deviceUnavailable")}
+                        ? t("fields.deviceAvailable")
+                        : t("fields.deviceUnavailable")}
                     </Tag>
                   </div>
                 </Option>
@@ -676,7 +676,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
               type="primary"
               htmlType="submit"
               loading={loading}
-              className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-emerald-500 dark:hover:bg-emerald-600"
             >
               {t("buttons.submit")}
             </Button>

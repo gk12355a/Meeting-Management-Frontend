@@ -64,7 +64,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
   const [isSearching, setIsSearching] = useState(false);
 
   // STATE: isRecurring
-  const [isRecurring, setIsRecurring] = useState(false); 
+  const [isRecurring, setIsRecurring] = useState(false);
   const [showRecurringOptions, setShowRecurringOptions] = useState(false);
 
   // State cho Modal Xác nhận (Chọn sửa 1 hay sửa chuỗi)
@@ -82,7 +82,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
   const watchedDate = Form.useWatch("date", form);
   const watchedTime = Form.useWatch("time", form);
   const watchedDuration = Form.useWatch("duration", form);
-  
+
   /* LOAD ROOMS */
   useEffect(() => {
     if (!open || !meetingDetail) return;
@@ -96,7 +96,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
       }
     };
     fetchData();
-  }, [open, meetingDetail]); 
+  }, [open, meetingDetail]);
 
   /* POPULATE FORM */
   useEffect(() => {
@@ -139,7 +139,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
 
     // Nếu là chuỗi thì hiện options luôn
     if (isSeries) {
-       setShowRecurringOptions(true);
+      setShowRecurringOptions(true);
     }
 
     if (meetingDetail.participants) {
@@ -147,7 +147,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
     }
 
     if (startTime && duration) {
-      loadDevicesForTime(startTime , duration);
+      loadDevicesForTime(startTime, duration);
     }
   }, [meetingDetail, open, form, user]);
 
@@ -273,14 +273,14 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
       // TRƯỜNG HỢP 1: CHỈ SỬA CUỘC HỌP NÀY 
       if (mode === 'SINGLE') {
         res = await updateMeeting(meetingDetail.id, payload);
-      } 
+      }
       // TRƯỜNG HỢP 2: SỬA TOÀN BỘ CHUỖI 
       else if (mode === 'SERIES') {
         // Validate ngày kết thúc cho chuỗi
         if (!values.repeatUntil || dayjs(values.repeatUntil).isBefore(dayjs(), 'day')) {
-            toast.error(t('userEdit:edit.messages.invalidRepeatUntil')); // ({/* "Ngày kết thúc lặp lại không hợp lệ (phải ở tương lai)!" */})
-            setLoading(false);
-            return;
+          toast.error(t('userEdit:edit.messages.invalidRepeatUntil')); // ({/* "Ngày kết thúc lặp lại không hợp lệ (phải ở tương lai)!" */})
+          setLoading(false);
+          return;
         }
 
         // Thêm thông tin Recurrence Rule vào payload
@@ -462,8 +462,8 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
             </div>
 
             {/* ROOM SELECT */}
-            <Form.Item 
-              name="roomId" 
+            <Form.Item
+              name="roomId"
               // ({/* label="Phòng họp" */}
               label={t('userEdit:edit.fields.room')}
               // )
@@ -502,11 +502,11 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
             </Form.Item>
 
             {/* DEVICES */}
-            <Form.Item 
-              name="deviceIds" 
+            <Form.Item
+              name="deviceIds"
               // ({/* label="Thiết bị sử dụng" */}
               label={t('userEdit:edit.fields.devices')}
-              // )
+            // )
             >
               <Select
                 mode="multiple"
@@ -541,7 +541,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
             <Divider className="dark:border-gray-700" />
 
             {/* PARTICIPANTS */}
-            <Form.Item 
+            <Form.Item
               // ({/* label="Người tham gia (Nội bộ)" */}
               label={t('userEdit:edit.fields.participants')}
               // ) 
@@ -563,8 +563,8 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
             </Form.Item>
 
             {/* GUEST EMAILS */}
-            <Form.Item 
-              name="guestEmails" 
+            <Form.Item
+              name="guestEmails"
               // ({/* label={<span><FiMail className="inline mr-2" />Email khách mời</span>} */}
               label={
                 <span>
@@ -581,9 +581,9 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
                 }
               }]}
             >
-              <Select 
-                mode="tags" 
-                tokenSeparators={[',', ';', ' ']} 
+              <Select
+                mode="tags"
+                tokenSeparators={[',', ';', ' ']}
                 placeholder={t('userEdit:edit.placeholders.enterEmail')}
                 className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
                 classNames={{ popup: "dark:bg-gray-700 dark:text-gray-100" }}
@@ -605,11 +605,11 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
                 {showRecurringOptions && (
                   <div className="bg-gray-50 dark:bg-slate-800 p-4 rounded-lg mb-4 border border-gray-200 dark:border-gray-700">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                      <Form.Item 
-                        name="frequencies" 
+                      <Form.Item
+                        name="frequencies"
                         // ({/* label="Tần suất" */}
                         label={t('userEdit:edit.fields.frequency')}
-                        // )
+                      // )
                       >
                         <Select className="dark:bg-gray-700 dark:text-white dark:border-gray-600">
                           <Option value="DAILY">{t('userEdit:edit.frequencies.daily')}</Option>
@@ -617,8 +617,8 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
                           <Option value="MONTHLY">{t('userEdit:edit.frequencies.monthly')}</Option>
                         </Select>
                       </Form.Item>
-                      <Form.Item 
-                        name="repeatUntil" 
+                      <Form.Item
+                        name="repeatUntil"
                         // ({/* label="Đến ngày" */}
                         label={t('userEdit:edit.fields.repeatUntil')}
                         // )
@@ -632,13 +632,13 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
                       </Form.Item>
                     </div>
                     {/* CHỌN THỨ (NẾU LÀ WEEKLY) */}
-                    <Form.Item 
+                    <Form.Item
                       shouldUpdate={(prev, curr) => prev.frequencies !== curr.frequencies}
                     >
-                      {({ getFieldValue }) => 
+                      {({ getFieldValue }) =>
                         getFieldValue('frequencies') === 'WEEKLY' ? (
-                          <Form.Item 
-                            name="daysOfWeek" 
+                          <Form.Item
+                            name="daysOfWeek"
                             // ({/* label="Lặp lại vào các thứ" */}
                             label={t('userEdit:edit.fields.daysOfWeek')}
                             // )
@@ -654,11 +654,11 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
               </>
             )}
 
-            <Form.Item 
-              name="description" 
+            <Form.Item
+              name="description"
               // ({/* label="Ghi chú" */}
               label={t('userEdit:edit.fields.notes')}
-              // )
+            // )
             >
               <TextArea rows={3} className="dark:bg-gray-700 dark:text-white dark:border-gray-600" />
             </Form.Item>
@@ -673,7 +673,7 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
                 type="primary"
                 htmlType="submit"
                 loading={loading}
-                className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-emerald-500 dark:hover:bg-emerald-600"
               >
                 {/* ({/* "Cập nhật" */}
                 <span>{t('userEdit:edit.buttons.update')}</span>
@@ -707,9 +707,9 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
             {/* ) */}
           </p>
           <div className="flex flex-col gap-3">
-            <Button 
-              block 
-              size="large" 
+            <Button
+              block
+              size="large"
               onClick={() => executeUpdate(pendingValues, 'SINGLE')}
               className="dark:bg-gray-700 dark:text-white dark:border-gray-600 h-12 font-medium"
             >
@@ -717,12 +717,12 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
               <span>{t('userEdit:edit.confirmModal.single')}</span>
               {/* ) */}
             </Button>
-            <Button 
-              block 
-              size="large" 
-              type="primary" 
+            <Button
+              block
+              size="large"
+              type="primary"
               onClick={() => executeUpdate(pendingValues, 'SERIES')}
-              className="bg-blue-600 h-12 font-medium"
+              className="bg-emerald-600 h-12 font-medium"
             >
               {/* ({/* "Toàn bộ chuỗi (Các cuộc họp tương lai)" */}
               <span>{t('userEdit:edit.confirmModal.series')}</span>
@@ -730,11 +730,11 @@ const EditMeetingModal = ({ open, onCancel, meetingDetail, onSuccess }) => {
             </Button>
           </div>
           <div className="mt-4 text-right">
-             <Button type="text" onClick={() => setConfirmModalOpen(false)}>
-                {/* ({/* "Hủy bỏ" */}
-                <span>{t('common:buttons.cancel')}</span>
-                {/* ) */}
-             </Button>
+            <Button type="text" onClick={() => setConfirmModalOpen(false)}>
+              {/* ({/* "Hủy bỏ" */}
+              <span>{t('common:buttons.cancel')}</span>
+              {/* ) */}
+            </Button>
           </div>
         </div>
       </Modal>
