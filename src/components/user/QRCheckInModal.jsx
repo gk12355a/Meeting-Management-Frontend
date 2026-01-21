@@ -97,7 +97,7 @@ const QRCheckInModal = ({ open, onClose, checkinCode, meetingTitle }) => {
       className="qr-checkin-modal"
     >
       <div className="border-t border-gray-200 dark:border-slate-600 my-5"></div>
-     
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
         {/* Cột trái: Mã QR */}
         <div className="flex flex-col items-center justify-center">
@@ -106,19 +106,19 @@ const QRCheckInModal = ({ open, onClose, checkinCode, meetingTitle }) => {
             className="bg-white p-4 rounded-2xl shadow-lg border-2 border-gray-100 dark:border-gray-700"
           >
             {checkinCode ? (
-                <QRCodeSVG
-                  value={checkInUrl} 
-                  size={220}
-                  level="H"
-                  includeMargin={true}
-                  imageSettings={{
-                      // Đảm bảo bạn có file logo này trong thư mục public
-                      src: "/logo-meetflow.png",
-                      height: 30,
-                      width: 47,
-                      excavate: true,
-                  }}
-                />
+              <QRCodeSVG
+                value={checkInUrl}
+                size={220}
+                level="H"
+                includeMargin={true}
+                imageSettings={{
+                  // Đảm bảo bạn có file logo này trong thư mục public
+                  src: "/logo-6X6.png",
+                  height: 30,
+                  width: 47,
+                  excavate: true,
+                }}
+              />
             ) : (
               <div className="w-[220px] h-[220px] flex items-center justify-center bg-gray-100 rounded-lg">
                 {/* <span className="text-gray-400 text-xs">Đang tạo mã...</span> */}
@@ -139,22 +139,22 @@ const QRCheckInModal = ({ open, onClose, checkinCode, meetingTitle }) => {
 
           <div className="flex gap-2">
             <Button
-                onClick={handleDownloadQR}
-                disabled={!checkinCode}
-                icon={<FiDownload />}
+              onClick={handleDownloadQR}
+              disabled={!checkinCode}
+              icon={<FiDownload />}
             >
-                {/* Lưu ảnh */}
-                <span>{t('qr:qr.buttons.download')}</span>
+              {/* Lưu ảnh */}
+              <span>{t('qr:qr.buttons.download')}</span>
             </Button>
             <Tooltip title={t('qr:qr.buttons.copyLink')}>
-                <Button
-                    onClick={handleCopyLink}
-                    disabled={!checkinCode}
-                    icon={<FiLink />}
-                >
-                    {/* Copy Link */}
-                    <span>{t('qr:qr.buttons.copyLink')}</span>
-                </Button>
+              <Button
+                onClick={handleCopyLink}
+                disabled={!checkinCode}
+                icon={<FiLink />}
+              >
+                {/* Copy Link */}
+                <span>{t('qr:qr.buttons.copyLink')}</span>
+              </Button>
             </Tooltip>
           </div>
         </div>
@@ -176,9 +176,9 @@ const QRCheckInModal = ({ open, onClose, checkinCode, meetingTitle }) => {
               {/* <Tooltip title="Sao chép mã"> */}
               <Tooltip title={t('qr:qr.buttons.copyCode')}>
                 <Button
-                    icon={<FiCopy />}
-                    onClick={handleCopyCode}
-                    disabled={!checkinCode}
+                  icon={<FiCopy />}
+                  onClick={handleCopyCode}
+                  disabled={!checkinCode}
                 />
               </Tooltip>
             </div>
@@ -219,7 +219,7 @@ const QRCheckInModal = ({ open, onClose, checkinCode, meetingTitle }) => {
               </li>
             </ul>
           </div>
-         
+
           {/* <p className="text-xs text-center text-red-400 italic">
              Mã này chỉ hiệu lực trong 30 phút trước thời gian diễn ra cuộc họp.
           </p> */}

@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 // 👇 SỬA DÒNG NÀY: "../" thay vì "../../"
-import { useAuth } from "../context/AuthContext"; 
+import { useAuth } from "../context/AuthContext";
 import { FiEye, FiEyeOff, FiLogIn, FiGlobe } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 // 👇 SỬA DÒNG NÀY: "../" thay vì "../../"
-import { loginWithSSO } from "../services/authService"; 
+import { loginWithSSO } from "../services/authService";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -35,9 +35,9 @@ export default function LoginPage() {
       setTimeout(() => {
         // Điều hướng dựa trên Role thật
         if (realRoles.includes("ROLE_ADMIN")) {
-            navigate("/admin/dashboard");
+          navigate("/admin/dashboard");
         } else {
-            navigate("/user/dashboard");
+          navigate("/user/dashboard");
         }
       }, 1000);
     } catch (err) {
@@ -59,7 +59,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-blue-100 via-blue-50 to-indigo-100">
+    <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-emerald-100 via-emerald-50 to-teal-100">
       {/* Minh họa (Cột trái) */}
       <div className="hidden md:flex w-1/2 items-center justify-center p-10">
         <motion.img
@@ -75,12 +75,12 @@ export default function LoginPage() {
       {/* Form (Cột phải) */}
       <div className="flex w-full md:w-1/2 items-center justify-center p-6">
         <motion.div
-          className="bg-white shadow-2xl p-10 rounded-3xl w-full max-w-md border border-blue-100"
+          className="bg-white shadow-2xl p-10 rounded-3xl w-full max-w-md border border-emerald-100"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.4 }}
         >
-          <h2 className="text-3xl font-bold text-center mb-8 text-blue-700">
+          <h2 className="text-3xl font-bold text-center mb-8 text-emerald-700">
             🗓️ Meeting Management
           </h2>
 
@@ -97,7 +97,7 @@ export default function LoginPage() {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   autoComplete="username"
-                  className="w-full border border-blue-300 p-3 rounded-xl bg-white placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                  className="w-full border border-emerald-300 p-3 rounded-xl bg-white placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition"
                   required
                 />
               </div>
@@ -114,13 +114,13 @@ export default function LoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     autoComplete="current-password"
-                    className="w-full border border-blue-300 p-3 rounded-xl bg-white placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition pr-10"
+                    className="w-full border border-emerald-300 p-3 rounded-xl bg-white placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition pr-10"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-3 text-gray-500 hover:text-blue-600"
+                    className="absolute right-3 top-3 text-gray-500 hover:text-emerald-600"
                   >
                     {showPassword ? <FiEye size={20} /> : <FiEyeOff size={20} />}
                   </button>
@@ -133,7 +133,7 @@ export default function LoginPage() {
               type="submit"
               disabled={loading}
               whileTap={{ scale: 0.97 }}
-              className="w-full bg-blue-600 text-white font-semibold py-3 mt-6 rounded-lg hover:bg-blue-700 transition disabled:opacity-60 flex items-center justify-center gap-2"
+              className="w-full bg-emerald-600 text-white font-semibold py-3 mt-6 rounded-lg hover:bg-emerald-700 transition disabled:opacity-60 flex items-center justify-center gap-2"
             >
               <FiLogIn />
               {loading ? "Đang đăng nhập..." : "Đăng nhập"}
@@ -159,7 +159,7 @@ export default function LoginPage() {
               whileTap={{ scale: 0.97 }}
               className="w-full bg-white text-gray-700 font-semibold py-3 mt-4 rounded-lg border border-gray-300 hover:bg-gray-50 transition flex items-center justify-center gap-2 shadow-sm group"
             >
-              <FiGlobe className="text-blue-600 text-xl group-hover:scale-110 transition-transform" />
+              <FiGlobe className="text-emerald-600 text-xl group-hover:scale-110 transition-transform" />
               SSO (Auth Service)
             </motion.button>
           </div>
@@ -168,7 +168,7 @@ export default function LoginPage() {
           <div className="text-right mt-4">
             <Link
               to="/forgot-password"
-              className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
+              className="text-sm text-emerald-600 hover:text-emerald-800 hover:underline"
             >
               Quên mật khẩu?
             </Link>

@@ -19,26 +19,26 @@ const NotificationItem = ({ notification, onMarkRead }) => {
   const { t } = useTranslation(['userHeader']);
 
   // Thông báo LỜI MỜI họp (người khác mời bạn)
-const isInvite =
-  notification.message.includes("mời bạn tham gia") ||
-  notification.message.includes("đã mời");
+  const isInvite =
+    notification.message.includes("mời bạn tham gia") ||
+    notification.message.includes("đã mời");
 
   // Logic xác định loại thông báo
   const isStatusUpdate =
-  notification.message.includes("đã được phê duyệt") ||
-  notification.message.includes("chờ Admin phê duyệt") ||
-  notification.message.includes("bị từ chối") ||
-  notification.message.includes("đã chấp nhận") ||
-  notification.message.includes("đã từ chối");
+    notification.message.includes("đã được phê duyệt") ||
+    notification.message.includes("chờ Admin phê duyệt") ||
+    notification.message.includes("bị từ chối") ||
+    notification.message.includes("đã chấp nhận") ||
+    notification.message.includes("đã từ chối");
 
   // Chỉ hiện nút nếu là Lời mời họp VÀ chưa đọc VÀ không phải thông báo trạng thái
   // const showActions = notification.meetingId && !notification.read && !isStatusUpdate;
 
   const showActions =
-  isInvite &&
-  notification.meetingId &&
-  !notification.read &&
-  !isStatusUpdate;
+    isInvite &&
+    notification.meetingId &&
+    !notification.read &&
+    !isStatusUpdate;
 
   const handleResponse = async (status) => {
     if (isResponding) return;
@@ -49,7 +49,7 @@ const isInvite =
     } catch (error) {
       console.error(`Lỗi khi ${status} cuộc họp:`, error);
     } finally {
-      setIsResponding(false); 
+      setIsResponding(false);
     }
   };
 
@@ -57,7 +57,7 @@ const isInvite =
   const handleNavigate = () => {
     // Luôn đánh dấu là đã đọc khi click vào nội dung
     if (!notification.read) {
-       onMarkRead(notification.id);
+      onMarkRead(notification.id);
     }
 
     // Chỉ điều hướng nếu có meetingId
@@ -104,10 +104,10 @@ const isInvite =
       {/* === 2. LOGIC HIỂN THỊ TRẠNG THÁI === */}
       {/* Hiển thị "Đã xem" nếu không có nút hành động VÀ đã đọc (Bỏ điều kiện check meetingId) */}
       {(!showActions && notification.read) && (
-         <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 font-medium">
-           {/* Đã xem. */}
-           <span>{t('userHeader:notifications.status.viewed')}</span>
-         </div>
+        <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 font-medium">
+          {/* Đã xem. */}
+          <span>{t('userHeader:notifications.status.viewed')}</span>
+        </div>
       )}
     </div>
   );
@@ -119,7 +119,7 @@ const UserHeader = ({ setIsSidebarOpen }) => {
   const { t } = useTranslation(['userHeader', 'common']);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  
+
   const notificationRef = useRef(null);
   const settingsRef = useRef(null);
 
@@ -198,33 +198,33 @@ const UserHeader = ({ setIsSidebarOpen }) => {
   };
 
   return (
-    <header className="h-14 bg-[#0b132b] text-white dark:bg-slate-900 flex items-center justify-between px-5 shadow-md transition-colors z-40 fixed top-0 left-0 right-0">
+    <header className="h-14 bg-emerald-950 text-white dark:bg-slate-900 flex items-center justify-between px-5 shadow-md transition-colors z-40 fixed top-0 left-0 right-0">
       {/* Left: Toggle & Logo */}
       <div className="flex items-center gap-3">
         <button
           onClick={() => setIsSidebarOpen(prev => !prev)}
-          className="w-9 h-9 rounded-lg bg-[#1c2541] flex items-center justify-center hover:bg-[#3a506b] transition"
+          className="w-9 h-9 rounded-lg bg-emerald-900 flex items-center justify-center hover:bg-emerald-800 transition"
         >
           <FiMenu size={20} />
         </button>
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white">🗓️</div>
-          <span className="font-semibold text-lg">MeetFlow</span>
+          <div className="w-6 h-6 bg-emerald-600 rounded-lg flex items-center justify-center text-white">🗓️</div>
+          <span className="font-semibold text-lg">6X6</span>
         </div>
       </div>
 
       {/* Right: User Info & Icons */}
       <div className="flex items-center gap-3">
-        <span className="text-sm bg-blue-500 px-3 py-1 rounded-full shadow-md hidden sm:block">
+        <span className="text-sm bg-emerald-600 px-3 py-1 rounded-full shadow-md hidden sm:block">
           {user?.username || "User"}
         </span>
 
         {/* Notification Bell */}
         <div className="relative" ref={notificationRef}>
-          <button onClick={handleNotificationClick} className="w-9 h-9 rounded-lg bg-[#1c2541] flex items-center justify-center hover:bg-[#3a506b] transition relative">
+          <button onClick={handleNotificationClick} className="w-9 h-9 rounded-lg bg-emerald-900 flex items-center justify-center hover:bg-emerald-800 transition relative">
             <FiBell size={20} />
             {unreadCount > 0 && (
-              <span className="absolute top-0 right-0 w-4 h-4 bg-red-500 rounded-full text-xs font-bold flex items-center justify-center border-2 border-[#0b132b] transform translate-x-1/3 -translate-y-1/3">
+              <span className="absolute top-0 right-0 w-4 h-4 bg-red-500 rounded-full text-xs font-bold flex items-center justify-center border-2 border-emerald-950 transform translate-x-1/3 -translate-y-1/3">
                 {unreadCount}
               </span>
             )}
@@ -235,7 +235,7 @@ const UserHeader = ({ setIsSidebarOpen }) => {
               <div className="p-3 border-b dark:border-slate-700 flex justify-between items-center">
                 {/* Thông báo */}
                 <h4 className="font-semibold text-gray-800 dark:text-white">{t('userHeader:notifications.title')}</h4>
-                <button onClick={handleMarkAllAsRead} className="text-xs text-blue-500 hover:underline disabled:opacity-50" disabled={notifications.every(n => n.read) || notificationLoading}>
+                <button onClick={handleMarkAllAsRead} className="text-xs text-emerald-500 hover:underline disabled:opacity-50" disabled={notifications.every(n => n.read) || notificationLoading}>
                   {/* Đánh dấu tất cả đã đọc */}
                   <span>{t('userHeader:notifications.markAllRead')}</span>
                 </button>
@@ -257,7 +257,7 @@ const UserHeader = ({ setIsSidebarOpen }) => {
               </div>
               {hasMoreNotifications && (
                 <div className="p-2 border-t dark:border-slate-700 text-center">
-                  <button onClick={() => fetchNotifications(notificationPage + 1)} disabled={notificationLoading} className="text-sm text-blue-600 hover:underline dark:text-blue-400">
+                  <button onClick={() => fetchNotifications(notificationPage + 1)} disabled={notificationLoading} className="text-sm text-emerald-600 hover:underline dark:text-emerald-400">
                     {/* 'Đang tải...' : 'Xem thêm' */}
                     {notificationLoading ? t('userHeader:notifications.loading') : t('userHeader:notifications.viewMore')}
                   </button>
@@ -269,53 +269,53 @@ const UserHeader = ({ setIsSidebarOpen }) => {
 
         {/* Settings */}
         <div className="relative" ref={settingsRef}>
-          <button onClick={handleSettingsClick} className="w-9 h-9 rounded-lg bg-[#1c2541] flex items-center justify-center hover:bg-[#3a506b] transition">
+          <button onClick={handleSettingsClick} className="w-9 h-9 rounded-lg bg-emerald-900 flex items-center justify-center hover:bg-emerald-800 transition">
             <FiSettings size={20} />
           </button>
           {isSettingsOpen && (
-  <div className="absolute top-12 right-0 w-52 bg-white dark:bg-slate-800 
+            <div className="absolute top-12 right-0 w-52 bg-white dark:bg-slate-800 
       rounded-lg shadow-xl border dark:border-slate-700 py-2">
 
-    {/* Language Selector — menu item */}
-    <LanguageSelector />
+              {/* Language Selector — menu item */}
+              <LanguageSelector />
 
-    {/* Theme Toggle — menu item */}
-    <ThemeToggle />
+              {/* Theme Toggle — menu item */}
+              <ThemeToggle />
 
-    {/* Profile */}
-    <NavLink
-      to="/user/profile"
-      className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 
+              {/* Profile */}
+              <NavLink
+                to="/user/profile"
+                className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 
                  dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700"
-    >
-      <FiUser size={16} />
-      {/* Thông tin cá nhân */}
-      <span>{t('userHeader:settings.profile')}</span>
-    </NavLink>
+              >
+                <FiUser size={16} />
+                {/* Thông tin cá nhân */}
+                <span>{t('userHeader:settings.profile')}</span>
+              </NavLink>
 
-    {/* Change Password */}
-    <NavLink
-      to="/user/change-password"
-      className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 
+              {/* Change Password */}
+              <NavLink
+                to="/user/change-password"
+                className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 
                  dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700"
-    >
-      <FiLock size={16} />
-      {/* Đổi mật khẩu */}
-      <span>{t('userHeader:settings.changePassword')}</span>
-    </NavLink>
+              >
+                <FiLock size={16} />
+                {/* Đổi mật khẩu */}
+                <span>{t('userHeader:settings.changePassword')}</span>
+              </NavLink>
 
-    {/* Logout */}
-    <button
-      onClick={() => { logout(); setIsSettingsOpen(false); }}
-      className="w-full text-left flex items-center gap-3 px-4 py-2.5 text-sm 
+              {/* Logout */}
+              <button
+                onClick={() => { logout(); setIsSettingsOpen(false); }}
+                className="w-full text-left flex items-center gap-3 px-4 py-2.5 text-sm 
                  text-red-500 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-slate-700"
-    >
-      <FiLogOut size={16} />
-      {/* <span>Đăng xuất</span> */}
-      <span>{t('userHeader:settings.logout')}</span>
-    </button>
-  </div>
-)}
+              >
+                <FiLogOut size={16} />
+                {/* <span>Đăng xuất</span> */}
+                <span>{t('userHeader:settings.logout')}</span>
+              </button>
+            </div>
+          )}
 
         </div>
       </div>

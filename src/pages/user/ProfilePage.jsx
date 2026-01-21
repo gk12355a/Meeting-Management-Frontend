@@ -3,7 +3,7 @@ import { Form, Input, Button, Card, Spin, message, Tag } from "antd";
 import { FiUser, FiSave, FiMail, FiShield } from "react-icons/fi";
 import { useAuth } from "../../context/AuthContext";
 import { getMyProfile, updateMyProfile } from "../../services/userService";
-import { getGoogleAuthorizeUrl } from "../../services/googleService"; 
+import { getGoogleAuthorizeUrl } from "../../services/googleService";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useTranslation } from "react-i18next";
@@ -77,7 +77,7 @@ const ProfilePage = () => {
 
       {/* Header */}
       <div className="flex items-center gap-3 mb-6 pb-3 border-b border-gray-300 dark:border-gray-700">
-        <div className="p-3 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-500 shadow-md">
+        <div className="p-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 shadow-md">
           <FiUser className="text-white text-2xl" />
         </div>
         <div>
@@ -146,9 +146,9 @@ const ProfilePage = () => {
                   placeholder={t("placeholders.fullName")}
                   className="
                     rounded-xl py-2 bg-white border-gray-300
-                    focus:ring-2 focus:ring-blue-500 focus:border-blue-500 
+                    focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 
                     dark:bg-gray-700 dark:text-white dark:border-gray-600 
-                    dark:focus:ring-blue-400 dark:focus:border-blue-400
+                    dark:focus:ring-emerald-400 dark:focus:border-emerald-400
                   "
                 />
               </Form.Item>
@@ -177,9 +177,9 @@ const ProfilePage = () => {
                   block
                   className="
                     rounded-xl py-2 text-lg font-semibold 
-                    bg-gradient-to-r from-blue-600 to-indigo-600 
+                    bg-gradient-to-r from-emerald-600 to-teal-600 
                     hover:opacity-90 shadow-md
-                    dark:from-blue-500 dark:to-indigo-500
+                    dark:from-emerald-500 dark:to-teal-500
                   "
                 >
                   {t("save")}

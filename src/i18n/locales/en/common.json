@@ -1,5 +1,5 @@
 {
-  "appName": "MeetFlow",
+  "appName": "6X6",
   "buttons": {
     "save": "Save",
     "cancel": "Cancel",
@@ -63,10 +63,10 @@
     "person": "person",
     "item": "item",
     "notifications": "Notifications",
-"markAllRead": "Mark all as read",
-"noNotifications": "No new notifications.",
-"loadMore": "Load more",
-"loading": "Loading...",
-"viewed": "Viewed"
+    "markAllRead": "Mark all as read",
+    "noNotifications": "No new notifications.",
+    "loadMore": "Load more",
+    "loading": "Loading...",
+    "viewed": "Viewed"
   }
 }

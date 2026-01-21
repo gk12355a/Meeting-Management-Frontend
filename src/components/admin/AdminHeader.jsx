@@ -27,9 +27,9 @@ const NotificationItem = ({ notification, onMarkRead }) => {
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
 
-  const isApprovalRequest = 
-    notification.message.includes("Yêu cầu duyệt phòng") || 
-    notification.message.includes("CẬP NHẬT") || 
+  const isApprovalRequest =
+    notification.message.includes("Yêu cầu duyệt phòng") ||
+    notification.message.includes("CẬP NHẬT") ||
     notification.message.includes("duyệt lại");
 
   const showActions = notification.meetingId && !notification.read;
@@ -109,7 +109,7 @@ const NotificationItem = ({ notification, onMarkRead }) => {
 
     // 2. Nếu là thông báo thường: Điều hướng và đánh dấu đã đọc
     if (notification.meetingId) {
-      navigate("/admin"); 
+      navigate("/admin");
       if (!notification.read) {
         onMarkRead(notification.id);
       }
@@ -119,18 +119,16 @@ const NotificationItem = ({ notification, onMarkRead }) => {
   return (
     <>
       <div
-        className={`p-3 border-b dark:border-slate-700 ${
-          notification.read ? "opacity-70" : ""
-        }`}
+        className={`p-3 border-b dark:border-slate-700 ${notification.read ? "opacity-70" : ""
+          }`}
       >
         <div
           onClick={handleNavigate}
           className="cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700 -m-3 p-3 rounded-lg"
         >
           <p
-            className={`text-sm text-gray-800 dark:text-gray-100 ${
-              !notification.read ? "font-semibold" : ""
-            }`}
+            className={`text-sm text-gray-800 dark:text-gray-100 ${!notification.read ? "font-semibold" : ""
+              }`}
           >
             {notification.message}
           </p>
@@ -313,27 +311,27 @@ const AdminHeader = ({ setIsSidebarOpen }) => {
   };
 
   return (
-    <header className="h-14 bg-[#0b132b] text-white dark:bg-slate-900 flex items-center justify-between px-5 shadow-md transition-colors z-40 fixed top-0 left-0 right-0">
+    <header className="h-14 bg-emerald-950 text-white dark:bg-slate-900 flex items-center justify-between px-5 shadow-md transition-colors z-40 fixed top-0 left-0 right-0">
       {/* Left Side: Toggle Sidebar & Logo */}
       <div className="flex items-center gap-3">
         <button
           onClick={() => setIsSidebarOpen((prev) => !prev)}
-          className="w-9 h-9 rounded-lg bg-[#1c2541] flex items-center justify-center hover:bg-[#3a506b] transition"
+          className="w-9 h-9 rounded-lg bg-emerald-900 flex items-center justify-center hover:bg-emerald-800 transition"
         >
           <FiMenu size={20} />
         </button>
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white">
+          <div className="w-6 h-6 bg-emerald-600 rounded-lg flex items-center justify-center text-white">
             🗓️
           </div>
-          {/* <span className="font-semibold text-lg">MeetFlow</span> */}
+          {/* <span className="font-semibold text-lg">6X6</span> */}
           <span className="font-semibold text-lg">{t('common:appName')}</span>
         </div>
       </div>
 
       {/* Right Side: User, Notification, Settings */}
       <div className="flex items-center gap-3">
-        <span className="text-sm bg-blue-500 px-3 py-1 rounded-full shadow-md hidden sm:block">
+        <span className="text-sm bg-emerald-600 px-3 py-1 rounded-full shadow-md hidden sm:block">
           {user?.username || "Admin"}
         </span>
 
@@ -341,11 +339,11 @@ const AdminHeader = ({ setIsSidebarOpen }) => {
         <div className="relative" ref={notificationRef}>
           <button
             onClick={handleNotificationClick}
-            className="w-9 h-9 rounded-lg bg-[#1c2541] flex items-center justify-center hover:bg-[#3a506b] transition relative"
+            className="w-9 h-9 rounded-lg bg-emerald-900 flex items-center justify-center hover:bg-emerald-800 transition relative"
           >
             <FiBell size={20} />
             {unreadCount > 0 && (
-              <span className="absolute top-0 right-0 w-4 h-4 bg-red-500 rounded-full text-xs font-bold flex items-center justify-center border-2 border-[#0b132b] transform translate-x-1/3 -translate-y-1/3">
+              <span className="absolute top-0 right-0 w-4 h-4 bg-red-500 rounded-full text-xs font-bold flex items-center justify-center border-2 border-emerald-950 transform translate-x-1/3 -translate-y-1/3">
                 {unreadCount}
               </span>
             )}
@@ -362,7 +360,7 @@ const AdminHeader = ({ setIsSidebarOpen }) => {
                 </h4>
                 <button
                   onClick={handleMarkAllAsRead}
-                  className="text-xs text-blue-500 hover:underline disabled:opacity-50"
+                  className="text-xs text-emerald-500 hover:underline disabled:opacity-50"
                   disabled={
                     notifications.every((n) => n.read) || notificationLoading
                   }
@@ -401,7 +399,7 @@ const AdminHeader = ({ setIsSidebarOpen }) => {
                   <button
                     onClick={() => fetchNotifications(notificationPage + 1)}
                     disabled={notificationLoading}
-                    className="text-sm text-blue-600 hover:underline dark:text-blue-400"
+                    className="text-sm text-emerald-600 hover:underline dark:text-emerald-400"
                   >
                     {/* {notificationLoading ? "Đang tải..." : "Xem thêm"} */}
                     {notificationLoading ? t('common:messages.loading') : t('common:buttons.viewMore')}
@@ -416,7 +414,7 @@ const AdminHeader = ({ setIsSidebarOpen }) => {
         <div className="relative" ref={settingsRef}>
           <button
             onClick={handleSettingsClick}
-            className="w-9 h-9 rounded-lg bg-[#1c2541] flex items-center justify-center hover:bg-[#3a506b] transition"
+            className="w-9 h-9 rounded-lg bg-emerald-900 flex items-center justify-center hover:bg-emerald-800 transition"
           >
             <FiSettings size={20} />
           </button>

@@ -10,7 +10,7 @@ import dayjs from "dayjs";
 import "dayjs/locale/vi";
 import isToday from "dayjs/plugin/isToday";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
-import isBetween from "dayjs/plugin/isBetween"; 
+import isBetween from "dayjs/plugin/isBetween";
 import isoWeek from "dayjs/plugin/isoWeek";
 import MeetingDetailModal from "../../components/user/MeetingDetailModal";
 import MeetingListModal from "../../components/MeetingListModal";
@@ -27,8 +27,8 @@ const statTemplates = [
     key: "stats.today",
     value: "0",
     icon: <FiCalendar size={24} />,
-    textColor: "text-blue-600",
-    bgLight: "bg-blue-50 dark:bg-blue-900/20",
+    textColor: "text-emerald-600",
+    bgLight: "bg-emerald-50 dark:bg-emerald-900/20",
   },
   {
     key: "stats.week",
@@ -99,8 +99,8 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   // --- POPUP STATE ---
-  const [selectedMeetingId, setSelectedMeetingId] = useState(null); 
-  const [selectedMeeting, setSelectedMeeting] = useState(null);   
+  const [selectedMeetingId, setSelectedMeetingId] = useState(null);
+  const [selectedMeeting, setSelectedMeeting] = useState(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
 
   // Dùng ref để tránh memory leak khi component bị unmount khi đang load
@@ -246,133 +246,133 @@ export default function DashboardPage() {
   const handleViewDevices = () => {
     navigate("/user/devices");
   };
-const handleOpenStat = (type) => {
-  if (type === "today") {
-    setListModalTitle(t("stats.today"));
-    setListModalData(activeMeetingsAll.filter(m => dayjs(m.startTime).isToday()));
-  }
+  const handleOpenStat = (type) => {
+    if (type === "today") {
+      setListModalTitle(t("stats.today"));
+      setListModalData(activeMeetingsAll.filter(m => dayjs(m.startTime).isToday()));
+    }
 
-  if (type === "week") {
-    setListModalTitle(t("stats.week"));
-    setListModalData(
-      activeMeetingsAll.filter(m =>
-        dayjs(m.startTime).isBetween(
-          dayjs().startOf("isoWeek"),
-          dayjs().endOf("isoWeek")
+    if (type === "week") {
+      setListModalTitle(t("stats.week"));
+      setListModalData(
+        activeMeetingsAll.filter(m =>
+          dayjs(m.startTime).isBetween(
+            dayjs().startOf("isoWeek"),
+            dayjs().endOf("isoWeek")
+          )
         )
-      )
-    );
-  }
+      );
+    }
 
-  if (type === "upcoming") {
-    setListModalTitle(t("stats.upcoming"));
-    setListModalData(upcomingMeetingsAll);
-  }
+    if (type === "upcoming") {
+      setListModalTitle(t("stats.upcoming"));
+      setListModalData(upcomingMeetingsAll);
+    }
 
-  if (type === "total") {
-    setListModalTitle(t("stats.total"));
-    setListModalData(activeMeetingsAll);
-  }
+    if (type === "total") {
+      setListModalTitle(t("stats.total"));
+      setListModalData(activeMeetingsAll);
+    }
 
-  setListModalOpen(true);
-  setPage(1); // Reset về trang 1 mỗi lần mở
-};
+    setListModalOpen(true);
+    setPage(1); // Reset về trang 1 mỗi lần mở
+  };
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
-  👋 {t("welcomeTitle", { username: user?.username || "User" })}
-</h1>
-<p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-  {t("welcomeSubtitle")}
-</p>
+            👋 {t("welcomeTitle", { username: user?.username || "User" })}
+          </h1>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            {t("welcomeSubtitle")}
+          </p>
         </div>
       </div>
 
       {/* Wrapper cho Spinner */}
       {loading ? (
-  <div className="flex justify-center items-center h-64">
-    <Spin size="large" />
-  </div>
-) : (
-  <>
-    {/* Stats Cards */}
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      {stats.map((stat, index) => (
-        <div
-          key={index}
-          onClick={() => {
-            if (index === 0) handleOpenStat("today");
-            if (index === 1) handleOpenStat("week");
-            if (index === 2) handleOpenStat("upcoming");
-            if (index === 3) handleOpenStat("total");
-          }}
-          className="cursor-pointer bg-white dark:bg-slate-900 rounded-xl p-5 shadow-sm border hover:scale-105 transition"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                {t(stat.key)}
-              </p>
-              <p className={`text-2xl font-bold ${stat.textColor} dark:text-gray-100`}>
-                {stat.value}
-              </p>
-            </div>
-            <div className={`${stat.bgLight} p-3 rounded-lg`}>
-              <div className={`${stat.textColor}`}>{stat.icon}</div>
+        <div className="flex justify-center items-center h-64">
+          <Spin size="large" />
+        </div>
+      ) : (
+        <>
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {stats.map((stat, index) => (
+              <div
+                key={index}
+                onClick={() => {
+                  if (index === 0) handleOpenStat("today");
+                  if (index === 1) handleOpenStat("week");
+                  if (index === 2) handleOpenStat("upcoming");
+                  if (index === 3) handleOpenStat("total");
+                }}
+                className="cursor-pointer bg-white dark:bg-slate-900 rounded-xl p-5 shadow-sm border hover:scale-105 transition"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                      {t(stat.key)}
+                    </p>
+                    <p className={`text-2xl font-bold ${stat.textColor} dark:text-gray-100`}>
+                      {stat.value}
+                    </p>
+                  </div>
+                  <div className={`${stat.bgLight} p-3 rounded-lg`}>
+                    <div className={`${stat.textColor}`}>{stat.icon}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Upcoming meetings */}
+          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-gray-200 dark:border-slate-800 p-6">
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">
+              📅 {t("upcomingMeetingsTitle")}
+            </h2>
+
+            <div className="space-y-3">
+              {upcomingMeetings.map((meeting) => {
+                const acceptedCount =
+                  meeting.participants?.filter((p) => p.status === "ACCEPTED").length || 0;
+
+                return (
+                  <div
+                    key={meeting.id}
+                    className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-800 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition cursor-pointer"
+                    onClick={() => handleShowMeetingDetail(meeting)}
+                  >
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-800 dark:text-gray-100">
+                        {meeting.title}
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                        {dayjs(meeting.startTime).format("HH:mm")} -{" "}
+                        {dayjs(meeting.endTime).format("HH:mm")} ·{" "}
+                        {meeting.room?.name || "N/A"}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                      <FiUsers size={16} />
+                      <span>{t("meeting.participants", { count: acceptedCount })}</span>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {upcomingMeetings.length === 0 && (
+                <p className="text-center text-gray-500 dark:text-gray-400 py-8">
+                  {t("meeting.upcomingMeetingsEmpty")}
+                </p>
+              )}
             </div>
           </div>
-        </div>
-      ))}
-    </div>
-
-    {/* Upcoming meetings */}
-    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-gray-200 dark:border-slate-800 p-6">
-      <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">
-        📅 {t("upcomingMeetingsTitle")}
-      </h2>
-
-      <div className="space-y-3">
-        {upcomingMeetings.map((meeting) => {
-          const acceptedCount =
-            meeting.participants?.filter((p) => p.status === "ACCEPTED").length || 0;
-
-          return (
-            <div
-              key={meeting.id}
-              className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-800 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition cursor-pointer"
-              onClick={() => handleShowMeetingDetail(meeting)}
-            >
-              <div className="flex-1">
-                <h3 className="font-semibold text-gray-800 dark:text-gray-100">
-                  {meeting.title}
-                </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  {dayjs(meeting.startTime).format("HH:mm")} -{" "}
-                  {dayjs(meeting.endTime).format("HH:mm")} ·{" "}
-                  {meeting.room?.name || "N/A"}
-                </p>
-              </div>
-
-              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                <FiUsers size={16} />
-                <span>{t("meeting.participants", { count: acceptedCount })}</span>
-              </div>
-            </div>
-          );
-        })}
-
-        {upcomingMeetings.length === 0 && (
-          <p className="text-center text-gray-500 dark:text-gray-400 py-8">
-            {t("meeting.upcomingMeetingsEmpty")}
-          </p>
-        )}
-      </div>
-    </div>
-  </>
-)}
+        </>
+      )}
 
       {/* Meeting Details Modal */}
       <MeetingDetailModal
@@ -383,16 +383,16 @@ const handleOpenStat = (type) => {
       >
       </MeetingDetailModal>
       {/* Meeting List Modal */}
-        <MeetingListModal
-  visible={listModalOpen}
-  onClose={() => setListModalOpen(false)}
-  title={listModalTitle}
-  meetings={listModalData} // toàn bộ dữ liệu, không phân trang
-  onMeetingClick={(m) => {
-    setListModalOpen(false);
-    handleShowMeetingDetail(m);
-  }}
-/>
+      <MeetingListModal
+        visible={listModalOpen}
+        onClose={() => setListModalOpen(false)}
+        title={listModalTitle}
+        meetings={listModalData} // toàn bộ dữ liệu, không phân trang
+        onMeetingClick={(m) => {
+          setListModalOpen(false);
+          handleShowMeetingDetail(m);
+        }}
+      />
 
       {/* Loading overlay khi đang fetch dashboard */}
       {loadingDetail && false && (
@@ -404,11 +404,11 @@ const handleOpenStat = (type) => {
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <button
-          className="bg-blue-600 text-white rounded-xl p-6 text-left hover:bg-blue-700 transition shadow-md"
+          className="bg-emerald-600 text-white rounded-xl p-6 text-left hover:bg-emerald-700 transition shadow-md"
           onClick={handleCreateMeeting}
         >
           <h3 className="font-semibold text-lg mb-2">{t("buttons.create")}</h3>
-          <p className="text-sm text-blue-100">
+          <p className="text-sm text-emerald-100">
             {t("buttonDesc.create")}
           </p>
         </button>

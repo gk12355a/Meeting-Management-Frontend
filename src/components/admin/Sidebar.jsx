@@ -16,7 +16,7 @@ const adminMenu = [
 ];
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
-  const { t } = useTranslation('admin'); 
+  const { t } = useTranslation('admin');
   return (
     <>
       {/* Sidebar Chính */}
@@ -29,7 +29,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         {/* Header của Sidebar */}
         <div className="flex flex-col items-center py-5 border-b border-gray-100 dark:border-slate-800">
           <div className="text-center">
-            {/* <span>MeetFlow Admin</span> */}
+            {/* <span>6X6 Admin</span> */}
             <p className="font-semibold text-gray-700 dark:text-gray-100 text-base">
               {t('sidebar.title')}
             </p>
@@ -48,10 +48,9 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
               to={m.to}
               end
               className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-2.5 rounded-xl mb-1 text-[15px] transition ${
-                  isActive
-                    ? "bg-blue-50 text-blue-600 font-semibold border-l-4 border-blue-500 shadow-sm dark:bg-slate-800 dark:text-blue-300"
-                    : "text-gray-700 hover:bg-gray-100 hover:text-blue-600 dark:text-gray-200 dark:hover:bg-slate-800 dark:hover:text-blue-400"
+                `flex items-center gap-3 px-4 py-2.5 rounded-xl mb-1 text-[15px] transition ${isActive
+                  ? "bg-emerald-50 text-emerald-600 font-semibold border-l-4 border-emerald-500 shadow-sm dark:bg-slate-800 dark:text-emerald-300"
+                  : "text-gray-700 hover:bg-gray-100 hover:text-emerald-600 dark:text-gray-200 dark:hover:bg-slate-800 dark:hover:text-emerald-400"
                 }`
               }
             >

@@ -41,7 +41,7 @@ dayjs.extend(duration);
 dayjs.extend(isBetween);
 
 const COLORS = [
-  "#60A5FA",
+  "#10B981", // Emerald primary
   "#A78BFA",
   "#F472B6",
   "#34D399",
@@ -374,8 +374,8 @@ export default function DashboardPage() {
           start: meeting.startTime,
           end: meeting.endTime,
           resourceId: meeting.room?.id?.toString(),
-          backgroundColor: roomColors[meeting.room?.id?.toString()] || "#60A5FA",
-          borderColor: roomColors[meeting.room?.id?.toString()] || "#2563EB",
+          backgroundColor: roomColors[meeting.room?.id?.toString()] || "#34D399",
+          borderColor: roomColors[meeting.room?.id?.toString()] || "#059669",
           opacity:
             (meeting.room?.status || "").toUpperCase() === "UNDER_MAINTENANCE"
               ? 0.4
@@ -499,7 +499,7 @@ export default function DashboardPage() {
                   onClick={onClickFunc}
                   className="flex items-center gap-3 bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all cursor-pointer"
                 >
-                  <div className="p-3 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-lg">
+                  <div className="p-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-lg">
                     {card.icon}
                   </div>
                   <div>
@@ -535,7 +535,7 @@ export default function DashboardPage() {
                     borderRadius: "8px",
                     border: "none"
                   }} />
-                  <Bar dataKey="count" fill={isDarkMode ? "#818cf8" : "#60A5FA"} radius={[8, 8, 0, 0]} barSize={30} />
+                  <Bar dataKey="count" fill={isDarkMode ? "#34d399" : "#10b981"} radius={[8, 8, 0, 0]} barSize={30} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -602,10 +602,10 @@ export default function DashboardPage() {
                 return (
                   <span
                     className={`text-sm font-medium ${isMaintenance
-                        ? "text-gray-400 line-through opacity-60"
-                        : isDarkMode
-                          ? "text-gray-200"
-                          : "text-gray-800"
+                      ? "text-gray-400 line-through opacity-60"
+                      : isDarkMode
+                        ? "text-gray-200"
+                        : "text-gray-800"
                       }`}
                   >
                     {arg.resource.title}
@@ -682,7 +682,7 @@ export default function DashboardPage() {
                 </Descriptions.Item>
                 {/* <span>Trạng thái</span> */}
                 <Descriptions.Item label={t('dashboard:modal.status')}>
-                  <Tag color={selectedMeeting.status === 'CONFIRMED' ? 'blue' : 'warning'}>
+                  <Tag color={selectedMeeting.status === 'CONFIRMED' ? 'success' : 'warning'}>
                     {selectedMeeting.status}
                   </Tag>
                 </Descriptions.Item>
