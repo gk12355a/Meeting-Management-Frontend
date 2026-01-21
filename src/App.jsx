@@ -42,7 +42,7 @@ import GoogleCallbackPage from "./pages/GoogleCallbackPage";
 import "./i18n";
 
 export default function App() {
-  const { isAuthenticated, isAdmin } = useAuth();
+  const { isAuthenticated, isAdmin, user, loading } = useAuth();
 
   return (
     <>
@@ -56,10 +56,15 @@ export default function App() {
               !isAuthenticated ? (
                 <LoginPage key={isAuthenticated ? "auth" : "guest"} />
               ) : (
-                <Navigate
-                  to={isAdmin ? "/admin/dashboard" : "/user/dashboard"}
-                  replace
-                />
+                // Nếu đang loading hoặc chưa có user profile -> Chờ, tránh redirect nhầm
+                loading || !user ? (
+                  <div className="flex items-center justify-center p-4">Đang xử lý...</div>
+                ) : (
+                  <Navigate
+                    to={isAdmin ? "/admin/dashboard" : "/user/dashboard"}
+                    replace
+                  />
+                )
               )
             }
           />

@@ -12,6 +12,7 @@ import {
   Checkbox,
   Spin,
   Tag,
+  TimePicker, // [Updated] Import TimePicker
 } from "antd";
 import { FiPlusCircle, FiUsers } from "react-icons/fi";
 import dayjs from "dayjs";
@@ -25,10 +26,7 @@ import { getAvailableDevices } from "../../services/deviceService";
 import { useAuth } from "../../context/AuthContext";
 import { useTranslation } from "react-i18next";
 
-// MUI STATIC TIME PICKER
-import { LocalizationProvider } from "@mui/x-date-pickers";
-import { StaticTimePicker } from "@mui/x-date-pickers/StaticTimePicker";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+// [Updated] Removed MUI imports
 
 dayjs.locale("vi");
 dayjs.extend(utc);
@@ -57,12 +55,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
   const [isSearching, setIsSearching] = useState(false);
   const [isRecurring, setIsRecurring] = useState(false);
 
-  // ← THÊM 2 DÒNG NÀY
   const [selectedDays, setSelectedDays] = useState([]);
-
-  // TIME PICKER STATE
-  const [clockOpen, setClockOpen] = useState(false);
-  const [clockValue, setClockValue] = useState(dayjs());
 
   const debounceTimer = useRef(null);
   const [form] = Form.useForm();
@@ -70,9 +63,9 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
 
   // Watch form values
   const watchedDate = Form.useWatch("date", form);
-  const watchedTime = Form.useWatch("time", form);
-  const watchedDuration = Form.useWatch("duration", form);
-  const watchedRoomId = Form.useWatch("roomId", form); // Vẫn watch để logic form hoạt động, nhưng không set state VIP nữa
+  const watchedStartTime = Form.useWatch("startTime", form); // [Updated] Watch startTime
+  const watchedEndTime = Form.useWatch("endTime", form);     // [Updated] Watch endTime
+  const watchedRoomId = Form.useWatch("roomId", form);
   const watchedFrequency = Form.useWatch("frequency", form);
 
   /* LOAD ROOMS */
@@ -90,25 +83,28 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
     loadRooms();
   }, [open]);
 
-  // Đã xóa useEffect theo dõi selectedRoom VIP
-
   /* ===== SET INITIAL FORM VALUES =====*/
   useEffect(() => {
     if (open && quickBookingData?.start) {
       const { start, end } = quickBookingData;
+      // Default duration is calculated but we will use start and end times directly
       let duration = end.diff(start, "minute");
-      if (duration <= 0) duration = 60;
+
+      // If duration is 0 or negative (invalid), default to 1 hour
+      let defaultEnd = end;
+      if (duration <= 0) {
+        defaultEnd = start.add(60, 'minute');
+      }
 
       setIsRecurring(false);
       setSelectedDays([]);
-      setClockValue(start);
 
       setTimeout(() => {
         form.setFieldsValue({
           title: "",
           date: start,
-          time: start,
-          duration: duration <= 0 ? 60 : duration,
+          startTime: start,
+          endTime: defaultEnd,
           roomId: undefined,
           deviceIds: [],
           participantIds: [],
@@ -129,7 +125,16 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
   /* ===== LOAD DEVICES WHEN TIME CHANGES =====*/
   useEffect(() => {
     const fetchDevices = async () => {
-      if (!watchedDate || !watchedTime || !watchedDuration) {
+      // Need all 3 fields to calculate interval
+      if (!watchedDate || !watchedStartTime || !watchedEndTime) {
+        setAvailableDevices([]);
+        return;
+      }
+
+      // Check if end > start
+      const startMin = watchedStartTime.hour() * 60 + watchedStartTime.minute();
+      const endMin = watchedEndTime.hour() * 60 + watchedEndTime.minute();
+      if (endMin <= startMin) {
         setAvailableDevices([]);
         return;
       }
@@ -142,11 +147,19 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
           .year(watchedDate.year())
           .month(watchedDate.month())
           .date(watchedDate.date())
-          .hour(watchedTime.hour())
-          .minute(watchedTime.minute());
+          .hour(watchedStartTime.hour())
+          .minute(watchedStartTime.minute());
+
+        const endTimeUTC = dayjs
+          .utc()
+          .year(watchedDate.year())
+          .month(watchedDate.month())
+          .date(watchedDate.date())
+          .hour(watchedEndTime.hour())
+          .minute(watchedEndTime.minute());
 
         const startTime = startTimeUTC.toISOString();
-        const endTime = startTimeUTC.add(watchedDuration, "minute").toISOString();
+        const endTime = endTimeUTC.toISOString();
 
         const res = await getAvailableDevices(startTime, endTime);
         setAvailableDevices(res.data || []);
@@ -160,7 +173,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
 
     const t = setTimeout(fetchDevices, 500);
     return () => clearTimeout(t);
-  }, [watchedDate, watchedTime, watchedDuration]);
+  }, [watchedDate, watchedStartTime, watchedEndTime]);
 
   /* SEARCH INTERNAL USERS */
   const handleSearchUsers = (query) => {
@@ -186,10 +199,17 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
   };
 
   /* VALIDATE BUSINESS TIME */
-  const validateBusinessTime = (value) => {
-    if (!value) return false;
-    const totalMin = value.hour() * 60 + value.minute();
-    return totalMin >= 480 && totalMin <= 1080; // 08:00 - 18:00
+  const validateBusinessTime = (start, end) => {
+    if (!start || !end) return false;
+    const startMin = start.hour() * 60 + start.minute();
+    const endMin = end.hour() * 60 + end.minute();
+
+    // Business hours: 08:00 (480) - 18:00 (1080)
+    // Allow end time to be exactly 18:00
+    if (startMin < 480 || startMin >= 1080) return false;
+    if (endMin <= 480 || endMin > 1080) return false;
+
+    return true;
   };
 
   /* SUBMIT MEETING */
@@ -202,10 +222,17 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
       setLoading(true);
 
       const date = values.date;
-      const time = dayjs(values.time);
+      const startTime = dayjs(values.startTime);
+      const endTime = dayjs(values.endTime);
 
-      if (!validateBusinessTime(time)) {
-        toast.error(t("errors.outsideBusiness"));
+      // Validate Time Order
+      if (endTime.isBefore(startTime) || endTime.isSame(startTime)) {
+        toast.error("Giờ kết thúc phải sau giờ bắt đầu!");
+        return;
+      }
+
+      if (!validateBusinessTime(startTime, endTime)) {
+        toast.error(t("errors.outsideBusiness")); // 08:00 - 18:00
         return;
       }
 
@@ -214,15 +241,22 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
         .year(date.year())
         .month(date.month())
         .date(date.date())
-        .hour(time.hour())
-        .minute(time.minute());
+        .hour(startTime.hour())
+        .minute(startTime.minute());
 
-      // Cập nhật payload: Nếu weekly thì thêm daysOfWeek nếu có
+      const endUTC = dayjs
+        .utc()
+        .year(date.year())
+        .month(date.month())
+        .date(date.date())
+        .hour(endTime.hour())
+        .minute(endTime.minute());
+
       const payload = {
         title: values.title.trim(),
         description: values.description || "",
         startTime: startUTC.toISOString(),
-        endTime: startUTC.add(values.duration, "minute").toISOString(),
+        endTime: endUTC.toISOString(),
         roomId: values.roomId,
         participantIds: Array.from(
           new Set([user.id, ...(values.participantIds || [])])
@@ -253,7 +287,6 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
         if (onLockViewDate && quickBookingData?.start) {
           onLockViewDate(quickBookingData.start.toDate());
         }
-
       }
 
       handleCancel();
@@ -269,32 +302,21 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
       const raw = backendMsg.toLowerCase();
       let msg = t("errors.createFailed");
 
-      // === 1️⃣ Phòng họp trùng lịch ===
       if (raw.includes("phòng") && raw.includes("đã bị đặt")) {
         msg = t("errors.roomBusy");
       }
-
-      // === 2️⃣ Người tham dự trùng lịch ===
       else if (raw.includes("người tham dự") && raw.includes("trùng lịch")) {
         msg = t("errors.participantBusy");
       }
-
-      // === 3️⃣ Phòng họp đang bảo trì ===
       else if (raw.includes("bảo trì") && raw.includes("phòng")) {
         msg = t("errors.roomMaintenance");
       }
-
-      // === 4️⃣ Thiết bị đang bảo trì ===
       else if (raw.includes("thiết bị") && raw.includes("bảo trì")) {
         msg = t("errors.deviceMaintenance");
       }
-
-      // === 5️⃣ Xung đột lịch định kỳ ===
       else if (raw.includes("recurrence") || raw.includes("định kỳ")) {
         msg = t("errors.recurrenceConflict");
       }
-
-      // === 6️⃣ Fallback chung ===
       else {
         msg = `⚠️ ${backendMsg}`;
       }
@@ -308,10 +330,8 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
     }
   };
 
-  // Cập nhật hàm handleCancel: reset selectedDays
   const handleCancel = () => {
     form.resetFields();
-    setClockValue(dayjs());
     setAvailableDevices([]);
     setIsRecurring(false);
     setSelectedDays([]);
@@ -378,72 +398,34 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
               />
             </Form.Item>
 
-            {/* TIME PICKER MỚI - MUI STATIC TIME PICKER */}
+            {/* START TIME */}
             <Form.Item
+              name="startTime"
               label={t("fields.startTime")}
-              required
+              rules={[{ required: true, message: "Vui lòng chọn giờ bắt đầu" }]}
             >
-              <div className="flex gap-2">
-                <Form.Item
-                  name="time"
-                  noStyle
-                  rules={[{ required: true }]}
-                  getValueProps={(value) => ({ value: value ? dayjs(value).format("HH:mm") : "" })}
-                >
-                  <Input
-                    readOnly
-                    onClick={() => setClockOpen(true)}
-                    placeholder={t("fields.startTime")}
-                    className="cursor-pointer dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                  />
-                </Form.Item>
-                <Button onClick={() => setClockOpen(true)}>🕒 {t("fields.pickTime")}</Button>
-              </div>
+              <TimePicker
+                format="HH:mm"
+                minuteStep={15}
+                className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                placeholder="Giờ bắt đầu"
+                showNow={false}
+              />
             </Form.Item>
 
-            <Modal
-              title={t("fields.pickTimeRange")} // "Chọn giờ (08:00 - 18:00)"
-              open={clockOpen}
-              onCancel={() => setClockOpen(false)}
-              onOk={() => {
-                if (!validateBusinessTime(clockValue)) {
-                  toast.error(t("errors.outsideBusiness"));
-                  return;
-                }
-                form.setFieldsValue({ time: clockValue });
-                setClockOpen(false);
-              }}
-              width={350}
-              centered
-            >
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <StaticTimePicker
-                  orientation="portrait"
-                  ampm={false}
-                  value={clockValue}
-                  onChange={(v) => setClockValue(v)}
-                  slotProps={{
-                    actionBar: { actions: [] }, // Ẩn nút OK/Cancel của MUI
-                  }}
-                />
-              </LocalizationProvider>
-            </Modal>
-
+            {/* END TIME */}
             <Form.Item
-              name="duration"
-              label={t("fields.duration")}
-              initialValue={60}
-              rules={[{ required: true, message: t("fields.durationRequired") }]}
+              name="endTime"
+              label={t("fields.endTime")} // Ensure this key exists in your translation or use a hardcoded fallback
+              rules={[{ required: true, message: "Vui lòng chọn giờ kết thúc" }]}
             >
-              <Select className="dark:bg-gray-700 dark:text-white dark:border-gray-600">
-                <Option value={15}>{t("fields.duration15")}</Option>
-                <Option value={30}>{t("fields.duration30")}</Option>
-                <Option value={45}>{t("fields.duration45")}</Option>
-                <Option value={60}>{t("fields.duration60")}</Option>
-                <Option value={90}>{t("fields.duration90")}</Option>
-                <Option value={120}>{t("fields.duration120")}</Option>
-
-              </Select>
+              <TimePicker
+                format="HH:mm"
+                minuteStep={15}
+                className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                placeholder="Giờ kết thúc"
+                showNow={false}
+              />
             </Form.Item>
           </div>
 
@@ -479,19 +461,17 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
             </Select>
           </Form.Item>
 
-          {/* Đã xóa Alert VIP */}
-
           {/* DEVICES */}
           <Form.Item name="deviceIds" label={t("fields.devices")}>
             <Select
               mode="multiple"
               placeholder={
-                !watchedDate || !watchedTime
-                  ? t("fields.deviceSelectBefore")
+                !watchedDate || !watchedStartTime || !watchedEndTime
+                  ? t("fields.deviceSelectBefore") // Or "Vui lòng chọn ngày giờ trước"
                   : t("fields.devices")
               }
               loading={devicesLoading}
-              disabled={!watchedDate || !watchedTime || devicesLoading}
+              disabled={!watchedDate || !watchedStartTime || !watchedEndTime || devicesLoading}
               className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
               classNames={{ popup: "dark:bg-gray-700 dark:text-gray-100" }}
             >
@@ -605,7 +585,6 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
                   <Option value="DAILY">{t("fields.frequencyDaily")}</Option>
                   <Option value="WEEKLY">{t("fields.frequencyWeekly")}</Option>
                   <Option value="MONTHLY">{t("fields.frequencyMonthly")}</Option>
-
                 </Select>
               </Form.Item>
 

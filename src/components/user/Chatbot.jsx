@@ -90,8 +90,8 @@ const Chatbot = () => {
           {/* Header */}
           <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-4 flex justify-between items-center text-white shadow-md">
             <div className="flex items-center gap-3">
-              <div className="bg-white/20 p-2 rounded-full backdrop-blur-sm">
-                <FaRobot className="text-xl" />
+              <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-white font-bold text-lg shadow-sm border border-white/10">
+                6x6
               </div>
               <div>
                 <h3 className="font-bold text-sm">Trợ lý AI</h3>
@@ -118,8 +118,8 @@ const Chatbot = () => {
                   }`}
               >
                 {msg.sender === "bot" && (
-                  <div className="w-6 h-6 rounded-full bg-teal-100 flex items-center justify-center mr-2 mt-1 shrink-0 text-teal-600">
-                    <FaRobot size={12} />
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center mr-2 mt-1 shrink-0 text-white text-[10px] font-bold shadow-sm">
+                    6x6
                   </div>
                 )}
 
@@ -150,8 +150,8 @@ const Chatbot = () => {
             {/* Loading Indicator */}
             {isLoading && (
               <div className="flex justify-start items-center gap-2">
-                <div className="w-6 h-6 rounded-full bg-teal-100 flex items-center justify-center text-teal-600">
-                  <FaRobot size={12} />
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-white text-[10px] font-bold shadow-sm">
+                  6x6
                 </div>
                 <div className="bg-white p-3 rounded-2xl rounded-bl-none border border-gray-200 shadow-sm">
                   <div className="flex space-x-1">
@@ -215,9 +215,9 @@ const Chatbot = () => {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="bg-gradient-to-br from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white p-4 rounded-full shadow-xl transition-all hover:scale-110 flex items-center justify-center group z-50"
+          className="bg-gradient-to-br from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white w-14 h-14 rounded-full shadow-xl transition-all hover:scale-110 flex items-center justify-center group z-50"
         >
-          <FaRobot className="text-2xl animate-bounce-slow" />
+          <span className="font-bold text-lg font-sans">6x6</span>
 
           {/* Badge thông báo */}
           <span className="absolute top-0 right-0 flex h-3 w-3">

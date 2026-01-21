@@ -12,7 +12,7 @@ import {
   Checkbox,
   Spin,
   Tag,
-  InputNumber,
+  TimePicker, // [Updated] Import TimePicker
 } from "antd";
 import { FiPlusCircle, FiUsers } from "react-icons/fi";
 import dayjs from "dayjs";
@@ -24,11 +24,9 @@ import { createMeeting, getRooms } from "../../services/meetingService";
 import { searchUsers } from "../../services/userService";
 import { getAvailableDevices } from "../../services/deviceService";
 import { useAuth } from "../../context/AuthContext";
-
-import { LocalizationProvider } from "@mui/x-date-pickers";
-import { StaticTimePicker } from "@mui/x-date-pickers/StaticTimePicker";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { useTranslation } from "react-i18next";
+
+// [Updated] Removed MUI imports
 
 dayjs.locale("vi");
 dayjs.extend(utc);
@@ -48,10 +46,6 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
   const [availableDevices, setAvailableDevices] = useState([]);
   const [devicesLoading, setDevicesLoading] = useState(false);
 
-  // TIME PICKER STATE
-  const [clockOpen, setClockOpen] = useState(false);
-  const [clockValue, setClockValue] = useState(dayjs().hour(9).minute(0));
-
   const debounceTimer = useRef(null);
   const [form] = Form.useForm();
 
@@ -59,13 +53,21 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
 
   // Watch form values để tải devices tự động
   const watchedDate = Form.useWatch("date", form);
-  const watchedTime = Form.useWatch("time", form);
-  const watchedDuration = Form.useWatch("duration", form);
+  const watchedStartTime = Form.useWatch("startTime", form); // [Updated]
+  const watchedEndTime = Form.useWatch("endTime", form);     // [Updated]
 
   /* ===== LOAD DEVICES WHEN TIME CHANGES ====== */
   useEffect(() => {
     const fetchDevices = async () => {
-      if (!watchedDate || !watchedTime || !watchedDuration) {
+      if (!watchedDate || !watchedStartTime || !watchedEndTime) {
+        setAvailableDevices([]);
+        return;
+      }
+
+      // Validate order
+      const startMin = watchedStartTime.hour() * 60 + watchedStartTime.minute();
+      const endMin = watchedEndTime.hour() * 60 + watchedEndTime.minute();
+      if (endMin <= startMin) {
         setAvailableDevices([]);
         return;
       }
@@ -78,13 +80,19 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
           .year(watchedDate.year())
           .month(watchedDate.month())
           .date(watchedDate.date())
-          .hour(watchedTime.hour())
-          .minute(watchedTime.minute());
+          .hour(watchedStartTime.hour())
+          .minute(watchedStartTime.minute());
+
+        const endTimeUTC = dayjs
+          .utc()
+          .year(watchedDate.year())
+          .month(watchedDate.month())
+          .date(watchedDate.date())
+          .hour(watchedEndTime.hour())
+          .minute(watchedEndTime.minute());
 
         const startTime = startTimeUTC.toISOString();
-        const endTime = startTimeUTC
-          .add(watchedDuration, "minute")
-          .toISOString();
+        const endTime = endTimeUTC.toISOString();
 
         const res = await getAvailableDevices(startTime, endTime);
         const availableList = res.data || [];
@@ -92,7 +100,6 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
         // Đảm bảo thiết bị đã chọn luôn có trong danh sách (ngay cả khi đang được sử dụng)
         const prefilledInList = availableList.find(d => d.id === prefilledDevice?.id);
         if (!prefilledInList && prefilledDevice) {
-          // Thêm thiết bị đã chọn vào đầu danh sách
           availableList.unshift(prefilledDevice);
         }
 
@@ -107,7 +114,7 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
 
     const t = setTimeout(fetchDevices, 500);
     return () => clearTimeout(t);
-  }, [watchedDate, watchedTime, watchedDuration, prefilledDevice]);
+  }, [watchedDate, watchedStartTime, watchedEndTime, prefilledDevice]);
 
   useEffect(() => {
     if (!open) return;
@@ -127,17 +134,18 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
   useEffect(() => {
     if (open && prefilledDevice) {
       setIsRecurring(false);
-      setClockValue(dayjs().hour(9).minute(0));
+
+      const defaultStart = dayjs().hour(9).minute(0);
+      const defaultEnd = dayjs().hour(10).minute(0);
 
       setTimeout(() => {
-        const defaultTime = dayjs().hour(9).minute(0);
         form.setFieldsValue({
           title: "",
-          date: defaultTime,
-          time: defaultTime,
-          duration: 60,
+          date: defaultStart,
+          startTime: defaultStart,
+          endTime: defaultEnd,
           roomId: undefined,
-          deviceIds: [],
+          deviceIds: [prefilledDevice.id], // Auto select prefilled
           participantIds: [],
           guestEmails: [],
           isRecurring: false,
@@ -175,10 +183,14 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
   };
 
   /* ====== VALIDATE BUSINESS TIME ====== */
-  const validateBusinessTime = (value) => {
-    if (!value) return false;
-    const totalMin = value.hour() * 60 + value.minute();
-    return totalMin >= 480 && totalMin <= 1080;
+  const validateBusinessTime = (start, end) => {
+    if (!start || !end) return false;
+    const startMin = start.hour() * 60 + start.minute();
+    const endMin = end.hour() * 60 + end.minute();
+    // 08:00 - 18:00
+    if (startMin < 480 || startMin >= 1080) return false;
+    if (endMin <= 480 || endMin > 1080) return false;
+    return true;
   };
 
   // Submit
@@ -187,9 +199,15 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
       setLoading(true);
 
       const date = values.date;
-      const time = dayjs(values.time);
+      const startTime = dayjs(values.startTime);
+      const endTime = dayjs(values.endTime);
 
-      if (!validateBusinessTime(time)) {
+      if (endTime.isBefore(startTime) || endTime.isSame(startTime)) {
+        toast.error("Giờ kết thúc phải sau giờ bắt đầu!");
+        return;
+      }
+
+      if (!validateBusinessTime(startTime, endTime)) {
         toast.error("⏰ Chỉ được đặt lịch từ 08:00 đến 18:00!");
         return;
       }
@@ -198,15 +216,21 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
         .year(date.year())
         .month(date.month())
         .date(date.date())
-        .hour(time.hour())
-        .minute(time.minute());
+        .hour(startTime.hour())
+        .minute(startTime.minute());
 
-      const finalDuration = values.customHour ? dayjs.duration(parseFloat(values.customHour), 'hours').asMinutes() : values.duration;
+      const endUTC = dayjs.utc()
+        .year(date.year())
+        .month(date.month())
+        .date(date.date())
+        .hour(endTime.hour())
+        .minute(endTime.minute());
+
       const payload = {
         title: values.title.trim(),
         description: values.description || "",
         startTime: startUTC.toISOString(),
-        endTime: startUTC.add(finalDuration, "minute").toISOString(),
+        endTime: endUTC.toISOString(),
         roomId: values.roomId,
         participantIds: Array.from(new Set([user.id, ...(values.participantIds || [])])),
         deviceIds: values.deviceIds || [],
@@ -228,11 +252,9 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
       }
 
       form.resetFields();
-      setClockValue(dayjs().hour(8).minute(0));
       setIsRecurring(false);
       setAvailableDevices([]);
 
-      // Gọi callback onSuccess nếu có
       if (onSuccess) onSuccess();
       onCancel();
 
@@ -247,17 +269,12 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
       const raw = backendMsg.toLowerCase();
       let msg = "Không thể tạo cuộc họp!";
 
-      // === 1️⃣ Phòng họp trùng lịch ===
       if (raw.includes("phòng") && raw.includes("đã bị đặt")) {
         msg = "Phòng họp đã được đặt trong khung giờ này";
       }
-
-      // === 2️⃣ Người tham dự trùng lịch ===
       else if (raw.includes("người tham dự") && raw.includes("trùng lịch")) {
         msg = "Người tham gia bị trùng lịch trong khung giờ này";
       }
-
-      // fallback chung nếu BE trả lỗi khác
       else {
         msg = `⚠️ ${backendMsg}`;
       }
@@ -273,7 +290,6 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
 
   const handleCancel = () => {
     form.resetFields();
-    setClockValue(dayjs().hour(9).minute(0));
     setIsRecurring(false);
     onCancel();
   };
@@ -342,112 +358,36 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
               />
             </Form.Item>
 
-            {/* TIME PICKER - MUI CLOCK */}
+            {/* START TIME */}
             <Form.Item
-              name="time"
+              name="startTime"
               label={t("form.time")}
               rules={[{ required: true, message: t("form.timeRequired") }]}>
-              <>
-                <div className="flex gap-2">
-                  <Input
-                    readOnly
-                    value={clockValue.format("HH:mm")}
-                    onClick={() => setClockOpen(true)}
-                    className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                  />
-                  <Button
-                    onClick={() => setClockOpen(true)}
-                    className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                  >
-                    🕒 {t("form.timeBtn")}
-                  </Button>
-                </div>
-
-                <Modal
-                  title={t("form.timePickerTitle")}
-                  open={clockOpen}
-                  onCancel={() => setClockOpen(false)}
-                  onOk={() => {
-                    if (!validateBusinessTime(clockValue)) {
-                      toast.error("⏰ Chỉ được đặt 08:00 - 18:00!");
-                      return;
-                    }
-                    form.setFieldsValue({ time: clockValue });
-                    setClockOpen(false);
-                  }}
-                  width={520}
-                  style={{ overflow: "visible" }}
-                  styles={{ body: { overflow: "visible", paddingTop: 8 } }}
-                  className="dark:[&_.ant-modal-content]:bg-gray-800 dark:[&_.ant-modal-header]:bg-gray-800"
-                >
-                  <div className="text-center text-gray-500 dark:text-gray-300 mb-2 text-sm">
-                    <span className="font-medium text-indigo-600 dark:text-indigo-400">
-                      Giờ (HH)
-                    </span>{" "}
-                    :{" "}
-                    <span className="font-medium text-indigo-600 dark:text-indigo-400">
-                      Phút (MM)
-                    </span>
-                  </div>
-
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <StaticTimePicker
-                      orientation="landscape"
-                      ampm={false}
-                      value={clockValue}
-                      onChange={(v) => setClockValue(v)}
-                      slotProps={{
-                        actionBar: { actions: [] },
-                      }}
-                    />
-                  </LocalizationProvider>
-                </Modal>
-              </>
+              <TimePicker
+                format="HH:mm"
+                minuteStep={15}
+                className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                placeholder="Giờ bắt đầu"
+                showNow={false}
+              />
             </Form.Item>
 
-            {/* DURATION + CUSTOM HOUR */}
-            <div className="flex gap-2 items-end">
-              {/* DURATION SELECT */}
-              <Form.Item
-                name="duration"
-                label={t("form.duration")}
-                style={{ flex: 1 }}
-                initialValue={60}
-              >
-                <Select
-                  className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                  onChange={() => form.setFieldsValue({ customHour: undefined })}
-                  placeholder={t("form.durationPlaceholder")}
-                  allowClear
-                >
-                  <Option value={30}>{t("form.duration30")}</Option>
-                  <Option value={60}>{t("form.duration60")}</Option>
-                  <Option value={90}>{t("form.duration90")}</Option>
-                  <Option value={120}>{t("form.duration120")}</Option>
-                </Select>
-              </Form.Item>
+            {/* END TIME */}
+            <Form.Item
+              name="endTime"
+              label="Giờ kết thúc" // Hardcoded label as no key in i18n file yet maybe
+              rules={[{ required: true, message: "Chọn giờ kết thúc" }]}
+            >
+              <TimePicker
+                format="HH:mm"
+                minuteStep={15}
+                className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                placeholder="Giờ kết thúc"
+                showNow={false}
+              />
+            </Form.Item>
 
-              {/* CUSTOM HOUR INPUT */}
-              <Form.Item
-                name="customHour"
-                label={t("form.customHour")}
-                style={{ flex: "0 0 80px" }}
-              >
-                <Input
-                  type="number"
-                  step={0.5}
-                  min={0.5}
-                  max={8}
-                  className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                  onChange={(e) => {
-                    const hour = parseFloat(e.target.value || 0);
-                    if (hour > 0) {
-                      form.setFieldsValue({ duration: undefined });
-                    }
-                  }}
-                />
-              </Form.Item>
-            </div>
+            {/* REMOVED DURATION + CUSTOM HOUR */}
           </div>
 
           {/* ROOM */}
@@ -482,7 +422,6 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
               ))}
             </Select>
           </Form.Item>
-          {/* Đã xóa Alert VIP */}
 
           <Form.Item
             name="deviceIds"
@@ -491,19 +430,24 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
           >
             <Select
               mode="multiple"
-              disabled={!watchedDate || !watchedTime}
+              disabled={!watchedDate || !watchedStartTime || !watchedEndTime}
               loading={devicesLoading}
               placeholder={
-                !watchedDate || !watchedTime
+                !watchedDate || !watchedStartTime || !watchedEndTime
                   ? t("form.selectDateTimeFirst")
                   : t("form.selectMoreDevices")
               }
               className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
               classNames={{ popup: "dark:bg-gray-700 dark:text-gray-100" }}
               onChange={(selectedIds) => {
-                if (!selectedIds.includes(prefilledDevice?.id)) {
+                if (prefilledDevice && !selectedIds.includes(prefilledDevice.id)) {
+                  // Prevent unselecting the prefilled device? Or allow?
+                  // The logic above ensures it stays in option list.
+                  // If user unselects it, maybe we should warn or auto-reselect?
+                  // For now, let user deselect if they want, but usually BookDevice means booking THAT device.
+                  // Let's force it:
                   form.setFieldsValue({
-                    deviceIds: [...selectedIds, prefilledDevice?.id],
+                    deviceIds: [...selectedIds, prefilledDevice.id],
                   });
                 }
               }}
@@ -525,14 +469,9 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
                           </span>
                         )}
                       </span>
-                      <span
-                        className={`px-2 py-1 rounded text-xs ${d.status === "AVAILABLE"
-                          ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
-                          : "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300"
-                          }`}
-                      >
+                      <Tag color={d.status === "AVAILABLE" ? "green" : "red"}>
                         {d.status === "AVAILABLE" ? "Có sẵn" : "Bảo trì"}
-                      </span>
+                      </Tag>
                     </div>
                   </Option>
                 );

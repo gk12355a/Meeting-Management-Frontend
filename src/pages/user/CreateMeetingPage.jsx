@@ -1,6 +1,4 @@
 // src/pages/user/CreateMeetingPage.jsx
-// file còn dong hồ
-
 import React, { useEffect, useState, useRef } from "react";
 import {
   DatePicker,
@@ -12,9 +10,9 @@ import {
   Card,
   Divider,
   Checkbox,
-  Modal,
   Tag,
   Spin,
+  TimePicker, // [Updated]
 } from "antd";
 import { FiPlusCircle, FiUsers } from "react-icons/fi";
 import dayjs from "dayjs";
@@ -31,10 +29,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 import { useTranslation } from "react-i18next";
 
-// MUI STATIC TIME PICKER
-import { LocalizationProvider } from "@mui/x-date-pickers";
-import { StaticTimePicker } from "@mui/x-date-pickers/StaticTimePicker";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+// [UPdated] Removed MUI imports
 
 dayjs.locale("vi");
 dayjs.extend(utc);
@@ -60,14 +55,8 @@ const CreateMeetingPage = () => {
   const [isRecurring, setIsRecurring] = useState(false);
 
   const watchedDate = Form.useWatch("date", form);
-  const watchedTime = Form.useWatch("time", form);
-  const watchedDuration = Form.useWatch("duration", form);
-  const watchedCustomHour = Form.useWatch("customHour", form);
-
-  // TIME PICKER STATE
-  const [clockOpen, setClockOpen] = useState(false);
-  const [clockValue, setClockValue] = useState(dayjs().hour(8).minute(0));
-
+  const watchedStartTime = Form.useWatch("startTime", form); // [Updated]
+  const watchedEndTime = Form.useWatch("endTime", form);     // [Updated]
 
   // Load Rooms
   useEffect(() => {
@@ -89,7 +78,15 @@ const CreateMeetingPage = () => {
   // Load Devices khi thời gian thay đổi
   useEffect(() => {
     const fetchDevices = async () => {
-      if (!watchedDate || !watchedTime || (!watchedDuration && !watchedCustomHour)) {
+      if (!watchedDate || !watchedStartTime || !watchedEndTime) {
+        setAvailableDevices([]);
+        return;
+      }
+
+      // Validate order
+      const startMin = watchedStartTime.hour() * 60 + watchedStartTime.minute();
+      const endMin = watchedEndTime.hour() * 60 + watchedEndTime.minute();
+      if (endMin <= startMin) {
         setAvailableDevices([]);
         return;
       }
@@ -102,15 +99,24 @@ const CreateMeetingPage = () => {
           .year(watchedDate.year())
           .month(watchedDate.month())
           .date(watchedDate.date())
-          .hour(watchedTime.hour())
-          .minute(watchedTime.minute())
+          .hour(watchedStartTime.hour())
+          .minute(watchedStartTime.minute())
           .second(0)
           .millisecond(0);
 
-        const realDuration = watchedCustomHour ? parseFloat(watchedCustomHour) * 60 : watchedDuration;
-        const endTime = startTimeUTC.add(realDuration, "minute").toISOString();
+        const endTimeUTC = dayjs.utc()
+          .year(watchedDate.year())
+          .month(watchedDate.month())
+          .date(watchedDate.date())
+          .hour(watchedEndTime.hour())
+          .minute(watchedEndTime.minute())
+          .second(0)
+          .millisecond(0);
 
-        const res = await getAvailableDevices(startTimeUTC.toISOString(), endTime);
+        const startTime = startTimeUTC.toISOString();
+        const endTime = endTimeUTC.toISOString();
+
+        const res = await getAvailableDevices(startTime, endTime);
         setAvailableDevices(res.data || []);
       } catch (err) {
         console.error(err);
@@ -122,7 +128,7 @@ const CreateMeetingPage = () => {
 
     const t = setTimeout(fetchDevices, 500);
     return () => clearTimeout(t);
-  }, [watchedDate, watchedTime, watchedDuration, watchedCustomHour, form]);
+  }, [watchedDate, watchedStartTime, watchedEndTime, form]);
 
   // SEARCH USERS 
   const handleSearchUsers = (query) => {
@@ -151,10 +157,14 @@ const CreateMeetingPage = () => {
   };
 
   // Validate giờ làm việc
-  const validateBusinessTime = (value) => {
-    if (!value) return false;
-    const totalMin = value.hour() * 60 + value.minute();
-    return totalMin >= 480 && totalMin <= 1080;
+  const validateBusinessTime = (start, end) => {
+    if (!start || !end) return false;
+    const startMin = start.hour() * 60 + start.minute();
+    const endMin = end.hour() * 60 + end.minute();
+    // 08:00 - 18:00
+    if (startMin < 480 || startMin >= 1080) return false;
+    if (endMin <= 480 || endMin > 1080) return false;
+    return true;
   };
 
   // Submit
@@ -167,9 +177,16 @@ const CreateMeetingPage = () => {
       setLoading(true);
 
       const date = values.date;
-      const time = dayjs(values.time);
+      const startTime = dayjs(values.startTime);
+      const endTime = dayjs(values.endTime);
 
-      if (!validateBusinessTime(time)) {
+      // Validate Time Order
+      if (endTime.isBefore(startTime) || endTime.isSame(startTime)) {
+        toast.error(i18n.language === "vi" ? "Giờ kết thúc phải sau giờ bắt đầu!" : "End time must be after start time!");
+        return;
+      }
+
+      if (!validateBusinessTime(startTime, endTime)) {
         toast.error(
           i18n.language === "vi"
             ? "⏰ Chỉ được đặt lịch từ 08:00 đến 18:00!"
@@ -182,15 +199,21 @@ const CreateMeetingPage = () => {
         .year(date.year())
         .month(date.month())
         .date(date.date())
-        .hour(time.hour())
-        .minute(time.minute());
+        .hour(startTime.hour())
+        .minute(startTime.minute());
 
-      const finalDuration = values.customHour ? dayjs.duration(parseFloat(values.customHour), 'hours').asMinutes() : values.duration;
+      const endUTC = dayjs.utc()
+        .year(date.year())
+        .month(date.month())
+        .date(date.date())
+        .hour(endTime.hour())
+        .minute(endTime.minute());
+
       const payload = {
         title: values.title.trim(),
         description: values.description || "",
         startTime: startUTC.toISOString(),
-        endTime: startUTC.add(finalDuration, "minute").toISOString(),
+        endTime: endUTC.toISOString(),
         roomId: values.roomId,
         participantIds: Array.from(new Set([user.id, ...(values.participantIds || [])])),
         deviceIds: values.deviceIds || [],
@@ -216,7 +239,6 @@ const CreateMeetingPage = () => {
       }
 
       form.resetFields();
-      setClockValue(dayjs().hour(8).minute(0));
       setIsRecurring(false);
       setAvailableDevices([]);
 
@@ -295,122 +317,64 @@ const CreateMeetingPage = () => {
                   disabledDate={(d) => !d || d < dayjs().startOf("day")} />
               </Form.Item>
 
-              <Form.Item label={t("startTime")} required>
-                <div className="flex gap-2">
-                  <Form.Item
-                    name="time"
-                    noStyle
-                    rules={[{ required: true }]}
-                    getValueProps={(value) => ({ value: value ? dayjs(value).format("HH:mm") : "" })}
-                  >
-                    <Input
-                      readOnly
-                      onClick={() => setClockOpen(true)}
-                      placeholder={t("startTime")}
-                      className="cursor-pointer dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                    />
-                  </Form.Item>
-                  <Button onClick={() => setClockOpen(true)}>
-                    🕒 {i18n.language === "vi" ? "Chọn giờ" : "Pick time"}
-                  </Button>
-                </div>
+              <Form.Item
+                name="startTime"
+                label={t("startTime")}
+                rules={[{ required: true, message: "Chọn giờ bắt đầu" }]}
+              >
+                <TimePicker
+                  format="HH:mm"
+                  minuteStep={15}
+                  className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                  placeholder="Giờ bắt đầu"
+                  showNow={false}
+                />
               </Form.Item>
 
-              {/* Modal chứa đồng hồ chọn giờ */}
-              <Modal
-                title={i18n.language === "vi" ? "Chọn giờ họp (08:00 - 18:00)" : "Select meeting time (08:00 - 18:00)"}
-                open={clockOpen}
-                onCancel={() => setClockOpen(false)}
-                onOk={() => {
-                  if (!validateBusinessTime(clockValue)) {
-                    toast.error(
-                      i18n.language === "vi"
-                        ? "⏰ Chỉ được đặt lịch từ 08:00 đến 18:00!"
-                        : "⏰ Bookings allowed only 08:00 - 18:00!"
-                    );
-                    return;
-                  }
-                  form.setFieldsValue({ time: clockValue });
-                  setClockOpen(false);
-                }}
-                width={350}
-                centered
+              <Form.Item
+                name="endTime"
+                label="Giờ kết thúc"
+                rules={[{ required: true, message: "Chọn giờ kết thúc" }]}
               >
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <StaticTimePicker
-                    orientation="portrait"
-                    ampm={false}
-                    value={clockValue}
-                    onChange={(v) => setClockValue(v)}
-                    slotProps={{
-                      actionBar: { actions: [] }, // ẩn nút OK/Cancel của MUI
-                    }}
-                  />
-                </LocalizationProvider>
-              </Modal>
-
-              <div className="flex gap-2">
-                <Form.Item name="duration" label={t("endTime")} initialValue={60} style={{ flex: 1 }}>
-                  <Select className="dark:bg-gray-700 dark:text-white dark:border-gray-600">
-                    <Option value={30}>{i18n.language === "vi" ? "30 phút" : "30 minutes"}</Option>
-                    <Option value={60}>{i18n.language === "vi" ? "1 giờ" : "1 hour"}</Option>
-                    <Option value={90}>{i18n.language === "vi" ? "1.5 giờ" : "1.5 hours"}</Option>
-                    <Option value={120}>{i18n.language === "vi" ? "2 giờ" : "2 hours"}</Option>
-                  </Select>
-                </Form.Item>
-                <Form.Item
-                  name="customHour"
-                  label={i18n.language === "vi" ? "Khác (giờ)" : "Custom(h)"}
-                  style={{ width: 80 }}
-                >
-                  <Input type="number" step={0.5} min={0.5} max={8}
-                    onChange={() => form.setFieldsValue({ duration: undefined })}
-                    className="dark:bg-gray-700 dark:text-white dark:border-gray-600" />
-                </Form.Item>
-              </div>
+                <TimePicker
+                  format="HH:mm"
+                  minuteStep={15}
+                  className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                  placeholder="Giờ kết thúc"
+                  showNow={false}
+                />
+              </Form.Item>
             </div>
 
-            {/* ROOM SELECT */}
-            <Form.Item name="roomId" label={t("room")} rules={[{ required: true, message: "Chọn phòng họp" }]}>
-              <Select placeholder={t("room")} optionLabelProp="label"
-                className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                classNames={{ popup: "dark:bg-gray-700 dark:text-gray-100" }}>
+            {/* ROOM */}
+            <Form.Item name="roomId" label={t("room")} rules={[{ required: true, message: t("room") + " không được để trống" }]}>
+              <Select placeholder={t("room")} className="dark:bg-gray-700 dark:text-white dark:border-gray-600" classNames={{ popup: "dark:bg-gray-700 dark:text-gray-100" }}>
                 {rooms.map((r) => (
-                  <Option key={r.id} value={r.id} label={r.name} disabled={r.status !== "AVAILABLE"}>
-                    <div className="flex justify-between items-center">
-                      <span>
-                        {r.name} ({r.capacity} {t("seats")})
-                      </span>
-                      <Tag color={r.status === "AVAILABLE" ? "green" : "red"}>
-                        {r.status === "AVAILABLE"
-                          ? (i18n.language === "vi" ? "Có sẵn" : "Available")
-                          : (i18n.language === "vi" ? "Bảo trì" : "Maintenance")
-                        }
-                      </Tag>
+                  <Option key={r.id} value={r.id} disabled={r.status !== "AVAILABLE"}>
+                    <div className="flex justify-between">
+                      <span>{r.name} ({r.capacity} chỗ)</span>
+                      <Tag color={r.status === "AVAILABLE" ? "green" : "red"}>{r.status === "AVAILABLE" ? "Sẵn sàng" : "Bảo trì"}</Tag>
                     </div>
                   </Option>
                 ))}
               </Select>
             </Form.Item>
 
-            {/* DEVICES */}
-            <Form.Item name="deviceIds" label={t("device")}>
-              <Select mode="multiple" loading={devicesLoading}
-                disabled={!watchedDate || !watchedTime || devicesLoading}
-                placeholder={
-                  !watchedDate || !watchedTime
-                    ? (i18n.language === "vi" ? "Vui lòng chọn thời gian trước" : "Please select time first")
-                    : (i18n.language === "vi" ? "Chọn thiết bị khả dụng" : "Select available devices")
-                }
+            {/* DEVICE */}
+            <Form.Item name="deviceIds" label={t("devices")}>
+              <Select
+                mode="multiple"
+                placeholder={!watchedDate || !watchedStartTime || !watchedEndTime ? "Vui lòng chọn thời gian" : t("devices")}
+                disabled={!watchedDate || !watchedStartTime || !watchedEndTime || devicesLoading}
+                loading={devicesLoading}
                 className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                classNames={{ popup: "dark:bg-gray-700 dark:text-gray-100" }}>
+                classNames={{ popup: "dark:bg-gray-700 dark:text-gray-100" }}
+              >
                 {availableDevices.map((d) => (
                   <Option key={d.id} value={d.id} disabled={d.status !== "AVAILABLE"}>
-                    <div className="flex justify-between items-center">
+                    <div className="flex justify-between">
                       <span>{d.name}</span>
-                      <Tag color={d.status === "AVAILABLE" ? "green" : "red"}>
-                        {d.status === "AVAILABLE" ? "Có sẵn" : "Bảo trì"}
-                      </Tag>
+                      <Tag color={d.status === "AVAILABLE" ? "green" : "red"}>{d.status === "AVAILABLE" ? "Sẵn sàng" : "Bảo trì"}</Tag>
                     </div>
                   </Option>
                 ))}
@@ -419,117 +383,68 @@ const CreateMeetingPage = () => {
 
             <Divider className="dark:border-gray-700" />
 
-            {/* === NGƯỜI THAM GIA NỘI BỘ  === */}
-            <Form.Item
-              name="participantIds"
-              label={
-                <span>
-                  <FiUsers className="inline mr-2" />
-                  {t("participants")}
-                </span>
-              }
-            >
+            {/* PARTICIPANTS */}
+            <Form.Item label={t("participants")} name="participantIds">
               <Select
                 mode="multiple"
                 showSearch
-                filterOption={false}
+                placeholder={t("participants")}
                 onSearch={handleSearchUsers}
                 loading={isSearching}
-                placeholder={
-                  i18n.language === "vi"
-                    ? "Gõ tên hoặc email để tìm"
-                    : "Type name or email to search"
-                }
-                notFoundContent={
-                  isSearching
-                    ? <Spin size="small" />
-                    : (i18n.language === "vi" ? "Không tìm thấy người dùng" : "No users found")
-                }
+                filterOption={false}
                 className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
                 classNames={{ popup: "dark:bg-gray-700 dark:text-gray-100" }}
               >
                 {searchResults.map((u) => (
-                  <Option key={u.id} value={u.id}>
-                    {u.fullName} ({u.username})
-                  </Option>
+                  <Option key={u.id} value={u.id}>{u.fullName} ({u.username})</Option>
                 ))}
               </Select>
             </Form.Item>
 
-            {/* GUEST EMAILS */}
             <Form.Item
               name="guestEmails"
-              label={i18n.language === "vi" ? "Email khách mời" : "Guest emails"}
-              tooltip={
-                i18n.language === "vi"
-                  ? "Nhập email, nhấn Enter"
-                  : "Enter email then press Enter"
-              }
+              label={t("guestEmail")}
               rules={[{
                 validator: (_, list) => {
                   if (!list || !list.length) return Promise.resolve();
-                  const invalid = list.filter(e => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e));
-                  return invalid.length
-                    ? Promise.reject(`Email không hợp lệ: ${invalid.join(", ")}`)
-                    : Promise.resolve();
-                },
+                  const invalid = list.filter((e) => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e));
+                  return invalid.length ? Promise.reject("Email không hợp lệ: " + invalid.join(", ")) : Promise.resolve();
+                }
               }]}
             >
-              <Select
-                mode="tags"
-                tokenSeparators={[" ", ",", ";"]}
-                placeholder="guest@example.com"
-                className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                classNames={{ popup: "dark:bg-gray-700 dark:text-gray-100" }}
-              />
+              <Select mode="tags" placeholder="email@example.com" className="dark:bg-gray-700 dark:text-white dark:border-gray-600" />
             </Form.Item>
 
             <Divider className="dark:border-gray-700" />
 
             {/* RECURRING */}
-            <Form.Item name="isRecurring" valuePropName="checked" className="mb-1">
-              <Checkbox onChange={(e) => setIsRecurring(e.target.checked)} className="dark:text-gray-200 accent-emerald-600">
-                {i18n.language === "vi" ? "Lặp lại cuộc họp" : "Repeat meeting"}
-              </Checkbox>
+            <Form.Item name="isRecurring" valuePropName="checked" className="mb-0">
+              <Checkbox onChange={(e) => setIsRecurring(e.target.checked)} className="dark:text-gray-200">{t("recurring")}</Checkbox>
             </Form.Item>
 
             {isRecurring && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Form.Item name="frequency" label={i18n.language === "vi" ? "Tần suất" : "Frequency"}
-                  initialValue="DAILY" rules={[{ required: true }]}>
+              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <Form.Item name="frequency" label={t("frequency")} rules={[{ required: true }]}>
                   <Select className="dark:bg-gray-700 dark:text-white dark:border-gray-600">
-                    <Option value="DAILY">{i18n.language === "vi" ? "Hằng ngày" : "Daily"}</Option>
-                    <Option value="WEEKLY">{i18n.language === "vi" ? "Hằng tuần" : "Weekly"}</Option>
-                    <Option value="MONTHLY">{i18n.language === "vi" ? "Hằng tháng" : "Monthly"}</Option>
+                    <Option value="DAILY">Hàng ngày</Option>
+                    <Option value="WEEKLY">Hàng tuần</Option>
+                    <Option value="MONTHLY">Hàng tháng</Option>
                   </Select>
                 </Form.Item>
-                <Form.Item name="repeatUntil" label={i18n.language === "vi" ? "Lặp đến ngày" : "Repeat until"} rules={[{ required: true }]}>
-                  <DatePicker
-                    format="DD/MM/YYYY"
-                    className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                    disabledDate={(c) => c && c <= dayjs().startOf("day")}
-                  />
+                <Form.Item name="repeatUntil" label={t("repeatUntil")} rules={[{ required: true }]}>
+                  <DatePicker className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600" format="DD/MM/YYYY" disabledDate={(d) => !d || d < dayjs()} />
                 </Form.Item>
               </div>
             )}
 
-            <Form.Item name="description" label={t("meetingNote")}>
-              <TextArea rows={3} placeholder={t("meetingNotePlaceholder")}
-                className="dark:bg-gray-700 dark:text-white dark:border-gray-600" />
+            <Form.Item name="description" label={t("note")} className="mt-4">
+              <TextArea rows={4} className="dark:bg-gray-700 dark:text-white dark:border-gray-600" />
             </Form.Item>
 
-            {/* SUBMIT BUTTON */}
-            <Form.Item>
-              <Button
-                type="primary"
-                htmlType="submit"
-                loading={loading}
-                size="large"
-                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-emerald-500 dark:hover:bg-emerald-600 font-semibold h-12 shadow-lg hover:shadow-emerald-500/30 transition-all transform hover:-translate-y-0.5"
-              >
-                {t("createMeetingTitle")}
-              </Button>
-            </Form.Item>
+            <Button type="primary" htmlType="submit" loading={loading} block size="large" className="bg-emerald-600 hover:bg-emerald-700 text-white mt-4">
+              {t("createButton")}
+            </Button>
+
           </Form>
         </Card>
       </div>

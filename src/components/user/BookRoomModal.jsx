@@ -11,6 +11,8 @@ import {
   Divider,
   Checkbox,
   Spin,
+  TimePicker, // [Updated] Import TimePicker
+  Tag,
 } from "antd";
 import { FiPlusCircle, FiUsers } from "react-icons/fi";
 import dayjs from "dayjs";
@@ -25,10 +27,7 @@ import { useAuth } from "../../context/AuthContext";
 import RoomSchedule from "./RoomSchedule";
 import { useTranslation } from "react-i18next";
 
-// MUI STATIC TIME PICKER
-import { LocalizationProvider } from "@mui/x-date-pickers";
-import { StaticTimePicker } from "@mui/x-date-pickers/StaticTimePicker";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+// [Updated] Removed MUI imports
 
 dayjs.locale("vi");
 dayjs.extend(utc);
@@ -47,72 +46,48 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, start, end, onSuccess })
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
 
-  // TIME PICKER STATE
-  const [clockOpen, setClockOpen] = useState(false);
-  const [clockValue, setClockValue] = useState(dayjs().hour(9).minute(0));
-
   const debounceTimer = useRef(null);
   const [form] = Form.useForm();
   const { user } = useAuth();
 
   // Watch form values để tải devices tự động
   const watchedDate = Form.useWatch("date", form);
-  const watchedTime = Form.useWatch("time", form);
-  const watchedDuration = Form.useWatch("duration", form);
+  const watchedStartTime = Form.useWatch("startTime", form); // [Updated]
+  const watchedEndTime = Form.useWatch("endTime", form);     // [Updated]
 
-  /* ===== SET INITIAL FORM VALUES WITH PREFILLED ROOM ====== */
   useEffect(() => {
     if (open && prefilledRoom) {
       setIsRecurring(false);
 
-      // Mặc định 09:00
-      let defaultClock = dayjs().hour(9).minute(0);
+      // Default logic
+      let defaultDate = undefined;
+      let defaultStart = dayjs().hour(9).minute(0);
+      let defaultEnd = dayjs().hour(10).minute(0);
 
       // Nếu có slot được chọn từ calendar -> dùng giờ đó
       if (start && end) {
-        const startD = dayjs(start);
-        const endD = dayjs(end);
-        const durationMin = Math.max(endD.diff(startD, "minute"), 15); // tối thiểu 15p
-
-        defaultClock = startD;
-
-        setTimeout(() => {
-          form.setFieldsValue({
-            title: "",
-            date: startD,
-            time: startD,
-            duration: durationMin,
-            roomId: prefilledRoom.id,
-            deviceIds: [],
-            participantIds: [],
-            guestEmails: [],
-            isRecurring: false,
-            frequency: "DAILY",
-            repeatUntil: undefined,
-            description: "",
-          });
-        }, 100);
-      } else {
-        // Trường hợp user mở modal mà không đi qua calendar
-        setTimeout(() => {
-          form.setFieldsValue({
-            title: "",
-            date: undefined,
-            time: undefined,
-            duration: 60,
-            roomId: prefilledRoom.id,
-            deviceIds: [],
-            participantIds: [],
-            guestEmails: [],
-            isRecurring: false,
-            frequency: "DAILY",
-            repeatUntil: undefined,
-            description: "",
-          });
-        }, 100);
+        defaultDate = dayjs(start);
+        defaultStart = dayjs(start);
+        defaultEnd = dayjs(end);
       }
 
-      setClockValue(defaultClock);
+      setTimeout(() => {
+        form.setFieldsValue({
+          title: "",
+          date: defaultDate,
+          startTime: defaultStart,
+          endTime: defaultEnd,
+          roomId: prefilledRoom.id,
+          deviceIds: [],
+          participantIds: [],
+          guestEmails: [],
+          isRecurring: false,
+          frequency: "DAILY",
+          repeatUntil: undefined,
+          description: "",
+        });
+      }, 100);
+
       setSearchResults([]);
       setAvailableDevices([]);
     }
@@ -123,7 +98,15 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, start, end, onSuccess })
   ==================================================== */
   useEffect(() => {
     const fetchDevices = async () => {
-      if (!watchedDate || !watchedTime || !watchedDuration) {
+      if (!watchedDate || !watchedStartTime || !watchedEndTime) {
+        setAvailableDevices([]);
+        return;
+      }
+
+      // Validate order
+      const startMin = watchedStartTime.hour() * 60 + watchedStartTime.minute();
+      const endMin = watchedEndTime.hour() * 60 + watchedEndTime.minute();
+      if (endMin <= startMin) {
         setAvailableDevices([]);
         return;
       }
@@ -136,13 +119,19 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, start, end, onSuccess })
           .year(watchedDate.year())
           .month(watchedDate.month())
           .date(watchedDate.date())
-          .hour(watchedTime.hour())
-          .minute(watchedTime.minute());
+          .hour(watchedStartTime.hour())
+          .minute(watchedStartTime.minute());
+
+        const endTimeUTC = dayjs
+          .utc()
+          .year(watchedDate.year())
+          .month(watchedDate.month())
+          .date(watchedDate.date())
+          .hour(watchedEndTime.hour())
+          .minute(watchedEndTime.minute());
 
         const startTime = startTimeUTC.toISOString();
-        const endTime = startTimeUTC
-          .add(watchedDuration, "minute")
-          .toISOString();
+        const endTime = endTimeUTC.toISOString();
 
         const res = await getAvailableDevices(startTime, endTime);
         setAvailableDevices(res.data || []);
@@ -156,7 +145,7 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, start, end, onSuccess })
 
     const t = setTimeout(fetchDevices, 500);
     return () => clearTimeout(t);
-  }, [watchedDate, watchedTime, watchedDuration]);
+  }, [watchedDate, watchedStartTime, watchedEndTime]);
 
   /* ===== SEARCH INTERNAL USERS ====== */
   const handleSearchUsers = (query) => {
@@ -182,10 +171,14 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, start, end, onSuccess })
   };
 
   /* ===== VALIDATE BUSINESS TIME ====== */
-  const validateBusinessTime = (value) => {
-    if (!value) return false;
-    const totalMin = value.hour() * 60 + value.minute();
-    return totalMin >= 480 && totalMin <= 1080; // 08:00 - 18:00
+  const validateBusinessTime = (start, end) => {
+    if (!start || !end) return false;
+    const startMin = start.hour() * 60 + start.minute();
+    const endMin = end.hour() * 60 + end.minute();
+    // 08:00 - 18:00
+    if (startMin < 480 || startMin >= 1080) return false;
+    if (endMin <= 480 || endMin > 1080) return false;
+    return true;
   };
 
   /* ===== SUBMIT MEETING ====== */
@@ -194,9 +187,15 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, start, end, onSuccess })
       setLoading(true);
 
       const date = values.date;
-      const time = dayjs(values.time);
+      const startTime = dayjs(values.startTime);
+      const endTime = dayjs(values.endTime);
 
-      if (!validateBusinessTime(time)) {
+      if (endTime.isBefore(startTime) || endTime.isSame(startTime)) {
+        toast.error("Giờ kết thúc phải sau giờ bắt đầu!");
+        return;
+      }
+
+      if (!validateBusinessTime(startTime, endTime)) {
         toast.error("⏰ Chỉ được đặt lịch từ 08:00 đến 18:00!");
         return;
       }
@@ -206,14 +205,22 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, start, end, onSuccess })
         .year(date.year())
         .month(date.month())
         .date(date.date())
-        .hour(time.hour())
-        .minute(time.minute());
+        .hour(startTime.hour())
+        .minute(startTime.minute());
+
+      const endUTC = dayjs
+        .utc()
+        .year(date.year())
+        .month(date.month())
+        .date(date.date())
+        .hour(endTime.hour())
+        .minute(endTime.minute());
 
       const payload = {
         title: values.title.trim(),
         description: values.description || "",
         startTime: startUTC.toISOString(),
-        endTime: startUTC.add(values.duration, "minute").toISOString(),
+        endTime: endUTC.toISOString(),
         roomId: values.roomId,
         participantIds: Array.from(
           new Set([user.id, ...(values.participantIds || [])])
@@ -237,7 +244,6 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, start, end, onSuccess })
 
       toast.success(t("success", { name: prefilledRoom?.name }));
       form.resetFields();
-      setClockValue(dayjs().hour(9).minute(0));
       setAvailableDevices([]);
       setIsRecurring(false);
       onSuccess?.();
@@ -253,17 +259,12 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, start, end, onSuccess })
       const raw = backendMsg.toLowerCase();
       let msg = "Không thể tạo cuộc họp!";
 
-      // === 1️⃣ Phòng họp trùng lịch ===
       if (raw.includes("phòng") && raw.includes("đã bị đặt")) {
         msg = "Phòng họp đã được đặt trong khung giờ này";
       }
-
-      // === 2️⃣ Người tham dự trùng lịch ===
       else if (raw.includes("người tham dự") && raw.includes("trùng lịch")) {
         msg = "Người tham gia bị trùng lịch trong khung giờ này";
       }
-
-      // fallback chung nếu BE trả lỗi khác
       else {
         msg = `⚠️ ${backendMsg}`;
       }
@@ -280,7 +281,6 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, start, end, onSuccess })
 
   const handleCancel = () => {
     form.resetFields();
-    setClockValue(dayjs().hour(9).minute(0));
     setAvailableDevices([]);
     setIsRecurring(false);
     onCancel();
@@ -351,89 +351,36 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, start, end, onSuccess })
               />
             </Form.Item>
 
-            {/* TIME PICKER */}
+            {/* START TIME */}
             <Form.Item
-              name="time"
+              name="startTime"
               label={t("startTime")}
               rules={[{ required: true, message: "Chọn giờ bắt đầu" }]}
             >
-              <>
-                <div className="flex gap-2">
-                  <Input
-                    readOnly
-                    value={clockValue.format("HH:mm")}
-                    onClick={() => setClockOpen(true)}
-                    className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                  />
-                  <Button
-                    onClick={() => setClockOpen(true)}
-                    className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                  >
-                    🕒 {t("chooseClock")}
-                  </Button>
-                </div>
-
-                <Modal
-                  title={t("chooseTimeTitle")}
-                  open={clockOpen}
-                  onCancel={() => setClockOpen(false)}
-                  onOk={() => {
-                    if (!validateBusinessTime(clockValue)) {
-                      toast.error(t("invalidTime"));
-                      return;
-                    }
-                    form.setFieldsValue({ time: clockValue });
-                    setClockOpen(false);
-                  }}
-                  width={520}
-                  style={{ overflow: "visible" }}
-                  styles={{ body: { overflow: "visible", paddingTop: 8 } }}
-                  className="dark:[&_.ant-modal-content]:bg-gray-800 dark:[&_.ant-modal-header]:bg-gray-800"
-                >
-                  <div className="text-center text-gray-500 dark:text-gray-300 mb-2 text-sm">
-                    <span className="font-medium text-indigo-600 dark:text-indigo-400">
-                      Giờ (HH)
-                    </span>{" "}
-                    :{" "}
-                    <span className="font-medium text-indigo-600 dark:text-indigo-400">
-                      Phút (MM)
-                    </span>
-                  </div>
-
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <StaticTimePicker
-                      orientation="landscape"
-                      ampm={false}
-                      value={clockValue}
-                      onChange={(v) => setClockValue(v)}
-                      slotProps={{
-                        actionBar: { actions: [] },
-                      }}
-                    />
-                  </LocalizationProvider>
-                </Modal>
-              </>
+              <TimePicker
+                format="HH:mm"
+                minuteStep={15}
+                className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                placeholder="Giờ bắt đầu"
+                showNow={false}
+              />
             </Form.Item>
 
-            {/* DURATION */}
+            {/* END TIME */}
             <Form.Item
-              name="duration"
-              label={t("duration")}
-              initialValue={60}
-              rules={[{ required: true, message: "Chọn thời lượng" }]}
+              name="endTime"
+              label="Giờ kết thúc"
+              rules={[{ required: true, message: "Chọn giờ kết thúc" }]}
             >
-              <Select
-                className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                classNames={{ popup: "dark:bg-gray-700 dark:text-gray-100" }}
-              >
-                <Option value={15}>15 phút</Option>
-                <Option value={30}>30 phút</Option>
-                <Option value={45}>45 phút</Option>
-                <Option value={60}>1 giờ</Option>
-                <Option value={90}>1 giờ 30 phút</Option>
-                <Option value={120}>2 giờ</Option>
-              </Select>
+              <TimePicker
+                format="HH:mm"
+                minuteStep={15}
+                className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                placeholder="Giờ kết thúc"
+                showNow={false}
+              />
             </Form.Item>
+
           </div>
 
           {/* ROOM (Hidden - prefilled) */}
@@ -446,7 +393,7 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, start, end, onSuccess })
             <p className="text-sm text-blue-800 dark:text-blue-300">
               <span className="font-semibold">📍 {t("roomLabel")}:</span> {prefilledRoom?.name}
               {prefilledRoom?.location && ` - ${prefilledRoom.location}`}
-              {prefilledRoom?.capacity && ` (${prefilledRoom.capacity} ${t("people")})`}
+              {prefilledRoom?.capacity && ` (${prefilledRoom.capacity} {t("people")})`}
             </p>
           </div>
 
@@ -454,10 +401,10 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, start, end, onSuccess })
           <Form.Item name="deviceIds" label={t("deviceLabel")}>
             <Select
               mode="multiple"
-              disabled={!watchedDate || !watchedTime}
+              disabled={!watchedDate || !watchedStartTime || !watchedEndTime}
               loading={devicesLoading}
               placeholder={
-                !watchedDate || !watchedTime
+                !watchedDate || !watchedStartTime || !watchedEndTime
                   ? t("deviceNeedDate")
                   : t("devicePlaceholder")
               }
