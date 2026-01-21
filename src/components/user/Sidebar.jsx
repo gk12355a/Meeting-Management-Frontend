@@ -33,14 +33,19 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             transition-transform duration-300 cubic-bezier(0.4, 0, 0.2, 1) z-30`}
       >
         {/* Header Section */}
-        <div className="flex flex-col items-center justify-center py-8 border-b border-dashed border-slate-200 dark:border-slate-800">
-          <div className="text-center px-4">
-            <h2 className="font-bold text-slate-800 dark:text-slate-100 text-lg tracking-tight">
-              {t("title")}
-            </h2>
-            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider mt-1">
-              {t("subtitle")}
-            </p>
+        <div className="flex flex-col items-center justify-center py-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-emerald-500/20">
+              6x6
+            </div>
+            <div className="text-left">
+              <h2 className="font-bold text-gray-800 dark:text-gray-100 text-lg leading-tight">
+                Meeting
+              </h2>
+              <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+                Management
+              </p>
+            </div>
           </div>
         </div>
 
@@ -52,9 +57,9 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
               to={m.to}
               end
               className={({ isActive }) =>
-                `relative group flex items-center gap-3.5 px-4 py-3 rounded-2xl transition-all duration-200 ease-in-out ${isActive
-                  ? "bg-emerald-50/80 text-emerald-700 shadow-sm shadow-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:shadow-none font-semibold"
-                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-slate-200 font-medium"
+                `relative group flex items-center gap-3.5 px-4 py-3.5 mx-3 rounded-xl transition-all duration-300 ${isActive
+                  ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/30"
+                  : "text-gray-600 hover:bg-emerald-50 hover:text-emerald-700 dark:text-gray-400 dark:hover:bg-slate-800 dark:hover:text-gray-200"
                 }`
               }
             >
@@ -62,18 +67,13 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
                 <>
                   {/* Icon Wrapper with subtle animation */}
                   <span
-                    className={`transition-transform duration-300 group-hover:scale-110 ${isActive ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400 group-hover:text-slate-600 dark:text-slate-500 dark:group-hover:text-slate-300"
+                    className={`transition-transform duration-300 group-hover:scale-110 ${isActive ? "text-white" : "text-gray-400 group-hover:text-emerald-600 dark:text-slate-500 dark:group-hover:text-emerald-400"
                       }`}
                   >
                     {m.icon}
                   </span>
 
-                  <span className="text-[15px]">{m.label}</span>
-
-                  {/* Optional: Active Indicator Dot (Modern Touch) */}
-                  {isActive && (
-                    <span className="absolute right-3 w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]"></span>
-                  )}
+                  <span className="text-[15px] font-medium">{m.label}</span>
                 </>
               )}
             </NavLink>
