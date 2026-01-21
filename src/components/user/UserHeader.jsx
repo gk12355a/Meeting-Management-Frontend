@@ -215,9 +215,21 @@ const UserHeader = ({ setIsSidebarOpen }) => {
 
       {/* Right: User Info & Icons */}
       <div className="flex items-center gap-3">
-        <span className="text-sm bg-emerald-600 px-3 py-1 rounded-full shadow-md hidden sm:block">
-          {user?.username || "User"}
-        </span>
+        <div className="flex items-center gap-2">
+          <div className="text-right hidden sm:block leading-tight">
+            <div className="text-sm font-semibold">{user?.fullName || user?.username}</div>
+            <div className="text-[10px] text-emerald-300 uppercase tracking-wider">{user?.roles?.[0] === 'ROLE_ADMIN' ? 'Admin' : 'User'}</div>
+          </div>
+          <div className="w-10 h-10 rounded-full overflow-hidden bg-emerald-800 flex items-center justify-center border-2 border-emerald-600 shadow-sm shrink-0">
+            {user?.avatarUrl ? (
+              <img src={user.avatarUrl} alt="User" className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-sm font-bold text-emerald-100 select-none">
+                {((user?.fullName || user?.username || "U").substring(0, 2)).toUpperCase()}
+              </span>
+            )}
+          </div>
+        </div>
 
         {/* Notification Bell */}
         <div className="relative" ref={notificationRef}>
@@ -319,7 +331,7 @@ const UserHeader = ({ setIsSidebarOpen }) => {
 
         </div>
       </div>
-    </header>
+    </header >
   );
 };
 

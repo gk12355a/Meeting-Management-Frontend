@@ -16,11 +16,13 @@ import {
   AlertTriangle,
   Building,
   Monitor, // Icon cho thiết bị
+  Image as ImageIcon,
 } from "lucide-react";
 import { toast } from "react-toastify";
 import Pagination from "../../components/Pagination";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import ImageLightbox from "../../components/ImageLightbox";
 const toastColors = {
   success: "#10b981",
   error: "#ef4444",
@@ -40,32 +42,32 @@ setToastTheme();
 export default function RoomsPage() {
   const { t } = useTranslation(['rooms', 'common']);
   const DEVICE_MAP = {
-  "Máy chiếu": "projector",
-  "TV màn hình lớn": "largeTV",
-  "Bảng trắng": "whiteboard",
-  "Hệ thống âm thanh": "soundSystem",
-  "Webcam hội nghị": "conferenceCam",
-  "Quạt điều hòa": "airCooler",
-};
+    "Máy chiếu": "projector",
+    "TV màn hình lớn": "largeTV",
+    "Bảng trắng": "whiteboard",
+    "Hệ thống âm thanh": "soundSystem",
+    "Webcam hội nghị": "conferenceCam",
+    "Quạt điều hòa": "airCooler",
+  };
 
-const DEVICE_MAP_REVERSE = Object.fromEntries(
-  Object.entries(DEVICE_MAP).map(([vi, key]) => [key, vi])
-);
+  const DEVICE_MAP_REVERSE = Object.fromEntries(
+    Object.entries(DEVICE_MAP).map(([vi, key]) => [key, vi])
+  );
 
-const DEVICE_KEYS = [
-  "projector",
-  "largeTV",
-  "whiteboard",
-  "soundSystem",
-  "conferenceCam",
-  "airCooler",
-];
+  const DEVICE_KEYS = [
+    "projector",
+    "largeTV",
+    "whiteboard",
+    "soundSystem",
+    "conferenceCam",
+    "airCooler",
+  ];
 
-// Gợi ý nhanh theo ngôn ngữ
-const SUGGESTED_DEVICES = DEVICE_KEYS.map((key) => ({
-  key,
-  label: t(`rooms:modal.equipment.list.${key}`)
-}));
+  // Gợi ý nhanh theo ngôn ngữ
+  const SUGGESTED_DEVICES = DEVICE_KEYS.map((key) => ({
+    key,
+    label: t(`rooms:modal.equipment.list.${key}`)
+  }));
 
   // === States ===
   const [filteredRooms, setFilteredRooms] = useState([]);
@@ -89,6 +91,9 @@ const SUGGESTED_DEVICES = DEVICE_KEYS.map((key) => ({
     requiresApproval: true, // Mặc định luôn là true
     fixedDevices: [], // Mảng chứa danh sách thiết bị
   });
+  const [selectedImages, setSelectedImages] = useState([]);
+  const [viewRoom, setViewRoom] = useState(null);
+  const [lightbox, setLightbox] = useState({ open: false, index: 0, images: [] });
 
   // State tạm để nhập tên thiết bị mới trong form
   const [deviceInput, setDeviceInput] = useState("");
@@ -156,6 +161,7 @@ const SUGGESTED_DEVICES = DEVICE_KEYS.map((key) => ({
   // === Modal Handlers ===
   const handleOpenModal = (room = null) => {
     setDeviceInput(""); // Reset input thiết bị
+    setSelectedImages([]);
     if (room) {
       setEditingRoom(room);
       setFormData({
@@ -184,25 +190,30 @@ const SUGGESTED_DEVICES = DEVICE_KEYS.map((key) => ({
     setIsModalOpen(false);
     setEditingRoom(null);
     setDeviceInput("");
+    setSelectedImages([]);
+  };
+
+  const handleViewRoom = (room) => {
+    setViewRoom(room);
   };
 
   // === Logic thêm/xóa thiết bị trong Form ===
   const handleAddDevice = () => {
     let val = deviceInput.trim();
 
-// Nếu người dùng nhập tiếng Việt → convert sang KEY
-const mappedKey = DEVICE_MAP[val];
-if (mappedKey) val = mappedKey;
+    // Nếu người dùng nhập tiếng Việt → convert sang KEY
+    const mappedKey = DEVICE_MAP[val];
+    if (mappedKey) val = mappedKey;
 
-if (val && !formData.fixedDevices.includes(val)) {
-  setFormData({
-    ...formData,
-    fixedDevices: [...formData.fixedDevices, val],
-  });
-  setDeviceInput("");
-} else {
-  toast.warning(t('rooms:messages.deviceExists'));
-}
+    if (val && !formData.fixedDevices.includes(val)) {
+      setFormData({
+        ...formData,
+        fixedDevices: [...formData.fixedDevices, val],
+      });
+      setDeviceInput("");
+    } else {
+      toast.warning(t('rooms:messages.deviceExists'));
+    }
   };
 
   const handleRemoveDevice = (deviceToRemove) => {
@@ -248,12 +259,19 @@ if (val && !formData.fixedDevices.includes(val)) {
         fixedDevices: formData.fixedDevices.map(key => DEVICE_MAP_REVERSE[key] || key),
       };
 
+      const submitData = new FormData();
+      submitData.append("request", new Blob([JSON.stringify(payload)], { type: "application/json" }));
+
+      selectedImages.forEach((image) => {
+        submitData.append("images", image);
+      });
+
       if (editingRoom) {
-        await updateRoom(editingRoom.id, payload);
+        await updateRoom(editingRoom.id, submitData);
         toast.success(t('rooms:messages.updateSuccess'));
         // ({/* <span>toast.success("Cập nhật phòng họp thành công!") */})
       } else {
-        await createRoom(payload);
+        await createRoom(submitData);
         toast.success(t('rooms:messages.createSuccess'));
         // ({/* <span>toast.success("Tạo phòng họp thành công!") */})
       }
@@ -344,7 +362,7 @@ if (val && !formData.fixedDevices.includes(val)) {
         transition={{ duration: 0.4 }}
         className="flex items-center gap-2 mb-8"
       >
-        <Building size={32} className="text-blue-600 dark:text-blue-400" />
+        <Building size={32} className="text-emerald-600 dark:text-emerald-400" />
         <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
           {/* <span>Quản lý phòng họp</span> */}
           <span>{t('rooms:pageTitle')}</span>
@@ -370,13 +388,13 @@ if (val && !formData.fixedDevices.includes(val)) {
               // ({/* <span>placeholder="Tìm kiếm phòng họp..."</span> */}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-400 transition"
+              className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-emerald-400 transition"
             />
           </div>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-400 cursor-pointer"
+            className="px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-emerald-400 cursor-pointer"
           >
             <option value="ALL">{t('common:common.filterAll')}</option>
             {/* ({/* <span>Tất cả trạng thái</span> */}
@@ -388,7 +406,7 @@ if (val && !formData.fixedDevices.includes(val)) {
           <button
             onClick={() => handleOpenModal()}
             disabled={loading}
-            className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold shadow hover:shadow-lg transition disabled:opacity-50"
+            className="flex items-center gap-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold shadow hover:shadow-lg transition disabled:opacity-50"
           >
             <Plus size={20} />
             {/* <span>Thêm phòng</span> */}
@@ -450,7 +468,7 @@ if (val && !formData.fixedDevices.includes(val)) {
       >
         {loading && (
           <div className="absolute inset-0 bg-white/80 dark:bg-gray-900/80 flex items-center justify-center z-10">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
           </div>
         )}
         <div className="overflow-x-auto">
@@ -489,7 +507,8 @@ if (val && !formData.fixedDevices.includes(val)) {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: idx * 0.05 }}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition"
+                    onClick={() => handleViewRoom(room)}
+                    className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition cursor-pointer"
                   >
                     <td className="p-4 text-center">
                       {(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}
@@ -513,18 +532,18 @@ if (val && !formData.fixedDevices.includes(val)) {
                       {room.fixedDevices && room.fixedDevices.length > 0 ? (
                         <div className="flex flex-wrap gap-1">
                           {room.fixedDevices.slice(0, 3).map((dev, i) => {
-  const key = DEVICE_MAP[dev] || dev; // Nếu không có trong map thì dùng nguyên bản
-  return (
-    <span
-      key={i}
-      className="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 rounded text-xs border border-blue-100 dark:border-blue-800"
-    >
-      {DEVICE_MAP_REVERSE[key]
-  ? t(`rooms:modal.equipment.list.${key}`)
-  : key}
-    </span>
-  );
-})}
+                            const key = DEVICE_MAP[dev] || dev; // Nếu không có trong map thì dùng nguyên bản
+                            return (
+                              <span
+                                key={i}
+                                className="px-2 py-0.5 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-300 rounded text-xs border border-emerald-100 dark:border-emerald-800"
+                              >
+                                {DEVICE_MAP_REVERSE[key]
+                                  ? t(`rooms:modal.equipment.list.${key}`)
+                                  : key}
+                              </span>
+                            );
+                          })}
                           {room.fixedDevices.length > 3 && (
                             <span className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded text-xs">
                               +{room.fixedDevices.length - 3}
@@ -544,7 +563,7 @@ if (val && !formData.fixedDevices.includes(val)) {
                       <div className="flex items-center justify-center gap-2">
                         <button
                           onClick={() => handleOpenModal(room)}
-                          className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md transition"
+                          className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-md transition"
                           title={t('common:buttons.edit')}
                         >
                           <Edit2 size={18} />
@@ -617,7 +636,7 @@ if (val && !formData.fixedDevices.includes(val)) {
                     placeholder={t('rooms:modal.placeholders.name')}
                     // ({/* <span>placeholder="VD: Phòng Họp Sao Hỏa"</span> */})
                     required
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition"
+                    className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none transition"
                   />
                 </div>
 
@@ -636,7 +655,7 @@ if (val && !formData.fixedDevices.includes(val)) {
                       }
                       placeholder={t('rooms:modal.placeholders.location')}
                       // ({/* <span>placeholder="VD: Tầng 3"</span> */})
-                      className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition"
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none transition"
                     />
                   </div>
                   <div>
@@ -652,7 +671,7 @@ if (val && !formData.fixedDevices.includes(val)) {
                       }
                       min="1"
                       required
-                      className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition"
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none transition"
                     />
                   </div>
                 </div>
@@ -668,7 +687,7 @@ if (val && !formData.fixedDevices.includes(val)) {
                     onChange={(e) =>
                       setFormData({ ...formData, status: e.target.value })
                     }
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition cursor-pointer"
+                    className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none transition cursor-pointer"
                   >
                     <option value="AVAILABLE">{t('rooms:modal.statusOptions.available')}</option>
                     {/* ({/* <span>Sẵn sàng sử dụng</span> */}
@@ -694,12 +713,12 @@ if (val && !formData.fixedDevices.includes(val)) {
                       onKeyDown={handleKeyDownDevice}
                       placeholder={t('rooms:modal.placeholders.equipmentInput')}
                       // ({/* <span>placeholder="Nhập tên thiết bị rồi nhấn Enter..."</span> */})
-                      className="flex-1 px-3 py-1.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-800 focus:ring-2 focus:ring-blue-400 outline-none"
+                      className="flex-1 px-3 py-1.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-800 focus:ring-2 focus:ring-emerald-400 outline-none"
                     />
                     <button
                       type="button"
                       onClick={handleAddDevice}
-                      className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition"
+                      className="px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-sm hover:bg-emerald-700 transition"
                     >
                       {/* <span>Thêm</span> */}
                       <span>{t('rooms:modal.equipment.add')}</span>
@@ -717,11 +736,11 @@ if (val && !formData.fixedDevices.includes(val)) {
                     {formData.fixedDevices.map((device, index) => (
                       <span
                         key={index}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 bg-white dark:bg-gray-800 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 rounded-full text-sm shadow-sm"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 bg-white dark:bg-gray-800 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 rounded-full text-sm shadow-sm"
                       >
                         {DEVICE_MAP_REVERSE[device]
-  ? t(`rooms:modal.equipment.list.${device}`)
-  : device}
+                          ? t(`rooms:modal.equipment.list.${device}`)
+                          : device}
                         <button
                           type="button"
                           onClick={() => handleRemoveDevice(device)}
@@ -755,17 +774,68 @@ if (val && !formData.fixedDevices.includes(val)) {
                               }));
                             }
                           }}
-                          className={`px-2 py-1 text-xs rounded border transition-colors ${
-                            formData.fixedDevices.includes(item.key)
-                              ? "bg-blue-100 text-blue-600 border-blue-200 cursor-default opacity-60"
-                              : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 hover:border-blue-400 hover:text-blue-500"
-                          }`}
+                          className={`px-2 py-1 text-xs rounded border transition-colors ${formData.fixedDevices.includes(item.key)
+                            ? "bg-emerald-100 text-emerald-600 border-emerald-200 cursor-default opacity-60"
+                            : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 hover:border-emerald-400 hover:text-emerald-500"
+                            }`}
                         >
                           + {item.label}
                         </button>
                       ))}
                     </div>
                   </div>
+                </div>
+
+                {/* === ẢNH PHÒNG HỌP === */}
+                <div className="p-4 bg-gray-50 dark:bg-gray-700/30 rounded-xl border border-gray-200 dark:border-gray-700">
+                  <label className="block text-sm font-bold text-gray-700 dark:text-gray-200 mb-2 flex items-center gap-2">
+                    <ImageIcon size={16} />
+                    <span>{t('rooms:modal.fields.images') || "Hình ảnh phòng họp"}</span>
+                  </label>
+
+                  <div className="flex items-center justify-center w-full">
+                    <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
+                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                        <ImageIcon className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" />
+                        <p className="text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">{t('rooms:modal.clickToUpload') || "Click để tải ảnh"}</span></p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">PNG, JPG (MAX. 5MB)</p>
+                      </div>
+                      <input
+                        type="file"
+                        multiple
+                        className="hidden"
+                        accept="image/*"
+                        onChange={(e) => {
+                          if (e.target.files) {
+                            const files = Array.from(e.target.files);
+                            setSelectedImages(prev => [...prev, ...files]);
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
+
+                  {/* Preview Selected Images */}
+                  {selectedImages.length > 0 && (
+                    <div className="mt-4 grid grid-cols-4 gap-2">
+                      {selectedImages.map((file, idx) => (
+                        <div key={idx} className="relative group w-full h-20 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
+                          <img
+                            src={URL.createObjectURL(file)}
+                            alt="preview"
+                            className="w-full h-full object-cover"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setSelectedImages(prev => prev.filter((_, i) => i !== idx))}
+                            className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <X size={12} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </form>
             </div>
@@ -785,7 +855,7 @@ if (val && !formData.fixedDevices.includes(val)) {
                 form="roomForm"
                 type="submit"
                 disabled={loading}
-                className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium shadow-md transition flex justify-center items-center gap-2"
+                className="flex-1 px-4 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-medium shadow-md transition flex justify-center items-center gap-2"
               >
                 {loading ? (
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
@@ -845,6 +915,129 @@ if (val && !formData.fixedDevices.includes(val)) {
           </motion.div>
         </div>
       )}
+
+      {/* MODAL CHI TIẾT PHÒNG */}
+      {viewRoom && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setViewRoom(null)}>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-4xl w-full text-left overflow-hidden flex flex-col max-h-[90vh]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="relative h-64 bg-gray-200 dark:bg-gray-700">
+              {viewRoom.images && viewRoom.images.length > 0 ? (
+                <img
+                  src={viewRoom.images[0]}
+                  alt={viewRoom.name}
+                  className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-700"
+                  onClick={() => setLightbox({ open: true, index: 0, images: viewRoom.images })}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-gray-400 flex-col">
+                  <ImageIcon size={48} />
+                  <span>{t('rooms:messages.noImage') || "Chưa có hình ảnh"}</span>
+                </div>
+              )}
+              <div className="absolute top-4 right-4 z-10">
+                <button onClick={() => setViewRoom(null)} className="bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition">
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 pt-20">
+                <h2 className="text-3xl font-bold text-white mb-1">{viewRoom.name}</h2>
+                <p className="text-gray-200 flex items-center gap-2">
+                  <Building size={16} /> {viewRoom.location || "N/A"}
+                </p>
+              </div>
+            </div>
+
+            <div className="p-6 overflow-y-auto custom-scrollbar">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Left Info */}
+                <div className="md:col-span-2 space-y-6">
+                  {/* Description/Specs */}
+                  <div className="flex gap-4">
+                    <div className="bg-emerald-50 dark:bg-emerald-900/20 p-4 rounded-xl flex-1 border border-emerald-100 dark:border-emerald-800">
+                      <span className="block text-xs uppercase text-emerald-600 dark:text-emerald-400 font-bold mb-1">{t('rooms:table.capacity') || "Sức chứa"}</span>
+                      <span className="text-2xl font-bold text-emerald-900 dark:text-emerald-100">{viewRoom.capacity} <span className="text-sm font-normal">người</span></span>
+                    </div>
+                    <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl flex-1 border border-blue-100 dark:border-blue-800">
+                      <span className="block text-xs uppercase text-blue-600 dark:text-blue-400 font-bold mb-1">{t('rooms:table.status') || "Trạng thái"}</span>
+                      <div className="mt-1">{getStatusBadge(viewRoom.status)}</div>
+                    </div>
+                  </div>
+
+                  {/* Equipment */}
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-3 flex items-center gap-2">
+                      <Monitor size={20} className="text-emerald-500" />
+                      {t('rooms:table.equipment') || "Thiết bị & Tiện ích"}
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {viewRoom.fixedDevices && viewRoom.fixedDevices.length > 0 ? (
+                        viewRoom.fixedDevices.map((dev, i) => {
+                          const key = DEVICE_MAP[dev] || dev;
+                          return (
+                            <span key={i} className="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg text-sm font-medium border border-gray-200 dark:border-gray-600">
+                              {DEVICE_MAP_REVERSE[dev] ? t(`rooms:modal.equipment.list.${key}`) : dev}
+                            </span>
+                          );
+                        })
+                      ) : (
+                        <span className="text-gray-400 italic">Không có thiết bị đặc biệt.</span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* More Images */}
+                  {viewRoom.images && viewRoom.images.length > 1 && (
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-3 flex items-center gap-2">
+                        <ImageIcon size={20} className="text-emerald-500" />
+                        <span>Thư viện ảnh</span>
+                      </h3>
+                      <div className="grid grid-cols-4 gap-2">
+                        {viewRoom.images.map((img, idx) => (
+                          <div
+                            key={idx}
+                            className="aspect-video rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 cursor-pointer hover:opacity-90 transition shadow-sm hover:shadow-md"
+                            onClick={() => setLightbox({ open: true, index: idx, images: viewRoom.images })}
+                          >
+                            <img src={img} alt={`Room ${idx}`} className="w-full h-full object-cover" />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Right Actions? or History? */}
+                <div className="md:col-span-1 space-y-4">
+                  <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50 border border-gray-100 dark:border-gray-600">
+                    <h4 className="font-bold text-gray-800 dark:text-white mb-2">Thao tác nhanh</h4>
+                    <div className="space-y-2">
+                      <button onClick={() => { setViewRoom(null); handleOpenModal(viewRoom); }} className="w-full py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 rounded-lg text-sm font-medium transition flex items-center justify-center gap-2">
+                        <Edit2 size={16} /> {t('common:buttons.edit') || "Chỉnh sửa"}
+                      </button>
+                      <button onClick={() => { setViewRoom(null); handleOpenDeleteModal(viewRoom); }} className="w-full py-2 bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 rounded-lg text-sm font-medium transition flex items-center justify-center gap-2">
+                        <Trash2 size={16} /> {t('common:buttons.delete') || "Xóa phòng"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+      {/* IMAGES LIGHTBOX */}
+      <ImageLightbox
+        open={lightbox.open}
+        onClose={() => setLightbox((prev) => ({ ...prev, open: false }))}
+        images={lightbox.images}
+        initialIndex={lightbox.index}
+      />
     </div>
   );
 }

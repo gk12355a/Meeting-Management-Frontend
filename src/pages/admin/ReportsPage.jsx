@@ -72,7 +72,7 @@ const ReportPage = () => {
       setRoomUsageData(rooms.data || []);
       setCancelStatsData(cancelStats.data || []);
     } catch (error) {
-      {/* toast.error("Không thể tải dữ liệu báo cáo!"); */}
+      {/* toast.error("Không thể tải dữ liệu báo cáo!"); */ }
       toast.error(t('reports:messages.loadError'));
       console.error(error);
     } finally {
@@ -101,7 +101,7 @@ const ReportPage = () => {
       document.body.appendChild(link);
       link.click();
       link.remove();
-      {/* toast.success("📊 Đã tải file Excel từ backend!"); */}
+      {/* toast.success("📊 Đã tải file Excel từ backend!"); */ }
       toast.success(t('reports:messages.exportSuccess'));
     } catch (error) {
       console.error(error);
@@ -119,13 +119,13 @@ const ReportPage = () => {
         // label: "Số giờ sử dụng",
         label: t('reports:charts.hoursBooked'), // ({/* <span>Số giờ sử dụng</span> */} <span>{t('reports:charts.hoursBooked')}</span>)
         data: roomUsageData.map((r) => r.totalHoursBooked),
-        backgroundColor: isDarkMode ? "#3b82f6" : "#2563eb",
+        backgroundColor: isDarkMode ? "#10b981" : "#059669",
       },
       {
         // label: "Số lần đặt",
         label: t('reports:charts.bookingCount'), // ({/* <span>Số lần đặt</span> */} <span>{t('reports:charts.bookingCount')}</span>)
         data: roomUsageData.map((r) => r.bookingCount),
-        backgroundColor: isDarkMode ? "#60a5fa" : "#93c5fd",
+        backgroundColor: isDarkMode ? "#34d399" : "#6ee7b7",
       },
     ],
   };
@@ -142,7 +142,7 @@ const ReportPage = () => {
           "#f97316",
           "#facc15",
           "#22c55e",
-          "#3b82f6",
+          "#10b981",
           "#8b5cf6",
         ],
       },
@@ -183,23 +183,20 @@ const ReportPage = () => {
 
   return (
     <div
-      className={`p-6 min-h-screen transition-colors duration-300 ${
-        isDarkMode ? "bg-[#0d1117] text-gray-100" : "bg-gray-50 text-gray-800"
-      }`}
+      className={`p-6 min-h-screen transition-colors duration-300 ${isDarkMode ? "bg-gray-900 text-gray-100" : "bg-gray-50 text-gray-800"
+        }`}
     >
       <ToastContainer autoClose={2000} theme={isDarkMode ? "dark" : "light"} />
 
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <FiBarChart2
-            className={`text-3xl ${
-              isDarkMode ? "text-blue-400" : "text-blue-600"
-            }`}
+            className={`text-3xl ${isDarkMode ? "text-emerald-400" : "text-emerald-600"
+              }`}
           />
           <h1
-            className={`text-3xl font-bold ${
-              isDarkMode ? "text-gray-100" : "text-gray-900"
-            }`}
+            className={`text-3xl font-bold ${isDarkMode ? "text-gray-100" : "text-gray-900"
+              }`}
           >
             {/* <h1>Báo cáo & Thống kê sử dụng phòng họp</h1> */}
             <span>{t('reports:pageTitle')}</span>
@@ -208,11 +205,10 @@ const ReportPage = () => {
       </div>
 
       <div
-        className={`p-4 rounded-2xl shadow-md border mb-6 flex flex-col md:flex-row md:items-center gap-3 ${
-          isDarkMode
-            ? "bg-[#161b22] border-gray-700"
+        className={`p-4 rounded-2xl shadow-md border mb-6 flex flex-col md:flex-row md:items-center gap-3 ${isDarkMode
+            ? "bg-gray-800 border-gray-700"
             : "bg-white border-gray-200"
-        }`}
+          }`}
       >
         <RangePicker
           onChange={(dates) => {
@@ -225,17 +221,16 @@ const ReportPage = () => {
           }}
           value={dateRange.map((d) => dayjs(d))}
           format="YYYY-MM-DD"
-          className={`rounded-lg ${
-            isDarkMode
-              ? "bg-[#0d1117] text-gray-200 border-gray-600"
+          className={`rounded-lg ${isDarkMode
+              ? "bg-gray-700 text-gray-200 border-gray-600"
               : "border-gray-300"
-          }`}
+            }`}
         />
 
         <div className="flex gap-3 md:ml-auto">
           <button
             onClick={handleDownloadExcel}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold shadow active:scale-95 transition"
+            className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-semibold shadow active:scale-95 transition"
           >
             {/* <FiDownload /> Xuất Excel */}
             <FiDownload /> <span>{t('reports:exportExcel')}</span>
@@ -254,11 +249,10 @@ const ReportPage = () => {
               label: t('reports:tabs.roomUsage'), // ({/* <span>📊 Tần suất sử dụng phòng</span> */} <span>{t('reports:tabs.roomUsage')}</span>)
               children: (
                 <div
-                  className={`rounded-2xl shadow-sm p-6 min-h-[450px] flex justify-center items-center ${
-                    isDarkMode
-                      ? "bg-[#161b22] border border-gray-700"
+                  className={`rounded-2xl shadow-sm p-6 min-h-[450px] flex justify-center items-center ${isDarkMode
+                      ? "bg-gray-800 border border-gray-700"
                       : "bg-white border border-gray-200"
-                  }`}
+                    }`}
                 >
                   {roomUsageData.length ? (
                     <div className="w-full h-[420px]">
@@ -281,11 +275,10 @@ const ReportPage = () => {
               label: t('reports:tabs.cancelStats'), // ({/* <span>❌ Lý do hủy họp</span> */} <span>{t('reports:tabs.cancelStats')}</span>)
               children: (
                 <div
-                  className={`rounded-2xl shadow-sm p-6 min-h-[450px] flex justify-center items-center ${
-                    isDarkMode
-                      ? "bg-[#161b22] border border-gray-700"
+                  className={`rounded-2xl shadow-sm p-6 min-h-[450px] flex justify-center items-center ${isDarkMode
+                      ? "bg-gray-800 border border-gray-700"
                       : "bg-white border border-gray-200"
-                  }`}
+                    }`}
                 >
                   {cancelStatsData.length ? (
                     <div className="w-[400px] h-[400px]">

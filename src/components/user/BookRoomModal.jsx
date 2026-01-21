@@ -40,10 +40,10 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, start, end, onSuccess })
   const { t } = useTranslation("bookRoom");
   const [loading, setLoading] = useState(false);
   const [isRecurring, setIsRecurring] = useState(false);
-  
+
   const [availableDevices, setAvailableDevices] = useState([]);
   const [devicesLoading, setDevicesLoading] = useState(false);
-  
+
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
 
@@ -62,61 +62,61 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, start, end, onSuccess })
 
   /* ===== SET INITIAL FORM VALUES WITH PREFILLED ROOM ====== */
   useEffect(() => {
-  if (open && prefilledRoom) {
-    setIsRecurring(false);
+    if (open && prefilledRoom) {
+      setIsRecurring(false);
 
-    // Mặc định 09:00
-    let defaultClock = dayjs().hour(9).minute(0);
+      // Mặc định 09:00
+      let defaultClock = dayjs().hour(9).minute(0);
 
-    // Nếu có slot được chọn từ calendar -> dùng giờ đó
-    if (start && end) {
-      const startD = dayjs(start);
-      const endD = dayjs(end);
-      const durationMin = Math.max(endD.diff(startD, "minute"), 15); // tối thiểu 15p
+      // Nếu có slot được chọn từ calendar -> dùng giờ đó
+      if (start && end) {
+        const startD = dayjs(start);
+        const endD = dayjs(end);
+        const durationMin = Math.max(endD.diff(startD, "minute"), 15); // tối thiểu 15p
 
-      defaultClock = startD;
+        defaultClock = startD;
 
-      setTimeout(() => {
-        form.setFieldsValue({
-          title: "",
-          date: startD,
-          time: startD,
-          duration: durationMin,
-          roomId: prefilledRoom.id,
-          deviceIds: [],
-          participantIds: [],
-          guestEmails: [],
-          isRecurring: false,
-          frequency: "DAILY",
-          repeatUntil: undefined,
-          description: "",
-        });
-      }, 100);
-    } else {
-      // Trường hợp user mở modal mà không đi qua calendar
-      setTimeout(() => {
-        form.setFieldsValue({
-          title: "",
-          date: undefined,
-          time: undefined,
-          duration: 60,
-          roomId: prefilledRoom.id,
-          deviceIds: [],
-          participantIds: [],
-          guestEmails: [],
-          isRecurring: false,
-          frequency: "DAILY",
-          repeatUntil: undefined,
-          description: "",
-        });
-      }, 100);
+        setTimeout(() => {
+          form.setFieldsValue({
+            title: "",
+            date: startD,
+            time: startD,
+            duration: durationMin,
+            roomId: prefilledRoom.id,
+            deviceIds: [],
+            participantIds: [],
+            guestEmails: [],
+            isRecurring: false,
+            frequency: "DAILY",
+            repeatUntil: undefined,
+            description: "",
+          });
+        }, 100);
+      } else {
+        // Trường hợp user mở modal mà không đi qua calendar
+        setTimeout(() => {
+          form.setFieldsValue({
+            title: "",
+            date: undefined,
+            time: undefined,
+            duration: 60,
+            roomId: prefilledRoom.id,
+            deviceIds: [],
+            participantIds: [],
+            guestEmails: [],
+            isRecurring: false,
+            frequency: "DAILY",
+            repeatUntil: undefined,
+            description: "",
+          });
+        }, 100);
+      }
+
+      setClockValue(defaultClock);
+      setSearchResults([]);
+      setAvailableDevices([]);
     }
-
-    setClockValue(defaultClock);
-    setSearchResults([]);
-    setAvailableDevices([]);
-  }
-}, [open, prefilledRoom, start, end, form]);
+  }, [open, prefilledRoom, start, end, form]);
 
   /* ===================================================
           LOAD DEVICES WHEN TIME CHANGES
@@ -224,10 +224,10 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, start, end, onSuccess })
         recurrenceRule:
           values.isRecurring === true
             ? {
-                frequency: values.frequency,
-                interval: 1,
-                repeatUntil: dayjs(values.repeatUntil).format("YYYY-MM-DD"),
-              }
+              frequency: values.frequency,
+              interval: 1,
+              repeatUntil: dayjs(values.repeatUntil).format("YYYY-MM-DD"),
+            }
             : null,
 
         onBehalfOfUserId: null,
@@ -243,37 +243,37 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, start, end, onSuccess })
       onSuccess?.();
       onCancel();
     } catch (err) {
-  console.error("ERROR:", err?.response?.data);
+      console.error("ERROR:", err?.response?.data);
 
-  const backendMsg =
-    err?.response?.data?.error ||
-    err?.response?.data?.message ||
-    "Không thể tạo cuộc họp!";
+      const backendMsg =
+        err?.response?.data?.error ||
+        err?.response?.data?.message ||
+        "Không thể tạo cuộc họp!";
 
-  const raw = backendMsg.toLowerCase();
-  let msg = "Không thể tạo cuộc họp!";
+      const raw = backendMsg.toLowerCase();
+      let msg = "Không thể tạo cuộc họp!";
 
-  // === 1️⃣ Phòng họp trùng lịch ===
-  if (raw.includes("phòng") && raw.includes("đã bị đặt")) {
-    msg = "Phòng họp đã được đặt trong khung giờ này";
-  }
+      // === 1️⃣ Phòng họp trùng lịch ===
+      if (raw.includes("phòng") && raw.includes("đã bị đặt")) {
+        msg = "Phòng họp đã được đặt trong khung giờ này";
+      }
 
-  // === 2️⃣ Người tham dự trùng lịch ===
-  else if (raw.includes("người tham dự") && raw.includes("trùng lịch")) {
-    msg = "Người tham gia bị trùng lịch trong khung giờ này";
-  }
+      // === 2️⃣ Người tham dự trùng lịch ===
+      else if (raw.includes("người tham dự") && raw.includes("trùng lịch")) {
+        msg = "Người tham gia bị trùng lịch trong khung giờ này";
+      }
 
-  // fallback chung nếu BE trả lỗi khác
-  else {
-    msg = `⚠️ ${backendMsg}`;
-  }
+      // fallback chung nếu BE trả lỗi khác
+      else {
+        msg = `⚠️ ${backendMsg}`;
+      }
 
-  toast.error(msg, {
-    position: "top-right",
-    autoClose: 3500,
-  });
-}
- finally {
+      toast.error(msg, {
+        position: "top-right",
+        autoClose: 3500,
+      });
+    }
+    finally {
       setLoading(false);
     }
   };
@@ -302,16 +302,16 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, start, end, onSuccess })
       }
       className="dark:[&_.ant-modal-content]:bg-gray-800 dark:[&_.ant-modal-content]:text-gray-100 
                  dark:[&_.ant-modal-header]:bg-gray-800 dark:[&_.ant-modal-header]:border-b-gray-700"
-      bodyStyle={{ paddingTop: 18, paddingBottom: 10 }}
+      styles={{ body: { paddingTop: 18, paddingBottom: 10 } }}
     >
       <Card
-  className="shadow-none bg-white dark:bg-[#1e293b] border-none dark:text-gray-100"
-  bodyStyle={{ padding: 0 }}
->
-  {prefilledRoom && (
-    <RoomSchedule roomId={prefilledRoom.id} />
-  )}
-      
+        className="shadow-none bg-white dark:bg-[#1e293b] border-none dark:text-gray-100"
+        styles={{ body: { padding: 0 } }}
+      >
+        {prefilledRoom && (
+          <RoomSchedule roomId={prefilledRoom.id} />
+        )}
+
         <Form
           layout="vertical"
           form={form}
@@ -365,7 +365,7 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, start, end, onSuccess })
                     onClick={() => setClockOpen(true)}
                     className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
                   />
-                  <Button 
+                  <Button
                     onClick={() => setClockOpen(true)}
                     className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
                   >
@@ -387,7 +387,7 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, start, end, onSuccess })
                   }}
                   width={520}
                   style={{ overflow: "visible" }}
-                  bodyStyle={{ overflow: "visible", paddingTop: 8 }}
+                  styles={{ body: { overflow: "visible", paddingTop: 8 } }}
                   className="dark:[&_.ant-modal-content]:bg-gray-800 dark:[&_.ant-modal-header]:bg-gray-800"
                 >
                   <div className="text-center text-gray-500 dark:text-gray-300 mb-2 text-sm">
@@ -424,7 +424,7 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, start, end, onSuccess })
             >
               <Select
                 className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                popupClassName="dark:bg-gray-700 dark:text-gray-100"
+                classNames={{ popup: "dark:bg-gray-700 dark:text-gray-100" }}
               >
                 <Option value={15}>15 phút</Option>
                 <Option value={30}>30 phút</Option>
@@ -462,7 +462,7 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, start, end, onSuccess })
                   : t("devicePlaceholder")
               }
               className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-              popupClassName="dark:bg-gray-700 dark:text-gray-100"
+              classNames={{ popup: "dark:bg-gray-700 dark:text-gray-100" }}
             >
               {availableDevices.map((d) => (
                 <Option
@@ -473,11 +473,10 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, start, end, onSuccess })
                   <div className="flex justify-between items-center">
                     <span>{d.name}</span>
                     <span
-                      className={`px-2 py-1 rounded text-xs ${
-                        d.status === "AVAILABLE"
-                          ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
-                          : "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300"
-                      }`}
+                      className={`px-2 py-1 rounded text-xs ${d.status === "AVAILABLE"
+                        ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+                        : "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300"
+                        }`}
                     >
                       {d.status === "AVAILABLE" ? t("deviceAvailable") : t("deviceBusy")}
                     </span>
@@ -490,7 +489,7 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, start, end, onSuccess })
           <Divider className="dark:border-gray-700" />
 
           {/* PARTICIPANTS */}
-          <Form.Item 
+          <Form.Item
             name="participantIds"
             label={
               <span>
@@ -507,7 +506,7 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, start, end, onSuccess })
               onSearch={handleSearchUsers}
               placeholder={t("participantsPlaceholder")}
               className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-              popupClassName="dark:bg-gray-700 dark:text-gray-100"
+              classNames={{ popup: "dark:bg-gray-700 dark:text-gray-100" }}
               notFoundContent={isSearching ? <Spin size="small" /> : t("noUser")}
             >
               {searchResults.map((u) => (
@@ -532,19 +531,19 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, start, end, onSuccess })
                   );
                   return invalid.length
                     ? Promise.reject(
-                        t("invalidEmail", { list: invalid.join(", ") })
-                      )
+                      t("invalidEmail", { list: invalid.join(", ") })
+                    )
                     : Promise.resolve();
                 },
               },
             ]}
           >
-            <Select 
-              mode="tags" 
+            <Select
+              mode="tags"
               tokenSeparators={[",", ";", " "]}
               placeholder={t("guestEmailPlaceholder")}
               className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-              popupClassName="dark:bg-gray-700 dark:text-gray-100"
+              classNames={{ popup: "dark:bg-gray-700 dark:text-gray-100" }}
             />
           </Form.Item>
 
@@ -557,7 +556,7 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, start, end, onSuccess })
             initialValue={false}
             className="mb-1"
           >
-            <Checkbox 
+            <Checkbox
               onChange={(e) => setIsRecurring(e.target.checked)}
               className="dark:text-gray-200"
             >
@@ -574,12 +573,11 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, start, end, onSuccess })
               >
                 <Select
                   className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                  popupClassName="dark:bg-gray-700 dark:text-gray-100"
+                  classNames={{ popup: "dark:bg-gray-700 dark:text-gray-100" }}
                 >
                   <Option value="DAILY">{t("daily")}</Option>
                   <Option value="WEEKLY">{t("weekly")}</Option>
                   <Option value="MONTHLY">{t("monthly")}</Option>
-
                 </Select>
               </Form.Item>
 
@@ -601,8 +599,8 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, start, end, onSuccess })
 
           {/* DESCRIPTION */}
           <Form.Item name="description" label={t("note")}>
-            <TextArea 
-              rows={3} 
+            <TextArea
+              rows={3}
               placeholder={t("notePlaceholder")}
               className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
             />

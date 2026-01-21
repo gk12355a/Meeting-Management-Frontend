@@ -30,7 +30,7 @@ const RoomCalendarModal = ({ open, onClose, room, onSelectSlot }) => {
     const refreshNow = () => {
       if (calendarRef.current) {
         const api = calendarRef.current.getApi();
-        api.updateNow();     // cập nhật thanh đỏ
+        // api.updateNow();     // removed causing crash
         api.updateSize();    // fix lệch khi modal thay đổi layout
       }
     };
@@ -101,7 +101,7 @@ const RoomCalendarModal = ({ open, onClose, room, onSelectSlot }) => {
         if (calendarRef.current) {
           const api = calendarRef.current.getApi();
           api.updateSize();
-          api.updateNow();
+          // api.updateNow(); // removed
         }
       }, 200);
     }
@@ -113,7 +113,7 @@ const RoomCalendarModal = ({ open, onClose, room, onSelectSlot }) => {
       onCancel={onClose}
       footer={null}
       width={900}
-      destroyOnClose
+      destroyOnHidden
       title={
         <span className="flex items-center gap-2 text-lg font-semibold dark:text-white">
           📅 {t("title", { name: room?.name || "" })}

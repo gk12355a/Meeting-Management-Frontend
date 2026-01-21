@@ -7,7 +7,7 @@ import {
   deleteUser,
 } from "../../services/userService";
 import { toast } from "react-toastify";
-import { FiUsers, FiPlus, FiTrash2, FiEdit2, FiSearch } from "react-icons/fi";
+import { FiUsers, FiPlus, FiTrash2, FiEdit2, FiSearch, FiCamera } from "react-icons/fi";
 import { motion } from "framer-motion";
 import "react-toastify/dist/ReactToastify.css";
 import Pagination from "../../components/Pagination";
@@ -48,7 +48,9 @@ export default function UsersPage() {
   const [newUser, setNewUser] = useState({
     fullName: "",
     username: "",
+    password: "",
     role: "ROLE_USER",
+    avatar: null,
   });
 
   // Modal sửa
@@ -78,7 +80,7 @@ export default function UsersPage() {
 
   /* Kiểm tra dữ liệu nhập */
   const validateUserInput = () => {
-    if (!newUser.fullName.trim() || !newUser.username.trim()) {
+    if (!newUser.fullName.trim() || !newUser.username.trim() || !newUser.password.trim()) {
       toast.warning(t('users:messages.fillRequired'));
       return false;
     }
@@ -94,7 +96,9 @@ export default function UsersPage() {
       const payload = {
         username: newUser.username,
         fullName: newUser.fullName,
+        password: newUser.password,
         roles: [newUser.role],
+        avatar: newUser.avatar,
       };
 
       const res = await createUser(payload);
@@ -102,7 +106,9 @@ export default function UsersPage() {
       setNewUser({
         fullName: "",
         username: "",
+        password: "",
         role: "ROLE_USER",
+        avatar: null,
       });
       setShowAddModal(false);
       fetchUsers();
@@ -180,20 +186,17 @@ export default function UsersPage() {
       <div className="p-5 text-center select-none">
         <div className="flex justify-center items-center gap-3 mb-3">
           <div
-            className={`flex items-center justify-center w-10 h-10 rounded-full ${
-              isDark ? "bg-blue-900" : "bg-blue-100"
-            }`}
+            className={`flex items-center justify-center w-10 h-10 rounded-full ${isDark ? "bg-blue-900" : "bg-blue-100"
+              }`}
           >
             <FiTrash2
-              className={`text-xl ${
-                isDark ? "text-blue-300" : "text-blue-600"
-              }`}
+              className={`text-xl ${isDark ? "text-blue-300" : "text-blue-600"
+                }`}
             />
           </div>
           <h3
-            className={`text-lg font-semibold ${
-              isDark ? "text-gray-100" : "text-gray-800"
-            }`}
+            className={`text-lg font-semibold ${isDark ? "text-gray-100" : "text-gray-800"
+              }`}
           >
             {/* <span>Xác nhận xoá người dùng?</span> */}
             <span>{t('users:modal.confirmDelete')}</span>
@@ -222,11 +225,10 @@ export default function UsersPage() {
           </button>
           <button
             onClick={() => toast.dismiss()}
-            className={`font-semibold px-5 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 active:scale-95 ${
-              isDark
-                ? "bg-gray-700 hover:bg-gray-600 text-gray-100"
-                : "bg-gray-200 hover:bg-gray-300 text-gray-800"
-            }`}
+            className={`font-semibold px-5 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 active:scale-95 ${isDark
+              ? "bg-gray-700 hover:bg-gray-600 text-gray-100"
+              : "bg-gray-200 hover:bg-gray-300 text-gray-800"
+              }`}
           >
             {/* <span>Huỷ</span> */}
             <span>{t('common:buttons.cancel')}</span>
@@ -264,8 +266,8 @@ export default function UsersPage() {
       statusFilter === "all"
         ? true
         : statusFilter === "active"
-        ? user.active
-        : !user.active;
+          ? user.active
+          : !user.active;
 
     return matchSearch && matchStatus;
   });
@@ -290,7 +292,7 @@ export default function UsersPage() {
         className="flex items-center justify-between mb-8"
       >
         <div className="flex items-center gap-2">
-          <FiUsers className="text-3xl text-blue-600 dark:text-blue-400" />
+          <FiUsers className="text-3xl text-emerald-600 dark:text-emerald-400" />
           <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
             {/* <span>Quản lý người dùng</span> */}
             <span>{t('users:pageTitle')}</span>
@@ -315,7 +317,7 @@ export default function UsersPage() {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-gray-900
               placeholder-gray-400 dark:placeholder-gray-500
-              focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-400 focus:border-transparent
+              focus:ring-2 focus:ring-emerald-400 dark:focus:ring-emerald-400 focus:border-transparent
               transition-all duration-200 text-base"
           />
         </div>
@@ -324,7 +326,7 @@ export default function UsersPage() {
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
           className="text-base px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white
-            text-gray-900 focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-400 focus:border-transparent
+            text-gray-900 focus:ring-2 focus:ring-emerald-400 dark:focus:ring-emerald-400 focus:border-transparent
              transition-all duration-200 cursor-pointer"
         >
           {/* <option value="all">Tất cả trạng thái</option>
@@ -338,8 +340,8 @@ export default function UsersPage() {
         <button
           onClick={() => setShowAddModal(true)}
           disabled={creating}
-          className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-base
-              disabled:bg-blue-400 disabled:cursor-not-allowed
+          className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-base
+              disabled:bg-emerald-400 disabled:cursor-not-allowed
               text-white rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
         >
           <FiPlus size={20} />
@@ -412,7 +414,7 @@ export default function UsersPage() {
         {/* Loading overlay */}
         {loading && (
           <div className="absolute inset-0 bg-white/80 dark:bg-gray-900/80 flex items-center justify-center z-10">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
           </div>
         )}
 
@@ -491,11 +493,10 @@ export default function UsersPage() {
                       <td className="p-4 font-medium text-gray-900 dark:text-white">{user.fullName}</td>
                       <td className="p-4 text-gray-700 dark:text-gray-300">{user.username}</td>
                       <td className="p-4">
-                        <span className={`px-3 py-1 text-sm font-medium rounded-full ${
-                          roleCode === "ROLE_ADMIN"
-                            ? "bg-blue-100 text-blue-700 dark:bg-blue-700 dark:text-blue-100"
-                            : "bg-green-100 text-green-700 dark:bg-green-700 dark:text-green-100"
-                        }`}>
+                        <span className={`px-3 py-1 text-sm font-medium rounded-full ${roleCode === "ROLE_ADMIN"
+                          ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-700 dark:text-emerald-100"
+                          : "bg-green-100 text-green-700 dark:bg-green-700 dark:text-green-100"
+                          }`}>
                           {/* <span>{roleCode === "ROLE_ADMIN" ? "Admin" : "User"}</span> */}
                           <span>
                             {roleCode === "ROLE_ADMIN"
@@ -505,11 +506,10 @@ export default function UsersPage() {
                         </span>
                       </td>
                       <td className="p-4 text-center">
-                        <span className={`px-3 py-1 text-sm font-medium rounded-full ${
-                          user.active
-                            ? "bg-green-100 text-green-700 dark:bg-green-700 dark:text-green-100"
-                            : "bg-red-100 text-red-700 dark:bg-red-700 dark:text-red-100"
-                        }`}>
+                        <span className={`px-3 py-1 text-sm font-medium rounded-full ${user.active
+                          ? "bg-green-100 text-green-700 dark:bg-green-700 dark:text-green-100"
+                          : "bg-red-100 text-red-700 dark:bg-red-700 dark:text-red-100"
+                          }`}>
                           {/* <span>{user.active ? "Đang hoạt động" : "Vô hiệu"}</span> */}
                           <span>
                             {user.active
@@ -524,8 +524,8 @@ export default function UsersPage() {
                           <button
                             onClick={() => openEditModal(user)}
                             disabled={loading}
-                            className="p-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300
-                              hover:bg-blue-100 dark:hover:bg-blue-900/20 rounded-md transition
+                            className="p-2 text-emerald-600 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300
+                              hover:bg-emerald-100 dark:hover:bg-emerald-900/20 rounded-md transition
                               disabled:opacity-50 disabled:cursor-not-allowed"
                             title={t('users:table.edit')}
                           >
@@ -587,6 +587,45 @@ export default function UsersPage() {
             {/* Modal Body - Form */}
             <div className="p-6">
               <div className="space-y-4">
+                {/* Avatar Upload */}
+                <div className="flex justify-center mb-6">
+                  <div className="relative group">
+                    <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                      {newUser.avatar ? (
+                        <img
+                          src={URL.createObjectURL(newUser.avatar)}
+                          alt="Avatar"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-3xl font-bold text-gray-400 dark:text-gray-500 select-none">
+                          {(newUser.fullName || newUser.username || "U")
+                            .substring(0, 2)
+                            .toUpperCase()}
+                        </span>
+                      )}
+                    </div>
+                    <label className="absolute bottom-0 right-0 bg-emerald-600 text-white p-2 rounded-full cursor-pointer hover:bg-emerald-700 shadow-md transition-all active:scale-95">
+                      <FiCamera size={16} />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            if (file.size > 5 * 1024 * 1024) {
+                              toast.error("Ảnh quá lớn! Vui lòng chọn ảnh dưới 5MB.");
+                              return;
+                            }
+                            setNewUser({ ...newUser, avatar: file });
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
+                </div>
+
                 {/* Họ và tên */}
                 <div>
                   <label className="block text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -604,7 +643,7 @@ export default function UsersPage() {
                     disabled={creating}
                     className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-gray-900
                       placeholder-gray-400 dark:placeholder-gray-500
-                      focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-400 focus:border-transparent
+                      focus:ring-2 focus:ring-emerald-400 dark:focus:ring-emerald-400 focus:border-transparent
                       transition-all duration-200 text-base"
                   />
                 </div>
@@ -625,13 +664,32 @@ export default function UsersPage() {
                     disabled={creating}
                     className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-gray-900
                       placeholder-gray-400 dark:placeholder-gray-500
-                      focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-400 focus:border-transparent
+                      focus:ring-2 focus:ring-emerald-400 dark:focus:ring-emerald-400 focus:border-transparent
+                      transition-all duration-200 text-base"
+                  />
+                </div>
+                {/* Mật khẩu */}
+                <div>
+                  <label className="block text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <span>{t('users:modal.fields.password')} <span className="text-red-500">*</span></span>
+                  </label>
+                  <input
+                    type="password"
+                    value={newUser.password}
+                    onChange={(e) =>
+                      setNewUser({ ...newUser, password: e.target.value })
+                    }
+                    placeholder={t('users:modal.placeholders.password')}
+                    disabled={creating}
+                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-gray-900
+                      placeholder-gray-400 dark:placeholder-gray-500
+                      focus:ring-2 focus:ring-emerald-400 dark:focus:ring-emerald-400 focus:border-transparent
                       transition-all duration-200 text-base"
                   />
                 </div>
                 {/* Vai trò cho thêm mới */}
-                 {/* NOTE: nếu muốn bật lại cho phép chọn vai trò khi thêm mới, chỉ cần mở khóa đoạn này và áp dụng các nhãn i18n như dưới */}
-                 {/* 
+                {/* NOTE: nếu muốn bật lại cho phép chọn vai trò khi thêm mới, chỉ cần mở khóa đoạn này và áp dụng các nhãn i18n như dưới */}
+                {/* 
                  <div>
                    <label className="block text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
                      <span>{t('users:modal.fields.role')} <span className="text-red-500">*</span></span>
@@ -664,11 +722,10 @@ export default function UsersPage() {
                 <button
                   onClick={handleCreateUser}
                   disabled={creating}
-                  className={`px-4 py-2 rounded-lg font-semibold text-white shadow-md active:scale-95 transition ${
-                    creating
-                      ? "bg-gray-400 cursor-not-allowed"
-                      : "bg-blue-600 hover:bg-blue-700"
-                  }`}
+                  className={`px-4 py-2 rounded-lg font-semibold text-white shadow-md active:scale-95 transition ${creating
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-emerald-600 hover:bg-emerald-700"
+                    }`}
                 >
                   {/* <span>{creating ? "Đang thêm..." : "Thêm"}</span> */}
                   <span>
@@ -728,7 +785,7 @@ export default function UsersPage() {
                       })
                     }
                     className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-gray-900
-                      focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-400 focus:border-transparent
+                      focus:ring-2 focus:ring-emerald-400 dark:focus:ring-emerald-400 focus:border-transparent
                       transition-all duration-200 text-base"
                   >
                     <option value="ROLE_USER">{t('users:roles.user')}</option>
@@ -751,7 +808,7 @@ export default function UsersPage() {
                       })
                     }
                     className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-gray-900
-                      focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-400 focus:border-transparent
+                      focus:ring-2 focus:ring-emerald-400 dark:focus:ring-emerald-400 focus:border-transparent
                       transition-all duration-200 text-base"
                   >
                     <option value="active">{t('common:status.active')}</option>
@@ -769,7 +826,7 @@ export default function UsersPage() {
                 </button>
                 <button
                   onClick={handleUpdateUser}
-                  className="px-4 py-2 rounded-lg font-semibold text-white shadow-md active:scale-95 transition bg-blue-600 hover:bg-blue-700"
+                  className="px-4 py-2 rounded-lg font-semibold text-white shadow-md active:scale-95 transition bg-emerald-600 hover:bg-emerald-700"
                 >
                   {/* <span>Lưu</span> */}
                   <span>{t('common:buttons.save')}</span>

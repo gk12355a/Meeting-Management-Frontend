@@ -1,14 +1,15 @@
 // src/pages/user/RoomsPage.jsx
 import React, { useEffect, useState } from "react";
-import { FiSearch, FiTool, FiMonitor, FiUsers } from "react-icons/fi";
+import { FiSearch, FiTool, FiMonitor, FiUsers, FiImage, FiX, FiMapPin, FiCalendar } from "react-icons/fi";
 import { Spin, message, Tag, Tooltip } from "antd";
 import { getAllRooms } from "../../services/roomService";
 import { HiBuildingOffice } from "react-icons/hi2";
 import BookRoomModal from "../../components/user/BookRoomModal";
-import { ToastContainer } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import RoomCalendarModal from "../../components/user/RoomCalendarModal";
 import { useTranslation } from "react-i18next";
+import ImageLightbox from "../../components/ImageLightbox";
 
 const RoomsPage = () => {
   const { t } = useTranslation("userRooms");
@@ -17,6 +18,8 @@ const RoomsPage = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState([]);
+  const [viewRoom, setViewRoom] = useState(null);
+  const [lightbox, setLightbox] = useState({ open: false, index: 0, images: [] });
   const [bookingModal, setBookingModal] = useState({
     open: false,
     room: null,
@@ -197,8 +200,9 @@ const RoomsPage = () => {
               return (
                 <div
                   key={room.id}
+                  onClick={() => setViewRoom(room)}
                   className={`
-                    relative rounded-2xl p-6 border transition-all duration-300 group
+                    relative rounded-2xl p-6 border transition-all duration-300 group cursor-pointer
                     ${isAvailable
                       ? "bg-white dark:bg-slate-800 border-gray-100 dark:border-slate-700 hover:shadow-xl hover:shadow-emerald-500/10 hover:border-emerald-200 dark:hover:border-emerald-900"
                       : "bg-gray-50 dark:bg-slate-800/50 border-gray-200 dark:border-slate-700 opacity-75"
@@ -263,7 +267,7 @@ const RoomsPage = () => {
                     <div className="mt-auto pt-4 border-t border-gray-100 dark:border-gray-700/50">
                       <button
                         disabled={!isAvailable}
-                        onClick={() => setCalendarModal({ open: true, room })}
+                        onClick={(e) => { e.stopPropagation(); setCalendarModal({ open: true, room }); }}
                         className={`w-full py-2.5 rounded-xl text-sm font-semibold transition-all transform active:scale-95 ${isAvailable
                           ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40"
                           : "bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-slate-700 dark:text-slate-500"
@@ -309,6 +313,165 @@ const RoomsPage = () => {
             end,
           });
         }}
+      />
+
+      {/* VIEW ROOM MODAL */}
+      {viewRoom && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setViewRoom(null)}>
+          <div
+            className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Cover Image */}
+            <div className="relative h-64 bg-slate-200 dark:bg-slate-700">
+              {viewRoom.images && viewRoom.images.length > 0 ? (
+                <img src={viewRoom.images[0]} alt={viewRoom.name} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex flex-col items-center justify-center text-slate-400">
+                  <FiImage size={48} />
+                  <span className="mt-2 text-sm">{t("noImage") || "Chưa có hình ảnh"}</span>
+                </div>
+              )}
+
+              {/* Close Button */}
+              <button
+                onClick={() => setViewRoom(null)}
+                className="absolute top-4 right-4 p-2 bg-black/50 hover:bg-black/70 text-white rounded-full transition-colors backdrop-blur-sm"
+              >
+                <FiX size={20} />
+              </button>
+
+              {/* Title Overlay */}
+              <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent pt-20">
+                <h2 className="text-3xl font-bold text-white mb-1">{viewRoom.name}</h2>
+                <div className="flex items-center gap-2 text-slate-200">
+                  <FiMapPin size={16} />
+                  <span>{viewRoom.location || "N/A"}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 overflow-y-auto custom-scrollbar flex-1">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {/* Left: Details */}
+                <div className="md:col-span-2 space-y-8">
+                  {/* Stats */}
+                  <div className="flex gap-4">
+                    <div className="flex-1 p-4 rounded-xl bg-slate-50 dark:bg-slate-700/50 border border-slate-100 dark:border-slate-700">
+                      <div className="text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-1">{t("seats")}</div>
+                      <div className="text-2xl font-bold text-slate-800 dark:text-white flex items-baseline gap-1">
+                        {viewRoom.capacity} <span className="text-sm font-normal text-slate-500">người</span>
+                      </div>
+                    </div>
+                    <div className="flex-1 p-4 rounded-xl bg-slate-50 dark:bg-slate-700/50 border border-slate-100 dark:border-slate-700">
+                      <div className="text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-1">{t("status")}</div>
+                      <div className="text-lg font-bold">
+                        {viewRoom.status === 'AVAILABLE' ? (
+                          <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                            {t("statusAvailable")}
+                          </span>
+                        ) : (
+                          <span className="text-orange-600 dark:text-orange-400 flex items-center gap-1.5">
+                            <FiTool size={14} />
+                            {t("statusMaintenance")}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Devices */}
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
+                      <FiMonitor className="text-emerald-500" />
+                      {t("deviceLabel") || "Thiết bị có sẵn"}
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {viewRoom.fixedDevices && viewRoom.fixedDevices.length > 0 ? (
+                        viewRoom.fixedDevices.map((dev, i) => (
+                          <span key={i} className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-sm font-medium border border-slate-200 dark:border-slate-600">
+                            {dev}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-slate-400 italic">Không có thiết bị đặc biệt.</span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Gallery Grid */}
+                  {viewRoom.images && viewRoom.images.length > 1 && (
+                    <div>
+                      <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
+                        <FiImage className="text-emerald-500" />
+                        {t("gallery") || "Thư viện ảnh"}
+                      </h3>
+                      <div className="grid grid-cols-4 gap-3">
+                        {viewRoom.images.map((img, idx) => (
+                          <div
+                            key={idx}
+                            className="aspect-square rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 cursor-pointer"
+                            onClick={() => setLightbox({ open: true, index: idx, images: viewRoom.images })}
+                          >
+                            <img src={img} alt={`Gallery ${idx}`} className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Right: Actions */}
+                <div className="md:col-span-1">
+                  <div className="sticky top-6 p-6 rounded-2xl bg-slate-50 dark:bg-slate-700/30 border border-slate-100 dark:border-slate-700">
+                    <h4 className="font-bold text-slate-800 dark:text-white mb-4">Bạn muốn đặt phòng này?</h4>
+
+                    <button
+                      disabled={viewRoom.status !== 'AVAILABLE'}
+                      onClick={() => {
+                        setCalendarModal({ open: true, room: viewRoom });
+                        setViewRoom(null);
+                      }}
+                      className={`
+                                  w-full py-3 rounded-xl font-bold mb-3 flex items-center justify-center gap-2 transition-all
+                                  ${viewRoom.status === 'AVAILABLE'
+                          ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20 active:scale-95"
+                          : "bg-slate-200 dark:bg-slate-600 text-slate-400 cursor-not-allowed"
+                        }
+                                `}
+                    >
+                      {viewRoom.status === 'AVAILABLE' ? (
+                        <>
+                          <FiCalendar size={18} />
+                          {t("bookRoom")}
+                        </>
+                      ) : (
+                        <>
+                          <FiTool size={18} />
+                          {t("statusMaintenance")}
+                        </>
+                      )}
+                    </button>
+
+                    <p className="text-xs text-center text-slate-400">
+                      Vui lòng kiểm tra kỹ lịch trống trước khi đặt.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* LIGHTBOX */}
+      <ImageLightbox
+        open={lightbox.open}
+        onClose={() => setLightbox((prev) => ({ ...prev, open: false }))}
+        images={lightbox.images}
+        initialIndex={lightbox.index}
       />
     </div>
   );

@@ -130,13 +130,12 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
       setClockValue(dayjs().hour(9).minute(0));
 
       setTimeout(() => {
+        const defaultTime = dayjs().hour(9).minute(0);
         form.setFieldsValue({
           title: "",
-          date: start,
-          time: start,
-          hour: start.hour(),
-          minute: start.minute(),
-          duration: duration <= 0 ? 60 : duration,
+          date: defaultTime,
+          time: defaultTime,
+          duration: 60,
           roomId: undefined,
           deviceIds: [],
           participantIds: [],
@@ -144,7 +143,6 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
           isRecurring: false,
           frequency: "DAILY",
           repeatUntil: undefined,
-          daysOfWeek: [],
           description: "",
         });
       }, 100);
@@ -280,7 +278,7 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
     onCancel();
   };
 
-  /* ===== UI ====== */
+  /* ====== UI ====== */
   return (
     <Modal
       open={open}
@@ -361,7 +359,7 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
                     onClick={() => setClockOpen(true)}
                     className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
                   >
-                    🕒 Đồng hồ
+                    🕒 {t("form.timeBtn")}
                   </Button>
                 </div>
 
@@ -379,7 +377,7 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
                   }}
                   width={520}
                   style={{ overflow: "visible" }}
-                  bodyStyle={{ overflow: "visible", paddingTop: 8 }}
+                  styles={{ body: { overflow: "visible", paddingTop: 8 } }}
                   className="dark:[&_.ant-modal-content]:bg-gray-800 dark:[&_.ant-modal-header]:bg-gray-800"
                 >
                   <div className="text-center text-gray-500 dark:text-gray-300 mb-2 text-sm">
@@ -462,7 +460,7 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
               placeholder={t("form.roomPlaceholder")}
               optionLabelProp="label"
               className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-              popupClassName="dark:bg-gray-700 dark:text-gray-100"
+              classNames={{ popup: "dark:bg-gray-700 dark:text-gray-100" }}
             >
               {rooms.map((r) => (
                 <Option
@@ -501,7 +499,7 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
                   : t("form.selectMoreDevices")
               }
               className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-              popupClassName="dark:bg-gray-700 dark:text-gray-100"
+              classNames={{ popup: "dark:bg-gray-700 dark:text-gray-100" }}
               onChange={(selectedIds) => {
                 if (!selectedIds.includes(prefilledDevice?.id)) {
                   form.setFieldsValue({
@@ -529,8 +527,8 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
                       </span>
                       <span
                         className={`px-2 py-1 rounded text-xs ${d.status === "AVAILABLE"
-                            ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
-                            : "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300"
+                          ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+                          : "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300"
                           }`}
                       >
                         {d.status === "AVAILABLE" ? "Có sẵn" : "Bảo trì"}
@@ -573,7 +571,7 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
               onSearch={handleSearchUsers}
               placeholder={t("form.participantPlaceholder")}
               className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-              popupClassName="dark:bg-gray-700 dark:text-gray-100"
+              classNames={{ popup: "dark:bg-gray-700 dark:text-gray-100" }}
               notFoundContent={isSearching ? <Spin size="small" /> : t("form.noUsers")}
             >
               {searchResults.map((u) => (
@@ -609,7 +607,7 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
               tokenSeparators={[",", ";", " "]}
               placeholder={t("form.guestEmailPlaceholder")}
               className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-              popupClassName="dark:bg-gray-700 dark:text-gray-100"
+              classNames={{ popup: "dark:bg-gray-700 dark:text-gray-100" }}
             />
           </Form.Item>
 
@@ -639,7 +637,7 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
               >
                 <Select
                   className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                  popupClassName="dark:bg-gray-700 dark:text-gray-100"
+                  classNames={{ popup: "dark:bg-gray-700 dark:text-gray-100" }}
                 >
                   <Option value="DAILY">{t("form.daily")}</Option>
                   <Option value="WEEKLY">{t("form.weekly")}</Option>

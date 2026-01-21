@@ -15,6 +15,7 @@ import {
   FiX,
   FiLoader,
   FiInbox,
+  FiUser,
 } from "react-icons/fi";
 import ThemeToggle from "../ThemeToggle";
 import LanguageSelector from "../LanguageSelector";
@@ -331,9 +332,21 @@ const AdminHeader = ({ setIsSidebarOpen }) => {
 
       {/* Right Side: User, Notification, Settings */}
       <div className="flex items-center gap-3">
-        <span className="text-sm bg-emerald-600 px-3 py-1 rounded-full shadow-md hidden sm:block">
-          {user?.username || "Admin"}
-        </span>
+        <div className="flex items-center gap-2">
+          <div className="text-right hidden sm:block leading-tight">
+            <div className="text-sm font-semibold">{user?.fullName || user?.username}</div>
+            <div className="text-[10px] text-emerald-300 uppercase tracking-wider">Admin</div>
+          </div>
+          <div className="w-10 h-10 rounded-full overflow-hidden bg-emerald-800 flex items-center justify-center border-2 border-emerald-600 shadow-sm shrink-0">
+            {user?.avatarUrl ? (
+              <img src={user.avatarUrl} alt="Admin" className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-sm font-bold text-emerald-100 select-none">
+                {((user?.fullName || user?.username || "A").substring(0, 2)).toUpperCase()}
+              </span>
+            )}
+          </div>
+        </div>
 
         {/* Notification Bell */}
         <div className="relative" ref={notificationRef}>
@@ -422,6 +435,14 @@ const AdminHeader = ({ setIsSidebarOpen }) => {
             <div className="absolute top-12 right-0 w-52 bg-white dark:bg-slate-800 rounded-lg shadow-xl border dark:border-slate-700 py-2">
               <LanguageSelector />
               <ThemeToggle />
+              <NavLink
+                to="/admin/profile"
+                className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700"
+                onClick={() => setIsSettingsOpen(false)}
+              >
+                <FiUser size={16} />
+                <span>{t('admin:header.profile') || "Thông tin cá nhân"}</span>
+              </NavLink>
               <NavLink
                 to="/admin/change-password"
                 className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700"

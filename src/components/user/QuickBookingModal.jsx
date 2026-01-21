@@ -334,11 +334,11 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
       }
       className="dark:[&_.ant-modal-content]:bg-gray-800 dark:[&_.ant-modal-content]:text-gray-100 
                  dark:[&_.ant-modal-header]:bg-gray-800 dark:[&_.ant-modal-header]:border-b-gray-700"
-      bodyStyle={{ paddingTop: 18, paddingBottom: 10 }}
+      styles={{ body: { paddingTop: 18, paddingBottom: 10 } }}
     >
       <Card
         className="shadow-none bg-white dark:bg-[#1e293b] border-none dark:text-gray-100"
-        bodyStyle={{ padding: 0 }}
+        styles={{ body: { padding: 0 } }}
       >
         <Form
           layout="vertical"
@@ -380,49 +380,54 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
 
             {/* TIME PICKER MỚI - MUI STATIC TIME PICKER */}
             <Form.Item
-              name="time"
               label={t("fields.startTime")}
-              rules={[{ required: true }]}
+              required
             >
               <div className="flex gap-2">
-                <Input
-                  readOnly
-                  value={clockValue.format("HH:mm")}
-                  onClick={() => setClockOpen(true)}
-                  placeholder={t("fields.startTime")}
-                  className="cursor-pointer dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                />
+                <Form.Item
+                  name="time"
+                  noStyle
+                  rules={[{ required: true }]}
+                  getValueProps={(value) => ({ value: value ? dayjs(value).format("HH:mm") : "" })}
+                >
+                  <Input
+                    readOnly
+                    onClick={() => setClockOpen(true)}
+                    placeholder={t("fields.startTime")}
+                    className="cursor-pointer dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                  />
+                </Form.Item>
                 <Button onClick={() => setClockOpen(true)}>🕒 {t("fields.pickTime")}</Button>
               </div>
-
-              <Modal
-                title={t("fields.pickTimeRange")} // "Chọn giờ (08:00 - 18:00)"
-                open={clockOpen}
-                onCancel={() => setClockOpen(false)}
-                onOk={() => {
-                  if (!validateBusinessTime(clockValue)) {
-                    toast.error(t("errors.outsideBusiness"));
-                    return;
-                  }
-                  form.setFieldsValue({ time: clockValue });
-                  setClockOpen(false);
-                }}
-                width={350}
-                centered
-              >
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <StaticTimePicker
-                    orientation="portrait"
-                    ampm={false}
-                    value={clockValue}
-                    onChange={(v) => setClockValue(v)}
-                    slotProps={{
-                      actionBar: { actions: [] }, // Ẩn nút OK/Cancel của MUI
-                    }}
-                  />
-                </LocalizationProvider>
-              </Modal>
             </Form.Item>
+
+            <Modal
+              title={t("fields.pickTimeRange")} // "Chọn giờ (08:00 - 18:00)"
+              open={clockOpen}
+              onCancel={() => setClockOpen(false)}
+              onOk={() => {
+                if (!validateBusinessTime(clockValue)) {
+                  toast.error(t("errors.outsideBusiness"));
+                  return;
+                }
+                form.setFieldsValue({ time: clockValue });
+                setClockOpen(false);
+              }}
+              width={350}
+              centered
+            >
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <StaticTimePicker
+                  orientation="portrait"
+                  ampm={false}
+                  value={clockValue}
+                  onChange={(v) => setClockValue(v)}
+                  slotProps={{
+                    actionBar: { actions: [] }, // Ẩn nút OK/Cancel của MUI
+                  }}
+                />
+              </LocalizationProvider>
+            </Modal>
 
             <Form.Item
               name="duration"
@@ -452,7 +457,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
               placeholder={t("fields.roomPlaceholder")}
               optionLabelProp="label"
               className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-              popupClassName="dark:bg-gray-700 dark:text-gray-100"
+              classNames={{ popup: "dark:bg-gray-700 dark:text-gray-100" }}
             >
               {rooms.map((r) => (
                 <Option
@@ -488,7 +493,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
               loading={devicesLoading}
               disabled={!watchedDate || !watchedTime || devicesLoading}
               className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-              popupClassName="dark:bg-gray-700 dark:text-gray-100"
+              classNames={{ popup: "dark:bg-gray-700 dark:text-gray-100" }}
             >
               {availableDevices.map((d) => (
                 <Option
@@ -530,7 +535,7 @@ const QuickBookingModal = ({ open, onCancel, quickBookingData, onSuccess, onLock
               placeholder={t("fields.participantPlaceholder")}
               notFoundContent={isSearching ? <Spin size="small" /> : t("fields.participantNotFound")}
               className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-              popupClassName="dark:bg-gray-700 dark:text-gray-100"
+              classNames={{ popup: "dark:bg-gray-700 dark:text-gray-100" }}
             >
               {searchResults.map((u) => (
                 <Option key={u.id} value={u.id}>

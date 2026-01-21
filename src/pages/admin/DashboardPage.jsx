@@ -76,9 +76,27 @@ export default function DashboardPage() {
   const { t, i18n } = useTranslation(['dashboard', 'common']);
 
   const cardTemplates = [
-    { label: t('dashboard:cards.todayMeetings'), value: "0", icon: <FiCalendar /> },
-    { label: t('dashboard:cards.avgDuration'), value: "0", icon: <FiClock /> },
-    { label: t('dashboard:cards.upcomingMeetings'), value: "0", icon: <FiCheckSquare /> },
+    {
+      label: t('dashboard:cards.todayMeetings'),
+      value: "0",
+      icon: <FiCalendar size={20} />,
+      color: "emerald",
+      gradient: "from-emerald-500 to-teal-500"
+    },
+    {
+      label: t('dashboard:cards.avgDuration'),
+      value: "0",
+      icon: <FiClock size={20} />,
+      color: "blue",
+      gradient: "from-blue-500 to-indigo-500"
+    },
+    {
+      label: t('dashboard:cards.upcomingMeetings'),
+      value: "0",
+      icon: <FiCheckSquare size={20} />,
+      color: "purple",
+      gradient: "from-purple-500 to-fuchsia-500"
+    },
   ];
 
   // === 2. STATE CHO TẤT CẢ DỮ LIỆU ===
@@ -323,6 +341,47 @@ export default function DashboardPage() {
   useEffect(() => {
     const style = document.createElement("style");
     style.innerHTML = `
+      /* === MODERN CALENDAR BUTTONS === */
+      .fc-button-primary {
+        background-color: white !important;
+        border-color: #e5e7eb !important;
+        color: #374151 !important;
+        font-weight: 500 !important;
+        padding: 0.5rem 1rem !important;
+        border-radius: 9999px !important; /* Rounded Full */
+        text-transform: capitalize !important;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+        transition: all 0.2s !important;
+      }
+      .fc-button-primary:hover {
+        background-color: #f9fafb !important;
+        border-color: #d1d5db !important;
+        color: #111827 !important;
+      }
+      .fc-button-primary:focus {
+        box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2) !important; /* Emerald Focus */
+      }
+      .fc-button-active {
+        background-color: #ecfdf5 !important; /* Emerald 50 */
+        border-color: #10b981 !important;
+        color: #059669 !important;
+      }
+      .dark .fc-button-primary {
+        background-color: #1e293b !important;
+        border-color: #334155 !important;
+        color: #e2e8f0 !important;
+      }
+      .dark .fc-button-primary:hover {
+        background-color: #334155 !important;
+        color: #f8fafc !important;
+      }
+      .dark .fc-button-active {
+        background-color: rgba(16, 185, 129, 0.2) !important;
+        border-color: #10b981 !important;
+        color: #34d399 !important;
+      }
+
+      /* === HEADERS & TEXT COLORS === */
       .fc .fc-col-header-cell-cushion,
       .fc .fc-timeline-slot-cushion,
       .fc .fc-datagrid-cell-main,
@@ -330,12 +389,45 @@ export default function DashboardPage() {
       .fc .fc-scrollgrid-sync-inner,
       .fc .fc-timeline-header-row-chrono th,
       .fc .fc-timeline-slot-label-cushion {
-        color: #000 !important;
+        color: #374151 !important;
+        font-weight: 600 !important;
+        text-decoration: none !important;
       }
+      .dark .fc .fc-col-header-cell-cushion,
+      .dark .fc .fc-timeline-slot-cushion,
+      .dark .fc .fc-datagrid-cell-main,
+      .dark .fc .fc-resource-timeline-divider,
+      .dark .fc .fc-scrollgrid-sync-inner,
+      .dark .fc .fc-timeline-header-row-chrono th,
+      .dark .fc .fc-timeline-slot-label-cushion {
+        color: #e2e8f0 !important;
+      }
+
+      /* === BACKGROUNDS & BORDERS === */
       .fc .fc-timeline-header-row,
       .fc .fc-datagrid-header,
       .fc .fc-timeline-header {
-        background-color: #ffffff !important;
+        background-color: #f9fafb !important;
+      }
+      .dark .fc .fc-timeline-header-row,
+      .dark .fc .fc-datagrid-header,
+      .dark .fc .fc-timeline-header {
+        background-color: #1e293b !important;
+      }
+
+      .fc-theme-standard td, .fc-theme-standard th {
+        border-color: #f3f4f6 !important;
+      }
+      .dark .fc-theme-standard td, .dark .fc-theme-standard th {
+        border-color: #334155 !important;
+      }
+
+      /* === TODAY HIGHLIGHT === */
+      .fc .fc-timeline-slot.fc-timeline-slot-lane.fc-day-today {
+         background-color: #ecfdf5 !important;
+      }
+      .dark .fc .fc-timeline-slot.fc-timeline-slot-lane.fc-day-today {
+         background-color: rgba(16, 185, 129, 0.1) !important;
       }
     `;
     document.head.appendChild(style);
@@ -486,7 +578,7 @@ export default function DashboardPage() {
       ) : (
         <>
           {/* Cards */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {stats.map((card, i) => {
               let onClickFunc;
               // Dùng so sánh theo translation label luôn:
@@ -497,15 +589,19 @@ export default function DashboardPage() {
                 <div
                   key={i}
                   onClick={onClickFunc}
-                  className="flex items-center gap-3 bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all cursor-pointer"
+                  className="group relative cursor-pointer bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-slate-700"
                 >
-                  <div className="p-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-lg">
-                    {card.icon}
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">{card.label}</p>
+                      <h3 className="text-3xl font-bold text-gray-800 dark:text-gray-100">{card.value}</h3>
+                    </div>
+                    <div className={`p-3 rounded-xl bg-gradient-to-br ${card.gradient} text-white shadow-lg shadow-${card.color}-500/30 transform group-hover:scale-110 transition-transform`}>
+                      {card.icon}
+                    </div>
                   </div>
-                  <div>
-                    {/* <span>Cuộc họp hôm nay | Thời lượng họp TB | Cuộc họp sắp tới</span> */}
-                    <p className="text-sm text-gray-500 dark:text-gray-400">{card.label}</p>
-                    <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">{card.value}</h3>
+                  <div className="mt-4 h-1 w-full bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div className={`h-full bg-gradient-to-r ${card.gradient} w-[70%] rounded-full opacity-80`}></div>
                   </div>
                 </div>
               );

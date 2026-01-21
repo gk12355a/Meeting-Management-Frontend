@@ -295,54 +295,59 @@ const CreateMeetingPage = () => {
                   disabledDate={(d) => !d || d < dayjs().startOf("day")} />
               </Form.Item>
 
-              <Form.Item name="time" label={t("startTime")} rules={[{ required: true }]}>
-                {/* Hiển thị giờ đã chọn + nút mở modal */}
+              <Form.Item label={t("startTime")} required>
                 <div className="flex gap-2">
-                  <Input
-                    readOnly
-                    value={clockValue.format("HH:mm")}
-                    onClick={() => setClockOpen(true)}
-                    placeholder={t("startTime")}
-                    className="cursor-pointer dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                  />
+                  <Form.Item
+                    name="time"
+                    noStyle
+                    rules={[{ required: true }]}
+                    getValueProps={(value) => ({ value: value ? dayjs(value).format("HH:mm") : "" })}
+                  >
+                    <Input
+                      readOnly
+                      onClick={() => setClockOpen(true)}
+                      placeholder={t("startTime")}
+                      className="cursor-pointer dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                    />
+                  </Form.Item>
                   <Button onClick={() => setClockOpen(true)}>
                     🕒 {i18n.language === "vi" ? "Chọn giờ" : "Pick time"}
                   </Button>
                 </div>
-
-                {/* Modal chứa đồng hồ chọn giờ */}
-                <Modal
-                  title={i18n.language === "vi" ? "Chọn giờ họp (08:00 - 18:00)" : "Select meeting time (08:00 - 18:00)"}
-                  open={clockOpen}
-                  onCancel={() => setClockOpen(false)}
-                  onOk={() => {
-                    if (!validateBusinessTime(clockValue)) {
-                      toast.error(
-                        i18n.language === "vi"
-                          ? "⏰ Chỉ được đặt lịch từ 08:00 đến 18:00!"
-                          : "⏰ Bookings allowed only 08:00 - 18:00!"
-                      );
-                      return;
-                    }
-                    form.setFieldsValue({ time: clockValue });
-                    setClockOpen(false);
-                  }}
-                  width={350}
-                  centered
-                >
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <StaticTimePicker
-                      orientation="portrait"
-                      ampm={false}
-                      value={clockValue}
-                      onChange={(v) => setClockValue(v)}
-                      slotProps={{
-                        actionBar: { actions: [] }, // ẩn nút OK/Cancel của MUI
-                      }}
-                    />
-                  </LocalizationProvider>
-                </Modal>
               </Form.Item>
+
+              {/* Modal chứa đồng hồ chọn giờ */}
+              <Modal
+                title={i18n.language === "vi" ? "Chọn giờ họp (08:00 - 18:00)" : "Select meeting time (08:00 - 18:00)"}
+                open={clockOpen}
+                onCancel={() => setClockOpen(false)}
+                onOk={() => {
+                  if (!validateBusinessTime(clockValue)) {
+                    toast.error(
+                      i18n.language === "vi"
+                        ? "⏰ Chỉ được đặt lịch từ 08:00 đến 18:00!"
+                        : "⏰ Bookings allowed only 08:00 - 18:00!"
+                    );
+                    return;
+                  }
+                  form.setFieldsValue({ time: clockValue });
+                  setClockOpen(false);
+                }}
+                width={350}
+                centered
+              >
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <StaticTimePicker
+                    orientation="portrait"
+                    ampm={false}
+                    value={clockValue}
+                    onChange={(v) => setClockValue(v)}
+                    slotProps={{
+                      actionBar: { actions: [] }, // ẩn nút OK/Cancel của MUI
+                    }}
+                  />
+                </LocalizationProvider>
+              </Modal>
 
               <div className="flex gap-2">
                 <Form.Item name="duration" label={t("endTime")} initialValue={60} style={{ flex: 1 }}>
@@ -369,7 +374,7 @@ const CreateMeetingPage = () => {
             <Form.Item name="roomId" label={t("room")} rules={[{ required: true, message: "Chọn phòng họp" }]}>
               <Select placeholder={t("room")} optionLabelProp="label"
                 className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                popupClassName="dark:bg-gray-700 dark:text-gray-100">
+                classNames={{ popup: "dark:bg-gray-700 dark:text-gray-100" }}>
                 {rooms.map((r) => (
                   <Option key={r.id} value={r.id} label={r.name} disabled={r.status !== "AVAILABLE"}>
                     <div className="flex justify-between items-center">
@@ -398,7 +403,7 @@ const CreateMeetingPage = () => {
                     : (i18n.language === "vi" ? "Chọn thiết bị khả dụng" : "Select available devices")
                 }
                 className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                popupClassName="dark:bg-gray-700 dark:text-gray-100">
+                classNames={{ popup: "dark:bg-gray-700 dark:text-gray-100" }}>
                 {availableDevices.map((d) => (
                   <Option key={d.id} value={d.id} disabled={d.status !== "AVAILABLE"}>
                     <div className="flex justify-between items-center">
@@ -441,7 +446,7 @@ const CreateMeetingPage = () => {
                     : (i18n.language === "vi" ? "Không tìm thấy người dùng" : "No users found")
                 }
                 className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                popupClassName="dark:bg-gray-700 dark:text-gray-100"
+                classNames={{ popup: "dark:bg-gray-700 dark:text-gray-100" }}
               >
                 {searchResults.map((u) => (
                   <Option key={u.id} value={u.id}>
@@ -475,7 +480,7 @@ const CreateMeetingPage = () => {
                 tokenSeparators={[" ", ",", ";"]}
                 placeholder="guest@example.com"
                 className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                popupClassName="dark:bg-gray-700 dark:text-gray-100"
+                classNames={{ popup: "dark:bg-gray-700 dark:text-gray-100" }}
               />
             </Form.Item>
 

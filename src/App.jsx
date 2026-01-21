@@ -20,6 +20,7 @@ import Rooms from "./pages/admin/RoomsPage";
 import Devices from "./pages/admin/DevicesPage";
 import Reports from "./pages/admin/ReportsPage";
 import ChangePasswordPageAdmin from "./pages/admin/ChangePasswordPage";
+import AdminProfilePage from "./pages/admin/ProfilePage";
 // ===== User Pages =====
 import UserDashboard from "./pages/user/DashboardPage";
 import MyMeetingsPage from "./pages/user/MyMeetingsPage";
@@ -96,6 +97,7 @@ export default function App() {
           <Route path="devices" element={<Devices />} />
           <Route path="reports" element={<Reports />} />
           <Route path="change-password" element={<ChangePasswordPageAdmin />} />
+          <Route path="profile" element={<AdminProfilePage />} />
         </Route>
 
         {/* === USER ROUTES === */}
