@@ -3,7 +3,8 @@
   "subtitle": "Xem lại các cuộc họp bạn đã tham gia",
   "tabs": {
     "joined": "Đã tham gia",
-    "cancelled": "Đã hủy"
+    "cancelled": "Đã hủy",
+    "finished": "Hoàn thành"
   },
   "empty": "Không có dữ liệu.",
   "errors": {

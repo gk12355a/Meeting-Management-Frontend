@@ -12,7 +12,7 @@ import {
   Checkbox,
   Spin,
   Tag,
-  InputNumber, 
+  InputNumber,
 } from "antd";
 import { FiPlusCircle, FiUsers } from "react-icons/fi";
 import dayjs from "dayjs";
@@ -54,7 +54,7 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
 
   const debounceTimer = useRef(null);
   const [form] = Form.useForm();
-  
+
   const { user } = useAuth();
 
   // Watch form values để tải devices tự động
@@ -130,7 +130,7 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
       setClockValue(dayjs().hour(9).minute(0));
 
       setTimeout(() => {
-         form.setFieldsValue({
+        form.setFieldsValue({
           title: "",
           date: start,
           time: start,
@@ -178,100 +178,100 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
 
   /* ====== VALIDATE BUSINESS TIME ====== */
   const validateBusinessTime = (value) => {
-      if (!value) return false;
-      const totalMin = value.hour() * 60 + value.minute();
-      return totalMin >= 480 && totalMin <= 1080;
-    };
+    if (!value) return false;
+    const totalMin = value.hour() * 60 + value.minute();
+    return totalMin >= 480 && totalMin <= 1080;
+  };
 
-    // Submit
-    const handleCreateMeeting = async (values) => {
-      try {
-        setLoading(true);
+  // Submit
+  const handleCreateMeeting = async (values) => {
+    try {
+      setLoading(true);
 
-        const date = values.date;
-        const time = dayjs(values.time);
+      const date = values.date;
+      const time = dayjs(values.time);
 
-        if (!validateBusinessTime(time)) {
-          toast.error("⏰ Chỉ được đặt lịch từ 08:00 đến 18:00!");
-          return;
-        }
-
-        const startUTC = dayjs.utc()
-          .year(date.year())
-          .month(date.month())
-          .date(date.date())
-          .hour(time.hour())
-          .minute(time.minute());
-
-        const finalDuration = values.customHour ? dayjs.duration(parseFloat(values.customHour), 'hours').asMinutes() : values.duration;
-        const payload = {
-          title: values.title.trim(),
-          description: values.description || "",
-          startTime: startUTC.toISOString(),
-          endTime: startUTC.add(finalDuration, "minute").toISOString(),
-          roomId: values.roomId,
-          participantIds: Array.from(new Set([user.id, ...(values.participantIds || [])])),
-          deviceIds: values.deviceIds || [],
-          guestEmails: values.guestEmails || [],
-          recurrenceRule: values.isRecurring ? {
-            frequency: values.frequency || "DAILY",
-            interval: 1,
-            repeatUntil: dayjs(values.repeatUntil).format("YYYY-MM-DD"),
-          } : null,
-          onBehalfOfUserId: null,
-        };
-
-        const res = await createMeeting(payload);
-
-        if (res.data?.status === "PENDING_APPROVAL") {
-          toast.info("📝 Yêu cầu đặt phòng đã được gửi và đang chờ Admin phê duyệt.");
-        } else {
-          toast.success("🎉 Tạo cuộc họp thành công!");
-        }
-
-        form.resetFields();
-        setClockValue(dayjs().hour(8).minute(0));
-        setIsRecurring(false);
-        setAvailableDevices([]);
-        
-        // Gọi callback onSuccess nếu có
-        if (onSuccess) onSuccess();
-        onCancel();
-
-      } catch (err) {
-        console.error("ERROR:", err?.response?.data);
-
-        const backendMsg =
-          err?.response?.data?.error ||
-          err?.response?.data?.message ||
-          "Không thể tạo cuộc họp!";
-
-        const raw = backendMsg.toLowerCase();
-        let msg = "Không thể tạo cuộc họp!";
-
-        // === 1️⃣ Phòng họp trùng lịch ===
-        if (raw.includes("phòng") && raw.includes("đã bị đặt")) {
-          msg = "Phòng họp đã được đặt trong khung giờ này";
-        }
-
-        // === 2️⃣ Người tham dự trùng lịch ===
-        else if (raw.includes("người tham dự") && raw.includes("trùng lịch")) {
-          msg = "Người tham gia bị trùng lịch trong khung giờ này";
-        }
-
-        // fallback chung nếu BE trả lỗi khác
-        else {
-          msg = `⚠️ ${backendMsg}`;
-        }
-
-        toast.error(msg, {
-          position: "top-right",
-          autoClose: 3500,
-        });
-      } finally {
-        setLoading(false);
+      if (!validateBusinessTime(time)) {
+        toast.error("⏰ Chỉ được đặt lịch từ 08:00 đến 18:00!");
+        return;
       }
-    };
+
+      const startUTC = dayjs.utc()
+        .year(date.year())
+        .month(date.month())
+        .date(date.date())
+        .hour(time.hour())
+        .minute(time.minute());
+
+      const finalDuration = values.customHour ? dayjs.duration(parseFloat(values.customHour), 'hours').asMinutes() : values.duration;
+      const payload = {
+        title: values.title.trim(),
+        description: values.description || "",
+        startTime: startUTC.toISOString(),
+        endTime: startUTC.add(finalDuration, "minute").toISOString(),
+        roomId: values.roomId,
+        participantIds: Array.from(new Set([user.id, ...(values.participantIds || [])])),
+        deviceIds: values.deviceIds || [],
+        guestEmails: values.guestEmails || [],
+        recurrenceRule: values.isRecurring ? {
+          frequency: values.frequency || "DAILY",
+          interval: 1,
+          repeatUntil: dayjs(values.repeatUntil).format("YYYY-MM-DD"),
+        } : null,
+        onBehalfOfUserId: null,
+      };
+
+      const res = await createMeeting(payload);
+
+      if (res.data?.status === "PENDING_APPROVAL") {
+        toast.info("📝 Yêu cầu đặt phòng đã được gửi và đang chờ Admin phê duyệt.");
+      } else {
+        toast.success("🎉 Tạo cuộc họp thành công!");
+      }
+
+      form.resetFields();
+      setClockValue(dayjs().hour(8).minute(0));
+      setIsRecurring(false);
+      setAvailableDevices([]);
+
+      // Gọi callback onSuccess nếu có
+      if (onSuccess) onSuccess();
+      onCancel();
+
+    } catch (err) {
+      console.error("ERROR:", err?.response?.data);
+
+      const backendMsg =
+        err?.response?.data?.error ||
+        err?.response?.data?.message ||
+        "Không thể tạo cuộc họp!";
+
+      const raw = backendMsg.toLowerCase();
+      let msg = "Không thể tạo cuộc họp!";
+
+      // === 1️⃣ Phòng họp trùng lịch ===
+      if (raw.includes("phòng") && raw.includes("đã bị đặt")) {
+        msg = "Phòng họp đã được đặt trong khung giờ này";
+      }
+
+      // === 2️⃣ Người tham dự trùng lịch ===
+      else if (raw.includes("người tham dự") && raw.includes("trùng lịch")) {
+        msg = "Người tham gia bị trùng lịch trong khung giờ này";
+      }
+
+      // fallback chung nếu BE trả lỗi khác
+      else {
+        msg = `⚠️ ${backendMsg}`;
+      }
+
+      toast.error(msg, {
+        position: "top-right",
+        autoClose: 3500,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleCancel = () => {
     form.resetFields();
@@ -294,10 +294,10 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
           <FiPlusCircle /> {t("modal.title", { name: prefilledDevice?.name })}
         </span>
       }
-       className="dark:[&_.ant-modal-content]:bg-gray-800 dark:[&_.ant-modal-content]:text-gray-100 
+      className="dark:[&_.ant-modal-content]:bg-gray-800 dark:[&_.ant-modal-content]:text-gray-100 
              dark:[&_.ant-modal-header]:bg-gray-800 dark:[&_.ant-modal-header]:border-b-gray-700"
       styles={{ body: { paddingTop: 18, paddingBottom: 10 } }}
-    > 
+    >
       <Card
         className="shadow-none bg-white dark:bg-[#1e293b] border-none dark:text-gray-100"
         styles={{ body: { padding: 0 } }}
@@ -327,131 +327,131 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
           </Form.Item>
 
           {/* DATE - TIME - DURATION */}
-<div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
 
-  {/* DATE */}
-  <Form.Item 
-    name="date" 
-    label={t("form.date")}
-    rules={[{ required: true, message: t("form.dateRequired") }]}
-  >
-    <DatePicker
-      format="DD/MM/YYYY"
-      className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
-      disabledDate={(d) =>
-        !d || d < dayjs().startOf("day")
-      }
-    />
-  </Form.Item>
+            {/* DATE */}
+            <Form.Item
+              name="date"
+              label={t("form.date")}
+              rules={[{ required: true, message: t("form.dateRequired") }]}
+            >
+              <DatePicker
+                format="DD/MM/YYYY"
+                className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                disabledDate={(d) =>
+                  !d || d < dayjs().startOf("day")
+                }
+              />
+            </Form.Item>
 
-  {/* TIME PICKER - MUI CLOCK */}
-<Form.Item
-  name="time"
-  label={t("form.time")}
-  rules={[{ required: true, message: t("form.timeRequired") }]}>
-  <>
-    <div className="flex gap-2">
-      <Input
-        readOnly
-        value={clockValue.format("HH:mm")}
-        onClick={() => setClockOpen(true)}
-        className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-      />
-      <Button
-        onClick={() => setClockOpen(true)}
-        className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-      >
-        🕒 Đồng hồ
-      </Button>
-    </div>
+            {/* TIME PICKER - MUI CLOCK */}
+            <Form.Item
+              name="time"
+              label={t("form.time")}
+              rules={[{ required: true, message: t("form.timeRequired") }]}>
+              <>
+                <div className="flex gap-2">
+                  <Input
+                    readOnly
+                    value={clockValue.format("HH:mm")}
+                    onClick={() => setClockOpen(true)}
+                    className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                  />
+                  <Button
+                    onClick={() => setClockOpen(true)}
+                    className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                  >
+                    🕒 Đồng hồ
+                  </Button>
+                </div>
 
-    <Modal
-      title={t("form.timePickerTitle")}
-      open={clockOpen}
-      onCancel={() => setClockOpen(false)}
-      onOk={() => {
-        if (!validateBusinessTime(clockValue)) {
-          toast.error("⏰ Chỉ được đặt 08:00 - 18:00!");
-          return;
-        }
-        form.setFieldsValue({ time: clockValue });
-        setClockOpen(false);
-      }}
-      width={520}
-      style={{ overflow: "visible" }}
-      bodyStyle={{ overflow: "visible", paddingTop: 8 }}
-      className="dark:[&_.ant-modal-content]:bg-gray-800 dark:[&_.ant-modal-header]:bg-gray-800"
-    >
-      <div className="text-center text-gray-500 dark:text-gray-300 mb-2 text-sm">
-        <span className="font-medium text-indigo-600 dark:text-indigo-400">
-          Giờ (HH)
-        </span>{" "}
-        :{" "}
-        <span className="font-medium text-indigo-600 dark:text-indigo-400">
-          Phút (MM)
-        </span>
-      </div>
+                <Modal
+                  title={t("form.timePickerTitle")}
+                  open={clockOpen}
+                  onCancel={() => setClockOpen(false)}
+                  onOk={() => {
+                    if (!validateBusinessTime(clockValue)) {
+                      toast.error("⏰ Chỉ được đặt 08:00 - 18:00!");
+                      return;
+                    }
+                    form.setFieldsValue({ time: clockValue });
+                    setClockOpen(false);
+                  }}
+                  width={520}
+                  style={{ overflow: "visible" }}
+                  bodyStyle={{ overflow: "visible", paddingTop: 8 }}
+                  className="dark:[&_.ant-modal-content]:bg-gray-800 dark:[&_.ant-modal-header]:bg-gray-800"
+                >
+                  <div className="text-center text-gray-500 dark:text-gray-300 mb-2 text-sm">
+                    <span className="font-medium text-indigo-600 dark:text-indigo-400">
+                      Giờ (HH)
+                    </span>{" "}
+                    :{" "}
+                    <span className="font-medium text-indigo-600 dark:text-indigo-400">
+                      Phút (MM)
+                    </span>
+                  </div>
 
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <StaticTimePicker
-          orientation="landscape"
-          ampm={false}
-          value={clockValue}
-          onChange={(v) => setClockValue(v)}
-          slotProps={{
-            actionBar: { actions: [] },
-          }}
-        />
-      </LocalizationProvider>
-    </Modal>
-  </>
-</Form.Item>
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <StaticTimePicker
+                      orientation="landscape"
+                      ampm={false}
+                      value={clockValue}
+                      onChange={(v) => setClockValue(v)}
+                      slotProps={{
+                        actionBar: { actions: [] },
+                      }}
+                    />
+                  </LocalizationProvider>
+                </Modal>
+              </>
+            </Form.Item>
 
-  {/* DURATION + CUSTOM HOUR */}
-  <div className="flex gap-2 items-end">
-    {/* DURATION SELECT */}
-    <Form.Item
-      name="duration"
-      label={t("form.duration")}
-      style={{ flex: 1 }}
-      initialValue={60}
-    >
-      <Select
-        className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-        onChange={() => form.setFieldsValue({ customHour: undefined })}
-        placeholder={t("form.durationPlaceholder")}
-        allowClear
-      >
-        <Option value={30}>{t("form.duration30")}</Option>
-        <Option value={60}>{t("form.duration60")}</Option>
-        <Option value={90}>{t("form.duration90")}</Option>
-        <Option value={120}>{t("form.duration120")}</Option>
-      </Select>
-    </Form.Item>
+            {/* DURATION + CUSTOM HOUR */}
+            <div className="flex gap-2 items-end">
+              {/* DURATION SELECT */}
+              <Form.Item
+                name="duration"
+                label={t("form.duration")}
+                style={{ flex: 1 }}
+                initialValue={60}
+              >
+                <Select
+                  className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                  onChange={() => form.setFieldsValue({ customHour: undefined })}
+                  placeholder={t("form.durationPlaceholder")}
+                  allowClear
+                >
+                  <Option value={30}>{t("form.duration30")}</Option>
+                  <Option value={60}>{t("form.duration60")}</Option>
+                  <Option value={90}>{t("form.duration90")}</Option>
+                  <Option value={120}>{t("form.duration120")}</Option>
+                </Select>
+              </Form.Item>
 
-    {/* CUSTOM HOUR INPUT */}
-    <Form.Item
-      name="customHour"
-      label={t("form.customHour")}
-      style={{ flex: "0 0 80px" }}
-    >
-      <Input
-        type="number"
-        step={0.5}
-        min={0.5}
-        max={8}
-        className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-        onChange={(e) => {
-          const hour = parseFloat(e.target.value || 0);
-          if (hour > 0) {
-            form.setFieldsValue({ duration: undefined });
-          }
-        }}
-      />
-    </Form.Item>
-  </div>
-  </div>
-          
+              {/* CUSTOM HOUR INPUT */}
+              <Form.Item
+                name="customHour"
+                label={t("form.customHour")}
+                style={{ flex: "0 0 80px" }}
+              >
+                <Input
+                  type="number"
+                  step={0.5}
+                  min={0.5}
+                  max={8}
+                  className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                  onChange={(e) => {
+                    const hour = parseFloat(e.target.value || 0);
+                    if (hour > 0) {
+                      form.setFieldsValue({ duration: undefined });
+                    }
+                  }}
+                />
+              </Form.Item>
+            </div>
+          </div>
+
           {/* ROOM */}
           <Form.Item
             name="roomId"
@@ -522,17 +522,16 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
                       <span>
                         {d.name}
                         {isPrefilled && (
-                          <span className="ml-2 text-xs text-purple-600 dark:text-purple-400 font-semibold">
+                          <span className="ml-2 text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
                             (Đã chọn - Bắt buộc)
                           </span>
                         )}
                       </span>
                       <span
-                        className={`px-2 py-1 rounded text-xs ${
-                          d.status === "AVAILABLE"
+                        className={`px-2 py-1 rounded text-xs ${d.status === "AVAILABLE"
                             ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
                             : "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300"
-                        }`}
+                          }`}
                       >
                         {d.status === "AVAILABLE" ? "Có sẵn" : "Bảo trì"}
                       </span>
@@ -544,12 +543,12 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
           </Form.Item>
 
           {/* Device Info Display */}
-          <div className="mb-4 p-3 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-lg">
-            <p className="text-sm text-purple-800 dark:text-purple-300">
+          <div className="mb-4 p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700 rounded-lg">
+            <p className="text-sm text-emerald-800 dark:text-emerald-300">
               <span className="font-semibold">{t("deviceInfo.title")}</span> {prefilledDevice?.name}
               {prefilledDevice?.description && ` - ${prefilledDevice.description}`}
             </p>
-            <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">
+            <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">
               💡 {t("deviceInfo.tip")}
             </p>
           </div>
@@ -588,7 +587,7 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
           {/* GUEST EMAIL */}
           <Form.Item
             name="guestEmails"
-            initialValue={[]} 
+            initialValue={[]}
             label={t("form.guestEmails")}
             tooltip={t("form.guestTooltip")}
             rules={[
@@ -682,7 +681,7 @@ const BookDeviceModal = ({ open, onCancel, prefilledDevice, onSuccess }) => {
               type="primary"
               htmlType="submit"
               loading={loading}
-              className="bg-purple-600 hover:bg-purple-700 text-white dark:bg-purple-500 dark:hover:bg-purple-600"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-emerald-500 dark:hover:bg-emerald-600"
             >
               {t("submit.submit")}
             </Button>

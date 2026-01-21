@@ -101,7 +101,7 @@ const RoomsPage = () => {
 
       {/* HEADER */}
       <div className="flex items-center gap-4 mb-6 pb-3 border-b border-gray-300 dark:border-gray-700">
-        <div className="p-3 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-500 shadow-md">
+        <div className="p-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 shadow-md">
           <HiBuildingOffice className="text-white text-2xl" />
         </div>
 
@@ -124,65 +124,64 @@ const RoomsPage = () => {
             placeholder={t("searchPlaceholder")}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-700 
-            rounded-lg bg-white dark:bg-slate-800 
-            text-gray-800 dark:text-gray-100 placeholder-gray-400"
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-slate-700 
+            rounded-xl bg-white dark:bg-slate-800 
+            text-gray-800 dark:text-gray-100 placeholder-gray-400
+            focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all shadow-sm"
           />
         </div>
 
-       {/* FILTER SECTION - UI GIỐNG ẢNH MẪU */}
-<div className="flex items-center gap-3">
-  <span className="font-medium text-gray-700 dark:text-gray-300">
-    {t("filterStatus")}
-  </span>
+        {/* FILTER SECTION - UI GIỐNG ẢNH MẪU */}
+        <div className="flex items-center gap-3">
+          <span className="font-medium text-gray-700 dark:text-gray-300">
+            {t("filterStatus")}
+          </span>
 
-  {[
-    { key: "ALL", label: t("filterAll") },
-    { key: "AVAILABLE", label: t("filterAvailable") },
-    { key: "UNDER_MAINTENANCE", label: t("filterMaintenance") },
-  ].map((btn) => {
-    const isAll = btn.key === "ALL";
-    const isActive =
-      (isAll && filterStatus.length === 0) ||
-      (!isAll && filterStatus[0] === btn.key);
+          {[
+            { key: "ALL", label: t("filterAll") },
+            { key: "AVAILABLE", label: t("filterAvailable") },
+            { key: "UNDER_MAINTENANCE", label: t("filterMaintenance") },
+          ].map((btn) => {
+            const isAll = btn.key === "ALL";
+            const isActive =
+              (isAll && filterStatus.length === 0) ||
+              (!isAll && filterStatus[0] === btn.key);
 
-    const handleClick = () => {
-      if (isAll) {
-        setFilterStatus([]);
-      } else {
-        setFilterStatus([btn.key]);  // CHỈ GIỮ 1 GIÁ TRỊ
-      }
-    };
+            const handleClick = () => {
+              if (isAll) {
+                setFilterStatus([]);
+              } else {
+                setFilterStatus([btn.key]);  // CHỈ GIỮ 1 GIÁ TRỊ
+              }
+            };
 
-    return (
-      <button
-        key={btn.key}
-        onClick={handleClick}
-        className={`
-          flex items-center gap-2 px-4 py-1.5 rounded-xl border text-sm font-medium transition-all
-          ${
-            isActive
-              ? "bg-green-600 border-green-600 text-white shadow"
-              : "bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700"
-          }
+            return (
+              <button
+                key={btn.key}
+                onClick={handleClick}
+                className={`
+          flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium transition-all shadow-sm
+          ${isActive
+                    ? "bg-emerald-600 border-emerald-600 text-white shadow-emerald-500/30"
+                    : "bg-white dark:bg-slate-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700"
+                  }
         `}
-      >
-        <span
-          className={`
-            w-3.5 h-3.5 rounded-sm border-2 flex-shrink-0
-            ${
-              isActive
-                ? "border-white bg-green-300"
-                : "border-gray-400 dark:border-gray-500"
-            }
+              >
+                <span
+                  className={`
+            w-2.5 h-2.5 rounded-full flex-shrink-0
+            ${isActive
+                      ? "bg-white"
+                      : "bg-gray-400 dark:bg-gray-500"
+                    }
           `}
-        />
-        {btn.label}
-      </button>
-    );
-  })}
-</div>
-</div>
+                />
+                {btn.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
       {/* ROOM LIST */}
       {loading ? (
@@ -195,94 +194,84 @@ const RoomsPage = () => {
             processedRooms.map((room) => {
               const statusDisplay = getStatusDisplay(room.status);
               const isAvailable = room.status === "AVAILABLE";
-              // Đã xóa biến isVip
-
               return (
                 <div
                   key={room.id}
                   className={`
-                    rounded-xl p-5 border shadow-md transition-all duration-200
-                    ${
-                      isAvailable
-                        ? "bg-green-50 border-green-200 hover:shadow-green-300 hover:scale-[1.02] dark:bg-green-900/20 dark:border-green-700"
-                        : "bg-gray-200/60 border-gray-300 cursor-not-allowed dark:bg-slate-700/40 dark:border-slate-600"
+                    relative rounded-2xl p-6 border transition-all duration-300 group
+                    ${isAvailable
+                      ? "bg-white dark:bg-slate-800 border-gray-100 dark:border-slate-700 hover:shadow-xl hover:shadow-emerald-500/10 hover:border-emerald-200 dark:hover:border-emerald-900"
+                      : "bg-gray-50 dark:bg-slate-800/50 border-gray-200 dark:border-slate-700 opacity-75"
                     }
                   `}
                 >
-                  <div className="flex justify-between items-start">
-                    <div className="flex items-center gap-2">
-                      <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
-                        {room.name}
-                      </h2>
-                    </div>
-
-                    {room.status === "UNDER_MAINTENANCE" && (
-                      <span className="flex items-center gap-1 text-xs text-orange-500 dark:text-orange-400 font-medium">
-                        <FiTool size={12} /> {t("filterMaintenance")}
+                  {/* Status Badge Top-Right */}
+                  <div className="absolute top-4 right-4">
+                    {isAvailable ? (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        {t("statusAvailable")}
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border border-orange-100 dark:border-orange-800">
+                        <FiTool size={10} />
+                        {t("statusMaintenance")}
                       </span>
                     )}
                   </div>
 
-                  <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300 mt-2">
-                    <FiUsers size={14} /> {t("capacity")}: {room.capacity} {t("people")}
-                  </p>
-                  
-                  {/* === HIỂN THỊ THIẾT BỊ === */}
-                  <div className="flex items-start gap-2 text-gray-700 dark:text-gray-300 mt-2">
-                    <FiMonitor size={14} className="mt-1.5 flex-shrink-0" />
-                    <div className="flex flex-wrap gap-1 items-center">
-                      <span className="mr-1">{t("deviceLabel")}:</span>
-                      {room.fixedDevices && room.fixedDevices.length > 0 ? (
-                        <>
-                          {/* Chỉ hiện tối đa 3 thiết bị */}
-                          {room.fixedDevices.slice(0, 3).map((device, idx) => (
-                            <Tag
-                              key={idx}
-                              className="mr-0 text-xs border-blue-200 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 dark:border-blue-800"
-                            >
-                              {device}
-                            </Tag>
-                          ))}
-                          {/* Nếu > 3 thì hiện +X */}
-                          {room.fixedDevices.length > 3 && (
-                            <Tooltip
-                              title={room.fixedDevices.slice(3).join(", ")}
-                            >
-                              <Tag className="mr-0 text-xs cursor-pointer border-gray-300 bg-gray-100">
-                                +{room.fixedDevices.length - 3}
-                              </Tag>
-                            </Tooltip>
-                          )}
-                        </>
-                      ) : (
-                        <span>{t("noDevice")}</span>
-                      )}
+                  <div className="flex flex-col h-full">
+                    <div className="mb-4">
+                      <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                        {room.name}
+                      </h2>
+                      <p className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm mt-1">
+                        <FiUsers size={14} /> {room.capacity} {t("seats")}
+                      </p>
                     </div>
-                  </div>
 
-                  <div className="flex items-center justify-between mt-3">
-                    <p className="text-gray-700 dark:text-gray-300 text-sm">
-                      {t("statusLabel")}:{" "}
-                      <span className={statusDisplay.color}>
-                        {statusDisplay.text}
-                      </span>
-                    </p>
-                  </div>
 
-                  {/* Đã xóa dòng chú thích yêu cầu phê duyệt VIP */}
+                    {/* === HIỂN THỊ THIẾT BỊ === */}
+                    <div className="mb-6 flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <FiMonitor size={14} className="text-gray-400" />
+                        <span className="text-sm font-medium text-gray-600 dark:text-gray-300">{t("deviceLabel")}:</span>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {room.fixedDevices && room.fixedDevices.length > 0 ? (
+                          <>
+                            {room.fixedDevices.slice(0, 3).map((device, idx) => (
+                              <span
+                                key={idx}
+                                className="px-2 py-1 text-xs rounded-md bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-600"
+                              >
+                                {device}
+                              </span>
+                            ))}
+                            {room.fixedDevices.length > 3 && (
+                              <span className="px-2 py-1 text-xs rounded-md bg-slate-50 text-slate-500 border border-slate-200 cursor-help" title={room.fixedDevices.slice(3).join(", ")}>
+                                +{room.fixedDevices.length - 3}
+                              </span>
+                            )}
+                          </>
+                        ) : (
+                          <span className="text-xs text-gray-400 italic px-1">{t("noDevice")}</span>
+                        )}
+                      </div>
+                    </div>
 
-                  <div className="mt-4 flex justify-end">
-                    <button
-                      disabled={!isAvailable}
-                      onClick={() => setCalendarModal({ open: true, room })}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                        isAvailable
-                          ? "bg-green-600 hover:bg-green-700 text-white shadow-sm"
-                          : "bg-gray-400 text-gray-700 cursor-not-allowed"
-                      }`}
-                    >
-                      {t("bookRoom")}
-                    </button>
+                    <div className="mt-auto pt-4 border-t border-gray-100 dark:border-gray-700/50">
+                      <button
+                        disabled={!isAvailable}
+                        onClick={() => setCalendarModal({ open: true, room })}
+                        className={`w-full py-2.5 rounded-xl text-sm font-semibold transition-all transform active:scale-95 ${isAvailable
+                          ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40"
+                          : "bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-slate-700 dark:text-slate-500"
+                          }`}
+                      >
+                        {isAvailable ? t("bookRoom") : t("statusMaintenance")}
+                      </button>
+                    </div>
                   </div>
                 </div>
               );
@@ -304,7 +293,7 @@ const RoomsPage = () => {
         prefilledRoom={bookingModal.room}
         start={bookingModal.start}
         end={bookingModal.end}
-        onSuccess={() => {}}
+        onSuccess={() => { }}
       />
 
       <RoomCalendarModal

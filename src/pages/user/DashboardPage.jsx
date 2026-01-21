@@ -2,6 +2,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { FiCalendar, FiClock, FiUsers, FiCheckSquare } from "react-icons/fi";
+import { HiComputerDesktop, HiBuildingOffice } from "react-icons/hi2";
 import { useNavigate } from "react-router-dom";
 import { Spin, message, Modal, Pagination } from "antd";
 import { getMyMeetings, getMeetingById } from "../../services/meetingService";
@@ -22,34 +23,35 @@ dayjs.extend(isBetween);
 dayjs.extend(isoWeek);
 
 // Template cho thẻ Stats 
+// Template cho thẻ Stats 
 const statTemplates = [
   {
     key: "stats.today",
     value: "0",
-    icon: <FiCalendar size={24} />,
-    textColor: "text-emerald-600",
-    bgLight: "bg-emerald-50 dark:bg-emerald-900/20",
+    icon: <FiCalendar size={20} />,
+    color: "emerald",
+    gradient: "from-emerald-500 to-teal-500",
   },
   {
     key: "stats.week",
     value: "0",
-    icon: <FiClock size={24} />,
-    textColor: "text-green-600",
-    bgLight: "bg-green-50 dark:bg-green-900/20",
+    icon: <FiClock size={20} />,
+    color: "blue",
+    gradient: "from-blue-500 to-indigo-500",
   },
   {
     key: "stats.upcoming",
     value: "0",
-    icon: <FiUsers size={24} />,
-    textColor: "text-purple-600",
-    bgLight: "bg-purple-50 dark:bg-purple-900/20",
+    icon: <FiUsers size={20} />,
+    color: "purple",
+    gradient: "from-purple-500 to-fuchsia-500",
   },
   {
     key: "stats.total",
     value: "0",
-    icon: <FiCheckSquare size={24} />,
-    textColor: "text-orange-600",
-    bgLight: "bg-orange-50 dark:bg-orange-900/20",
+    icon: <FiCheckSquare size={20} />,
+    color: "orange",
+    gradient: "from-orange-500 to-amber-500",
   },
 ];
 
@@ -299,7 +301,8 @@ export default function DashboardPage() {
       ) : (
         <>
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
             {stats.map((stat, index) => (
               <div
                 key={index}
@@ -309,32 +312,34 @@ export default function DashboardPage() {
                   if (index === 2) handleOpenStat("upcoming");
                   if (index === 3) handleOpenStat("total");
                 }}
-                className="cursor-pointer bg-white dark:bg-slate-900 rounded-xl p-5 shadow-sm border hover:scale-105 transition"
+                className="group relative cursor-pointer bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-slate-700"
               >
-                <div className="flex items-center justify-between">
+                <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                      {t(stat.key)}
-                    </p>
-                    <p className={`text-2xl font-bold ${stat.textColor} dark:text-gray-100`}>
-                      {stat.value}
-                    </p>
+                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">{t(stat.key)}</p>
+                    <h3 className="text-3xl font-bold text-gray-800 dark:text-gray-100">{stat.value}</h3>
                   </div>
-                  <div className={`${stat.bgLight} p-3 rounded-lg`}>
-                    <div className={`${stat.textColor}`}>{stat.icon}</div>
+                  <div className={`p-3 rounded-xl bg-gradient-to-br ${stat.gradient} text-white shadow-lg shadow-${stat.color}-500/30 transform group-hover:scale-110 transition-transform`}>
+                    {stat.icon}
                   </div>
+                </div>
+                <div className="mt-4 h-1 w-full bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <div className={`h-full bg-gradient-to-r ${stat.gradient} w-[70%] rounded-full opacity-80`}></div>
                 </div>
               </div>
             ))}
           </div>
 
           {/* Upcoming meetings */}
-          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-gray-200 dark:border-slate-800 p-6">
-            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">
-              📅 {t("upcomingMeetingsTitle")}
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 p-6">
+            <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-5 flex items-center gap-2">
+              <span className="p-1.5 rounded-lg bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
+                <FiCalendar size={18} />
+              </span>
+              {t("upcomingMeetingsTitle")}
             </h2>
 
-            <div className="space-y-3">
+            <div className="space-y-4">
               {upcomingMeetings.map((meeting) => {
                 const acceptedCount =
                   meeting.participants?.filter((p) => p.status === "ACCEPTED").length || 0;
@@ -342,22 +347,34 @@ export default function DashboardPage() {
                 return (
                   <div
                     key={meeting.id}
-                    className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-800 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition cursor-pointer"
+                    className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-gray-50 dark:bg-slate-700/30 rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-900/20 border border-transparent hover:border-emerald-200 dark:hover:border-emerald-800 transition-all cursor-pointer group"
                     onClick={() => handleShowMeetingDetail(meeting)}
                   >
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-800 dark:text-gray-100">
-                        {meeting.title}
-                      </h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                        {dayjs(meeting.startTime).format("HH:mm")} -{" "}
-                        {dayjs(meeting.endTime).format("HH:mm")} ·{" "}
-                        {meeting.room?.name || "N/A"}
-                      </p>
+                    <div className="flex items-start gap-4">
+                      <div className="flex-shrink-0 flex flex-col items-center bg-white dark:bg-slate-800 p-2 rounded-lg shadow-sm w-14 text-center border border-gray-100 dark:border-slate-600">
+                        <span className="text-xs font-bold text-red-500 uppercase">{dayjs(meeting.startTime).format("MMM")}</span>
+                        <span className="text-lg font-bold text-gray-800 dark:text-gray-100">{dayjs(meeting.startTime).format("DD")}</span>
+                      </div>
+
+                      <div>
+                        <h3 className="font-bold text-gray-800 dark:text-gray-100 text-lg group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                          {meeting.title}
+                        </h3>
+                        <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400 mt-1">
+                          <span className="flex items-center gap-1">
+                            <FiClock size={14} />
+                            {dayjs(meeting.startTime).format("HH:mm")} - {dayjs(meeting.endTime).format("HH:mm")}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <FiUsers size={14} />
+                            {meeting.room?.name || "N/A"}
+                          </span>
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                      <FiUsers size={16} />
+                    <div className="mt-3 sm:mt-0 flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-slate-800 px-3 py-1.5 rounded-full shadow-sm">
+                      <FiUsers size={14} />
                       <span>{t("meeting.participants", { count: acceptedCount })}</span>
                     </div>
                   </div>
@@ -365,9 +382,10 @@ export default function DashboardPage() {
               })}
 
               {upcomingMeetings.length === 0 && (
-                <p className="text-center text-gray-500 dark:text-gray-400 py-8">
-                  {t("meeting.upcomingMeetingsEmpty")}
-                </p>
+                <div className="flex flex-col items-center justify-center py-10 text-gray-400 dark:text-gray-500">
+                  <FiCalendar size={48} className="mb-3 opacity-20" />
+                  <p>{t("meeting.upcomingMeetingsEmpty")}</p>
+                </div>
               )}
             </div>
           </div>
@@ -402,32 +420,41 @@ export default function DashboardPage() {
       )}
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         <button
-          className="bg-emerald-600 text-white rounded-xl p-6 text-left hover:bg-emerald-700 transition shadow-md"
+          className="relative overflow-hidden group bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-2xl p-6 text-left shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 hover:-translate-y-1 transition-all duration-300"
           onClick={handleCreateMeeting}
         >
-          <h3 className="font-semibold text-lg mb-2">{t("buttons.create")}</h3>
-          <p className="text-sm text-emerald-100">
+          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity transform group-hover:scale-110">
+            <FiCalendar size={100} />
+          </div>
+          <h3 className="font-bold text-xl mb-2 relative z-10">{t("buttons.create")}</h3>
+          <p className="text-sm text-emerald-100 relative z-10 font-medium">
             {t("buttonDesc.create")}
           </p>
         </button>
 
         <button
-          className="bg-green-600 text-white rounded-xl p-6 text-left hover:bg-green-700 transition shadow-md"
+          className="relative overflow-hidden group bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-2xl p-6 text-left shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 hover:-translate-y-1 transition-all duration-300"
           onClick={handleViewRooms}
         >
-          <h3 className="font-semibold text-lg mb-2">{t("buttons.rooms")}</h3>
-          <p className="text-sm text-green-100">
+          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity transform group-hover:scale-110">
+            <HiBuildingOffice size={100} />
+          </div>
+          <h3 className="font-bold text-xl mb-2 relative z-10">{t("buttons.rooms")}</h3>
+          <p className="text-sm text-blue-100 relative z-10 font-medium">
             {t("buttonDesc.rooms")}
           </p>
         </button>
         <button
-          className="bg-purple-600 text-white rounded-xl p-6 text-left hover:bg-purple-700 transition shadow-md"
+          className="relative overflow-hidden group bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white rounded-2xl p-6 text-left shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 hover:-translate-y-1 transition-all duration-300"
           onClick={handleViewDevices}
         >
-          <h3 className="font-semibold text-lg mb-2">{t("buttons.devices")}</h3>
-          <p className="text-sm text-purple-100">
+          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity transform group-hover:scale-110">
+            <HiComputerDesktop size={100} />
+          </div>
+          <h3 className="font-bold text-xl mb-2 relative z-10">{t("buttons.devices")}</h3>
+          <p className="text-sm text-purple-100 relative z-10 font-medium">
             {t("buttonDesc.devices")}
           </p>
         </button>

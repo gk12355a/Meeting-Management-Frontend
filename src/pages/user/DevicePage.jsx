@@ -75,7 +75,7 @@ export default function DevicePage() {
 
       {/* ===== HEADER ===== */}
       <div className="flex items-center gap-4 mb-6 pb-3 border-b border-gray-300 dark:border-gray-700">
-        <div className="p-3 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg">
+        <div className="p-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 shadow-md">
           <HiComputerDesktop className="text-white text-2xl" />
         </div>
 
@@ -99,15 +99,16 @@ export default function DevicePage() {
             placeholder={t("searchPlaceholder")}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-700 
-            rounded-lg bg-white dark:bg-slate-800 
-            text-gray-800 dark:text-gray-100 placeholder-gray-400"
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-slate-700 
+            rounded-xl bg-white dark:bg-slate-800 
+            text-gray-800 dark:text-gray-100 placeholder-gray-400
+            focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all shadow-sm"
           />
         </div>
 
         {/* Tickbox filter trạng thái */}
-        <div className="w-full md:w-auto flex flex-wrap items-center gap-2">
-          <span className="text-sm font-medium text-gray-600 dark:text-gray-300 mr-1">
+        <div className="flex items-center gap-3">
+          <span className="font-medium text-gray-700 dark:text-gray-300">
             {t("statusLabel")}
           </span>
           {STATUS_FILTERS.map((opt) => {
@@ -118,30 +119,23 @@ export default function DevicePage() {
                 type="button"
                 onClick={() => setFilterStatus(opt.value)}
                 className={`
-                  flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm
-                  transition-all duration-150
-                  ${
-                    active
-                      ? "bg-purple-600 border-purple-600 text-white shadow-md"
-                      : "bg-white dark:bg-slate-800 border-gray-300 dark:border-slate-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700"
+                  flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium transition-all shadow-sm
+                  ${active
+                    ? "bg-emerald-600 border-emerald-600 text-white shadow-emerald-500/30"
+                    : "bg-white dark:bg-slate-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700"
                   }
                 `}
               >
-                {/* ô tick */}
+                {/* Dot indicator */}
                 <span
                   className={`
-                    w-4 h-4 rounded-sm border flex items-center justify-center
-                    ${
-                      active
-                        ? "border-white bg-white"
-                        : "border-gray-400 dark:border-gray-500 bg-transparent"
+                    w-2.5 h-2.5 rounded-full flex-shrink-0
+                    ${active
+                      ? "bg-white"
+                      : "bg-gray-400 dark:bg-gray-500"
                     }
                   `}
-                >
-                  {active && (
-                    <span className="w-2.5 h-2.5 rounded-sm bg-purple-600" />
-                  )}
-                </span>
+                />
                 <span>{opt.label}</span>
               </button>
             );
@@ -165,73 +159,53 @@ export default function DevicePage() {
                 <div
                   key={dv.id}
                   className={`
-                    rounded-2xl p-6 border shadow-md relative
-                    transition-all duration-300
-                    ${
-                      isAvailable
-                        ? `
-                          bg-gradient-to-br from-purple-50 to-indigo-50
-                          dark:from-purple-900/20 dark:to-indigo-900/20
-                          border-purple-300 dark:border-purple-600
-                          hover:shadow-purple-300 hover:-translate-y-1 hover:border-purple-500
-                        `
-                        : `
-                          bg-gray-100 dark:bg-slate-700/40
-                          border-gray-300 dark:border-slate-600
-                          opacity-80 cursor-not-allowed
-                        `
+                    relative rounded-2xl p-6 border transition-all duration-300 group
+                    ${isAvailable
+                      ? "bg-white dark:bg-slate-800 border-gray-100 dark:border-slate-700 hover:shadow-xl hover:shadow-emerald-500/10 hover:border-emerald-200 dark:hover:border-emerald-900"
+                      : "bg-gray-50 dark:bg-slate-800/50 border-gray-200 dark:border-slate-700 opacity-75"
                     }
                   `}
                 >
-                  {/* ICON BẢO TRÌ */}
-                  {!isAvailable && (
-                    <div
-                      className="absolute top-4 right-4 flex items-center gap-1 text-sm 
-                      text-amber-600 dark:text-amber-400 font-semibold"
-                    >
-                      <FiTool size={14} /> {t("filters.maintenance")}
+                  {/* Status Badge Top-Right */}
+                  <div className="absolute top-4 right-4">
+                    {isAvailable ? (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        {t("filters.available")}
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border border-orange-100 dark:border-orange-800">
+                        <FiTool size={10} />
+                        {t("filters.maintenance")}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col h-full">
+                    <div className="mb-4">
+                      <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors pr-24">
+                        {dv.name}
+                      </h2>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        {dv.description}
+                      </p>
                     </div>
-                  )}
 
-                  {/* TÊN THIẾT BỊ */}
-                  <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-2">
-                    {dv.name}
-                  </h2>
-
-                  {/* MÔ TẢ */}
-                  <p className="text-gray-700 dark:text-gray-300">
-                    <span className="font-semibold">{t("deviceType")}: </span>
-                    {dv.description}
-                  </p>
-
-                  {/* TRẠNG THÁI */}
-                  <p className="mt-2 text-gray-700 dark:text-gray-300">
-                    <span className="font-semibold">{t("status")}: </span>
-                    <span className={statusDisplay.color}>
-                      {statusDisplay.text}
-                    </span>
-                  </p>
-
-                  {/* BUTTON */}
-                  <div className="mt-5 flex justify-end">
-                    <button
-                      disabled={!isAvailable}
-                      className={`
-                        px-5 py-2 rounded-lg text-sm font-medium shadow
-                        transition-all duration-200
-                        ${
-                          isAvailable
-                            ? "bg-purple-600 hover:bg-purple-700 text-white"
-                            : "bg-gray-300 text-gray-600 dark:bg-slate-600 dark:text-gray-300 cursor-not-allowed"
+                    <div className="mt-auto pt-4 border-t border-gray-100 dark:border-gray-700/50">
+                      <button
+                        disabled={!isAvailable}
+                        className={`w-full py-2.5 rounded-xl text-sm font-semibold transition-all transform active:scale-95 ${isAvailable
+                          ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40"
+                          : "bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-slate-700 dark:text-slate-500"
+                          }`}
+                        onClick={() =>
+                          isAvailable &&
+                          setBookingModal({ open: true, device: dv })
                         }
-                      `}
-                      onClick={() =>
-                        isAvailable &&
-                        setBookingModal({ open: true, device: dv })
-                      }
-                    >
-                      {isAvailable ? t("button.book") : t("button.maintenance")}
-                    </button>
+                      >
+                        {isAvailable ? t("button.book") : t("button.maintenance")}
+                      </button>
+                    </div>
                   </div>
                 </div>
               );

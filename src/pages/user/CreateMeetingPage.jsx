@@ -14,7 +14,7 @@ import {
   Checkbox,
   Modal,
   Tag,
-  Spin, 
+  Spin,
 } from "antd";
 import { FiPlusCircle, FiUsers } from "react-icons/fi";
 import dayjs from "dayjs";
@@ -77,10 +77,10 @@ const CreateMeetingPage = () => {
         setRooms(res.data || []);
       } catch {
         message.error(
-  i18n.language === "vi"
-    ? "Không thể tải danh sách phòng họp!"
-    : "Cannot load meeting rooms!"
-);
+          i18n.language === "vi"
+            ? "Không thể tải danh sách phòng họp!"
+            : "Cannot load meeting rooms!"
+        );
       }
     };
     loadRooms();
@@ -140,10 +140,10 @@ const CreateMeetingPage = () => {
         setSearchResults((res.data || []).filter((u) => u.id !== user?.id));
       } catch {
         toast.error(
-  i18n.language === "vi"
-    ? "Không thể tìm kiếm người dùng."
-    : "Cannot search users."
-);
+          i18n.language === "vi"
+            ? "Không thể tìm kiếm người dùng."
+            : "Cannot search users."
+        );
       } finally {
         setIsSearching(false);
       }
@@ -160,9 +160,9 @@ const CreateMeetingPage = () => {
   // Submit
   const handleCreateMeeting = async (values) => {
     if (!user?.id) {
-    toast.error("Không thể tạo cuộc họp: Tài khoản của bạn chưa được đồng bộ đầy đủ. Vui lòng đăng xuất và đăng nhập lại!");
-    return;
-  }
+      toast.error("Không thể tạo cuộc họp: Tài khoản của bạn chưa được đồng bộ đầy đủ. Vui lòng đăng xuất và đăng nhập lại!");
+      return;
+    }
     try {
       setLoading(true);
 
@@ -171,10 +171,10 @@ const CreateMeetingPage = () => {
 
       if (!validateBusinessTime(time)) {
         toast.error(
-  i18n.language === "vi"
-    ? "⏰ Chỉ được đặt lịch từ 08:00 đến 18:00!"
-    : "⏰ You can only book between 08:00 and 18:00!"
-);
+          i18n.language === "vi"
+            ? "⏰ Chỉ được đặt lịch từ 08:00 đến 18:00!"
+            : "⏰ You can only book between 08:00 and 18:00!"
+        );
         return;
       }
 
@@ -207,10 +207,10 @@ const CreateMeetingPage = () => {
 
       if (res.data?.status === "PENDING_APPROVAL") {
         toast.info(
-  i18n.language === "vi"
-    ? "Yêu cầu đặt phòng đã được gửi và đang chờ Admin phê duyệt."
-    : "Booking request sent and awaiting admin approval."
-);
+          i18n.language === "vi"
+            ? "Yêu cầu đặt phòng đã được gửi và đang chờ Admin phê duyệt."
+            : "Booking request sent and awaiting admin approval."
+        );
       } else {
         toast.success(t("successCreate"));
       }
@@ -230,21 +230,21 @@ const CreateMeetingPage = () => {
 
       const raw = backendMsg.toLowerCase();
       let msg = i18n.language === "vi"
-  ? "Không thể tạo cuộc họp!"
-  : "Failed to create meeting!";
+        ? "Không thể tạo cuộc họp!"
+        : "Failed to create meeting!";
 
       // === Phòng họp trùng lịch ===
       if (raw.includes("phòng") && raw.includes("đã bị đặt")) {
         msg = i18n.language === "vi"
-  ? "Phòng họp đã được đặt trong khung giờ này"
-  : "The meeting room is already booked during this time.";
+          ? "Phòng họp đã được đặt trong khung giờ này"
+          : "The meeting room is already booked during this time.";
       }
 
       // === Người tham dự trùng lịch ===
       else if (raw.includes("người tham dự") && raw.includes("trùng lịch")) {
         msg = i18n.language === "vi"
-  ? "Người tham gia bị trùng lịch trong khung giờ này"
-  : "A participant has a schedule conflict during this time.";
+          ? "Người tham gia bị trùng lịch trong khung giờ này"
+          : "A participant has a schedule conflict during this time.";
       }
 
       // fallback chung nếu BE trả lỗi khác
@@ -266,7 +266,7 @@ const CreateMeetingPage = () => {
       <ToastContainer position="top-right" autoClose={3000} />
 
       <div className="flex items-center gap-3 mb-6 pb-3 border-b border-gray-300 dark:border-gray-700">
-        <div className="p-3 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-500 shadow-md">
+        <div className="p-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 shadow-md">
           <FiPlusCircle className="text-white text-2xl" />
         </div>
         <div>
@@ -282,9 +282,9 @@ const CreateMeetingPage = () => {
             {/* TITLE */}
             <Form.Item name="title" label={t("meetingName")}
               rules={[
-    { required: true, message: t("meetingName") + " " + t("errorTimeInvalid") },
-    { min: 3, message: t("meetingName") + " quá ngắn" }
-  ]}>
+                { required: true, message: t("meetingName") + " " + t("errorTimeInvalid") },
+                { min: 3, message: t("meetingName") + " quá ngắn" }
+              ]}>
               <Input placeholder={t("meetingName")} className="dark:bg-gray-700 dark:text-white dark:border-gray-600" />
             </Form.Item>
 
@@ -296,53 +296,53 @@ const CreateMeetingPage = () => {
               </Form.Item>
 
               <Form.Item name="time" label={t("startTime")} rules={[{ required: true }]}>
-  {/* Hiển thị giờ đã chọn + nút mở modal */}
-  <div className="flex gap-2">
-    <Input
-      readOnly
-      value={clockValue.format("HH:mm")}
-      onClick={() => setClockOpen(true)}
-      placeholder={t("startTime")}
-      className="cursor-pointer dark:bg-gray-700 dark:text-white dark:border-gray-600"
-    />
-    <Button onClick={() => setClockOpen(true)}>
-      🕒 {i18n.language === "vi" ? "Chọn giờ" : "Pick time"}
-    </Button>
-  </div>
+                {/* Hiển thị giờ đã chọn + nút mở modal */}
+                <div className="flex gap-2">
+                  <Input
+                    readOnly
+                    value={clockValue.format("HH:mm")}
+                    onClick={() => setClockOpen(true)}
+                    placeholder={t("startTime")}
+                    className="cursor-pointer dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                  />
+                  <Button onClick={() => setClockOpen(true)}>
+                    🕒 {i18n.language === "vi" ? "Chọn giờ" : "Pick time"}
+                  </Button>
+                </div>
 
-  {/* Modal chứa đồng hồ chọn giờ */}
-  <Modal
-    title={i18n.language === "vi" ? "Chọn giờ họp (08:00 - 18:00)" : "Select meeting time (08:00 - 18:00)"}
-    open={clockOpen}
-    onCancel={() => setClockOpen(false)}
-    onOk={() => {
-      if (!validateBusinessTime(clockValue)) {
-        toast.error(
-          i18n.language === "vi"
-            ? "⏰ Chỉ được đặt lịch từ 08:00 đến 18:00!"
-            : "⏰ Bookings allowed only 08:00 - 18:00!"
-        );
-        return;
-      }
-      form.setFieldsValue({ time: clockValue });
-      setClockOpen(false);
-    }}
-    width={350}
-    centered
-  >
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <StaticTimePicker
-        orientation="portrait"
-        ampm={false}
-        value={clockValue}
-        onChange={(v) => setClockValue(v)}
-        slotProps={{
-          actionBar: { actions: [] }, // ẩn nút OK/Cancel của MUI
-        }}
-      />
-    </LocalizationProvider>
-  </Modal>
-</Form.Item>
+                {/* Modal chứa đồng hồ chọn giờ */}
+                <Modal
+                  title={i18n.language === "vi" ? "Chọn giờ họp (08:00 - 18:00)" : "Select meeting time (08:00 - 18:00)"}
+                  open={clockOpen}
+                  onCancel={() => setClockOpen(false)}
+                  onOk={() => {
+                    if (!validateBusinessTime(clockValue)) {
+                      toast.error(
+                        i18n.language === "vi"
+                          ? "⏰ Chỉ được đặt lịch từ 08:00 đến 18:00!"
+                          : "⏰ Bookings allowed only 08:00 - 18:00!"
+                      );
+                      return;
+                    }
+                    form.setFieldsValue({ time: clockValue });
+                    setClockOpen(false);
+                  }}
+                  width={350}
+                  centered
+                >
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <StaticTimePicker
+                      orientation="portrait"
+                      ampm={false}
+                      value={clockValue}
+                      onChange={(v) => setClockValue(v)}
+                      slotProps={{
+                        actionBar: { actions: [] }, // ẩn nút OK/Cancel của MUI
+                      }}
+                    />
+                  </LocalizationProvider>
+                </Modal>
+              </Form.Item>
 
               <div className="flex gap-2">
                 <Form.Item name="duration" label={t("endTime")} initialValue={60} style={{ flex: 1 }}>
@@ -354,10 +354,10 @@ const CreateMeetingPage = () => {
                   </Select>
                 </Form.Item>
                 <Form.Item
-  name="customHour"
-  label={i18n.language === "vi" ? "Khác (giờ)" : "Custom(h)"}
-  style={{ width: 80 }}
->
+                  name="customHour"
+                  label={i18n.language === "vi" ? "Khác (giờ)" : "Custom(h)"}
+                  style={{ width: 80 }}
+                >
                   <Input type="number" step={0.5} min={0.5} max={8}
                     onChange={() => form.setFieldsValue({ duration: undefined })}
                     className="dark:bg-gray-700 dark:text-white dark:border-gray-600" />
@@ -377,11 +377,11 @@ const CreateMeetingPage = () => {
                         {r.name} ({r.capacity} {t("seats")})
                       </span>
                       <Tag color={r.status === "AVAILABLE" ? "green" : "red"}>
-  {r.status === "AVAILABLE"
-    ? (i18n.language === "vi" ? "Có sẵn" : "Available")
-    : (i18n.language === "vi" ? "Bảo trì" : "Maintenance")
-  }
-</Tag>
+                        {r.status === "AVAILABLE"
+                          ? (i18n.language === "vi" ? "Có sẵn" : "Available")
+                          : (i18n.language === "vi" ? "Bảo trì" : "Maintenance")
+                        }
+                      </Tag>
                     </div>
                   </Option>
                 ))}
@@ -393,10 +393,10 @@ const CreateMeetingPage = () => {
               <Select mode="multiple" loading={devicesLoading}
                 disabled={!watchedDate || !watchedTime || devicesLoading}
                 placeholder={
-  !watchedDate || !watchedTime
-    ? (i18n.language === "vi" ? "Vui lòng chọn thời gian trước" : "Please select time first")
-    : (i18n.language === "vi" ? "Chọn thiết bị khả dụng" : "Select available devices")
-}
+                  !watchedDate || !watchedTime
+                    ? (i18n.language === "vi" ? "Vui lòng chọn thời gian trước" : "Please select time first")
+                    : (i18n.language === "vi" ? "Chọn thiết bị khả dụng" : "Select available devices")
+                }
                 className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
                 popupClassName="dark:bg-gray-700 dark:text-gray-100">
                 {availableDevices.map((d) => (
@@ -431,15 +431,15 @@ const CreateMeetingPage = () => {
                 onSearch={handleSearchUsers}
                 loading={isSearching}
                 placeholder={
-  i18n.language === "vi"
-    ? "Gõ tên hoặc email để tìm"
-    : "Type name or email to search"
-}
+                  i18n.language === "vi"
+                    ? "Gõ tên hoặc email để tìm"
+                    : "Type name or email to search"
+                }
                 notFoundContent={
-  isSearching
-    ? <Spin size="small" />
-    : (i18n.language === "vi" ? "Không tìm thấy người dùng" : "No users found")
-}
+                  isSearching
+                    ? <Spin size="small" />
+                    : (i18n.language === "vi" ? "Không tìm thấy người dùng" : "No users found")
+                }
                 className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
                 popupClassName="dark:bg-gray-700 dark:text-gray-100"
               >
@@ -456,10 +456,10 @@ const CreateMeetingPage = () => {
               name="guestEmails"
               label={i18n.language === "vi" ? "Email khách mời" : "Guest emails"}
               tooltip={
-  i18n.language === "vi"
-    ? "Nhập email, nhấn Enter"
-    : "Enter email then press Enter"
-}
+                i18n.language === "vi"
+                  ? "Nhập email, nhấn Enter"
+                  : "Enter email then press Enter"
+              }
               rules={[{
                 validator: (_, list) => {
                   if (!list || !list.length) return Promise.resolve();
@@ -483,7 +483,7 @@ const CreateMeetingPage = () => {
 
             {/* RECURRING */}
             <Form.Item name="isRecurring" valuePropName="checked" className="mb-1">
-              <Checkbox onChange={(e) => setIsRecurring(e.target.checked)} className="dark:text-gray-200">
+              <Checkbox onChange={(e) => setIsRecurring(e.target.checked)} className="dark:text-gray-200 accent-emerald-600">
                 {i18n.language === "vi" ? "Lặp lại cuộc họp" : "Repeat meeting"}
               </Checkbox>
             </Form.Item>
@@ -491,7 +491,7 @@ const CreateMeetingPage = () => {
             {isRecurring && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Form.Item name="frequency" label={i18n.language === "vi" ? "Tần suất" : "Frequency"}
-                              initialValue="DAILY" rules={[{ required: true }]}>
+                  initialValue="DAILY" rules={[{ required: true }]}>
                   <Select className="dark:bg-gray-700 dark:text-white dark:border-gray-600">
                     <Option value="DAILY">{i18n.language === "vi" ? "Hằng ngày" : "Daily"}</Option>
                     <Option value="WEEKLY">{i18n.language === "vi" ? "Hằng tuần" : "Weekly"}</Option>
@@ -520,7 +520,7 @@ const CreateMeetingPage = () => {
                 htmlType="submit"
                 loading={loading}
                 size="large"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600"
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-emerald-500 dark:hover:bg-emerald-600 font-semibold h-12 shadow-lg hover:shadow-emerald-500/30 transition-all transform hover:-translate-y-0.5"
               >
                 {t("createMeetingTitle")}
               </Button>

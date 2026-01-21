@@ -24,45 +24,45 @@ const RoomCalendarModal = ({ open, onClose, room, onSelectSlot }) => {
   const isDark = document.documentElement.classList.contains("dark");
 
   /* --- AUTO UPDATE NOW INDICATOR --- */
-useEffect(() => {
-  if (!open) return;
+  useEffect(() => {
+    if (!open) return;
 
-  const refreshNow = () => {
-    if (calendarRef.current) {
-      const api = calendarRef.current.getApi();
-      api.updateNow();     // cập nhật thanh đỏ
-      api.updateSize();    // fix lệch khi modal thay đổi layout
-    }
-  };
+    const refreshNow = () => {
+      if (calendarRef.current) {
+        const api = calendarRef.current.getApi();
+        api.updateNow();     // cập nhật thanh đỏ
+        api.updateSize();    // fix lệch khi modal thay đổi layout
+      }
+    };
 
-  // refresh khi mở
-  setTimeout(refreshNow, 150);
+    // refresh khi mở
+    setTimeout(refreshNow, 150);
 
-  // refresh định kỳ
-  const interval = setInterval(refreshNow, 10000); // 10s
-  return () => clearInterval(interval);
-}, [open]);
+    // refresh định kỳ
+    const interval = setInterval(refreshNow, 10000); // 10s
+    return () => clearInterval(interval);
+  }, [open]);
 
-/* --- IMPROVED NOW-INDICATOR CSS --- */
-useEffect(() => {
-  const style = document.createElement("style");
-  style.innerHTML = `
+  /* --- IMPROVED NOW-INDICATOR CSS --- */
+  useEffect(() => {
+    const style = document.createElement("style");
+    style.innerHTML = `
     /* Đường line đỏ nằm đúng vị trí phút hiện tại */
     .fc .fc-timegrid-now-indicator-line {
-      border-top: 2px solid #ef4444 !important;
+      border-top: 2px solid #10b981 !important;
       height: 2px !important;
       z-index: 999 !important;
     }
 
     /* Mũi tên đỏ phía trái */
     .fc .fc-timegrid-now-indicator-arrow {
-      border-right-color: #ef4444 !important;
+      border-right-color: #10b981 !important;
       border-width: 6px !important;
     }
   `;
-  document.head.appendChild(style);
-  return () => document.head.removeChild(style);
-}, []);
+    document.head.appendChild(style);
+    return () => document.head.removeChild(style);
+  }, []);
 
   /* Load meetings */
   useEffect(() => {
@@ -77,8 +77,8 @@ useEffect(() => {
           title: m.title,
           start: m.startTime,
           end: m.endTime,
-          backgroundColor: "#3b82f6",
-          borderColor: "#3b82f6",
+          backgroundColor: "#059669",
+          borderColor: "#059669",
           textColor: "#fff",
         }));
 
@@ -134,7 +134,7 @@ useEffect(() => {
       {!loading && readyToShow && (
         <FullCalendar
           ref={calendarRef}
-          key={room?.id + i18n.language}  
+          key={room?.id + i18n.language}
           plugins={[timeGridPlugin, interactionPlugin]}
           initialView="timeGridWeek"
           locale={calendarLocale}
@@ -200,7 +200,7 @@ useEffect(() => {
 
             // Chặn giờ trong quá khứ của hôm nay
             if (start.isSame(now, "day") && start.isBefore(now)) return false;
-            
+
             // Không cho select sang ngày sau 
             if (!start.isSame(end, "day")) return false;
 
@@ -215,7 +215,7 @@ useEffect(() => {
           selectMirror={true}
 
           nowIndicator={true}
-          nowIndicatorClassNames="bg-red-500"
+          nowIndicatorClassNames="text-emerald-500"
 
           dayHeaderClassNames={isDark ? "bg-slate-800 text-gray-200" : ""}
           slotLabelClassNames={isDark ? "bg-slate-800 text-gray-300" : ""}

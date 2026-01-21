@@ -154,17 +154,29 @@ const ProfilePage = () => {
               </Form.Item>
 
               {/* GOOGLE CALENDAR */}
-              <Form.Item label={t("googleCalendar.title")}>
-                {user?.isGoogleLinked ? (
-                  <Tag color="green" className="px-3 py-1 text-base">
-                    ✔ {t("googleCalendar.linked")}
-                  </Tag>
-                ) : (
-                  <Button type="primary" danger onClick={handleConnectGoogle}>
-                    {t("googleCalendar.connect")}
-                  </Button>
-                )}
-              </Form.Item>
+              <div className="pt-2">
+                <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-slate-800/50 flex items-center justify-between">
+                  <div>
+                    <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-1">{t("googleCalendar.title")}</h4>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      {user?.isGoogleLinked ? t("googleCalendar.linkedDesc") || "Đã liên kết với tài khoản Google." : t("googleCalendar.unlinkedDesc") || "Liên kết để đồng bộ lịch họp."}
+                    </p>
+                  </div>
+                  {user?.isGoogleLinked ? (
+                    <span className="px-3 py-1.5 rounded-lg bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 text-sm font-semibold border border-emerald-200 dark:border-emerald-800 flex items-center gap-1">
+                      ✔ {t("googleCalendar.linked")}
+                    </span>
+                  ) : (
+                    <Button
+                      onClick={handleConnectGoogle}
+                      className="bg-white border-gray-300 shadow-sm hover:bg-gray-50 text-gray-700 font-medium dark:bg-slate-700 dark:text-white dark:border-slate-600"
+                      icon={<img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-4 h-4" alt="Google" />}
+                    >
+                      {t("googleCalendar.connect")}
+                    </Button>
+                  )}
+                </div>
+              </div>
 
               {/* SAVE BUTTON */}
               <Form.Item className="pt-4">

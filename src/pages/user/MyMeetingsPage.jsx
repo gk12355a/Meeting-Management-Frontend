@@ -983,8 +983,8 @@ const MyMeetingPage = () => {
                 right: "timeGridDay,timeGridWeek,dayGridMonth",
               }}
               allDaySlot={false}
-              slotMinTime="06:00:00"
-              slotMaxTime="19:30:00"
+              slotMinTime="08:00:00"
+              slotMaxTime="19:00:00"
               events={events.filter(e => {
                 if (e.extendedProps.status === "PENDING_APPROVAL") return showPending;
                 return showConfirmed;
@@ -1017,7 +1017,7 @@ const MyMeetingPage = () => {
               businessHours={{
                 daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
                 startTime: "08:00",
-                endTime: "18:00",
+                endTime: "19:00",
               }}
               backgroundEvents={(arg) =>
                 getNonBusinessHourBackgroundEvents(arg.start, arg.end)

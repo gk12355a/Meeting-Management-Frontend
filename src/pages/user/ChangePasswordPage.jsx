@@ -57,8 +57,8 @@ export default function ChangePasswordPage() {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.4 }}
       >
-        <h2 className="text-3xl font-bold text-center mb-8 text-blue-700 flex items-center justify-center gap-2">
-          <FiLock /> {t("title")}
+        <h2 className="text-3xl font-bold text-center mb-8 text-emerald-700 dark:text-emerald-400 flex items-center justify-center gap-2">
+          <FiLock className="mb-1" /> {t("title")}
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -87,12 +87,12 @@ export default function ChangePasswordPage() {
                 value={oldPassword}
                 onChange={(e) => setOldPassword(e.target.value)}
                 required
-                className="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
+                className="w-full border border-gray-300 dark:border-gray-600 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent pr-10 bg-gray-50 dark:bg-slate-800 dark:text-white transition-all"
               />
               <button
                 type="button"
                 onClick={() => setShowOld(!showOld)}
-                className="absolute right-3 top-3 text-gray-500 hover:text-blue-600 transition"
+                className="absolute right-3 top-3.5 text-gray-400 hover:text-emerald-600 transition"
                 tabIndex={-1}
               >
                 {showOld ? <FiEye size={20} /> : <FiEyeOff size={20} />}
@@ -112,12 +112,12 @@ export default function ChangePasswordPage() {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 required
-                className="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
+                className="w-full border border-gray-300 dark:border-gray-600 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent pr-10 bg-gray-50 dark:bg-slate-800 dark:text-white transition-all"
               />
               <button
                 type="button"
                 onClick={() => setShowNew(!showNew)}
-                className="absolute right-3 top-3 text-gray-500 hover:text-blue-600 transition"
+                className="absolute right-3 top-3.5 text-gray-400 hover:text-emerald-600 transition"
                 tabIndex={-1}
               >
                 {showNew ? <FiEye size={20} /> : <FiEyeOff size={20} />}
@@ -137,12 +137,12 @@ export default function ChangePasswordPage() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
-                className="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
+                className="w-full border border-gray-300 dark:border-gray-600 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent pr-10 bg-gray-50 dark:bg-slate-800 dark:text-white transition-all"
               />
               <button
                 type="button"
                 onClick={() => setShowConfirm(!showConfirm)}
-                className="absolute right-3 top-3 text-gray-500 hover:text-blue-600 transition"
+                className="absolute right-3 top-3.5 text-gray-400 hover:text-emerald-600 transition"
                 tabIndex={-1}
               >
                 {showConfirm ? <FiEye size={20} /> : <FiEyeOff size={20} />}
@@ -155,9 +155,9 @@ export default function ChangePasswordPage() {
             type="submit"
             disabled={loading}
             whileTap={{ scale: 0.97 }}
-            className="w-full bg-blue-600 text-white font-semibold py-3 mt-4 rounded-lg hover:bg-blue-700 transition duration-300 disabled:opacity-60 flex items-center justify-center gap-2"
+            className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold py-3.5 mt-6 rounded-xl shadow-lg hover:shadow-emerald-500/30 hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-60 flex items-center justify-center gap-2"
           >
-            <FiSave />
+            <FiSave size={20} />
             {loading ? t("saving") : t("save")}
           </motion.button>
         </form>

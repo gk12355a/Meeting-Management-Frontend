@@ -10,38 +10,10 @@ import { useTranslation } from "react-i18next";
 
 dayjs.locale("vi");
 
-/* Màu LIGHT MODE */
-const roomColors = [
-  { bg: "#FFE0E9", border: "#FF99B2" },
-  { bg: "#D6F4FF", border: "#4CB4FF" },
-  { bg: "#DBFFFC", border: "#04CCC6" },
-  { bg: "#FFF7C8", border: "#FFD560" },
-  { bg: "#F3EBFF", border: "#B88CFF" },
-  { bg: "#FFE8F0", border: "#FF6FA5" },
-];
-
-/* Màu DARK MODE */
-const roomColorsDark = [
-  { bg: "#3B2631", border: "#FF7FA5" },
-  { bg: "#112533", border: "#4FABFF" },
-  { bg: "#0F2E2C", border: "#26D7C8" },
-  { bg: "#3A351B", border: "#FFC857" },
-  { bg: "#2A1D3A", border: "#B892FF" },
-  { bg: "#3A1E2A", border: "#FF729A" },
-];
-
 /* getRoomColor xử lý theme */
 const getRoomColor = (roomName, isDark) => {
-  const palette = isDark ? roomColorsDark : roomColors;
-
-  if (!roomName) return palette[0];
-
-  let hash = 0;
-  for (let i = 0; i < roomName.length; i++) {
-    hash = roomName.charCodeAt(i) + ((hash << 5) - hash);
-  }
-
-  return palette[Math.abs(hash % palette.length)];
+  // Không dùng nữa, chuyển sang style tĩnh
+  return { bg: "#ffffff", border: "#e5e7eb" };
 };
 
 const HistoryPage = () => {
@@ -100,8 +72,8 @@ const HistoryPage = () => {
     <div className="p-6 min-h-screen bg-gray-50 dark:bg-slate-900 transition-colors">
 
       {/* ===== HEADER ===== */}
-      <div className="flex items-center gap-3 mb-6 pb-3 border-b border-gray-300 dark:border-gray-700">
-        <div className="p-3 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-500 shadow-md">
+      <div className="flex items-center gap-4 mb-6 pb-3 border-b border-gray-300 dark:border-gray-700">
+        <div className="p-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 shadow-md">
           <FiCalendar className="text-white text-2xl" />
         </div>
         <div>
@@ -113,24 +85,22 @@ const HistoryPage = () => {
       </div>
 
       {/* ===== TABS ===== */}
-      <div className="flex gap-3 mb-6">
+      <div className="flex gap-2 mb-6 bg-gray-100 dark:bg-slate-800 p-1 rounded-xl w-fit">
         <button
-          className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
-            activeTab === "joined"
-              ? "bg-blue-600 text-white"
-              : "bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-300"
-          }`}
+          className={`px-5 py-2.5 rounded-lg font-medium text-sm transition-all ${activeTab === "joined"
+            ? "bg-white dark:bg-emerald-600 text-emerald-700 dark:text-white shadow-sm"
+            : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+            }`}
           onClick={() => setActiveTab("joined")}
         >
           {t("tabs.joined")}
         </button>
 
         <button
-          className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
-            activeTab === "cancelled"
-              ? "bg-red-600 text-white"
-              : "bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-300"
-          }`}
+          className={`px-5 py-2.5 rounded-lg font-medium text-sm transition-all ${activeTab === "cancelled"
+            ? "bg-white dark:bg-rose-600 text-rose-600 dark:text-white shadow-sm"
+            : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+            }`}
           onClick={() => setActiveTab("cancelled")}
         >
           {t("tabs.cancelled")}
@@ -138,7 +108,7 @@ const HistoryPage = () => {
       </div>
 
       {/* ===== LIST ===== */}
-      <div className="bg-white dark:bg-slate-800 shadow-md rounded-2xl p-5 transition-colors">
+      <div className="space-y-4">
 
         {loading ? (
           <div className="flex justify-center py-16">
@@ -150,47 +120,53 @@ const HistoryPage = () => {
             {t("empty")}
           </div>
         ) : (
-          <ul className="flex flex-col gap-4">
-
-            {meetings.map((item) => {
-              const color = getRoomColor(item.room?.name, isDark);
-
-              return (
-                <li
-                  key={item.id}
-                  onClick={() => setSelectedMeeting(item)}
-                  style={{
-                    backgroundColor: color.bg,
-                    border: `2px solid ${color.border}`,
-                  }}
-                  className="p-4 rounded-xl cursor-pointer hover:shadow-xl hover:-translate-y-0.5 transition-all"
-                >
-                  <p className="font-semibold mb-2 text-lg text-gray-900 dark:text-white">
+          <div className="flex flex-col gap-4">
+            {meetings.map((item) => (
+              <div
+                key={item.id}
+                onClick={() => setSelectedMeeting(item)}
+                className="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-gray-100 dark:border-slate-700 cursor-pointer shadow-sm hover:shadow-lg hover:shadow-emerald-500/10 hover:border-emerald-200 dark:hover:border-emerald-900 transition-all duration-300 group"
+              >
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="font-bold text-lg text-gray-800 dark:text-gray-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                     {item.title}
-                  </p>
+                  </h3>
 
-                  <div className="flex flex-wrap items-center gap-5 text-sm text-gray-700 dark:text-gray-100">
-                    <span className="flex items-center gap-1">
-                      <FiCalendar size={15} />
-                      {dayjs(item.startTime).format("DD/MM/YYYY")}
-                    </span>
+                  <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${item.status === "CANCELLED"
+                    ? "bg-rose-50 text-rose-600 border-rose-100 dark:bg-rose-900/30 dark:text-rose-400 dark:border-rose-800"
+                    : "bg-gray-100 text-gray-600 border-gray-200 dark:bg-slate-700 dark:text-gray-300 dark:border-slate-600"
+                    }`}>
+                    {item.status === "CANCELLED" ? t("tabs.cancelled") : t("tabs.finished")}
+                  </span>
+                </div>
 
-                    <span className="flex items-center gap-1">
-                      <FiClock size={15} />
-                      {dayjs(item.startTime).format("HH:mm")} –{" "}
-                      {dayjs(item.endTime).format("HH:mm")}
-                    </span>
+                <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-600 dark:text-gray-400">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-full bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+                      <FiCalendar size={14} />
+                    </div>
+                    <span className="font-medium">{dayjs(item.startTime).format("DD/MM/YYYY")}</span>
+                  </div>
 
-                    <span className="flex items-center gap-1">
-                      <FiMapPin size={15} />
-                      {item.room?.name}
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-full bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400">
+                      <FiClock size={14} />
+                    </div>
+                    <span>
+                      {dayjs(item.startTime).format("HH:mm")} - {dayjs(item.endTime).format("HH:mm")}
                     </span>
                   </div>
-                </li>
-              );
-            })}
 
-          </ul>
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-full bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">
+                      <FiMapPin size={14} />
+                    </div>
+                    <span>{item.room?.name}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         )}
       </div>
 
