@@ -323,7 +323,7 @@ const AdminHeader = ({ setIsSidebarOpen }) => {
         </button>
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 bg-emerald-600 rounded-lg flex items-center justify-center text-white">
-            🗓️
+            🍀
           </div>
           {/* <span className="font-semibold text-lg">6X6</span> */}
           <span className="font-semibold text-lg">{t('common:appName')}</span>
