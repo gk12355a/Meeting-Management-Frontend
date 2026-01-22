@@ -203,7 +203,7 @@ const UserHeader = ({ setIsSidebarOpen }) => {
       <div className="flex items-center gap-3">
         <button
           onClick={() => setIsSidebarOpen(prev => !prev)}
-          className="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center hover:bg-emerald-800 transition"
+          className="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center hover:bg-emerald-800 transition md:hidden"
         >
           <FiMenu size={20} />
         </button>

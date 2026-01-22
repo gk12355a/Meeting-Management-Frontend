@@ -15,6 +15,33 @@ import isBetween from "dayjs/plugin/isBetween";
 import isoWeek from "dayjs/plugin/isoWeek";
 import MeetingDetailModal from "../../components/user/MeetingDetailModal";
 import MeetingListModal from "../../components/MeetingListModal";
+// --- Chart.js ---
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+} from 'chart.js';
+import { Line, Bar, Doughnut } from 'react-chartjs-2';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement
+);
+
 // --- dayjs config ---
 dayjs.locale("vi");
 dayjs.extend(isToday);
@@ -22,6 +49,7 @@ dayjs.extend(isSameOrAfter);
 dayjs.extend(isBetween);
 dayjs.extend(isoWeek);
 
+// Template cho thẻ Stats 
 // Template cho thẻ Stats 
 // Template cho thẻ Stats 
 const statTemplates = [
@@ -99,6 +127,23 @@ export default function DashboardPage() {
   const [stats, setStats] = useState(statTemplates);
   const [upcomingMeetings, setUpcomingMeetings] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // --- CHART STATES ---
+  const [weeklyActivityData, setWeeklyActivityData] = useState({
+    labels: [],
+    datasets: []
+  });
+  const [meetingTypesData, setMeetingTypesData] = useState({
+    labels: [],
+    datasets: []
+  });
+  const [participantsTrendData, setParticipantsTrendData] = useState({
+    labels: [],
+    datasets: []
+  });
+
+  const [recentActivity, setRecentActivity] = useState([]);
+
 
   // --- POPUP STATE ---
   const [selectedMeetingId, setSelectedMeetingId] = useState(null);
@@ -182,6 +227,88 @@ export default function DashboardPage() {
           { ...statTemplates[2], value: totalUpcoming.toString() },
           { ...statTemplates[3], value: totalActive.toString() },
         ]);
+
+        // --- CHART DATA PROCESSING ---
+        const startOfWeek = now.startOf('isoWeek');
+        // Translate days based on locale
+        // We use keys 'Mon', 'Tue' etc. to look up translations
+        const dayKeys = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        const translatedDays = dayKeys.map(k => t(`charts.days.${k}`));
+
+        const weeklyCounts = [0, 0, 0, 0, 0, 0, 0];
+        const participantsCounts = [0, 0, 0, 0, 0, 0, 0];
+        const participantsMeetingCounts = [0, 0, 0, 0, 0, 0, 0]; // For avg calculation
+
+        activeMeetings.forEach(m => {
+          if (dayjs(m.startTime).isAfter(startOfWeek.subtract(1, 'second')) && dayjs(m.startTime).isBefore(startOfWeek.add(7, 'day'))) {
+            const dayIndex = dayjs(m.startTime).day() === 0 ? 6 : dayjs(m.startTime).day() - 1; // Mon=0, Sun=6
+            weeklyCounts[dayIndex]++;
+
+            // Count participants (mock: use length or random if empty)
+            const pCount = m.participants ? m.participants.length : 1;
+            participantsCounts[dayIndex] += pCount;
+            participantsMeetingCounts[dayIndex]++;
+          }
+        });
+
+        // Avg participants
+        const avgParticipants = participantsCounts.map((count, i) => participantsMeetingCounts[i] > 0 ? Math.round(count / participantsMeetingCounts[i]) : 0);
+
+        setWeeklyActivityData({
+          labels: translatedDays,
+          datasets: [
+            {
+              label: t('charts.labels.meetings'),
+              data: weeklyCounts,
+              borderColor: '#10b981',
+              backgroundColor: 'rgba(16, 185, 129, 0.5)',
+              tension: 0.4
+            }
+          ]
+        });
+
+        setParticipantsTrendData({
+          labels: translatedDays,
+          datasets: [
+            {
+              label: t('charts.labels.participants'),
+              data: avgParticipants,
+              borderColor: '#6366f1',
+              backgroundColor: 'rgba(99, 102, 241, 0.5)',
+              tension: 0.4,
+              fill: true
+            }
+          ]
+        });
+
+        // MOCK CHART: Meeting Types (Simulation)
+        setMeetingTypesData({
+          labels: ['Team Sync', 'Client Calls', '1:1s', 'Workshops'],
+          datasets: [
+            {
+              label: t('charts.labels.votes'),
+              data: [12, 19, 3, 5],
+              backgroundColor: [
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(54, 162, 235, 0.6)',
+                'rgba(255, 206, 86, 0.6)',
+                'rgba(75, 192, 192, 0.6)',
+              ],
+              borderWidth: 1,
+            },
+          ],
+        });
+
+        // Recent Activity (Mock from latest meetings)
+        const recent = allMeetings.sort((a, b) => dayjs(b.createdAt || b.startTime).valueOf() - dayjs(a.createdAt || a.startTime).valueOf()).slice(0, 4).map(m => ({
+          id: m.id,
+          type: t('charts.activityTypes.meetingScheduled'),
+          title: m.title,
+          time: dayjs(m.createdAt || m.startTime).fromNow()
+        }));
+        setRecentActivity(recent);
+
+
       } catch (err) {
         console.error("Lỗi tải dashboard:", err);
         message.error("Không thể tải dữ liệu dashboard.");
@@ -191,7 +318,7 @@ export default function DashboardPage() {
     };
 
     fetchDashboardData();
-  }, [user]); // làm dependency
+  }, [user, t]); // Add t as dependency
 
   // Khi selectedMeetingId thay đổi (khi user click), mới fetch chi tiết và show popup (tối ưu tránh nháy)
   useEffect(() => {
@@ -330,63 +457,142 @@ export default function DashboardPage() {
             ))}
           </div>
 
-          {/* Upcoming meetings */}
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 p-6">
-            <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-5 flex items-center gap-2">
-              <span className="p-1.5 rounded-lg bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
-                <FiCalendar size={18} />
-              </span>
-              {t("upcomingMeetingsTitle")}
-            </h2>
+          {/* Charts Section */}
+          {/* Row 1: Weekly Activity & Recent Activity */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Weekly Activity (2 cols) */}
+            <div className="lg:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700">
+              <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4">{t('charts.weeklyActivity')}</h3>
+              <div className="h-64">
+                <Line
+                  data={weeklyActivityData}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: { display: false },
+                      title: { display: false }
+                    },
+                    scales: {
+                      y: {
+                        beginAtZero: true,
+                        grid: { display: true, color: 'rgba(0,0,0,0.05)' },
+                        ticks: { stepSize: 1 }
+                      },
+                      x: { grid: { display: false } }
+                    }
+                  }}
+                />
+              </div>
+            </div>
 
-            <div className="space-y-4">
-              {upcomingMeetings.map((meeting) => {
-                const acceptedCount =
-                  meeting.participants?.filter((p) => p.status === "ACCEPTED").length || 0;
-
-                return (
-                  <div
-                    key={meeting.id}
-                    className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-gray-50 dark:bg-slate-700/30 rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-900/20 border border-transparent hover:border-emerald-200 dark:hover:border-emerald-800 transition-all cursor-pointer group"
-                    onClick={() => handleShowMeetingDetail(meeting)}
-                  >
-                    <div className="flex items-start gap-4">
-                      <div className="flex-shrink-0 flex flex-col items-center bg-white dark:bg-slate-800 p-2 rounded-lg shadow-sm w-14 text-center border border-gray-100 dark:border-slate-600">
-                        <span className="text-xs font-bold text-red-500 uppercase">{dayjs(meeting.startTime).format("MMM")}</span>
-                        <span className="text-lg font-bold text-gray-800 dark:text-gray-100">{dayjs(meeting.startTime).format("DD")}</span>
-                      </div>
-
-                      <div>
-                        <h3 className="font-bold text-gray-800 dark:text-gray-100 text-lg group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-                          {meeting.title}
-                        </h3>
-                        <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400 mt-1">
-                          <span className="flex items-center gap-1">
-                            <FiClock size={14} />
-                            {dayjs(meeting.startTime).format("HH:mm")} - {dayjs(meeting.endTime).format("HH:mm")}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <FiUsers size={14} />
-                            {meeting.room?.name || "N/A"}
-                          </span>
-                        </div>
-                      </div>
+            {/* Recent Activity (1 col) */}
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700">
+              <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4">{t('charts.recentActivity')}</h3>
+              <div className="space-y-6">
+                {recentActivity.map((activity, idx) => (
+                  <div key={idx} className="flex gap-4">
+                    <div className="flex-shrink-0 mt-1">
+                      <div className="w-2 h-2 rounded-full bg-emerald-500 ring-4 ring-emerald-100 dark:ring-emerald-900/30"></div>
                     </div>
-
-                    <div className="mt-3 sm:mt-0 flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-slate-800 px-3 py-1.5 rounded-full shadow-sm">
-                      <FiUsers size={14} />
-                      <span>{t("meeting.participants", { count: acceptedCount })}</span>
+                    <div>
+                      <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{activity.type}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1">{activity.title}</p>
+                      <p className="text-xs text-gray-400 mt-1">{activity.time}</p>
                     </div>
                   </div>
-                );
-              })}
+                ))}
+                {recentActivity.length === 0 && <p className="text-gray-400 text-sm">{t('charts.noActivity')}</p>}
+              </div>
+            </div>
+          </div>
 
-              {upcomingMeetings.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-10 text-gray-400 dark:text-gray-500">
-                  <FiCalendar size={48} className="mb-3 opacity-20" />
-                  <p>{t("meeting.upcomingMeetingsEmpty")}</p>
-                </div>
-              )}
+          {/* Row 2: Upcoming Meetings & Participants Trend */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Upcoming meetings (2 cols) */}
+            <div className="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 p-6">
+              <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-5 flex items-center gap-2">
+                <span className="p-1.5 rounded-lg bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
+                  <FiCalendar size={18} />
+                </span>
+                {t("upcomingMeetingsTitle")}
+              </h2>
+
+              <div className="space-y-4">
+                {upcomingMeetings.map((meeting) => {
+                  const acceptedCount =
+                    meeting.participants?.filter((p) => p.status === "ACCEPTED").length || 0;
+
+                  return (
+                    <div
+                      key={meeting.id}
+                      className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-gray-50 dark:bg-slate-700/30 rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-900/20 border border-transparent hover:border-emerald-200 dark:hover:border-emerald-800 transition-all cursor-pointer group"
+                      onClick={() => handleShowMeetingDetail(meeting)}
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="flex-shrink-0 flex flex-col items-center bg-white dark:bg-slate-800 p-2 rounded-lg shadow-sm w-14 text-center border border-gray-100 dark:border-slate-600">
+                          <span className="text-xs font-bold text-red-500 uppercase">{dayjs(meeting.startTime).format("MMM")}</span>
+                          <span className="text-lg font-bold text-gray-800 dark:text-gray-100">{dayjs(meeting.startTime).format("DD")}</span>
+                        </div>
+
+                        <div>
+                          <h3 className="font-bold text-gray-800 dark:text-gray-100 text-lg group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                            {meeting.title}
+                          </h3>
+                          <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400 mt-1">
+                            <span className="flex items-center gap-1">
+                              <FiClock size={14} />
+                              {dayjs(meeting.startTime).format("HH:mm")} - {dayjs(meeting.endTime).format("HH:mm")}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <FiUsers size={14} />
+                              {meeting.room?.name || "N/A"}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-3 sm:mt-0 flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-slate-800 px-3 py-1.5 rounded-full shadow-sm">
+                        <FiUsers size={14} />
+                        <span>{t("meeting.participants", { count: acceptedCount })}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {upcomingMeetings.length === 0 && (
+                  <div className="flex flex-col items-center justify-center py-10 text-gray-400 dark:text-gray-500">
+                    <FiCalendar size={48} className="mb-3 opacity-20" />
+                    <p>{t("meeting.upcomingMeetingsEmpty")}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Participants Trend (1 col) */}
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700">
+              <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4">{t('charts.participantsTrend')}</h3>
+              <div className="h-64">
+                <Line
+                  data={participantsTrendData}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: { display: false },
+                      title: { display: false }
+                    },
+                    scales: {
+                      y: {
+                        beginAtZero: true,
+                        grid: { display: true, color: 'rgba(0,0,0,0.05)' },
+                        ticks: { stepSize: 1 }
+                      },
+                      x: { grid: { display: false } }
+                    }
+                  }}
+                />
+              </div>
             </div>
           </div>
         </>

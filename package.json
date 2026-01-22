@@ -49,6 +49,7 @@
     "react-router-dom": "^7.9.5",
     "react-time-picker": "^8.0.2",
     "react-toastify": "^11.0.5",
+    "rechart": "^0.0.1",
     "recharts": "^3.3.0",
     "stream-chat": "^9.28.0",
     "stream-chat-react": "^13.13.3",

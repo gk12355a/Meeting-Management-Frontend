@@ -68,5 +68,31 @@
     "loadMore": "Load more",
     "loading": "Loading...",
     "viewed": "Viewed"
+  },
+  "contactGroups": {
+    "title": "Contact Groups",
+    "subTitle": "Manage your personal contact groups for quick meeting invites.",
+    "exportReport": "Export report",
+    "createGroup": "Create new group",
+    "editGroup": "Edit Group",
+    "groupName": "Group Name",
+    "groupNamePlaceholder": "E.g. Team Tech, Team Marketing...",
+    "members": "Members",
+    "membersCount": "Member Count",
+    "membersPlaceholder": "Search colleagues...",
+    "selectMemberError": "Please select at least 1 member",
+    "enterGroupNameError": "Please enter group name",
+    "deleteGroupConfirm": "Delete this contact group?",
+    "deleteGroupDesc": "This action cannot be undone",
+    "deleteSuccess": "Contact group deleted",
+    "updateSuccess": "Contact group updated",
+    "createSuccess": "Contact group created",
+    "loadError": "Could not load contact groups",
+    "exportModalTitle": "Export Contact Groups Report",
+    "exportFile": "Export File",
+    "exportAll": "All Groups",
+    "exportSelected": "Selected Groups",
+    "selectGroupError": "Please select at least one group.",
+    "membersCountLabel": "{{count}} members"
   }
 }

@@ -68,5 +68,31 @@
     "loadMore": "Xem thêm",
     "loading": "Đang tải...",
     "viewed": "Đã xem"
+  },
+  "contactGroups": {
+    "title": "Nhóm liên hệ",
+    "subTitle": "Quản lý các nhóm người dùng cá nhân của bạn để mời nhanh vào cuộc họp",
+    "exportReport": "Xuất báo cáo",
+    "createGroup": "Tạo nhóm mới",
+    "editGroup": "Chỉnh sửa nhóm",
+    "groupName": "Tên nhóm",
+    "groupNamePlaceholder": "Ví dụ: Team Tech, Team Marketing...",
+    "members": "Thành viên",
+    "membersCount": "Số lượng thành viên",
+    "membersPlaceholder": "Tìm kiếm đồng nghiệp...",
+    "selectMemberError": "Vui lòng chọn ít nhất 1 thành viên",
+    "enterGroupNameError": "Vui lòng nhập tên nhóm",
+    "deleteGroupConfirm": "Xóa nhóm này?",
+    "deleteGroupDesc": "Hành động này không thể hoàn tác",
+    "deleteSuccess": "Đã xóa nhóm liên hệ",
+    "updateSuccess": "Cập nhật nhóm thành công",
+    "createSuccess": "Tạo nhóm thành công",
+    "loadError": "Không thể tải danh sách nhóm liên hệ",
+    "exportModalTitle": "Xuất báo cáo nhóm liên hệ",
+    "exportFile": "Xuất file",
+    "exportAll": "Tất cả các nhóm",
+    "exportSelected": "Các nhóm đã chọn",
+    "selectGroupError": "Vui lòng chọn ít nhất một nhóm trong danh sách.",
+    "membersCountLabel": "{{count}} thành viên"
   }
 }

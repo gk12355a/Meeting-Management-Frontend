@@ -43,7 +43,7 @@ const ContactGroupsPage = () => {
             setGroups(res.data);
         } catch (error) {
             console.error(error);
-            message.error("Không thể tải danh sách nhóm liên hệ");
+            message.error(t("contactGroups.loadError"));
         } finally {
             setLoading(false);
         }
@@ -138,11 +138,11 @@ const ContactGroupsPage = () => {
     const handleDelete = async (id) => {
         try {
             await deleteContactGroup(id);
-            message.success("Đã xóa nhóm liên hệ");
+            message.success(t("contactGroups.deleteSuccess"));
             fetchGroups();
         } catch (error) {
             console.error(error);
-            message.error("Xóa thất bại");
+            message.error(t("messages.deleteError"));
         }
     };
 
@@ -158,10 +158,10 @@ const ContactGroupsPage = () => {
 
             if (editingGroup) {
                 await updateContactGroup(editingGroup.id, payload);
-                message.success("Cập nhật nhóm thành công");
+                message.success(t("contactGroups.updateSuccess"));
             } else {
                 await createContactGroup(payload);
-                message.success("Tạo nhóm thành công");
+                message.success(t("contactGroups.createSuccess"));
             }
 
             setIsModalOpen(false);
@@ -176,13 +176,13 @@ const ContactGroupsPage = () => {
 
     const columns = [
         {
-            title: "Tên nhóm",
+            title: t("contactGroups.groupName"),
             dataIndex: "name",
             key: "name",
             render: (text) => <span className="font-semibold text-emerald-700">{text}</span>
         },
         {
-            title: "Thành viên",
+            title: t("contactGroups.members"),
             dataIndex: "members",
             key: "members",
             render: (members) => (
@@ -196,14 +196,14 @@ const ContactGroupsPage = () => {
             )
         },
         {
-            title: "Số lượng",
+            title: t("contactGroups.membersCount"),
             key: "count",
             render: (_, record) => (
-                <Tag color="blue">{record.members?.length || 0} thành viên</Tag>
+                <Tag color="blue">{t("contactGroups.membersCountLabel", { count: record.members?.length || 0 })}</Tag>
             )
         },
         {
-            title: "Hành động",
+            title: t("common.actions"),
             key: "action",
             align: "right",
             render: (_, record) => (
@@ -215,11 +215,11 @@ const ContactGroupsPage = () => {
                         className="text-blue-600 border-blue-200 hover:border-blue-500 hover:text-blue-700"
                     />
                     <Popconfirm
-                        title="Xóa nhóm này?"
-                        description="Hành động này không thể hoàn tác"
+                        title={t("contactGroups.deleteGroupConfirm")}
+                        description={t("contactGroups.deleteGroupDesc")}
                         onConfirm={() => handleDelete(record.id)}
-                        okText="Xóa"
-                        cancelText="Hủy"
+                        okText={t("buttons.delete")}
+                        cancelText={t("buttons.cancel")}
                         okButtonProps={{ danger: true }}
                     >
                         <Button
@@ -238,8 +238,8 @@ const ContactGroupsPage = () => {
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <Title level={3} className="!mb-1 dark:!text-white">Nhóm liên hệ</Title>
-                    <Text className="text-gray-500 dark:text-gray-400">Quản lý các nhóm người dùng cá nhân của bạn để mời nhanh vào cuộc họp</Text>
+                    <Title level={3} className="!mb-1 dark:!text-white">{t("contactGroups.title")}</Title>
+                    <Text className="text-gray-500 dark:text-gray-400">{t("contactGroups.subTitle")}</Text>
                 </div>
                 <div className="flex gap-2">
                     <Button
@@ -247,7 +247,7 @@ const ContactGroupsPage = () => {
                         onClick={handleExport}
                         className="flex items-center gap-2"
                     >
-                        Xuất báo cáo
+                        {t("contactGroups.exportReport")}
                     </Button>
                     <Button
                         type="primary"
@@ -256,7 +256,7 @@ const ContactGroupsPage = () => {
                         className="bg-emerald-600 hover:bg-emerald-500 border-none shadow-md"
                         size="large"
                     >
-                        Tạo nhóm mới
+                        {t("contactGroups.createGroup")}
                     </Button>
                 </div>
 
@@ -275,23 +275,23 @@ const ContactGroupsPage = () => {
 
             {/* Modal Xuất Báo Cáo */}
             <Modal
-                title="Xuất báo cáo nhóm liên hệ"
+                title={t("contactGroups.exportModalTitle")}
                 open={isExportModalOpen}
                 onOk={executeExport}
                 onCancel={() => setIsExportModalOpen(false)}
-                okText="Xuất file"
-                cancelText="Hủy"
+                okText={t("contactGroups.exportFile")}
+                cancelText={t("buttons.cancel")}
             >
                 <div className="space-y-4">
                     <Radio.Group onChange={(e) => setExportOption(e.target.value)} value={exportOption} className="flex flex-col gap-2">
-                        <Radio value="all">Tất cả các nhóm ({groups.length})</Radio>
+                        <Radio value="all">{t("contactGroups.exportAll")} ({groups.length})</Radio>
                         <Radio value="selected" disabled={selectedRowKeys.length === 0}>
-                            Các nhóm đã chọn ({selectedRowKeys.length})
+                            {t("contactGroups.exportSelected")} ({selectedRowKeys.length})
                         </Radio>
                     </Radio.Group>
 
                     {exportOption === 'selected' && selectedRowKeys.length === 0 && (
-                        <div className="text-red-500 text-sm">Vui lòng chọn ít nhất một nhóm trong danh sách.</div>
+                        <div className="text-red-500 text-sm">{t("contactGroups.selectGroupError")}</div>
                     )}
                 </div>
             </Modal>
@@ -300,35 +300,35 @@ const ContactGroupsPage = () => {
                 title={
                     <div className="flex items-center gap-2 text-lg">
                         {editingGroup ? <FiEdit2 className="text-blue-500" /> : <FiUserPlus className="text-emerald-500" />}
-                        <span>{editingGroup ? "Chỉnh sửa nhóm" : "Tạo nhóm mới"}</span>
+                        <span>{editingGroup ? t("contactGroups.editGroup") : t("contactGroups.createGroup")}</span>
                     </div>
                 }
                 open={isModalOpen}
                 onOk={handleOk}
                 onCancel={() => setIsModalOpen(false)}
                 confirmLoading={modalLoading}
-                okText={editingGroup ? "Cập nhật" : "Tạo mới"}
-                cancelText="Hủy"
+                okText={editingGroup ? t("buttons.update") : t("buttons.create")}
+                cancelText={t("buttons.cancel")}
                 centered
                 width={600}
             >
                 <Form form={form} layout="vertical" className="mt-4">
                     <Form.Item
                         name="name"
-                        label="Tên nhóm"
-                        rules={[{ required: true, message: "Vui lòng nhập tên nhóm" }]}
+                        label={t("contactGroups.groupName")}
+                        rules={[{ required: true, message: t("contactGroups.enterGroupNameError") }]}
                     >
-                        <Input placeholder="Ví dụ: Team Tech, Team Marketing..." prefix={<FiUsers className="text-gray-400" />} />
+                        <Input placeholder={t("contactGroups.groupNamePlaceholder")} prefix={<FiUsers className="text-gray-400" />} />
                     </Form.Item>
 
                     <Form.Item
                         name="memberIds"
-                        label="Thành viên"
-                        rules={[{ required: true, message: "Vui lòng chọn ít nhất 1 thành viên" }]}
+                        label={t("contactGroups.members")}
+                        rules={[{ required: true, message: t("contactGroups.selectMemberError") }]}
                     >
                         <Select
                             mode="multiple"
-                            placeholder="Tìm kiếm đồng nghiệp..."
+                            placeholder={t("contactGroups.membersPlaceholder")}
                             filterOption={false}
                             onSearch={handleSearchUsers}
                             notFoundContent={searchingUsers ? <Spin size="small" /> : null}

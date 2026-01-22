@@ -1,31 +1,50 @@
 {
   "welcomeTitle": "Hello, {{username}}",
   "welcomeSubtitle": "Welcome to the meeting management system",
-
   "stats": {
     "today": "Meetings Today",
     "week": "Meetings This Week",
     "upcoming": "Upcoming Meetings",
     "total": "Total Meetings"
   },
-
   "upcomingMeetingsTitle": "Upcoming Meetings",
-
   "meeting": {
     "participants": "{{count}} participants",
     "room": "Meeting room {{room}}",
     "upcomingMeetingsEmpty": "No upcoming meetings"
   },
-
   "buttons": {
     "create": "Create New Meeting",
     "rooms": "View Available Rooms",
     "devices": "View Devices"
   },
-
   "buttonDesc": {
-  "create": "Book rooms and devices for your meeting",
-  "rooms": "Find available rooms that match your needs",
-  "devices": "View devices suitable for your meeting"
+    "create": "Book rooms and devices for your meeting",
+    "rooms": "Find available rooms that match your needs",
+    "devices": "View devices suitable for your meeting"
+  },
+  "charts": {
+    "weeklyActivity": "Weekly Activity",
+    "meetingTypes": "Meeting Types",
+    "recentActivity": "Recent Activity",
+    "participantsTrend": "Participants Trend",
+    "days": {
+      "Mon": "Mon",
+      "Tue": "Tue",
+      "Wed": "Wed",
+      "Thu": "Thu",
+      "Fri": "Fri",
+      "Sat": "Sat",
+      "Sun": "Sun"
+    },
+    "labels": {
+      "meetings": "Meetings",
+      "participants": "Participants",
+      "votes": "Votes"
+    },
+    "activityTypes": {
+      "meetingScheduled": "Meeting scheduled"
+    },
+    "noActivity": "No recent activity"
   }
 }

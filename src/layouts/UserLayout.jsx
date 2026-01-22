@@ -21,9 +21,8 @@ export default function UserLayout() {
 
         {/* MAIN CONTENT */}
         <div
-          className={`flex-1 mt-14 transition-all duration-300 ${
-            isSidebarOpen ? "ml-64" : "ml-0"
-          }`}
+          className={`flex-1 mt-14 transition-all duration-300 ${isSidebarOpen ? "ml-20" : "ml-0"
+            }`}
         >
           <main className="p-6 overflow-y-auto bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-gray-100 transition-colors min-h-[calc(100vh-56px)]">
             <Outlet />
@@ -32,6 +31,6 @@ export default function UserLayout() {
       </div>
       {/* CHATBOT - Đặt ở cuối cùng để nó nổi lên trên */}
       <Chatbot />
-    </div>
+    </div >
   );
 }
