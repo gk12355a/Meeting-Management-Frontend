@@ -3,9 +3,23 @@ import dayjs from "dayjs";
 
 export const getRooms = () => api.get("/rooms");
 
-export const createRoom = (data) => api.post("/rooms", data);
+export const createRoom = (data) => {
+  if (data instanceof FormData) {
+    return api.post("/rooms", data, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  }
+  return api.post("/rooms", data);
+};
 
-export const updateRoom = (id, data) => api.put(`/rooms/${id}`, data);
+export const updateRoom = (id, data) => {
+  if (data instanceof FormData) {
+    return api.put(`/rooms/${id}`, data, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  }
+  return api.put(`/rooms/${id}`, data);
+};
 
 export const deleteRoom = (id) => api.delete(`/rooms/${id}`);
 

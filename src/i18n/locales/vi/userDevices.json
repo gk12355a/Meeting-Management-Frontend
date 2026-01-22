@@ -6,13 +6,17 @@
   "filters": {
     "all": "Tất cả",
     "available": "Sẵn sàng",
-    "maintenance": "Bảo trì"
+    "maintenance": "Bảo trì",
+    "description": "Mô tả"
   },
+  "gallery": "Thư viện ảnh",
+  "noImage": "Chưa có hình ảnh",
   "deviceType": "Loại thiết bị",
   "status": "Trạng thái",
   "button": {
     "book": "Đặt thiết bị",
     "maintenance": "Bảo trì"
   },
-  "noResults": "Không tìm thấy thiết bị nào phù hợp."
+  "noResults": "Không tìm thấy thiết bị nào phù hợp.",
+  "wantToBook": "Bạn muốn đặt thiết bị này?"
 }

@@ -6,13 +6,17 @@
   "filters": {
     "all": "All",
     "available": "Available",
-    "maintenance": "Under maintenance"
+    "maintenance": "Under maintenance",
+    "description": "Description"
   },
+  "gallery": "Gallery",
+  "noImage": "No image available",
   "deviceType": "Device type",
   "status": "Status",
   "button": {
     "book": "Book device",
     "maintenance": "Maintenance"
   },
-  "noResults": "No matching devices found."
+  "noResults": "No matching devices found.",
+  "wantToBook": "Do you want to book this device?"
 }

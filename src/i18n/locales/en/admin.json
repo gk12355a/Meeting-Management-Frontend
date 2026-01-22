@@ -1,6 +1,6 @@
 {
   "sidebar": {
-    "title": "MeetFlow Admin",
+    "title": "6X6 Admin",
     "subtitle": "Meeting Management",
     "menu": {
       "dashboard": "Dashboard",
@@ -13,6 +13,7 @@
   "header": {
     "notifications": "Notifications",
     "settings": "Settings",
+    "profile": "Profile",
     "changePassword": "Change Password",
     "logout": "Logout",
     "language": "Language",

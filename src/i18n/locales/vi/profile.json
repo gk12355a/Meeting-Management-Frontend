@@ -1,27 +1,23 @@
 {
   "title": "Thông tin cá nhân",
   "subtitle": "Xem và chỉnh sửa hồ sơ của bạn",
-
   "email": "Email",
   "role": "Vai trò",
   "fullName": "Họ và tên",
-
   "placeholders": {
     "fullName": "Nhập họ và tên đầy đủ của bạn"
   },
-
   "errors": {
     "requiredFullName": "Vui lòng nhập họ và tên!"
   },
-
   "googleCalendar": {
     "title": "Google Calendar",
     "connect": "Kết nối Google Calendar",
-    "linked": "Đã liên kết Google Calendar"
+    "linked": "Đã liên kết Google Calendar",
+    "linkedDesc": "Đã liên kết với tài khoản Google.",
+    "unlinkedDesc": "Liên kết để đồng bộ lịch họp."
   },
-
   "save": "Lưu thay đổi",
-
   "messages": {
     "updateSuccess": "🎉 Cập nhật thông tin thành công!",
     "updateFail": "Cập nhật thất bại. Vui lòng thử lại.",

@@ -53,18 +53,17 @@ const LanguageSelector = () => {
             <button
               key={lang.code}
               onClick={() => changeLanguage(lang.code)}
-              className={`flex items-center justify-between w-full px-4 py-2.5 text-sm transition-colors ${
-                i18n.language === lang.code
-                  ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
+              className={`flex items-center justify-between w-full px-4 py-2.5 text-sm transition-colors ${i18n.language === lang.code
+                  ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400"
                   : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700"
-              }`}
+                }`}
             >
               <span className="flex items-center gap-2">
                 <span>{lang.flag}</span>
                 <span>{lang.name}</span>
               </span>
               {i18n.language === lang.code && (
-                <FiCheck size={16} className="text-blue-600 dark:text-blue-400" />
+                <FiCheck size={16} className="text-emerald-600 dark:text-emerald-400" />
               )}
             </button>
           ))}

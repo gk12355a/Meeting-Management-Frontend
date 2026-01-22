@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import api from "../utils/api"; 
+import api from "../utils/api";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -27,7 +27,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-blue-100 via-blue-50 to-indigo-100">
+    <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-emerald-100 via-emerald-50 to-teal-100">
       {/* Hình minh họa bên trái */}
       <div className="hidden md:flex w-1/2 items-center justify-center p-10">
         <motion.img
@@ -43,12 +43,12 @@ export default function ForgotPasswordPage() {
       {/* Form bên phải */}
       <div className="flex w-full md:w-1/2 items-center justify-center p-6">
         <motion.div
-          className="bg-white shadow-2xl p-10 rounded-3xl w-full max-w-md border border-blue-100"
+          className="bg-white shadow-2xl p-10 rounded-3xl w-full max-w-md border border-emerald-100"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.4 }}
         >
-          <h2 className="text-3xl font-bold text-center mb-4 text-blue-700">
+          <h2 className="text-3xl font-bold text-center mb-4 text-emerald-700">
             🔒 Quên Mật khẩu
           </h2>
 
@@ -72,7 +72,7 @@ export default function ForgotPasswordPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="your@email.com"
                   required
-                  className="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
 
@@ -80,7 +80,7 @@ export default function ForgotPasswordPage() {
                 type="submit"
                 disabled={isLoading}
                 whileTap={{ scale: 0.97 }}
-                className="w-full bg-blue-600 text-white font-semibold py-3 mt-2 rounded-lg hover:bg-blue-700 transition duration-300 disabled:opacity-60 flex items-center justify-center gap-2"
+                className="w-full bg-emerald-600 text-white font-semibold py-3 mt-2 rounded-lg hover:bg-emerald-700 transition duration-300 disabled:opacity-60 flex items-center justify-center gap-2"
               >
                 {isLoading ? "Đang gửi..." : "📩 Gửi link"}
               </motion.button>
@@ -90,7 +90,7 @@ export default function ForgotPasswordPage() {
           <div className="text-center mt-4">
             <Link
               to="/login"
-              className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
+              className="text-sm text-emerald-600 hover:text-emerald-800 hover:underline"
             >
               ← Quay lại Đăng nhập
             </Link>

@@ -17,9 +17,32 @@ export const getUserById = (id) => api.get(`/admin/users/${id}`);
  * API này không cần mật khẩu. Backend sẽ tự tạo và gửi email.
  * @param {object} data - { fullName, username, roles }
  */
+/**
+ * TẠO NGƯỜI DÙNG MỚI (Bởi Admin)
+ * URL: /admin/users
+ * Content-Type: multipart/form-data
+ * Parts:
+ *   - request: JSON string { fullName, username, password, roles }
+ *   - avatar: File (optional)
+ */
 export const createUser = (data) => {
-  // Sửa từ "/auth/register" thành "/admin/users"
-  return api.post("/admin/users", data);
+  const formData = new FormData();
+  const { avatar, ...userData } = data;
+
+  // 'request' part as JSON
+  formData.append(
+    "request",
+    new Blob([JSON.stringify(userData)], { type: "application/json" })
+  );
+
+  // 'avatar' part if exists
+  if (avatar instanceof File) {
+    formData.append("avatar", avatar);
+  }
+
+  return api.post("/admin/users", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
 };
 
 /**
@@ -44,13 +67,31 @@ export const searchUsers = (query) => {
  * Lấy thông tin profile của tôi
  */
 export const getMyProfile = () => {
-  return api.get('/users/profile'); 
+  return api.get('/users/profile');
 };
 
 /**
  * Cập nhật thông tin profile của tôi
- * @param {object} profileData - { fullName: "Tên Mới" }
+ * URL: /users/profile
+ * Content-Type: multipart/form-data
+ * Parts:
+ *   - request: JSON string { fullName }
+ *   - avatar: File (optional)
  */
-export const updateMyProfile = (profileData) => {
-  return api.put('/users/profile', profileData);
+export const updateMyProfile = (data) => {
+  const formData = new FormData();
+  const { avatar, ...profileData } = data;
+
+  formData.append(
+    "request",
+    new Blob([JSON.stringify(profileData)], { type: "application/json" })
+  );
+
+  if (avatar instanceof File) {
+    formData.append("avatar", avatar);
+  }
+
+  return api.put('/users/profile', formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
 };

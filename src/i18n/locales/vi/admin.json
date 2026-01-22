@@ -1,6 +1,6 @@
 {
   "sidebar": {
-    "title": "MeetFlow Admin",
+    "title": "6X6 Admin",
     "subtitle": "Quản lý cuộc họp",
     "menu": {
       "dashboard": "Dashboard",
@@ -13,6 +13,7 @@
   "header": {
     "notifications": "Thông báo",
     "settings": "Cài đặt",
+    "profile": "Thông tin cá nhân",
     "changePassword": "Đổi mật khẩu",
     "logout": "Đăng xuất",
     "language": "Ngôn ngữ",

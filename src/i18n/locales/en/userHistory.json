@@ -3,7 +3,8 @@
   "subtitle": "Review meetings you have attended",
   "tabs": {
     "joined": "Joined",
-    "cancelled": "Cancelled"
+    "cancelled": "Cancelled",
+    "finished": "Finished"
   },
   "empty": "No data available.",
   "errors": {

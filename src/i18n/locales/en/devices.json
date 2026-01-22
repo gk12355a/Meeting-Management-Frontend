@@ -11,7 +11,9 @@
     "name": "Device Name",
     "description": "Description",
     "status": "Status",
-    "noDescription": "No description"
+    "noDescription": "No description",
+    "gallery": "Image Gallery",
+    "quickActions": "Quick Actions"
   },
   "modal": {
     "addTitle": "Add New Device",
@@ -43,6 +45,7 @@
     "nameRequired": "Please enter device name!",
     "loadError": "Cannot load device list!",
     "noDevices": "No devices found",
-    "noDevicesDesc": "Try changing filters or search terms"
+    "noDevicesDesc": "Try changing filters or search terms",
+    "noImage": "No image available"
   }
 }

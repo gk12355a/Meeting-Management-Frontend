@@ -9,7 +9,7 @@ const Chatbot = () => {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Chào bạn! Tôi là trợ lý AI của MeetFlow, giúp bạn đặt lịch họp và quản lý cuộc họp dễ dàng hơn. Tôi có thể hỗ trợ gì cho bạn?",
+      text: "Chào bạn! Tôi là trợ lý AI của 6X6, giúp bạn đặt lịch họp và quản lý cuộc họp dễ dàng hơn. Tôi có thể hỗ trợ gì cho bạn?",
       sender: "bot",
     },
   ]);
@@ -18,7 +18,7 @@ const Chatbot = () => {
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
 
-    // Tự động cuộn xuống
+  // Tự động cuộn xuống
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -39,7 +39,7 @@ const Chatbot = () => {
 
   const handleSend = async (e, manualText = null) => {
     if (e) e.preventDefault();
-    
+
     const textToSend = manualText || input;
     if (!textToSend.trim()) return;
 
@@ -88,14 +88,14 @@ const Chatbot = () => {
       {isOpen && (
         <div className="mb-4 w-80 md:w-96 h-[550px] bg-white rounded-2xl shadow-2xl flex flex-col border border-gray-200 overflow-hidden animate-fade-in-up font-sans">
           {/* Header */}
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 flex justify-between items-center text-white shadow-md">
+          <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-4 flex justify-between items-center text-white shadow-md">
             <div className="flex items-center gap-3">
-              <div className="bg-white/20 p-2 rounded-full backdrop-blur-sm">
-                <FaRobot className="text-xl" />
+              <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-white font-bold text-lg shadow-sm border border-white/10">
+                6x6
               </div>
               <div>
                 <h3 className="font-bold text-sm">Trợ lý AI</h3>
-                <span className="text-[10px] text-blue-100 flex items-center gap-1 opacity-90">
+                <span className="text-[10px] text-emerald-100 flex items-center gap-1 opacity-90">
                   <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
                   Sẵn sàng hỗ trợ
                 </span>
@@ -114,27 +114,25 @@ const Chatbot = () => {
             {messages.map((msg) => (
               <div
                 key={msg.id}
-                className={`flex ${
-                  msg.sender === "user" ? "justify-end" : "justify-start"
-                }`}
+                className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"
+                  }`}
               >
                 {msg.sender === "bot" && (
-                  <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center mr-2 mt-1 shrink-0 text-indigo-600">
-                    <FaRobot size={12} />
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center mr-2 mt-1 shrink-0 text-white text-[10px] font-bold shadow-sm">
+                    6x6
                   </div>
                 )}
-                
+
                 <div
-                  className={`max-w-[85%] p-3 rounded-2xl text-sm leading-relaxed shadow-sm break-words overflow-hidden ${
-                    msg.sender === "user"
-                      ? "bg-blue-600 text-white rounded-br-none"
-                      : `bg-white text-gray-800 border border-gray-200 rounded-bl-none ${msg.isError ? "border-red-200 bg-red-50 text-red-800" : ""}`
-                  }`}
+                  className={`max-w-[85%] p-3 rounded-2xl text-sm leading-relaxed shadow-sm break-words overflow-hidden ${msg.sender === "user"
+                    ? "bg-emerald-600 text-white rounded-br-none"
+                    : `bg-white text-gray-800 border border-gray-200 rounded-bl-none ${msg.isError ? "border-red-200 bg-red-50 text-red-800" : ""}`
+                    }`}
                 >
                   {msg.sender === "bot" ? (
                     // Render Markdown cho tin nhắn của Bot
                     <div className="markdown-body prose prose-sm max-w-none dark:prose-invert">
-                        <ReactMarkdown>{msg.text}</ReactMarkdown>
+                      <ReactMarkdown>{msg.text}</ReactMarkdown>
                     </div>
                   ) : (
                     msg.text
@@ -142,9 +140,9 @@ const Chatbot = () => {
                 </div>
 
                 {msg.sender === "user" && (
-                   <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center ml-2 mt-1 shrink-0 text-blue-600">
-                     <FaUser size={10} />
-                   </div>
+                  <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center ml-2 mt-1 shrink-0 text-emerald-600">
+                    <FaUser size={10} />
+                  </div>
                 )}
               </div>
             ))}
@@ -152,9 +150,9 @@ const Chatbot = () => {
             {/* Loading Indicator */}
             {isLoading && (
               <div className="flex justify-start items-center gap-2">
-                 <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
-                    <FaRobot size={12} />
-                  </div>
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-white text-[10px] font-bold shadow-sm">
+                  6x6
+                </div>
                 <div className="bg-white p-3 rounded-2xl rounded-bl-none border border-gray-200 shadow-sm">
                   <div className="flex space-x-1">
                     <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0s" }}></div>
@@ -169,17 +167,17 @@ const Chatbot = () => {
 
           {/* Gợi ý câu hỏi */}
           {!isLoading && messages.length < 5 && (
-             <div className="px-4 pb-2 bg-gray-50 flex gap-2 overflow-x-auto no-scrollbar">
-                {suggestedQuestions.map((q, idx) => (
-                   <button 
-                      key={idx}
-                      onClick={() => handleSend(null, q)}
-                      className="text-xs bg-white border border-blue-200 text-blue-600 px-3 py-1.5 rounded-full whitespace-nowrap hover:bg-blue-50 transition-colors"
-                   >
-                      {q}
-                   </button>
-                ))}
-             </div>
+            <div className="px-4 pb-2 bg-gray-50 flex gap-2 overflow-x-auto no-scrollbar">
+              {suggestedQuestions.map((q, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => handleSend(null, q)}
+                  className="text-xs bg-white border border-emerald-200 text-emerald-600 px-3 py-1.5 rounded-full whitespace-nowrap hover:bg-emerald-50 transition-colors"
+                >
+                  {q}
+                </button>
+              ))}
+            </div>
           )}
 
           {/* Input Area */}
@@ -192,7 +190,7 @@ const Chatbot = () => {
               value={input}
               onChange={handleInputChange}
               placeholder="Nhập yêu cầu (vd: đặt phòng...)"
-              className="flex-1 px-4 py-2.5 bg-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-gray-700 transition-all placeholder:text-gray-400 resize-none min-h-[40px] max-h-[120px] overflow-y-auto"
+              className="flex-1 px-4 py-2.5 bg-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm text-gray-700 transition-all placeholder:text-gray-400 resize-none min-h-[40px] max-h-[120px] overflow-y-auto"
               disabled={isLoading}
               autoFocus
               onKeyDown={(e) => {
@@ -205,7 +203,7 @@ const Chatbot = () => {
             <button
               type="submit"
               disabled={isLoading || !input.trim()}
-              className="bg-blue-600 hover:bg-blue-700 text-white p-2.5 rounded-full transition-all disabled:bg-gray-300 disabled:cursor-not-allowed shadow-sm hover:shadow-md active:scale-95 shrink-0"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white p-2.5 rounded-full transition-all disabled:bg-gray-300 disabled:cursor-not-allowed shadow-sm hover:shadow-md active:scale-95 shrink-0"
             >
               <FaPaperPlane className="text-sm ml-0.5" />
             </button>
@@ -217,10 +215,10 @@ const Chatbot = () => {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="bg-gradient-to-br from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white p-4 rounded-full shadow-xl transition-all hover:scale-110 flex items-center justify-center group z-50"
+          className="bg-gradient-to-br from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white w-14 h-14 rounded-full shadow-xl transition-all hover:scale-110 flex items-center justify-center group z-50"
         >
-          <FaRobot className="text-2xl animate-bounce-slow" />
-          
+          <span className="font-bold text-lg font-sans">6x6</span>
+
           {/* Badge thông báo */}
           <span className="absolute top-0 right-0 flex h-3 w-3">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
@@ -240,7 +238,7 @@ const Chatbot = () => {
         .markdown-body ul { list-style-type: disc; padding-left: 1.5em; margin: 0.5em 0; }
         .markdown-body ol { list-style-type: decimal; padding-left: 1.5em; margin: 0.5em 0; }
         .markdown-body p { margin: 0.5em 0; }
-        .markdown-body strong { font-weight: 600; color: #1e40af; }
+        .markdown-body strong { font-weight: 600; color: #047857; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>

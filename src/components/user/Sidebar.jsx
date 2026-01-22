@@ -12,52 +12,70 @@ import {
 } from "react-icons/fi";
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
-  const { t } = useTranslation("userSidebar"); // namespace bạn đã tạo
+  const { t } = useTranslation("userSidebar");
 
   const userMenu = [
-    { to: "/user", label: t("menu.dashboard"), icon: <FiHome size={18} /> },
-    { to: "/user/my-meetings", label: t("menu.myMeetings"), icon: <FiCalendar size={18} /> },
-    { to: "/user/create-meeting", label: t("menu.createMeeting"), icon: <FiPlusCircle size={18} /> },
-    { to: "/user/rooms", label: t("menu.rooms"), icon: <FiBriefcase size={18} /> },
-    { to: "/user/devices", label: t("menu.devices"), icon: <FiMonitor size={18} /> },
-    { to: "/user/history", label: t("menu.history"), icon: <FiClock size={18} /> }
+    { to: "/user", label: t("menu.dashboard"), icon: <FiHome size={20} /> },
+    { to: "/user/my-meetings", label: t("menu.myMeetings"), icon: <FiCalendar size={20} /> },
+    { to: "/user/create-meeting", label: t("menu.createMeeting"), icon: <FiPlusCircle size={20} /> },
+    { to: "/user/rooms", label: t("menu.rooms"), icon: <FiBriefcase size={20} /> },
+    { to: "/user/devices", label: t("menu.devices"), icon: <FiMonitor size={20} /> },
+    { to: "/user/history", label: t("menu.history"), icon: <FiClock size={20} /> }
   ];
 
   return (
     <>
       <aside
-        className={`fixed top-14 left-0 bg-white dark:bg-slate-900 
-              border-r dark:border-slate-800 shadow-md w-64 h-[calc(100%-56px)]
-              transform ${isOpen ? "translate-x-0" : "-translate-x-64"}
-              transition-transform duration-300 ease-in-out z-30`}
+        className={`fixed top-14 left-0 h-[calc(100%-56px)] w-64
+            bg-white/95 backdrop-blur-xl dark:bg-slate-900/95
+            border-r border-slate-100 dark:border-slate-800 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.1)]
+            transform ${isOpen ? "translate-x-0" : "-translate-x-64"}
+            transition-transform duration-300 cubic-bezier(0.4, 0, 0.2, 1) z-30`}
       >
-        <div className="flex flex-col items-center py-5 border-b border-gray-100 dark:border-slate-800">
-          <div className="text-center">
-            <p className="font-semibold text-gray-700 dark:text-gray-100 text-base">
-              {t("title")}
-            </p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              {t("subtitle")}
-            </p>
+        {/* Header Section */}
+        <div className="flex flex-col items-center justify-center py-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-emerald-500/20">
+              6x6
+            </div>
+            <div className="text-left">
+              <h2 className="font-bold text-gray-800 dark:text-gray-100 text-lg leading-tight">
+                Meeting
+              </h2>
+              <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+                Management
+              </p>
+            </div>
           </div>
         </div>
 
-        <nav className="mt-3 px-2">
+        {/* Navigation Section */}
+        <nav className="mt-6 px-4 space-y-1.5 overflow-y-auto h-[calc(100%-120px)] scrollbar-hide">
           {userMenu.map((m) => (
             <NavLink
               key={m.to}
               to={m.to}
               end
               className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-2.5 rounded-xl mb-1 text-[15px] transition ${
-                  isActive
-                    ? "bg-blue-50 text-blue-600 font-semibold border-l-4 border-blue-500 shadow-sm dark:bg-slate-800 dark:text-blue-300"
-                    : "text-gray-700 hover:bg-gray-100 hover:text-blue-600 dark:text-gray-200 dark:hover:bg-slate-800 dark:hover:text-blue-400"
+                `relative group flex items-center gap-3.5 px-4 py-3.5 mx-3 rounded-xl transition-all duration-300 ${isActive
+                  ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/30"
+                  : "text-gray-600 hover:bg-emerald-50 hover:text-emerald-700 dark:text-gray-400 dark:hover:bg-slate-800 dark:hover:text-gray-200"
                 }`
               }
             >
-              {m.icon}
-              <span>{m.label}</span>
+              {({ isActive }) => (
+                <>
+                  {/* Icon Wrapper with subtle animation */}
+                  <span
+                    className={`transition-transform duration-300 group-hover:scale-110 ${isActive ? "text-white" : "text-gray-400 group-hover:text-emerald-600 dark:text-slate-500 dark:group-hover:text-emerald-400"
+                      }`}
+                  >
+                    {m.icon}
+                  </span>
+
+                  <span className="text-[15px] font-medium">{m.label}</span>
+                </>
+              )}
             </NavLink>
           ))}
         </nav>
@@ -66,7 +84,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       {/* Overlay mobile */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-30 md:hidden z-20"
+          className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm md:hidden z-20 transition-opacity duration-300"
           onClick={() => setIsOpen(false)}
         ></div>
       )}

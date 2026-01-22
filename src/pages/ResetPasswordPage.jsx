@@ -1,16 +1,16 @@
 // src/pages/ResetPasswordPage.jsx
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
-import api from '../utils/api'; 
+import api from '../utils/api';
 
 export default function ResetPasswordPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  
+
   const [token, setToken] = useState(null);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
@@ -45,7 +45,7 @@ export default function ResetPasswordPage() {
       });
 
       setSuccess(response.data); // (Message: "Đặt lại mật khẩu thành công.")
-      
+
       // Tự động chuyển về trang login sau 3 giây
       setTimeout(() => {
         navigate('/login');
@@ -89,7 +89,7 @@ export default function ResetPasswordPage() {
                 className="w-full rounded-xl border border-gray-300 px-3 py-2"
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Xác nhận mật khẩu mới
@@ -110,7 +110,7 @@ export default function ResetPasswordPage() {
             <button
               type="submit"
               disabled={isLoading || !token}
-              className="w-full rounded-xl bg-blue-600 text-white px-3 py-3 font-semibold"
+              className="w-full rounded-xl bg-emerald-600 text-white px-3 py-3 font-semibold"
             >
               {isLoading ? 'Đang lưu...' : 'Đặt Lại Mật Khẩu'}
             </button>

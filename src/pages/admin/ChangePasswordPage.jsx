@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { useTranslation } from "react-i18next"; 
+import { useTranslation } from "react-i18next";
 import * as authService from "../../services/authService";
 import { FiLock, FiSave, FiEye, FiEyeOff } from "react-icons/fi";
 import { motion } from "framer-motion";
 
 export default function ChangePasswordPage() {
-  const { t } = useTranslation(['admin', 'common']); 
+  const { t } = useTranslation(['admin', 'common']);
 
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -49,7 +49,7 @@ export default function ChangePasswordPage() {
       // {/* <span>Đổi mật khẩu thất bại. Vui lòng kiểm tra lại mật khẩu cũ.</span> */}
       setError(
         err.response?.data?.message ||
-          t('admin:changePassword.errors.failed')
+        t('admin:changePassword.errors.failed')
       );
     } finally {
       setLoading(false);
@@ -65,7 +65,7 @@ export default function ChangePasswordPage() {
         transition={{ duration: 0.4 }}
       >
         {/* <span>Đổi mật khẩu</span> */}
-        <h2 className="text-3xl font-bold text-center mb-8 text-blue-700 dark:text-blue-400 flex items-center justify-center gap-2">
+        <h2 className="text-3xl font-bold text-center mb-8 text-emerald-700 dark:text-emerald-400 flex items-center justify-center gap-2">
           <FiLock /> {t('admin:changePassword.title')}
         </h2>
 
@@ -93,12 +93,12 @@ export default function ChangePasswordPage() {
                 value={oldPassword}
                 onChange={(e) => setOldPassword(e.target.value)}
                 required
-                className="w-full border border-gray-300 dark:border-gray-600 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10 dark:bg-gray-700 dark:text-white"
+                className="w-full border border-gray-300 dark:border-gray-600 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 pr-10 dark:bg-gray-700 dark:text-white"
               />
               <button
                 type="button"
                 onClick={() => setShowOld(!showOld)}
-                className="absolute right-3 top-3 text-gray-500 hover:text-blue-600 transition dark:text-gray-400"
+                className="absolute right-3 top-3 text-gray-500 hover:text-emerald-600 transition dark:text-gray-400"
                 tabIndex={-1}
               >
                 {showOld ? <FiEye size={20} /> : <FiEyeOff size={20} />}
@@ -118,12 +118,12 @@ export default function ChangePasswordPage() {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 required
-                className="w-full border border-gray-300 dark:border-gray-600 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10 dark:bg-gray-700 dark:text-white"
+                className="w-full border border-gray-300 dark:border-gray-600 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 pr-10 dark:bg-gray-700 dark:text-white"
               />
               <button
                 type="button"
                 onClick={() => setShowNew(!showNew)}
-                className="absolute right-3 top-3 text-gray-500 hover:text-blue-600 transition dark:text-gray-400"
+                className="absolute right-3 top-3 text-gray-500 hover:text-emerald-600 transition dark:text-gray-400"
                 tabIndex={-1}
               >
                 {showNew ? <FiEye size={20} /> : <FiEyeOff size={20} />}
@@ -143,12 +143,12 @@ export default function ChangePasswordPage() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
-                className="w-full border border-gray-300 dark:border-gray-600 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10 dark:bg-gray-700 dark:text-white"
+                className="w-full border border-gray-300 dark:border-gray-600 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 pr-10 dark:bg-gray-700 dark:text-white"
               />
               <button
                 type="button"
                 onClick={() => setShowConfirm(!showConfirm)}
-                className="absolute right-3 top-3 text-gray-500 hover:text-blue-600 transition dark:text-gray-400"
+                className="absolute right-3 top-3 text-gray-500 hover:text-emerald-600 transition dark:text-gray-400"
                 tabIndex={-1}
               >
                 {showConfirm ? <FiEye size={20} /> : <FiEyeOff size={20} />}
@@ -161,7 +161,7 @@ export default function ChangePasswordPage() {
             type="submit"
             disabled={loading}
             whileTap={{ scale: 0.97 }}
-            className="w-full bg-blue-600 text-white font-semibold py-3 mt-4 rounded-lg hover:bg-blue-700 transition duration-300 disabled:opacity-60 flex items-center justify-center gap-2"
+            className="w-full bg-emerald-600 text-white font-semibold py-3 mt-4 rounded-lg hover:bg-emerald-700 transition duration-300 disabled:opacity-60 flex items-center justify-center gap-2"
           >
             <FiSave />
             {/* <span>Đang lưu...</span> */}

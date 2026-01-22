@@ -20,6 +20,7 @@ import Rooms from "./pages/admin/RoomsPage";
 import Devices from "./pages/admin/DevicesPage";
 import Reports from "./pages/admin/ReportsPage";
 import ChangePasswordPageAdmin from "./pages/admin/ChangePasswordPage";
+import AdminProfilePage from "./pages/admin/ProfilePage";
 // ===== User Pages =====
 import UserDashboard from "./pages/user/DashboardPage";
 import MyMeetingsPage from "./pages/user/MyMeetingsPage";
@@ -41,7 +42,7 @@ import GoogleCallbackPage from "./pages/GoogleCallbackPage";
 import "./i18n";
 
 export default function App() {
-  const { isAuthenticated, isAdmin } = useAuth();
+  const { isAuthenticated, isAdmin, user, loading } = useAuth();
 
   return (
     <>
@@ -55,10 +56,15 @@ export default function App() {
               !isAuthenticated ? (
                 <LoginPage key={isAuthenticated ? "auth" : "guest"} />
               ) : (
-                <Navigate
-                  to={isAdmin ? "/admin/dashboard" : "/user/dashboard"}
-                  replace
-                />
+                // Nếu đang loading hoặc chưa có user profile -> Chờ, tránh redirect nhầm
+                loading || !user ? (
+                  <div className="flex items-center justify-center p-4">Đang xử lý...</div>
+                ) : (
+                  <Navigate
+                    to={isAdmin ? "/admin/dashboard" : "/user/dashboard"}
+                    replace
+                  />
+                )
               )
             }
           />
@@ -96,6 +102,7 @@ export default function App() {
           <Route path="devices" element={<Devices />} />
           <Route path="reports" element={<Reports />} />
           <Route path="change-password" element={<ChangePasswordPageAdmin />} />
+          <Route path="profile" element={<AdminProfilePage />} />
         </Route>
 
         {/* === USER ROUTES === */}

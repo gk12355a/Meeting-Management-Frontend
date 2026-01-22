@@ -53,15 +53,16 @@ export const AuthProvider = ({ children }) => {
           username: userProfile.username || decoded.sub,
           fullName: userProfile.fullName,
           roles: userProfile.roles || decoded.roles || [],
+          avatarUrl: userProfile.avatarUrl,
         });
-        
+
         return userProfile.roles || decoded.roles || [];
       } catch (profileErr) {
         console.error("Lỗi lấy profile:", profileErr);
         // Fallback tạm thời nếu API profile lỗi
         setUser({
-            username: decoded.sub,
-            roles: decoded.roles || []
+          username: decoded.sub,
+          roles: decoded.roles || []
         });
       }
 
@@ -111,7 +112,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("token");
     localStorage.removeItem("authProvider");
     localStorage.removeItem("id_token");
-    
+
     // 3. Dọn dẹp Cookies (Frontend - nếu có)
     clearAllCookies();
 
@@ -122,11 +123,11 @@ export const AuthProvider = ({ children }) => {
 
     // 5. Điều hướng & Dọn dẹp Session Server (Backend)
     if (provider === "sso" && !silent) {
-       // Redirect sang Auth Service để xóa Cookie Server
-       window.location.href = authApi.getSSOLogoutUrl(idToken);
+      // Redirect sang Auth Service để xóa Cookie Server
+      window.location.href = authApi.getSSOLogoutUrl(idToken);
     } else if (!silent) {
-       // Nếu là Local Login -> Về trang Login
-       navigate("/login");
+      // Nếu là Local Login -> Về trang Login
+      navigate("/login");
     }
   };
 

@@ -1,12 +1,13 @@
 // DevicesPage.jsx
 import { useEffect, useState } from "react";
 import { getDevices, createDevice, updateDevice, deleteDevice } from "../../services/deviceService";
-import { Search, Plus, Edit2, Trash2, X, Check, AlertTriangle } from "lucide-react";
+import { Search, Plus, Edit2, Trash2, X, Check, AlertTriangle, Image as ImageIcon } from "lucide-react";
 import { toast } from "react-toastify";
 import { motion } from "framer-motion";
 import "react-toastify/dist/ReactToastify.css";
 import Pagination from "../../components/Pagination";
 import { useTranslation } from "react-i18next";
+import ImageLightbox from "../../components/ImageLightbox";
 const toastColors = {
   success: "#10b981", // xanh ngọc dịu
   error: "#ef4444", // đỏ ấm
@@ -27,11 +28,11 @@ setToastTheme();
 export default function DevicesPage() {
   const { t } = useTranslation(['devices', 'common']);
   // Danh sách thiết bị
-  const [devices, setDevices] = useState([]);  
+  const [devices, setDevices] = useState([]);
   // Tìm kiếm & lọc
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
-  
+
   // Modal thêm/sửa thiết bị
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingDevice, setEditingDevice] = useState(null);
@@ -40,11 +41,14 @@ export default function DevicesPage() {
     description: "",
     status: "AVAILABLE"
   });
-  
+  const [selectedImages, setSelectedImages] = useState([]);
+  const [viewDevice, setViewDevice] = useState(null);
+  const [lightbox, setLightbox] = useState({ open: false, index: 0, images: [] });
+
   // Modal xác nhận xóa
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deviceToDelete, setDeviceToDelete] = useState(null);
-  
+
   // Trạng thái loading
   const [loading, setLoading] = useState(false);
   // ===== PHÂN TRANG =====//
@@ -99,6 +103,7 @@ export default function DevicesPage() {
    * @param {Object|null} device - Thiết bị cần sửa, null nếu thêm mới
    */
   const handleOpenModal = (device = null) => {
+    setSelectedImages([]);
     if (device) {
       // Chế độ chỉnh sửa
       setEditingDevice(device);
@@ -119,6 +124,11 @@ export default function DevicesPage() {
     setIsModalOpen(false);
     setEditingDevice(null);
     setFormData({ name: "", description: "", status: "AVAILABLE" });
+    setSelectedImages([]);
+  };
+
+  const handleViewDevice = (device) => {
+    setViewDevice(device);
   };
 
   // Khi tạo mới thiết bị, show thiết bị lên đầu 
@@ -134,42 +144,31 @@ export default function DevicesPage() {
     try {
       setLoading(true);
 
-      const submitData = {
+      const payload = {
         name: formData.name.trim(),
         description: formData.description.trim(),
         status: formData.status,
       };
 
+      const submitData = new FormData();
+      submitData.append("request", new Blob([JSON.stringify(payload)], { type: "application/json" }));
+      selectedImages.forEach((image) => {
+        submitData.append("images", image);
+      });
+
       if (editingDevice) {
         // Cập nhật thiết bị
         await updateDevice(editingDevice.id, submitData);
         toast.success(t("devices:messages.updateSuccess")); // ({/* <span>Cập nhật thiết bị thành công!</span> */})
-        await fetchDevices();
-        handleCloseModal();
       } else {
         // Thêm mới thiết bị
-        const res = await createDevice(submitData);
+        await createDevice(submitData);
         toast.success(t("devices:messages.createSuccess")); // ({/* <span>Thêm thiết bị mới thành công!</span> */})
-
-        let createdDevice = res?.data;
-        if (createdDevice && createdDevice.data) createdDevice = createdDevice.data;
-
-        createdDevice = {
-          ...createdDevice,
-          status: createdDevice.status || submitData.status || "AVAILABLE",
-        };
-
-        // Cập nhật list thiết bị
-        setDevices(prev => {
-          const newDevices = [{ ...createdDevice }, ...prev];
-          return newDevices.sort((a, b) => (b.id || 0) - (a.id || 0));
-        });
-
-        // Đợi 0.3s rồi tắt modal (mượt hơn)
-        setTimeout(() => {
-          handleCloseModal();
-        }, 300);
       }
+
+      await fetchDevices();
+      handleCloseModal();
+
     } catch (error) {
       const errorMsg = error?.response?.data?.message || error?.message || t('common:messages.error');
       toast.error(
@@ -276,7 +275,7 @@ export default function DevicesPage() {
             width={32}
             height={32}
             viewBox="0 0 24 24"
-            className="text-blue-600 dark:text-blue-400"
+            className="text-emerald-600 dark:text-emerald-400"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             stroke="currentColor"
@@ -313,7 +312,7 @@ export default function DevicesPage() {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-gray-900
               placeholder-gray-400 dark:placeholder-gray-500
-              focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-400 focus:border-transparent
+              focus:ring-2 focus:ring-emerald-400 dark:focus:ring-emerald-400 focus:border-transparent
               transition-all duration-200 text-base"
             />
           </div>
@@ -323,7 +322,7 @@ export default function DevicesPage() {
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
             className="text-base px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white
-            text-gray-900 focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-400 focus:border-transparent
+            text-gray-900 focus:ring-2 focus:ring-emerald-400 dark:focus:ring-emerald-400 focus:border-transparent
              transition-all duration-200 cursor-pointer"
           >
             {/* Sử dụng common:common.filterAll và trạng thái i18n */}
@@ -336,8 +335,8 @@ export default function DevicesPage() {
           <button
             onClick={() => handleOpenModal()}
             disabled={loading}
-            className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-base
-              disabled:bg-blue-400 disabled:cursor-not-allowed
+            className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-base
+              disabled:bg-emerald-400 disabled:cursor-not-allowed
               text-white rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
           >
             <Plus size={20} />
@@ -414,7 +413,7 @@ export default function DevicesPage() {
         {/* Loading overlay */}
         {loading && (
           <div className="absolute inset-0 bg-white/80 dark:bg-gray-900/80 flex items-center justify-center z-10">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
           </div>
         )}
 
@@ -431,7 +430,7 @@ export default function DevicesPage() {
                 <th className="p-4 text-base font-semibold text-center">{t('common:common.actions')}</th>
               </tr>
             </thead>
-            
+
             {/* Table body */}
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700 text-base">
               {filteredDevices.length === 0 ? (
@@ -454,7 +453,8 @@ export default function DevicesPage() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: i * 0.03 }}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                    onClick={() => handleViewDevice(device)}
+                    className="hover:bg-gray-50 dark:hover:bg-gray-700 transition cursor-pointer"
                   >
                     <td className="p-4 font-semibold text-center">
                       {(currentPage - 1) * ITEMS_PER_PAGE + i + 1}
@@ -481,8 +481,8 @@ export default function DevicesPage() {
                         <button
                           onClick={() => handleOpenModal(device)}
                           disabled={loading}
-                          className="p-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300
-                            hover:bg-blue-100 dark:hover:bg-blue-900/20 rounded-md transition
+                          className="p-2 text-emerald-600 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300
+                            hover:bg-emerald-100 dark:hover:bg-emerald-900/20 rounded-md transition
                             disabled:opacity-50 disabled:cursor-not-allowed"
                           title={t('common:buttons.edit')}
                         >
@@ -561,7 +561,7 @@ export default function DevicesPage() {
                     className="w-full px-4 py-2.5 text-base rounded-lg border border-gray-300 dark:border-gray-600
                     bg-white dark:bg-gray-700 text-gray-900 dark:text-white
                     placeholder-gray-400 dark:placeholder-gray-500
-                    focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-400 focus:border-transparent
+                    focus:ring-2 focus:ring-emerald-400 dark:focus:ring-emerald-400 focus:border-transparent
                     disabled:opacity-50 disabled:cursor-not-allowed
                     transition-all duration-200"
                     required
@@ -583,7 +583,7 @@ export default function DevicesPage() {
                     className="w-full px-4 py-2.5 text-base rounded-lg border border-gray-300 dark:border-gray-600
                     bg-white dark:bg-gray-700 text-gray-900 dark:text-white
                     placeholder-gray-400 dark:placeholder-gray-500
-                    focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-400 focus:border-transparent
+                    focus:ring-2 focus:ring-emerald-400 dark:focus:ring-emerald-400 focus:border-transparent
                     disabled:opacity-50 disabled:cursor-not-allowed
                     transition-all duration-200 resize-none"
                   />
@@ -601,7 +601,7 @@ export default function DevicesPage() {
                     disabled={loading}
                     className="w-full px-4 py-2.5 text-base rounded-lg border border-gray-300 dark:border-gray-600
                     bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                    focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-400 focus:border-transparent
+                    focus:ring-2 focus:ring-emerald-400 dark:focus:ring-emerald-400 focus:border-transparent
                     disabled:opacity-50 disabled:cursor-not-allowed
                     transition-all duration-200 cursor-pointer"
                     required
@@ -611,6 +611,58 @@ export default function DevicesPage() {
                     <option value="AVAILABLE">{t('devices:modal.statusOptions.available')}</option>
                     <option value="UNDER_MAINTENANCE">{t('devices:modal.statusOptions.maintenance')}</option>
                   </select>
+                </div>
+
+                {/* === ẢNH THIẾT BỊ === */}
+                <div className="p-4 bg-gray-50 dark:bg-gray-700/30 rounded-xl border border-gray-200 dark:border-gray-700">
+                  <label className="block text-sm font-bold text-gray-700 dark:text-gray-200 mb-2 flex items-center gap-2">
+                    <ImageIcon size={16} />
+                    <span>Hình ảnh thiết bị</span>
+                  </label>
+
+                  <div className="flex items-center justify-center w-full">
+                    <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
+                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                        <ImageIcon className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" />
+                        <p className="text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Click để tải ảnh</span></p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">PNG, JPG (MAX. 5MB)</p>
+                      </div>
+                      <input
+                        type="file"
+                        multiple
+                        className="hidden"
+                        accept="image/*"
+                        onChange={(e) => {
+                          if (e.target.files) {
+                            const files = Array.from(e.target.files);
+                            setSelectedImages(prev => [...prev, ...files]);
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
+
+                  {/* Preview Selected Images */}
+                  {selectedImages.length > 0 && (
+                    <div className="mt-4 grid grid-cols-4 gap-2">
+                      {selectedImages.map((file, idx) => (
+                        <div key={idx} className="relative group w-full h-20 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
+                          <img
+                            src={URL.createObjectURL(file)}
+                            alt="preview"
+                            className="w-full h-full object-cover"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setSelectedImages(prev => prev.filter((_, i) => i !== idx))}
+                            className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <X size={12} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -632,7 +684,7 @@ export default function DevicesPage() {
                   onClick={handleSubmit}
                   disabled={loading}
                   className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-base
-                    bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold 
+                    bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold 
                     transition-all duration-200 shadow-sm hover:shadow-md
                     disabled:opacity-50 disabled:cursor-not-allowed"
                 >
@@ -692,7 +744,7 @@ export default function DevicesPage() {
                 {/* Bạn có chắc chắn muốn xóa thiết bị này không? */}
                 {t('devices:modal.deleteDesc')}
               </p>
-              
+
               {/* Thông tin thiết bị sẽ bị xóa */}
               {deviceToDelete && (
                 <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 mb-4">
@@ -709,7 +761,7 @@ export default function DevicesPage() {
                   </div>
                 </div>
               )}
-              
+
               {/* Cảnh báo */}
               <p className="text-base text-red-600 dark:text-red-400">
                 {/* ⚠️ Hành động này không thể hoàn tác! */}
@@ -757,6 +809,112 @@ export default function DevicesPage() {
           </motion.div>
         </div>
       )}
+      {/* MODAL CHI TIẾT THIẾT BỊ */}
+      {viewDevice && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setViewDevice(null)}>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-4xl w-full text-left overflow-hidden flex flex-col max-h-[90vh]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="relative h-64 bg-gray-200 dark:bg-gray-700">
+              {viewDevice.images && viewDevice.images.length > 0 ? (
+                <img
+                  src={viewDevice.images[0]}
+                  alt={viewDevice.name}
+                  className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-700"
+                  onClick={() => setLightbox({ open: true, index: 0, images: viewDevice.images })}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-gray-400 flex-col">
+                  <ImageIcon size={48} />
+                  <span>{t('devices:messages.noImage') || "Chưa có hình ảnh"}</span>
+                </div>
+              )}
+              <div className="absolute top-4 right-4 z-10">
+                <button onClick={() => setViewDevice(null)} className="bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition">
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 pt-20">
+                <h2 className="text-3xl font-bold text-white mb-1">{viewDevice.name}</h2>
+                <p className="text-gray-200 flex items-center gap-2">
+                  {/* <Monitor size={16} />  */}
+                  {/* Description shortened? */}
+                </p>
+              </div>
+            </div>
+
+            <div className="p-6 overflow-y-auto custom-scrollbar">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Left Info */}
+                <div className="md:col-span-2 space-y-6">
+                  {/* Description */}
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-3 flex items-center gap-2">
+                      <Check size={20} className="text-emerald-500" />
+                      {t('devices:table.description') || "Mô tả"}
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                      {viewDevice.description || "Không có mô tả chi tiết."}
+                    </p>
+                  </div>
+
+                  <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-800">
+                    <span className="block text-xs uppercase text-blue-600 dark:text-blue-400 font-bold mb-1">{t('devices:table.status') || "Trạng thái"}</span>
+                    <div className="mt-1">{getStatusBadge(viewDevice.status)}</div>
+                  </div>
+
+                  {/* More Images */}
+                  {viewDevice.images && viewDevice.images.length > 1 && (
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-3 flex items-center gap-2">
+                        <ImageIcon size={20} className="text-emerald-500" />
+                        <span>{t('devices:table.gallery')}</span>
+                      </h3>
+                      <div className="grid grid-cols-4 gap-2">
+                        {viewDevice.images.map((img, idx) => (
+                          <div
+                            key={idx}
+                            className="aspect-video rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 cursor-pointer hover:opacity-90 transition shadow-sm hover:shadow-md"
+                            onClick={() => setLightbox({ open: true, index: idx, images: viewDevice.images })}
+                          >
+                            <img src={img} alt={`Device ${idx}`} className="w-full h-full object-cover" />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Right Actions */}
+                <div className="md:col-span-1 space-y-4">
+                  <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50 border border-gray-100 dark:border-gray-600">
+                    <h4 className="font-bold text-gray-800 dark:text-white mb-2">{t('devices:table.quickActions')}</h4>
+                    <div className="space-y-2">
+                      <button onClick={() => { setViewDevice(null); handleOpenModal(viewDevice); }} className="w-full py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 rounded-lg text-sm font-medium transition flex items-center justify-center gap-2">
+                        <Edit2 size={16} /> {t('common:buttons.edit') || "Chỉnh sửa"}
+                      </button>
+                      <button onClick={() => { setViewDevice(null); handleOpenDeleteModal(viewDevice); }} className="w-full py-2 bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 rounded-lg text-sm font-medium transition flex items-center justify-center gap-2">
+                        <Trash2 size={16} /> {t('common:buttons.delete') || "Xóa thiết bị"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* LIGHTBOX */}
+      <ImageLightbox
+        open={lightbox.open}
+        onClose={() => setLightbox((prev) => ({ ...prev, open: false }))}
+        images={lightbox.images}
+        initialIndex={lightbox.index}
+      />
     </div>
   );
 }

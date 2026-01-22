@@ -14,6 +14,9 @@ import {
   Input,
   Button,
   message,
+  Calendar as MiniCalendar,
+  Checkbox,
+  Badge,
 } from "antd";
 import {
   FiCalendar,
@@ -26,6 +29,7 @@ import { QrCode } from "lucide-react";
 import dayjs from "dayjs";
 import "dayjs/locale/vi";
 import utc from "dayjs/plugin/utc";
+import updateLocale from "dayjs/plugin/updateLocale";
 import { useAuth } from "../../context/AuthContext";
 
 import { toast, ToastContainer } from "react-toastify";
@@ -41,6 +45,14 @@ import QRCheckInModal from "../../components/user/QRCheckInModal";
 
 dayjs.locale("vi");
 dayjs.extend(utc);
+dayjs.extend(updateLocale);
+
+dayjs.updateLocale("vi", {
+  weekStart: 1,
+});
+dayjs.updateLocale("en", {
+  weekStart: 1,
+});
 
 // GIỜ HÀNH CHÍNH
 const WORK_HOUR_START = 8; // 8h sáng
@@ -251,16 +263,25 @@ function injectNoBusinessTimeStyle() {
   style.innerHTML = `
     /* Slot không hợp lệ (không đặt được): màu #f1f5f9, chéo "not allowed" khi hover */
     .fc-nonbusiness, .fc-business-blocked {
-      background: #f1f5f9 !important;
-      cursor: not-allowed !important;
-      opacity: 0.65 !important;
-      border-color: #f3f4f6 !important;
+      background: repeating-linear-gradient(
+        45deg,
+        #f9fafb,
+        #f9fafb 10px,
+        #f3f4f6 10px,
+        #f3f4f6 20px
+      ) !important;
+      opacity: 0.8 !important;
     }
-    .dark .fc-nonbusiness, .dark .fc-business-blocked {
-      background: #334155 !important;
-      cursor: not-allowed !important;
-      opacity: 0.7 !important;
-      border-color: #475569 !important;
+     .dark .fc-nonbusiness, .dark .fc-business-blocked {
+      background: repeating-linear-gradient(
+        45deg,
+        #1e293b,
+        #1e293b 10px,
+        #334155 10px,
+        #334155 20px
+      ) !important;
+      opacity: 0.6 !important;
+      border-color: #334155 !important;
     }
     /* Tooltip cấm chọn */
     .fc-nonbusiness:not(.fc-event):hover::after,
@@ -287,16 +308,87 @@ function injectNoBusinessTimeStyle() {
       border-color: #475569;
     }
     /* Hiện đường line đỏ thể hiện thời gian thực tại (now-indicator) */
-    .fc .fc-timegrid-now-indicator-arrow,
     .fc .fc-timegrid-now-indicator-line {
-      background: #ef4444 !important;
-      border-color: #ef4444 !important;
+      background: #10b981 !important;
+      border-color: #10b981 !important;
     }
     .fc .fc-timegrid-now-indicator-arrow {
-      border-right-color: #ef4444 !important;
+      border-right-color: #10b981 !important;
+      border-top-color: transparent !important;
+      border-bottom-color: transparent !important;
+    }
+
+    /* === MODERN CALENDAR STYLES === */
+    /* Toolbar Buttons */
+    .fc-button-primary {
+      background-color: white !important;
+      border-color: #e5e7eb !important;
+      color: #374151 !important;
+      font-weight: 500 !important;
+      padding: 0.5rem 1rem !important;
+      border-radius: 9999px !important; /* Rounded Full */
+      text-transform: capitalize !important;
+      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+      transition: all 0.2s !important;
+    }
+    .fc-button-primary:hover {
+      background-color: #f9fafb !important;
+      border-color: #d1d5db !important;
+      color: #111827 !important;
+    }
+    .fc-button-primary:focus {
+      box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2) !important; /* Emerald Focus */
+    }
+    .fc-button-active {
+        background-color: #ecfdf5 !important; /* Emerald 50 */
+        border-color: #10b981 !important;
+        color: #059669 !important;
+    }
+
+    /* Headers */
+    .fc-col-header-cell-cushion {
+      color: #374151 !important;
+      font-weight: 600 !important;
+      padding-top: 8px !important;
+      padding-bottom: 8px !important;
+      text-decoration: none !important;
+    }
+    .fc-col-header-cell {
+        background-color: #f9fafb !important;
+        border-color: #f3f4f6 !important;
+    }
+    .dark .fc-col-header-cell {
+        background-color: #1e293b !important;
+         border-color: #334155 !important;
+    }
+     .dark .fc-col-header-cell-cushion {
+        color: #e2e8f0 !important;
+     }
+
+    /* Grid Lines - Soften them */
+    .fc-theme-standard td, .fc-theme-standard th {
+        border-color: #f3f4f6 !important;
+    }
+    .dark .fc-theme-standard td, .dark .fc-theme-standard th {
+        border-color: #334155 !important;
+    }
+    
+    /* Time Axis */
+    .fc-timegrid-slot-label-cushion {
+        font-size: 0.75rem !important;
+        color: #9ca3af !important;
+        font-weight: 500 !important;
+    }
+
+    /* Today Highlight - subtle tint */
+    .fc-day-today {
+        background-color: #ecfdf5 !important; /* Emerald 50 */
+    }
+    .dark .fc-day-today {
+        background-color: rgba(16, 185, 129, 0.1) !important;
     }
     .fc .fc-timegrid-now-indicator-line {
-      border-top: 2px solid #ef4444 !important;
+      border-top: 2px solid #10b981 !important;
       z-index: 10 !important;
     }
   `;
@@ -304,7 +396,7 @@ function injectNoBusinessTimeStyle() {
 }
 
 const MyMeetingPage = () => {
-  const { t, i18n } = useTranslation("meeting");
+  const { t, i18n } = useTranslation(["meeting", "common"]);
   const calendarLocale = i18n.language === "vi" ? "vi" : "en-gb";
 
   const buttonText = {
@@ -356,6 +448,10 @@ const MyMeetingPage = () => {
 
   // State form data
   const { user } = useAuth();
+
+  // State filters
+  const [showConfirmed, setShowConfirmed] = useState(true);
+  const [showPending, setShowPending] = useState(true);
 
   const tooltipRef = useRef();
 
@@ -433,8 +529,20 @@ const MyMeetingPage = () => {
       // --- 2. MAP DỮ LIỆU ---
       const mappedEvents = cleanedData.map((m) => {
         // Logic màu sắc
-        let bgColor = "#3b82f6"; // Xanh (CONFIRMED)
-        let borderColor = "#2563eb";
+        // Logic màu sắc
+        let bgColor = "#10b981"; // Emerald (CONFIRMED)
+        let borderColor = "#059669";
+
+        // Logic màu sắc gradient đẹp hơn
+        const isCreator = m.creator?.id === user.id;
+
+        if (m.status === "PENDING_APPROVAL") {
+          bgColor = "#f59e0b"; // Cam (PENDING)
+          borderColor = "#d97706";
+        } else if (isCreator) {
+          bgColor = "#059669"; // Emerald đậm hơn cho mình tạo
+          borderColor = "#047857";
+        }
 
         if (m.status === "PENDING_APPROVAL") {
           bgColor = "#f59e0b"; // Cam (PENDING)
@@ -584,7 +692,7 @@ const MyMeetingPage = () => {
     const id = setInterval(() => {
       try {
         calendarRef.current?.getApi()?.updateNow();
-      } catch {}
+      } catch { }
     }, 20000);
     return () => clearInterval(id);
   }, []);
@@ -635,6 +743,32 @@ const MyMeetingPage = () => {
         color: #f8fafc !important;
         border-color: #334155 !important;
       }
+      html.dark .ant-form-item-label > label { color: #f1f5f9 !important; }
+      html.dark .ant-input, html.dark .ant-picker, html.dark .ant-select-selector {
+        background-color: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+      }
+      .ant-picker-calendar-full .ant-picker-panel .ant-picker-body {
+        padding: 0 !important;
+      }
+      html.dark .ant-picker-calendar {
+         background: transparent !important;
+      }
+      
+      /* Tùy chỉnh thanh scroll */
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+      }
+      .dark ::-webkit-scrollbar-thumb {
+        background: #475569;
+      }
+
       html.dark .ant-input::placeholder, html.dark textarea.ant-input::placeholder {
         color: #94a3b8 !important;
       }
@@ -690,7 +824,7 @@ const MyMeetingPage = () => {
 
       {/* Header */}
       <div className="flex items-center gap-4 mb-6 border-b pb-3 border-gray-200 dark:border-gray-700">
-        <div className="p-3 rounded-2xl bg-gradient-to-r from-indigo-500 to-blue-500 shadow-md">
+        <div className="p-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 shadow-md">
           <FiCalendar className="text-white text-2xl" />
         </div>
         <div>
@@ -703,85 +837,196 @@ const MyMeetingPage = () => {
         </div>
       </div>
 
-      {/* Calendar */}
+      {/* Calendar Layout */}
       {loading ? (
         <div className="flex justify-center items-center h-96">
           <Spin size="large" />
         </div>
       ) : (
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 transition-colors duration-500">
-          <FullCalendar
-            ref={calendarRef}
-            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-            initialView="timeGridWeek"
-            locale={calendarLocale}
-            buttonText={buttonText}
-            buttonHints={{
-              prev: i18n.language === "vi" ? "Tuần trước" : "Previous",
-              next: i18n.language === "vi" ? "Tuần sau" : "Next",
-              today: i18n.language === "vi" ? "Hôm nay" : "Today",
-              day: i18n.language === "vi" ? "Xem theo ngày" : "Day view",
-              week: i18n.language === "vi" ? "Xem theo tuần" : "Week view",
-              month: i18n.language === "vi" ? "Xem theo tháng" : "Month view",
-            }}
-            // BẮT SỰ KIỆN THAY ĐỔI VIEW (CHUYỂN TUẦN / THÁNG / NGÀY)
-            datesSet={(arg) => {
-              setCurrentViewDate(arg.start);
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* SIDEBAR MINI CALENDAR (Desktop only) */}
+          <div className="hidden lg:block w-72 shrink-0 space-y-6">
+            {/* Create Button */}
+            <button
+              onClick={() => setQuickBooking({ ...quickBooking, open: true, start: dayjs(), end: dayjs().add(1, 'hour') })}
+              className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white py-3 px-4 rounded-full shadow-lg transition-transform transform hover:scale-105 font-medium text-lg"
+            >
+              <FiPlusCircle size={24} />
+              <span>{t("common:buttons.create")}</span>
+            </button>
 
-              // Nếu user chuyển sang tuần/ngày/tháng khác → cập nhật fixedViewDate
-              if (
-                !fixedViewDate ||
-                !dayjs(arg.start).isSame(fixedViewDate, "day")
-              ) {
-                setFixedViewDate(arg.start);
+            {/* Mini Calendar */}
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
+              <MiniCalendar
+                fullscreen={false}
+                onSelect={(date) => {
+                  const jsDate = date.toDate();
+                  calendarRef.current?.getApi()?.gotoDate(jsDate);
+                  setCurrentViewDate(jsDate);
+                }}
+                value={dayjs(currentViewDate)}
+                headerRender={({ value, onChange }) => {
+                  const start = 0;
+                  const end = 12;
+                  const monthOptions = [];
+
+                  const current = value.clone();
+                  const localeData = value.localeData();
+                  const months = [];
+                  for (let i = 0; i < 12; i++) {
+                    current.month(i);
+                    months.push(localeData.monthsShort(current));
+                  }
+
+                  for (let i = start; i < end; i++) {
+                    monthOptions.push(
+                      <Select.Option key={i} value={i} className="month-item">
+                        {months[i]}
+                      </Select.Option>,
+                    );
+                  }
+
+                  const year = value.year();
+                  const month = value.month();
+                  const options = [];
+                  for (let i = year - 10; i < year + 10; i += 1) {
+                    options.push(
+                      <Select.Option key={i} value={i} className="year-item">
+                        {i}
+                      </Select.Option>,
+                    );
+                  }
+                  return (
+                    <div className="flex justify-between items-center mb-2 px-2">
+                      <span className="font-semibold text-gray-700 dark:text-gray-200">
+                        {dayjs(value).format("MMMM YYYY")}
+                      </span>
+                      <div className="flex gap-1">
+                        <Button
+                          size="small"
+                          type="text"
+                          onClick={() => onChange(value.clone().subtract(1, 'month'))}
+                        >
+                          {"<"}
+                        </Button>
+                        <Button
+                          size="small"
+                          type="text"
+                          onClick={() => onChange(value.clone().add(1, 'month'))}
+                        >
+                          {">"}
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                }}
+              />
+            </div>
+
+            {/* My Calendars Filter Demo */}
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
+              <h3 className="font-semibold text-gray-700 dark:text-gray-200 mb-3">{i18n.language === 'vi' ? 'Lịch của tôi' : 'My Calendars'}</h3>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    checked={showConfirmed}
+                    onChange={(e) => setShowConfirmed(e.target.checked)}
+                    className="accent-emerald-600"
+                  />
+                  <span className="text-gray-600 dark:text-gray-400 text-sm">Sự kiện (Emerald)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    checked={showPending}
+                    onChange={(e) => setShowPending(e.target.checked)}
+                  />
+                  <span className="text-gray-600 dark:text-gray-400 text-sm">Chờ duyệt (Amber)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* MAIN CALENDAR */}
+          <div className="flex-1 bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-2 transition-colors duration-500 border border-gray-200 dark:border-gray-700">
+            <FullCalendar
+              ref={calendarRef}
+              plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+              firstDay={1}
+              initialView="timeGridWeek"
+              locale={calendarLocale}
+              buttonText={buttonText}
+              buttonHints={{
+                prev: i18n.language === "vi" ? "Tuần trước" : "Previous",
+                next: i18n.language === "vi" ? "Tuần sau" : "Next",
+                today: i18n.language === "vi" ? "Hôm nay" : "Today",
+                day: i18n.language === "vi" ? "Xem theo ngày" : "Day view",
+                week: i18n.language === "vi" ? "Xem theo tuần" : "Week view",
+                month: i18n.language === "vi" ? "Xem theo tháng" : "Month view",
+              }}
+              // BẮT SỰ KIỆN THAY ĐỔI VIEW (CHUYỂN TUẦN / THÁNG / NGÀY)
+              datesSet={(arg) => {
+                setCurrentViewDate(arg.start);
+
+                // Nếu user chuyển sang tuần/ngày/tháng khác → cập nhật fixedViewDate
+                if (
+                  !fixedViewDate ||
+                  !dayjs(arg.start).isSame(fixedViewDate, "day")
+                ) {
+                  setFixedViewDate(arg.start);
+                }
+
+                setCurrentViewType(arg.view.type);
+              }}
+              headerToolbar={{
+                left: "prev,next today",
+                center: "title",
+                right: "timeGridDay,timeGridWeek,dayGridMonth",
+              }}
+              allDaySlot={false}
+              slotMinTime="08:00:00"
+              slotMaxTime="19:00:00"
+              events={events.filter(e => {
+                if (e.extendedProps.status === "PENDING_APPROVAL") return showPending;
+                return showConfirmed;
+              })}
+              eventClick={handleEventClick}
+              eventMouseEnter={handleEventMouseEnter}
+              eventMouseLeave={handleEventMouseLeave}
+              height="80vh"
+              selectable={true}
+              selectMirror={true}
+              select={handleDateSelect}
+              selectAllow={function (selectInfo) {
+                const start = dayjs(selectInfo.start);
+                const end = dayjs(selectInfo.end);
+                const validStart = isBusinessTime(start);
+                const validEnd = isBusinessTime(end);
+                // chỉ cho phép chọn nếu trong cùng 1 ngày
+                const sameDay = isSameDay(start, end.subtract(1, "minute")); // subtract 1 minute to avoid end 00:00 of next day
+                return validStart && validEnd && sameDay;
+              }}
+              eventAllow={function (dropInfo, draggedEvent) {
+                const start = dayjs(dropInfo.start);
+                const end = dayjs(dropInfo.end);
+                const validStart = isBusinessTime(start);
+                const validEnd = isBusinessTime(end);
+                // CHỈ CHO KÉO THẢ TRONG 1 NGÀY
+                const sameDay = isSameDay(start, end.subtract(1, "minute"));
+                return validStart && validEnd && sameDay;
+              }}
+              businessHours={{
+                daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
+                startTime: "08:00",
+                endTime: "19:00",
+              }}
+              backgroundEvents={(arg) =>
+                getNonBusinessHourBackgroundEvents(arg.start, arg.end)
               }
-
-              setCurrentViewType(arg.view.type);
-            }}
-            headerToolbar={{
-              left: "prev,next today",
-              center: "title",
-              right: "timeGridDay,timeGridWeek,dayGridMonth",
-            }}
-            allDaySlot={false}
-            slotMinTime="06:00:00"
-            slotMaxTime="19:30:00"
-            events={events}
-            eventClick={handleEventClick}
-            eventMouseEnter={handleEventMouseEnter}
-            eventMouseLeave={handleEventMouseLeave}
-            height="75vh"
-            selectable={true}
-            selectMirror={true}
-            select={handleDateSelect}
-            selectAllow={function (selectInfo) {
-              const start = dayjs(selectInfo.start);
-              const end = dayjs(selectInfo.end);
-              const validStart = isBusinessTime(start);
-              const validEnd = isBusinessTime(end);
-              // chỉ cho phép chọn nếu trong cùng 1 ngày
-              const sameDay = isSameDay(start, end.subtract(1, "minute")); // subtract 1 minute to avoid end 00:00 of next day
-              return validStart && validEnd && sameDay;
-            }}
-            eventAllow={function (dropInfo, draggedEvent) {
-              const start = dayjs(dropInfo.start);
-              const end = dayjs(dropInfo.end);
-              const validStart = isBusinessTime(start);
-              const validEnd = isBusinessTime(end);
-              // CHỈ CHO KÉO THẢ TRONG 1 NGÀY
-              const sameDay = isSameDay(start, end.subtract(1, "minute"));
-              return validStart && validEnd && sameDay;
-            }}
-            businessHours={{
-              daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
-              startTime: "08:00",
-              endTime: "18:00",
-            }}
-            backgroundEvents={(arg) =>
-              getNonBusinessHourBackgroundEvents(arg.start, arg.end)
-            }
-            nowIndicator={true}
-          />
+              nowIndicator={true}
+              dayMaxEvents={true}
+              eventClassNames="rounded-md border-0 shadow-sm opacity-90 hover:opacity-100 transition-opacity"
+            />
+          </div>
         </div>
       )}
 
@@ -846,7 +1091,7 @@ const MyMeetingPage = () => {
                 setIsEditModalOpen(true);
                 setIsModalOpen(false);
               }}
-              className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500"
+              className="bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500"
             >
               {t("buttons.edit")}
             </Button>

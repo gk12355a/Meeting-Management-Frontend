@@ -11,7 +11,9 @@
     "name": "Tên thiết bị",
     "description": "Mô tả",
     "status": "Trạng thái",
-    "noDescription": "Chưa có mô tả"
+    "noDescription": "Chưa có mô tả",
+    "gallery": "Thư viện ảnh",
+    "quickActions": "Thao tác nhanh"
   },
   "modal": {
     "addTitle": "Thêm thiết bị mới",
@@ -43,6 +45,7 @@
     "nameRequired": "Vui lòng nhập tên thiết bị!",
     "loadError": "Không thể tải danh sách thiết bị!",
     "noDevices": "Không tìm thấy thiết bị nào",
-    "noDevicesDesc": "Thử thay đổi bộ lọc hoặc tìm kiếm khác"
+    "noDevicesDesc": "Thử thay đổi bộ lọc hoặc tìm kiếm khác",
+    "noImage": "Chưa có hình ảnh"
   }
 }
