@@ -23,6 +23,7 @@ import AdminProfilePage from "./pages/admin/ProfilePage";
 import UserDashboard from "./pages/user/DashboardPage";
 import MyMeetingsPage from "./pages/user/MyMeetingsPage";
 import CreateMeetingPage from "./pages/user/CreateMeetingPage";
+import ContactGroupsPage from "./pages/user/ContactGroupsPage";
 import UserRoomsPage from "./pages/user/RoomsPage";
 import HistoryPage from "./pages/user/HistoryPage";
 import ProfilePage from "./pages/user/ProfilePage";
@@ -116,6 +117,7 @@ export default function App() {
           <Route path="dashboard" element={<UserDashboard />} />
           <Route path="my-meetings" element={<MyMeetingsPage />} />
           <Route path="create-meeting" element={<CreateMeetingPage />} />
+          <Route path="contact-groups" element={<ContactGroupsPage />} />
           <Route path="rooms" element={<UserRoomsPage />} />
           <Route path="devices" element={<DevicePage />} />
           <Route path="history" element={<HistoryPage />} />

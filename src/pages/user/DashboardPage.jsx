@@ -285,7 +285,7 @@ export default function DashboardPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
-            👋 {t("welcomeTitle", { username: user?.username || "User" })}
+            👋 {t("welcomeTitle", { username: user?.fullName || user?.username || "User" })}
           </h1>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
             {t("welcomeSubtitle")}

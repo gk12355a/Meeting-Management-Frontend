@@ -17,6 +17,8 @@ import {
   Calendar as MiniCalendar,
   Checkbox,
   Badge,
+  Radio,
+  DatePicker
 } from "antd";
 import {
   FiCalendar,
@@ -24,6 +26,7 @@ import {
   FiUsers,
   FiEdit,
   FiAlertTriangle,
+  FiDownload
 } from "react-icons/fi";
 import { QrCode } from "lucide-react";
 import dayjs from "dayjs";
@@ -31,6 +34,7 @@ import "dayjs/locale/vi";
 import utc from "dayjs/plugin/utc";
 import updateLocale from "dayjs/plugin/updateLocale";
 import { useAuth } from "../../context/AuthContext";
+import { exportToCSV } from "../../utils/exportHelper";
 
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -446,6 +450,11 @@ const MyMeetingPage = () => {
   // State mới cho QR Check-in Modal
   const [isQRModalOpen, setIsQRModalOpen] = useState(false);
 
+  // Export State
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [exportOption, setExportOption] = useState("all");
+  const [exportDateRange, setExportDateRange] = useState(null);
+
   // State form data
   const { user } = useAuth();
 
@@ -817,6 +826,39 @@ const MyMeetingPage = () => {
   //   quickBooking.open,
   // ]);
 
+  const handleExportClick = () => {
+    setIsExportModalOpen(true);
+  };
+
+  const executeExport = () => {
+    let dataToExport = events;
+
+    if (exportOption === "range" && exportDateRange) {
+      const [start, end] = exportDateRange;
+      const startDate = start.startOf('day');
+      const endDate = end.endOf('day');
+
+      dataToExport = events.filter(e => {
+        const eventDate = dayjs(e.start);
+        return eventDate.isAfter(startDate) && eventDate.isBefore(endDate);
+      });
+    }
+
+    const headers = ["ID", "Tiêu đề", "Phòng", "Bắt đầu", "Kết thúc", "Trạng thái", "Ghi chú"];
+    const rows = dataToExport.map(e => [
+      e.id,
+      e.title,
+      e.extendedProps?.roomName || "N/A",
+      dayjs(e.start).format("DD/MM/YYYY HH:mm"),
+      dayjs(e.end).format("DD/MM/YYYY HH:mm"),
+      e.extendedProps?.status || "UNKNOWN",
+      e.extendedProps?.note || ""
+    ]);
+
+    exportToCSV(headers, rows, `Danh_sach_lich_hop_${dayjs().format('DDMMYYYY')}`);
+    setIsExportModalOpen(false);
+  };
+
   // RENDER
   return (
     <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-500">
@@ -835,7 +877,44 @@ const MyMeetingPage = () => {
             {t("todayMeetings")}
           </p>
         </div>
+
+        <div className="ml-auto">
+          <Button
+            icon={<FiDownload />}
+            onClick={handleExportClick}
+            className="!flex !items-center !gap-2"
+          >
+            {i18n.language === 'vi' ? 'Xuất báo cáo' : 'Export Report'}
+          </Button>
+        </div>
       </div>
+
+      {/* Modal Xuất Báo Cáo */}
+      <Modal
+        title="Xuất báo cáo lịch họp"
+        open={isExportModalOpen}
+        onOk={executeExport}
+        onCancel={() => setIsExportModalOpen(false)}
+        okText="Xuất file"
+        cancelText="Hủy"
+      >
+        <div className="space-y-4">
+          <Radio.Group onChange={(e) => setExportOption(e.target.value)} value={exportOption} className="flex flex-col gap-2">
+            <Radio value="all">Tất cả cuộc họp</Radio>
+            <Radio value="range">Chọn khoảng thời gian</Radio>
+          </Radio.Group>
+
+          {exportOption === "range" && (
+            <div className="ml-6">
+              <DatePicker.RangePicker
+                value={exportDateRange}
+                onChange={(dates) => setExportDateRange(dates)}
+                format="DD/MM/YYYY"
+              />
+            </div>
+          )}
+        </div>
+      </Modal>
 
       {/* Calendar Layout */}
       {loading ? (
