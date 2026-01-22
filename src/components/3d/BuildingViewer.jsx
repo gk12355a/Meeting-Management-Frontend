@@ -175,7 +175,6 @@ const BuildingViewer = ({ open, onClose, rooms, onRoomClick }) => {
                                 <directionalLight position={[10, 20, 10]} intensity={1.2} />
                                 <directionalLight position={[-10, 5, -10]} intensity={0.5} />
 
-                                {/* Grid Helper: Sát chân đế tòa nhà (-0.6) */}
                                 <gridHelper args={[60, 60, 0x475569, 0x334155]} position={[0, -2.6, 0]} />
 
                                 {/* Controls: Cho phép Xoay, Zoom, và Di chuyển (Pan) */}
