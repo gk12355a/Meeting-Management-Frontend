@@ -3,14 +3,15 @@ import React from "react";
 import { NavLink } from "react-router-dom";
 import ThemeToggle from "../ThemeToggle";
 import { useTranslation } from "react-i18next";
-import { FiUsers, FiBarChart2, FiBriefcase } from "react-icons/fi";
+import { FiUsers, FiBarChart2 } from "react-icons/fi";
 import { BsCalendar4Week } from "react-icons/bs";
 import { HiOutlineDeviceMobile } from "react-icons/hi";
+import { MdMeetingRoom } from "react-icons/md";
 
 const adminMenu = [
   { to: "/admin", labelKey: "sidebar.menu.dashboard", icon: <BsCalendar4Week size={18} /> },
   { to: "/admin/users", labelKey: "sidebar.menu.users", icon: <FiUsers size={18} /> },
-  { to: "/admin/rooms", labelKey: "sidebar.menu.rooms", icon: <FiBriefcase size={18} /> },
+  { to: "/admin/rooms", labelKey: "sidebar.menu.rooms", icon: <MdMeetingRoom size={18} /> },
   { to: "/admin/devices", labelKey: "sidebar.menu.devices", icon: <HiOutlineDeviceMobile size={18} /> },
   { to: "/admin/reports", labelKey: "sidebar.menu.reports", icon: <FiBarChart2 size={18} /> },
 ];

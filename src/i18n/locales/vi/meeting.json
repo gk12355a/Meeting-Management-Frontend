@@ -54,5 +54,11 @@
     "edit": "Sửa",
     "cancelMeeting": "Hủy họp",
     "close": "Đóng"
-  }
+  },
+  "createButton": "Tạo cuộc họp",
+  "devices": "Thiết bị",
+  "guestEmail": "Email khách mời",
+  "recurring": "Lặp lại",
+  "frequency": "Tần suất",
+  "repeatUntil": "Lặp đến ngày"
 }

@@ -1,6 +1,4 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import { useAuth } from "./context/AuthContext";
 
 // ===== Layouts =====
@@ -161,16 +159,6 @@ export default function App() {
         />
         <Route path="/check-in/:code" element={<CheckInProcessingPage />} />
       </Routes>
-
-      {/* ToastContainer */}
-      <ToastContainer
-        position="top-right"
-        autoClose={2000}
-        limit={3}
-        pauseOnHover
-        newestOnTop
-        theme="light"
-      />
     </>
   );
 }

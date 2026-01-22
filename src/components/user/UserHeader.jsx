@@ -203,12 +203,12 @@ const UserHeader = ({ setIsSidebarOpen }) => {
       <div className="flex items-center gap-3">
         <button
           onClick={() => setIsSidebarOpen(prev => !prev)}
-          className="w-9 h-9 rounded-lg bg-emerald-900 flex items-center justify-center hover:bg-emerald-800 transition"
+          className="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center hover:bg-emerald-800 transition"
         >
           <FiMenu size={20} />
         </button>
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 bg-emerald-600 rounded-lg flex items-center justify-center text-white">🗓️</div>
+          <div className="w-6 h-6 bg-emerald-600 rounded-lg flex items-center justify-center text-white">🍀</div>
           <span className="font-semibold text-lg">6X6</span>
         </div>
       </div>

@@ -393,7 +393,7 @@ const BookRoomModal = ({ open, onCancel, prefilledRoom, start, end, onSuccess })
             <p className="text-sm text-blue-800 dark:text-blue-300">
               <span className="font-semibold">📍 {t("roomLabel")}:</span> {prefilledRoom?.name}
               {prefilledRoom?.location && ` - ${prefilledRoom.location}`}
-              {prefilledRoom?.capacity && ` (${prefilledRoom.capacity} {t("people")})`}
+              {prefilledRoom?.capacity && ` (${prefilledRoom.capacity} ${t("people")})`}
             </p>
           </div>
 

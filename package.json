@@ -21,6 +21,8 @@
     "@mui/material": "^7.3.5",
     "@mui/x-date-pickers": "^8.18.0",
     "@radix-ui/react-switch": "^1.2.6",
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.5.0",
     "@stream-io/video-react-sdk": "^1.31.3",
     "antd": "^5.28.0",
     "axios": "^1.13.1",
@@ -50,7 +52,8 @@
     "recharts": "^3.3.0",
     "stream-chat": "^9.28.0",
     "stream-chat-react": "^13.13.3",
-    "tailwind-merge": "^3.3.1"
+    "tailwind-merge": "^3.3.1",
+    "three": "^0.182.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",

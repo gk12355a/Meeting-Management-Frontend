@@ -6,10 +6,10 @@ import {
   FiHome,
   FiCalendar,
   FiPlusCircle,
-  FiBriefcase,
   FiClock,
   FiMonitor
 } from "react-icons/fi";
+import { MdMeetingRoom } from "react-icons/md";
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
   const { t } = useTranslation("userSidebar");
@@ -18,7 +18,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     { to: "/user", label: t("menu.dashboard"), icon: <FiHome size={20} /> },
     { to: "/user/my-meetings", label: t("menu.myMeetings"), icon: <FiCalendar size={20} /> },
     { to: "/user/create-meeting", label: t("menu.createMeeting"), icon: <FiPlusCircle size={20} /> },
-    { to: "/user/rooms", label: t("menu.rooms"), icon: <FiBriefcase size={20} /> },
+    { to: "/user/rooms", label: t("menu.rooms"), icon: <MdMeetingRoom size={20} /> },
     { to: "/user/devices", label: t("menu.devices"), icon: <FiMonitor size={20} /> },
     { to: "/user/history", label: t("menu.history"), icon: <FiClock size={20} /> }
   ];

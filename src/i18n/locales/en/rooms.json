@@ -26,8 +26,10 @@
       "location": "Location",
       "capacity": "Capacity",
       "status": "Status",
-      "equipment": "Available Equipment"
+      "equipment": "Available Equipment",
+      "images": "Room Images"
     },
+    "clickToUpload": "Click to upload",
     "placeholders": {
       "name": "e.g., Mars Meeting Room",
       "location": "e.g., 3rd Floor",
@@ -69,6 +71,7 @@
     "capacityInvalid": "Capacity must be greater than 0",
     "deviceExists": "This equipment is already in the list",
     "loadError": "Error loading room list",
-    "noResults": "No data found"
+    "noResults": "No data found",
+    "noImage": "No image available"
   }
 }

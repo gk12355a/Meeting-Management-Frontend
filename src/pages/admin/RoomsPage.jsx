@@ -23,6 +23,8 @@ import Pagination from "../../components/Pagination";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import ImageLightbox from "../../components/ImageLightbox";
+import BuildingViewer from "../../components/3d/BuildingViewer";
+import { FiBox } from "react-icons/fi";
 const toastColors = {
   success: "#10b981",
   error: "#ef4444",
@@ -87,6 +89,8 @@ export default function RoomsPage() {
     name: "",
     capacity: 0,
     location: "",
+    buildingName: "",
+    floor: "",
     status: "AVAILABLE",
     requiresApproval: true, // Mặc định luôn là true
     fixedDevices: [], // Mảng chứa danh sách thiết bị
@@ -94,9 +98,12 @@ export default function RoomsPage() {
   const [selectedImages, setSelectedImages] = useState([]);
   const [viewRoom, setViewRoom] = useState(null);
   const [lightbox, setLightbox] = useState({ open: false, index: 0, images: [] });
+  const [is3DOpen, setIs3DOpen] = useState(false);
 
   // State tạm để nhập tên thiết bị mới trong form
   const [deviceInput, setDeviceInput] = useState("");
+  const [existingImages, setExistingImages] = useState([]); // Ảnh cũ từ server
+  const [imagesToDelete, setImagesToDelete] = useState([]); // Danh sách URL ảnh cần xóa
 
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 5;
@@ -162,22 +169,29 @@ export default function RoomsPage() {
   const handleOpenModal = (room = null) => {
     setDeviceInput(""); // Reset input thiết bị
     setSelectedImages([]);
+    setImagesToDelete([]);
     if (room) {
       setEditingRoom(room);
+      setExistingImages(room.images || []);
       setFormData({
         name: room.name,
         capacity: room.capacity,
         location: room.location,
+        buildingName: room.buildingName || "",
+        floor: room.floor || "",
         status: room.status,
         requiresApproval: true, // Luôn đảm bảo là true khi sửa (hoặc giữ room.requiresApproval nếu muốn)
         fixedDevices: room.fixedDevices.map(dev => DEVICE_MAP[dev] || dev),
       });
     } else {
       setEditingRoom(null);
+      setExistingImages([]);
       setFormData({
         name: "",
         capacity: 0,
         location: "",
+        buildingName: "",
+        floor: "",
         status: "AVAILABLE",
         requiresApproval: true, // Mặc định là true khi tạo mới
         fixedDevices: [],
@@ -191,6 +205,8 @@ export default function RoomsPage() {
     setEditingRoom(null);
     setDeviceInput("");
     setSelectedImages([]);
+    setExistingImages([]);
+    setImagesToDelete([]);
   };
 
   const handleViewRoom = (room) => {
@@ -253,6 +269,8 @@ export default function RoomsPage() {
       const payload = {
         name: formData.name.trim(),
         location: formData.location.trim(),
+        buildingName: formData.buildingName.trim(),
+        floor: formData.floor ? parseInt(formData.floor, 10) : null,
         capacity: capacityValue,
         status: formData.status,
         requiresApproval: true, // Luôn yêu cầu duyệt
@@ -264,6 +282,11 @@ export default function RoomsPage() {
 
       selectedImages.forEach((image) => {
         submitData.append("images", image);
+      });
+
+      // Gửi danh sách ảnh cần xóa (nếu có)
+      imagesToDelete.forEach((imgUrl) => {
+        submitData.append("deleteImages", imgUrl);
       });
 
       if (editingRoom) {
@@ -404,6 +427,14 @@ export default function RoomsPage() {
             {/* ({/* <span>Đang bảo trì</span> */}
           </select>
           <button
+            onClick={() => setIs3DOpen(true)}
+            className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold shadow hover:shadow-lg transition disabled:opacity-50"
+          >
+            <FiBox size={20} />
+            {/* <span>Xem 3D</span> */}
+            <span>Xem 3D</span>
+          </button>
+          <button
             onClick={() => handleOpenModal()}
             disabled={loading}
             className="flex items-center gap-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold shadow hover:shadow-lg transition disabled:opacity-50"
@@ -519,8 +550,13 @@ export default function RoomsPage() {
                       </div>
                     </td>
                     <td className="p-4 text-gray-600 dark:text-gray-400">
-                      {room.location || (
-                        <span className="italic text-gray-400">--</span>
+                      {room.buildingName ? (
+                        <div className="flex flex-col">
+                          <span className="font-medium">{room.buildingName}</span>
+                          <span className="text-xs text-gray-500">Tầng {room.floor}</span>
+                        </div>
+                      ) : (
+                        room.location || <span className="italic text-gray-400">--</span>
                       )}
                     </td>
                     <td className="p-4 text-gray-900 dark:text-white font-medium">
@@ -640,21 +676,33 @@ export default function RoomsPage() {
                   />
                 </div>
 
-                {/* Grid: Location & Capacity */}
-                <div className="grid grid-cols-2 gap-4">
+                {/* Grid: Building, Floor, Capacity */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      {/* <span>Vị trí</span> */}
-                      <span>{t('rooms:modal.fields.location')}</span>
+                      Tòa nhà/Khu vực
                     </label>
                     <input
                       type="text"
-                      value={formData.location}
+                      value={formData.buildingName}
                       onChange={(e) =>
-                        setFormData({ ...formData, location: e.target.value })
+                        setFormData({ ...formData, buildingName: e.target.value })
                       }
-                      placeholder={t('rooms:modal.placeholders.location')}
-                      // ({/* <span>placeholder="VD: Tầng 3"</span> */})
+                      placeholder="VD: Tòa A"
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none transition"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Tầng
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.floor}
+                      onChange={(e) =>
+                        setFormData({ ...formData, floor: e.target.value })
+                      }
+                      placeholder="VD: 3"
                       className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none transition"
                     />
                   </div>
@@ -674,6 +722,23 @@ export default function RoomsPage() {
                       className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none transition"
                     />
                   </div>
+                </div>
+
+                {/* Location (Optional/Computed) */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    {/* <span>Vị trí</span> */}
+                    <span>{t('rooms:modal.fields.location')} (Hiển thị)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.location}
+                    onChange={(e) =>
+                      setFormData({ ...formData, location: e.target.value })
+                    }
+                    placeholder={t('rooms:modal.placeholders.location')}
+                    className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none transition"
+                  />
                 </div>
 
                 {/* Status */}
@@ -815,25 +880,57 @@ export default function RoomsPage() {
                     </label>
                   </div>
 
-                  {/* Preview Selected Images */}
+                  {/* Preview Existing Images (Server) */}
+                  {existingImages.length > 0 && (
+                    <div className="mt-4">
+                      <p className="text-xs text-gray-500 mb-2">Ảnh hiện có:</p>
+                      <div className="grid grid-cols-4 gap-2">
+                        {existingImages.map((imgUrl, idx) => (
+                          // Nếu ảnh đã bị mark xóa thì ẩn đi
+                          !imagesToDelete.includes(imgUrl) && (
+                            <div key={idx} className="relative group w-full h-20 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
+                              <img
+                                src={imgUrl}
+                                alt="existing"
+                                className="w-full h-full object-cover"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setImagesToDelete((prev) => [...prev, imgUrl])}
+                                className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                title="Xóa ảnh này"
+                              >
+                                <X size={12} />
+                              </button>
+                            </div>
+                          )
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Preview Selected Images (New Uploads) */}
                   {selectedImages.length > 0 && (
-                    <div className="mt-4 grid grid-cols-4 gap-2">
-                      {selectedImages.map((file, idx) => (
-                        <div key={idx} className="relative group w-full h-20 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
-                          <img
-                            src={URL.createObjectURL(file)}
-                            alt="preview"
-                            className="w-full h-full object-cover"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setSelectedImages(prev => prev.filter((_, i) => i !== idx))}
-                            className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <X size={12} />
-                          </button>
-                        </div>
-                      ))}
+                    <div className="mt-4">
+                      <p className="text-xs text-gray-500 mb-2">Ảnh mới chọn:</p>
+                      <div className="grid grid-cols-4 gap-2">
+                        {selectedImages.map((file, idx) => (
+                          <div key={idx} className="relative group w-full h-20 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
+                            <img
+                              src={URL.createObjectURL(file)}
+                              alt="preview"
+                              className="w-full h-full object-cover"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setSelectedImages(prev => prev.filter((_, i) => i !== idx))}
+                              className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <X size={12} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -1037,6 +1134,17 @@ export default function RoomsPage() {
         onClose={() => setLightbox((prev) => ({ ...prev, open: false }))}
         images={lightbox.images}
         initialIndex={lightbox.index}
+      />
+
+      <BuildingViewer
+        open={is3DOpen}
+        onClose={() => setIs3DOpen(false)}
+        rooms={rooms}
+        onRoomClick={(room) => {
+          setViewRoom(room);
+          setIs3DOpen(false);
+          // Optionally trigger edit or view logic here
+        }}
       />
     </div>
   );

@@ -54,5 +54,11 @@
     "edit": "Edit",
     "cancelMeeting": "Cancel meeting",
     "close": "Close"
-  }
+  },
+  "createButton": "Create meeting",
+  "devices": "Devices",
+  "guestEmail": "Guest email",
+  "recurring": "Recurring meeting",
+  "frequency": "Frequency",
+  "repeatUntil": "Repeat until"
 }
