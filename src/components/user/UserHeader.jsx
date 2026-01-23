@@ -18,7 +18,7 @@ const NotificationItem = ({ notification, onMarkRead }) => {
   const [isResponding, setIsResponding] = useState(false);
   const { t } = useTranslation(['userHeader']);
 
-  // Thông báo LỜI MỜI họp (người khác mời bạn)
+  // Thông báo LỜI MỜI họp
   const isInvite =
     notification.message.includes("mời bạn tham gia") ||
     notification.message.includes("đã mời");
@@ -30,9 +30,6 @@ const NotificationItem = ({ notification, onMarkRead }) => {
     notification.message.includes("bị từ chối") ||
     notification.message.includes("đã chấp nhận") ||
     notification.message.includes("đã từ chối");
-
-  // Chỉ hiện nút nếu là Lời mời họp VÀ chưa đọc VÀ không phải thông báo trạng thái
-  // const showActions = notification.meetingId && !notification.read && !isStatusUpdate;
 
   const showActions =
     isInvite &&
@@ -53,62 +50,76 @@ const NotificationItem = ({ notification, onMarkRead }) => {
     }
   };
 
-  // === 1. LOGIC CLICK ===
   const handleNavigate = () => {
-    // Luôn đánh dấu là đã đọc khi click vào nội dung
     if (!notification.read) {
       onMarkRead(notification.id);
     }
-
-    // Chỉ điều hướng nếu có meetingId
     if (notification.meetingId) {
       navigate('/user/my-meetings');
     }
   };
 
+  // Determine Icon based on type
+  let Icon = FiBell;
+  let iconColor = "text-blue-500 bg-blue-50 dark:bg-blue-900/20";
+  if (isInvite) {
+    Icon = FiUser;
+    iconColor = "text-purple-500 bg-purple-50 dark:bg-purple-900/20";
+  } else if (isStatusUpdate) {
+    if (notification.message.includes("đã chấp nhận") || notification.message.includes("đã được phê duyệt")) {
+      Icon = FiCheck;
+      iconColor = "text-green-500 bg-green-50 dark:bg-green-900/20";
+    } else if (notification.message.includes("từ chối")) {
+      Icon = FiX;
+      iconColor = "text-red-500 bg-red-50 dark:bg-red-900/20";
+    }
+  }
+
   return (
-    <div className={`p-3 border-b dark:border-slate-700 ${notification.read ? 'opacity-70' : ''}`}>
-      <div onClick={handleNavigate} className="cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700 -m-3 p-3 rounded-lg">
-        <p className={`text-sm text-gray-800 dark:text-gray-100 ${!notification.read ? 'font-semibold' : ''}`}>
-          {notification.message}
-        </p>
-        <span className="text-xs text-gray-500 dark:text-gray-400">
-          {new Date(notification.createdAt).toLocaleString()}
-        </span>
+    <div className={`relative group p-4 border-b border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors ${!notification.read ? 'bg-emerald-50/30 dark:bg-emerald-900/10' : ''}`}>
+      <div className="flex gap-4 cursor-pointer" onClick={handleNavigate}>
+        {/* Icon */}
+        <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${iconColor}`}>
+          <Icon size={18} />
+        </div>
+
+        {/* Content */}
+        <div className="flex-1">
+          <p className={`text-sm text-gray-800 dark:text-gray-200 mb-1 leading-snug ${!notification.read ? 'font-semibold' : ''}`}>
+            {notification.message}
+          </p>
+          <span className="text-xs text-gray-400 dark:text-gray-500 block">
+            {new Date(notification.createdAt).toLocaleString()}
+          </span>
+
+          {/* Buttons Area */}
+          {showActions && (
+            <div className="flex items-center gap-2 mt-3" onClick={(e) => e.stopPropagation()}>
+              <button
+                onClick={() => handleResponse('ACCEPTED')}
+                disabled={isResponding}
+                className="flex-1 inline-flex justify-center items-center px-3 py-1.5 text-xs font-semibold rounded-md text-white bg-emerald-600 hover:bg-emerald-700 transition disabled:opacity-50 shadow-sm"
+              >
+                <FiCheck size={14} className="mr-1.5" />
+                {t('userHeader:notifications.buttons.accept')}
+              </button>
+              <button
+                onClick={() => handleResponse('DECLINED')}
+                disabled={isResponding}
+                className="flex-1 inline-flex justify-center items-center px-3 py-1.5 text-xs font-semibold rounded-md text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 dark:bg-slate-700 dark:text-gray-200 dark:border-slate-600 dark:hover:bg-slate-600 transition disabled:opacity-50"
+              >
+                <FiX size={14} className="mr-1.5" />
+                {t('userHeader:notifications.buttons.decline')}
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Unread Dot */}
+        {!notification.read && (
+          <div className="absolute top-4 right-4 w-2 h-2 rounded-full bg-emerald-500"></div>
+        )}
       </div>
-
-      {/* Nút hành động (Chấp nhận/Từ chối) */}
-      {showActions && (
-        <div className="flex items-center space-x-2 mt-3">
-          <button
-            onClick={() => handleResponse('ACCEPTED')}
-            disabled={isResponding}
-            className="flex-1 inline-flex justify-center items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-green-600 hover:bg-green-700 disabled:opacity-50"
-          >
-            <FiCheck size={14} className="mr-1" />
-            {/* Chấp nhận */}
-            <span>{t('userHeader:notifications.buttons.accept')}</span>
-          </button>
-          <button
-            onClick={() => handleResponse('DECLINED')}
-            disabled={isResponding}
-            className="flex-1 inline-flex justify-center items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded shadow-sm text-gray-700 bg-white hover:bg-gray-50 dark:bg-slate-600 dark:text-gray-100 dark:border-slate-500 disabled:opacity-50"
-          >
-            <FiX size={14} className="mr-1" />
-            {/* Từ chối */}
-            <span>{t('userHeader:notifications.buttons.decline')}</span>
-          </button>
-        </div>
-      )}
-
-      {/* === 2. LOGIC HIỂN THỊ TRẠNG THÁI === */}
-      {/* Hiển thị "Đã xem" nếu không có nút hành động VÀ đã đọc (Bỏ điều kiện check meetingId) */}
-      {(!showActions && notification.read) && (
-        <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 font-medium">
-          {/* Đã xem. */}
-          <span>{t('userHeader:notifications.status.viewed')}</span>
-        </div>
-      )}
     </div>
   );
 };
@@ -243,7 +254,7 @@ const UserHeader = ({ setIsSidebarOpen }) => {
           </button>
 
           {isNotificationOpen && (
-            <div className="absolute top-12 right-0 w-80 max-h-[70vh] flex flex-col bg-white dark:bg-slate-800 rounded-lg shadow-xl border dark:border-slate-700">
+            <div className="absolute top-12 right-0 w-80 max-h-[70vh] flex flex-col bg-white dark:bg-slate-800 rounded-lg shadow-xl border dark:border-slate-700 z-50">
               <div className="p-3 border-b dark:border-slate-700 flex justify-between items-center">
                 {/* Thông báo */}
                 <h4 className="font-semibold text-gray-800 dark:text-white">{t('userHeader:notifications.title')}</h4>

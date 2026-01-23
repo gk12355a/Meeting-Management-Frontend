@@ -275,6 +275,7 @@ export default function RoomsPage() {
         status: formData.status,
         requiresApproval: true, // Luôn yêu cầu duyệt
         fixedDevices: formData.fixedDevices.map(key => DEVICE_MAP_REVERSE[key] || key),
+        deleteImages: imagesToDelete,
       };
 
       const submitData = new FormData();
@@ -896,7 +897,10 @@ export default function RoomsPage() {
                               />
                               <button
                                 type="button"
-                                onClick={() => setImagesToDelete((prev) => [...prev, imgUrl])}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setImagesToDelete((prev) => [...prev, imgUrl]);
+                                }}
                                 className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                                 title="Xóa ảnh này"
                               >
