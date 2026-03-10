@@ -254,13 +254,37 @@ export default function UsersPage() {
     );
   };
 
+  const smartSearch = (query, target) => {
+    if (!query || !target) return false;
+    const lowerQuery = query.toLowerCase();
+    const lowerTarget = target.toLowerCase();
+
+    if (lowerTarget.includes(lowerQuery)) return true;
+    if (lowerTarget.length >= 3 && lowerQuery.includes(lowerTarget)) return true;
+
+    if (lowerQuery.length > 1) {
+      const dedupedQuery = lowerQuery.replace(/(.)\1+/g, '$1');
+      if (dedupedQuery !== lowerQuery && lowerTarget.includes(dedupedQuery)) return true;
+      if (lowerTarget.length >= 3 && dedupedQuery.includes(lowerTarget)) return true;
+    }
+
+    if (lowerQuery.length > 3) {
+      for (let i = lowerQuery.length - 1; i >= 3; i--) {
+        const subQuery = lowerQuery.substring(0, i);
+        if (lowerTarget.includes(subQuery)) return true;
+        if (lowerTarget.length >= 3 && subQuery.includes(lowerTarget)) return true;
+      }
+    }
+    return false;
+  };
+
   // Filter users to show
   const filteredUsers = users.filter((user) => {
-    const term = searchTerm.toLowerCase();
+    const term = searchTerm.trim();
     const matchSearch =
       !term ||
-      user.fullName?.toLowerCase().includes(term) ||
-      user.username?.toLowerCase().includes(term);
+      smartSearch(term, user.fullName || "") ||
+      smartSearch(term, user.username || "");
 
     const matchStatus =
       statusFilter === "all"

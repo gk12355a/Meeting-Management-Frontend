@@ -68,12 +68,35 @@ const RoomsPage = () => {
     return { text: apiStatus, color: "text-gray-500" };
   };
 
+  const smartSearch = (query, target) => {
+    if (!query || !target) return false;
+    const lowerQuery = query.toLowerCase();
+    const lowerTarget = target.toLowerCase();
+
+    if (lowerTarget.includes(lowerQuery)) return true;
+    if (lowerTarget.length >= 3 && lowerQuery.includes(lowerTarget)) return true;
+
+    if (lowerQuery.length > 1) {
+      const dedupedQuery = lowerQuery.replace(/(.)\1+/g, '$1');
+      if (dedupedQuery !== lowerQuery && lowerTarget.includes(dedupedQuery)) return true;
+      if (lowerTarget.length >= 3 && dedupedQuery.includes(lowerTarget)) return true;
+    }
+
+    if (lowerQuery.length > 3) {
+      for (let i = lowerQuery.length - 1; i >= 3; i--) {
+        const subQuery = lowerQuery.substring(0, i);
+        if (lowerTarget.includes(subQuery)) return true;
+        if (lowerTarget.length >= 3 && subQuery.includes(lowerTarget)) return true;
+      }
+    }
+    return false;
+  };
+
   // FILTER ROOMS
   useEffect(() => {
     const filtered = rooms.filter((room) => {
-      const matchesSearch = room.name
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase());
+      const term = searchTerm.trim();
+      const matchesSearch = !term || smartSearch(term, room.name || "");
 
       // Nếu không tick gì → coi như "Tất cả"
       if (filterStatus.length === 0) return matchesSearch;
@@ -263,19 +286,19 @@ const RoomsPage = () => {
                           <span className="text-sm font-medium text-gray-600 dark:text-gray-300">{t("deviceLabel")}:</span>
                         </div>
                         <div className="flex flex-wrap gap-2">
-                          {room.fixedDevices && room.fixedDevices.length > 0 ? (
+                          {room.devices && room.devices.length > 0 ? (
                             <>
-                              {room.fixedDevices.slice(0, 3).map((device, idx) => (
+                              {room.devices.slice(0, 3).map((device, idx) => (
                                 <span
                                   key={idx}
                                   className="px-2 py-1 text-xs rounded-md bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-600"
                                 >
-                                  {device}
+                                  {device.name}
                                 </span>
                               ))}
-                              {room.fixedDevices.length > 3 && (
-                                <span className="px-2 py-1 text-xs rounded-md bg-slate-50 text-slate-500 border border-slate-200 cursor-help" title={room.fixedDevices.slice(3).join(", ")}>
-                                  +{room.fixedDevices.length - 3}
+                              {room.devices.length > 3 && (
+                                <span className="px-2 py-1 text-xs rounded-md bg-slate-50 text-slate-500 border border-slate-200 cursor-help" title={room.devices.slice(3).map(d => d.name).join(", ")}>
+                                  +{room.devices.length - 3}
                                 </span>
                               )}
                             </>
@@ -416,10 +439,10 @@ const RoomsPage = () => {
                         {t("deviceLabel") || "Thiết bị có sẵn"}
                       </h3>
                       <div className="flex flex-wrap gap-2">
-                        {viewRoom.fixedDevices && viewRoom.fixedDevices.length > 0 ? (
-                          viewRoom.fixedDevices.map((dev, i) => (
+                        {viewRoom.devices && viewRoom.devices.length > 0 ? (
+                          viewRoom.devices.map((dev, i) => (
                             <span key={i} className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-sm font-medium border border-slate-200 dark:border-slate-600">
-                              {dev}
+                              {dev.name}
                             </span>
                           ))
                         ) : (

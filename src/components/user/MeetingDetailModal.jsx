@@ -1,5 +1,5 @@
 // src/components/user/MeetingDetailModal.jsx
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { Button } from "antd";
@@ -14,11 +14,15 @@ import {
   FiVideo,
   FiCheckCircle,
   FiAlertCircle,
-  FiUser
+  FiUser,
+  FiFilm,
+  FiPlay
 } from "react-icons/fi";
 import dayjs from "dayjs";
 import { motion, AnimatePresence } from "framer-motion";
 import "dayjs/locale/vi";
+import { StreamVideoClient } from '@stream-io/video-react-sdk';
+import { getVideoToken } from '../../services/videoService';
 
 dayjs.locale("vi");
 
@@ -168,6 +172,46 @@ const MeetingDetailModal = ({ open, onClose, meeting, children }) => {
 
   const meetingStatus = meeting ? getMeetingStatus(meeting.status) : {};
 
+  // Recordings Logic
+  const [recordings, setRecordings] = useState([]);
+  const [loadingRecordings, setLoadingRecordings] = useState(false);
+
+  useEffect(() => {
+    let client;
+    const fetchRecordings = async () => {
+      if (!open || !meeting || !meeting.id) return;
+
+      setLoadingRecordings(true);
+      try {
+        const { token, apiKey, user } = await getVideoToken(meeting.id);
+        if (!token || !apiKey || !user) return;
+
+        const streamUser = {
+          id: String(user.id),
+          name: user.name || user.fullName || "User",
+          image: user.image,
+        };
+
+        client = new StreamVideoClient({ apiKey, user: streamUser, token });
+        const call = client.call('default', meeting.id.toString());
+        const { recordings: recs } = await call.queryRecordings();
+        setRecordings(recs);
+      } catch (error) {
+        console.error("Failed to load recordings", error);
+      } finally {
+        setLoadingRecordings(false);
+      }
+    };
+
+    if (open) {
+      fetchRecordings();
+    }
+
+    return () => {
+      if (client) client.disconnectUser();
+    };
+  }, [open, meeting]);
+
   // Hàm xử lý khi bấm vào họp
   const handleJoinMeeting = () => {
     onClose();
@@ -254,14 +298,6 @@ const MeetingDetailModal = ({ open, onClose, meeting, children }) => {
                     </div>
                   </div>
 
-                  {/* Description (if any) - Placeholder for now if needed */}
-                  {/* <div>
-                       <h3 className="text-sm font-bold text-slate-800 dark:text-white mb-2">Mô tả</h3>
-                       <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
-                         {meeting.description || "Không có mô tả thêm."}
-                       </p>
-                    </div> */}
-
                   {/* Devices */}
                   <div>
                     <h3 className="text-sm font-bold text-slate-800 dark:text-white mb-3 flex items-center gap-2">
@@ -282,6 +318,44 @@ const MeetingDetailModal = ({ open, onClose, meeting, children }) => {
                     ) : (
                       <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-3 text-sm text-slate-400 italic text-center border border-slate-100 dark:border-slate-700">
                         {t("noDevices") || "Không có thiết bị"}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Recordings Section */}
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-800 dark:text-white mb-3 flex items-center gap-2">
+                      <FiFilm className="text-red-500" />
+                      {t("recordings") || "Bản ghi cuộc họp"}
+                    </h3>
+                    {loadingRecordings ? (
+                      <div className="text-sm text-slate-400 italic">Đang tải bản ghi...</div>
+                    ) : recordings.length > 0 ? (
+                      <div className="space-y-2">
+                        {recordings.map((rec) => (
+                          <div key={rec.filename} className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 hover:border-red-200 dark:hover:border-red-900/50 transition-colors group">
+                            <div className="flex flex-col">
+                              <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                                {dayjs(rec.start_time).format("HH:mm DD/MM/YYYY")}
+                              </span>
+                              <span className="text-xs text-slate-500">
+                                {dayjs(rec.end_time).diff(dayjs(rec.start_time), 'minute')} phút
+                              </span>
+                            </div>
+                            <a
+                              href={rec.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40 text-xs font-bold transition-all"
+                            >
+                              <FiPlay size={12} /> Xem
+                            </a>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-3 text-sm text-slate-400 italic text-center border border-slate-100 dark:border-slate-700">
+                        {t("noRecordings") || "Không có bản ghi nào"}
                       </div>
                     )}
                   </div>
