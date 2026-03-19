@@ -31,6 +31,7 @@ import ChangePasswordPageUser from "./pages/user/ChangePasswordPage";
 import DevicePage from "./pages/user/DevicePage";
 import CheckInProcessingPage from "./pages/user/CheckInProcessingPage";
 import VideoPage from "./pages/user/VideoPage";
+import ImageSearchPage from "./pages/user/ImageSearchPage";
 // ===== Guards =====
 import ProtectedRoute from "./routes/ProtectedRoute";
 import AdminOnlyRoute from "./routes/AdminOnlyRoute";
@@ -123,6 +124,7 @@ export default function App() {
           <Route path="history" element={<HistoryPage />} />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="change-password" element={<ChangePasswordPageUser />} />
+          <Route path="image-search" element={<ImageSearchPage />} />
         </Route>
         <Route path="/meeting/:meetingId" element={<VideoPage />} />
         {/* === GOOGLE OAUTH CALLBACK === */}

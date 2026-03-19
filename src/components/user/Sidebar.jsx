@@ -8,7 +8,8 @@ import {
   FiPlusCircle,
   FiClock,
   FiMonitor,
-  FiUsers
+  FiUsers,
+  FiSearch
 } from "react-icons/fi";
 import { MdMeetingRoom } from "react-icons/md";
 
@@ -22,6 +23,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     { to: "/user/contact-groups", label: t("menu.contactGroups"), icon: <FiUsers size={20} /> },
     { to: "/user/rooms", label: t("menu.rooms"), icon: <MdMeetingRoom size={20} /> },
     { to: "/user/devices", label: t("menu.devices"), icon: <FiMonitor size={20} /> },
+    { to: "/user/image-search", label: t("menu.imageSearch", { defaultValue: "Tìm AI" }), icon: <FiSearch size={20} /> },
     { to: "/user/history", label: t("menu.history"), icon: <FiClock size={20} /> }
   ];
 
