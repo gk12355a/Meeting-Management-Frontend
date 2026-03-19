@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { FiSearch, FiTool, FiImage, FiX, FiCheckCircle } from "react-icons/fi";
 import { HiComputerDesktop } from "react-icons/hi2";
-import { Spin } from "antd";
+import { Spin, Pagination } from "antd";
 import { getDevices } from "../../services/deviceService";
 import BookDeviceModal from "../../components/user/BookDeviceModal";
 import { ToastContainer } from "react-toastify";
@@ -22,6 +22,13 @@ export default function DevicePage() {
   });
   const [viewDevice, setViewDevice] = useState(null);
   const [lightbox, setLightbox] = useState({ open: false, index: 0, images: [] });
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 9;
+
+  // Reset trang về 1 khi tìm kiếm hoặc lọc
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterStatus]);
 
   useEffect(() => {
     const fetch = async () => {
@@ -110,8 +117,8 @@ export default function DevicePage() {
         </div>
 
         {/* Tickbox filter trạng thái */}
-        <div className="flex items-center gap-3">
-          <span className="font-medium text-gray-700 dark:text-gray-300">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 w-full sm:w-auto pt-1 flex-nowrap scrollbar-hide">
+          <span className="font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
             {t("statusLabel")}
           </span>
           {STATUS_FILTERS.map((opt) => {
@@ -154,7 +161,7 @@ export default function DevicePage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredDevices.length > 0 ? (
-            filteredDevices.map((dv) => {
+            filteredDevices.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((dv) => {
               const statusDisplay = getStatusDisplay(dv.status);
               const isAvailable = dv.status === "AVAILABLE";
 
@@ -219,6 +226,18 @@ export default function DevicePage() {
               {t("noResults")}
             </div>
           )}
+        </div>
+      )}
+
+      {filteredDevices.length > 0 && !loading && (
+        <div className="flex justify-center mt-6">
+          <Pagination
+            current={currentPage}
+            pageSize={pageSize}
+            total={filteredDevices.length}
+            onChange={(page) => setCurrentPage(page)}
+            showSizeChanger={false}
+          />
         </div>
       )}
 

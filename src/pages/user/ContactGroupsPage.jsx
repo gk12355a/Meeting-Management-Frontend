@@ -270,6 +270,7 @@ const ContactGroupsPage = () => {
                     loading={loading}
                     pagination={{ pageSize: 10 }}
                     rowSelection={rowSelection}
+                    scroll={{ x: 'max-content' }}
                 />
             </Card>
 

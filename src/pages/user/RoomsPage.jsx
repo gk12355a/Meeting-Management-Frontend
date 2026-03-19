@@ -1,7 +1,7 @@
 // src/pages/user/RoomsPage.jsx
 import React, { useEffect, useState } from "react";
 import { FiSearch, FiTool, FiMonitor, FiUsers, FiImage, FiX, FiMapPin, FiCalendar } from "react-icons/fi";
-import { Spin, message, Tag, Tooltip } from "antd";
+import { Spin, message, Tag, Tooltip, Pagination } from "antd";
 import { getAllRooms } from "../../services/roomService";
 import { HiBuildingOffice } from "react-icons/hi2";
 import BookRoomModal from "../../components/user/BookRoomModal";
@@ -33,6 +33,13 @@ const RoomsPage = () => {
     room: null,
   });
   const [is3DOpen, setIs3DOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 9;
+
+  // Reset trang về 1 khi tìm kiếm hoặc lọc
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterStatus]);
 
   // Load rooms
   useEffect(() => {
@@ -160,17 +167,17 @@ const RoomsPage = () => {
           />
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto justify-start">
           <button
             onClick={() => setIs3DOpen(true)}
-            className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl transition-all active:scale-95 shadow-lg shadow-indigo-500/20"
+            className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl transition-all active:scale-95 shadow-lg shadow-indigo-500/20 whitespace-nowrap"
           >
             <FiBox size={18} />
-            <span className="font-medium whitespace-nowrap">Xem 3D</span>
+            <span className="font-medium">Xem 3D</span>
           </button>
 
           {/* FILTER SECTION - UI GIỐNG ẢNH MẪU */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 w-full sm:w-auto pt-1 flex-nowrap scrollbar-hide">
             <span className="font-medium text-gray-700 dark:text-gray-300">
               {t("filterStatus")}
             </span>
@@ -232,7 +239,7 @@ const RoomsPage = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {processedRooms.length > 0 ? (
-              processedRooms.map((room) => {
+              processedRooms.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((room) => {
                 const statusDisplay = getStatusDisplay(room.status);
                 const isAvailable = room.status === "AVAILABLE";
                 return (
@@ -332,6 +339,18 @@ const RoomsPage = () => {
           </div>
         )
       }
+
+      {processedRooms.length > 0 && !loading && (
+        <div className="flex justify-center mt-6">
+          <Pagination
+            current={currentPage}
+            pageSize={pageSize}
+            total={processedRooms.length}
+            onChange={(page) => setCurrentPage(page)}
+            showSizeChanger={false}
+          />
+        </div>
+      )}
 
       {/* Modal đặt phòng */}
       <BookRoomModal

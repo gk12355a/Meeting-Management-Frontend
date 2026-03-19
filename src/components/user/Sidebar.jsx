@@ -60,6 +60,9 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
               key={m.to}
               to={m.to}
               end
+              onClick={() => {
+                if (window.innerWidth < 768) setIsOpen(false);
+              }}
               className={({ isActive }) =>
                 `relative flex items-center gap-3.5 px-3 py-3.5 mx-1 rounded-xl transition-all duration-300
                  justify-center md:group-hover:justify-start

@@ -1,4 +1,3 @@
-
 graph TD
     %% === STYLES ===
     classDef page fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,shape:rect,rx:5,ry:5;

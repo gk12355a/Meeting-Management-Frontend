@@ -865,20 +865,22 @@ const MyMeetingPage = () => {
       <ToastContainer position="top-right" autoClose={2500} />
 
       {/* Header */}
-      <div className="flex items-center gap-4 mb-6 border-b pb-3 border-gray-200 dark:border-gray-700">
-        <div className="p-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 shadow-md">
-          <FiCalendar className="text-white text-2xl" />
-        </div>
-        <div>
-          <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100 tracking-tight">
-            {t("myMeetingsTitle")}
-          </h2>
-          <p className="text-gray-500 dark:text-gray-400 text-sm">
-            {t("todayMeetings")}
-          </p>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6 border-b pb-3 border-gray-200 dark:border-gray-700 justify-between">
+        <div className="flex items-center gap-4">
+          <div className="p-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 shadow-md">
+            <FiCalendar className="text-white text-2xl" />
+          </div>
+          <div>
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-800 dark:text-gray-100 tracking-tight">
+              {t("myMeetingsTitle")}
+            </h2>
+            <p className="text-gray-500 dark:text-gray-400 text-sm">
+              {t("todayMeetings")}
+            </p>
+          </div>
         </div>
 
-        <div className="ml-auto">
+        <div className="w-full sm:w-auto mt-2 sm:mt-0">
           <Button
             icon={<FiDownload />}
             onClick={handleExportClick}
