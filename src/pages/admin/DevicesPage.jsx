@@ -837,7 +837,7 @@ export default function DevicesPage() {
                   <X size={20} />
                 </button>
               </div>
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 pt-20">
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 pt-20 pointer-events-none">
                 <h2 className="text-3xl font-bold text-white mb-1">{viewDevice.name}</h2>
                 <p className="text-gray-200 flex items-center gap-2">
                   {/* <Monitor size={16} />  */}

@@ -12,8 +12,11 @@ import { useTranslation } from "react-i18next";
 import ImageLightbox from "../../components/ImageLightbox";
 import BuildingViewer from "../../components/3d/BuildingViewer";
 import { FiBox } from "react-icons/fi";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const RoomsPage = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const { t } = useTranslation("userRooms");
   const [rooms, setRooms] = useState([]);
   const [processedRooms, setProcessedRooms] = useState([]);
@@ -59,6 +62,19 @@ const RoomsPage = () => {
     fetchRooms();
   }, []);
 
+  // [NEW] Auto-open modal if navigated from Image Search
+  useEffect(() => {
+    if (location.state?.openRoomId && rooms.length > 0) {
+      const roomToOpen = rooms.find(r => r.id === location.state.openRoomId);
+      if (roomToOpen) {
+        setViewRoom(roomToOpen);
+        
+        // Clean up state so refreshing doesn't keep opening it
+        navigate(location.pathname, { replace: true, state: {} });
+      }
+    }
+  }, [location.state?.openRoomId, rooms]);
+
   const getStatusDisplay = (apiStatus) => {
     if (apiStatus === "AVAILABLE") {
       return {
@@ -75,35 +91,41 @@ const RoomsPage = () => {
     return { text: apiStatus, color: "text-gray-500" };
   };
 
-  const smartSearch = (query, target) => {
-    if (!query || !target) return false;
-    const lowerQuery = query.toLowerCase();
-    const lowerTarget = target.toLowerCase();
+  const [semanticResults, setSemanticResults] = useState(null);
 
-    if (lowerTarget.includes(lowerQuery)) return true;
-    if (lowerTarget.length >= 3 && lowerQuery.includes(lowerTarget)) return true;
-
-    if (lowerQuery.length > 1) {
-      const dedupedQuery = lowerQuery.replace(/(.)\1+/g, '$1');
-      if (dedupedQuery !== lowerQuery && lowerTarget.includes(dedupedQuery)) return true;
-      if (lowerTarget.length >= 3 && dedupedQuery.includes(lowerTarget)) return true;
+  useEffect(() => {
+    const term = searchTerm.trim();
+    if (!term) {
+      setSemanticResults(null);
+      return;
     }
-
-    if (lowerQuery.length > 3) {
-      for (let i = lowerQuery.length - 1; i >= 3; i--) {
-        const subQuery = lowerQuery.substring(0, i);
-        if (lowerTarget.includes(subQuery)) return true;
-        if (lowerTarget.length >= 3 && subQuery.includes(lowerTarget)) return true;
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch("http://localhost:8006/api/semantic-search", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query: term, type: "rooms" }),
+        });
+        const data = await res.json();
+        if (data.success && data.results) {
+          const matchedIds = data.results
+            .filter((r) => r.score > 0.05)
+            .map((r) => r.id);
+          setSemanticResults(matchedIds);
+        }
+      } catch (err) {
+        console.error("Semantic search error:", err);
       }
-    }
-    return false;
-  };
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm, rooms]);
 
   // FILTER ROOMS
   useEffect(() => {
     const filtered = rooms.filter((room) => {
       const term = searchTerm.trim();
-      const matchesSearch = !term || smartSearch(term, room.name || "");
+      const matchesSearch = !term || (semanticResults !== null && semanticResults.includes(room.id));
 
       // Nếu không tick gì → coi như "Tất cả"
       if (filterStatus.length === 0) return matchesSearch;
@@ -128,8 +150,15 @@ const RoomsPage = () => {
       return matchesSearch && matchStatus;
     });
 
+    const term = searchTerm.trim();
+    if (term && semanticResults) {
+      filtered.sort((a, b) => {
+        return semanticResults.indexOf(a.id) - semanticResults.indexOf(b.id);
+      });
+    }
+
     setProcessedRooms(filtered);
-  }, [searchTerm, filterStatus, rooms]);
+  }, [searchTerm, filterStatus, rooms, semanticResults]);
 
   return (
     <div className="p-6 min-h-screen bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
@@ -390,7 +419,12 @@ const RoomsPage = () => {
               {/* Cover Image */}
               <div className="relative h-64 bg-slate-200 dark:bg-slate-700">
                 {viewRoom.images && viewRoom.images.length > 0 ? (
-                  <img src={viewRoom.images[0]} alt={viewRoom.name} className="w-full h-full object-cover" />
+                  <img 
+                    src={viewRoom.images[0]} 
+                    alt={viewRoom.name} 
+                    className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity" 
+                    onClick={() => setLightbox({ open: true, index: 0, images: viewRoom.images })}
+                  />
                 ) : (
                   <div className="w-full h-full flex flex-col items-center justify-center text-slate-400">
                     <FiImage size={48} />
@@ -407,7 +441,7 @@ const RoomsPage = () => {
                 </button>
 
                 {/* Title Overlay */}
-                <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent pt-20">
+                <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent pt-20 pointer-events-none">
                   <h2 className="text-3xl font-bold text-white mb-1">{viewRoom.name}</h2>
                   <div className="flex items-center gap-2 text-slate-200">
                     <FiMapPin size={16} />

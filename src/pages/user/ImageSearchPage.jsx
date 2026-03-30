@@ -13,7 +13,7 @@ export default function ImageSearchPage() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [viewMode, setViewMode] = useState("grid");
-  
+
   const [roomsDict, setRoomsDict] = useState({});
   const [devicesDict, setDevicesDict] = useState({});
 
@@ -24,19 +24,19 @@ export default function ImageSearchPage() {
           getAllRooms(),
           getDevices()
         ]);
-        
+
         const rDict = {};
         if (roomsRes.data) {
           roomsRes.data.forEach(r => rDict[r.id] = r.name);
         }
         setRoomsDict(rDict);
-        
+
         const dDict = {};
         if (devicesRes.data) {
           devicesRes.data.forEach(d => dDict[d.id] = d.name);
         }
         setDevicesDict(dDict);
-        
+
       } catch (error) {
         console.error("Error fetching metadata for search:", error);
       }
@@ -77,14 +77,14 @@ export default function ImageSearchPage() {
     setLoading(true);
     const formData = new FormData();
     formData.append("file", selectedFile);
-    formData.append("top_k", 12);
+    formData.append("top_k", 6);
 
     try {
       // Gọi tới Python Microservice API
       const response = await axios.post("http://localhost:8005/api/search-image", formData, {
         headers: { "Content-Type": "multipart/form-data" }
       });
-      
+
       if (response.data.success) {
         setResults(response.data.results);
       } else {
@@ -92,7 +92,11 @@ export default function ImageSearchPage() {
       }
     } catch (error) {
       console.error(error);
-      toast.error("Lỗi khi tìm kiếm ảnh. Hãy chắc chắn rằng hệ thống AI Backend đang chạy (Cổng 8005).");
+      if (error.response && error.response.status === 500) {
+        toast.error("Yêu cầu bị từ chối: Tệp tin bị hỏng cấu trúc hoặc không phải thiết kế hình ảnh chuẩn! Hệ thống AI đã ngăn chặn rủi ro.");
+      } else {
+        toast.error("Lỗi khi kết nối đến AI Backend.");
+      }
     } finally {
       setLoading(false);
     }
@@ -110,7 +114,7 @@ export default function ImageSearchPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
+
         {/* Upload Section */}
         <div className="lg:col-span-1 space-y-4">
           <div
@@ -151,11 +155,10 @@ export default function ImageSearchPage() {
           <button
             onClick={handleSearch}
             disabled={!selectedImage || loading}
-            className={`w-full py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-all ${
-              !selectedImage || loading
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-blue-600 text-white hover:bg-blue-700 shadow-md"
-            }`}
+            className={`w-full py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-all ${!selectedImage || loading
+              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+              : "bg-blue-600 text-white hover:bg-blue-700 shadow-md"
+              }`}
           >
             {loading ? (
               <>
@@ -208,23 +211,33 @@ export default function ImageSearchPage() {
             <div className={viewMode === "grid" ? "grid grid-cols-2 md:grid-cols-3 gap-4" : "space-y-4"}>
               {results.map((result, idx) => {
                 // Formatting metadata for display
-                const distance = result.distance.toFixed(3);
+                const similarity = Math.max(0, (1 - result.distance) * 100).toFixed(1);
                 const metadata = result.metadata || {};
                 const typeName = metadata.type === 'room' ? 'Phòng họp' : 'Thiết bị';
-                
-                const realName = metadata.type === 'room' 
+
+                const realName = metadata.type === 'room'
                   ? (roomsDict[metadata.db_id] || `(ID: ${metadata.db_id})`)
                   : (devicesDict[metadata.db_id] || `(ID: ${metadata.db_id})`);
-                  
+
                 const nameInfo = `${typeName}: ${realName}`;
                 const imageUrl = metadata.url;
 
                 return (
-                  <div key={idx} className={`bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow group ${viewMode === "list" ? "flex flex-row items-center gap-4 p-3" : "flex flex-col"}`}>
-                    
+                  <div
+                    key={idx}
+                    className={`bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow group cursor-pointer ${viewMode === "list" ? "flex flex-row items-center gap-4 p-3" : "flex flex-col"}`}
+                    onClick={() => {
+                      if (metadata.type === 'room') {
+                        navigate("/user/rooms", { state: { openRoomId: metadata.db_id } });
+                      } else {
+                        navigate("/user/devices", { state: { openDeviceId: metadata.db_id } });
+                      }
+                    }}
+                  >
+
                     <div className={`bg-gray-100 flex items-center justify-center overflow-hidden relative ${viewMode === "list" ? "w-32 h-24 rounded-lg flex-shrink-0" : "w-full aspect-video"}`}>
-                      <img 
-                        src={imageUrl} 
+                      <img
+                        src={imageUrl}
                         alt={nameInfo}
                         className="w-full h-full object-cover"
                         onError={(e) => {
@@ -239,41 +252,31 @@ export default function ImageSearchPage() {
                           {nameInfo}
                         </span>
                       </div>
-                      
+
                       {/* Similarity Score Overlay */}
                       <div className="absolute top-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded backdrop-blur-md">
-                        D: {distance}
+                        {similarity}%
                       </div>
                     </div>
-                    
+
                     <div className={`p-4 flex flex-col justify-center ${viewMode === "list" ? "w-full" : ""}`}>
                       <h3 className="font-medium text-gray-900 truncate" title={nameInfo}>
                         {nameInfo}
                       </h3>
-                      <p 
-                        className="text-sm text-blue-500 mt-1 cursor-pointer hover:underline" 
+                      <p
+                        className="text-sm text-blue-500 mt-1 cursor-pointer hover:underline"
                         title="Xem chi tiết trên hệ thống"
                         onClick={() => {
                           if (metadata.type === 'room') {
-                            navigate("/user/rooms");
+                            navigate("/user/rooms", { state: { openRoomId: metadata.db_id } });
                           } else {
-                            navigate("/user/devices");
+                            navigate("/user/devices", { state: { openDeviceId: metadata.db_id } });
                           }
                         }}
                       >
                         Xem chi tiết hệ thống
                       </p>
-                      {/* Metric visualizing similarity closeness */}
-                      <div className="mt-3 flex items-center gap-2">
-                        <div className="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
-                          {/* Distance 0 is match, max is roughly 2.0 for cosine. Let's make an intuitive % */}
-                          <div 
-                            className="h-full bg-green-500 rounded-full" 
-                            style={{width: `${Math.max(5, 100 - (distance * 50))}%`}} 
-                          />
-                        </div>
-                        <span className="text-xs text-green-600 font-semibold">{Math.max(1, Math.round(100 - (distance * 50)))}%</span>
-                      </div>
+
                     </div>
                   </div>
                 );

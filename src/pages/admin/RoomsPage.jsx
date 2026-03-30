@@ -142,38 +142,41 @@ export default function RoomsPage() {
     setCurrentPage(1);
   }, [searchTerm, statusFilter]);
 
-  const smartSearch = (query, target) => {
-    if (!query || !target) return false;
-    const lowerQuery = query.toLowerCase();
-    const lowerTarget = target.toLowerCase();
+  const [semanticResults, setSemanticResults] = useState(null);
 
-    if (lowerTarget.includes(lowerQuery)) return true;
-    if (lowerTarget.length >= 3 && lowerQuery.includes(lowerTarget)) return true;
-
-    if (lowerQuery.length > 1) {
-      const dedupedQuery = lowerQuery.replace(/(.)\1+/g, '$1');
-      if (dedupedQuery !== lowerQuery && lowerTarget.includes(dedupedQuery)) return true;
-      if (lowerTarget.length >= 3 && dedupedQuery.includes(lowerTarget)) return true;
+  useEffect(() => {
+    const term = searchTerm.trim();
+    if (!term) {
+      setSemanticResults(null);
+      return;
     }
-
-    if (lowerQuery.length > 3) {
-      for (let i = lowerQuery.length - 1; i >= 3; i--) {
-        const subQuery = lowerQuery.substring(0, i);
-        if (lowerTarget.includes(subQuery)) return true;
-        if (lowerTarget.length >= 3 && subQuery.includes(lowerTarget)) return true;
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch("http://localhost:8006/api/semantic-search", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query: term, type: "rooms" }),
+        });
+        const data = await res.json();
+        if (data.success && data.results) {
+          const matchedIds = data.results
+            .filter((r) => r.score > 0.05)
+            .map((r) => r.id);
+          setSemanticResults(matchedIds);
+        }
+      } catch (err) {
+        console.error("Semantic search error:", err);
       }
-    }
-    return false;
-  };
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm, rooms]);
 
   useEffect(() => {
     const term = searchTerm.trim();
 
     const filtered = rooms.filter((item) => {
-      const matchSearch =
-        !term ||
-        smartSearch(term, item.name || "") ||
-        smartSearch(term, item.location || "");
+      const matchSearch = !term || (semanticResults !== null && semanticResults.includes(item.id));
 
       let matchStatus = true;
 
@@ -187,9 +190,15 @@ export default function RoomsPage() {
       return matchSearch && matchStatus;
     });
 
+    if (term && semanticResults) {
+      filtered.sort((a, b) => {
+        return semanticResults.indexOf(a.id) - semanticResults.indexOf(b.id);
+      });
+    }
+
     setFilteredRooms(filtered);
     setCurrentPage(1);
-  }, [searchTerm, statusFilter, rooms]);
+  }, [searchTerm, statusFilter, rooms, semanticResults]);
 
   const totalPages = Math.ceil(filteredRooms.length / ITEMS_PER_PAGE);
 
@@ -1014,7 +1023,7 @@ export default function RoomsPage() {
                     <X size={20} />
                   </button>
                 </div>
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 pt-20">
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 pt-20 pointer-events-none">
                   <h2 className="text-3xl font-bold text-white mb-1">{viewRoom.name}</h2>
                   <p className="text-gray-200 flex items-center gap-2">
                     <Building size={16} /> {viewRoom.location || "N/A"}

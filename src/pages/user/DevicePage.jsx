@@ -9,8 +9,11 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useTranslation } from "react-i18next";
 import ImageLightbox from "../../components/ImageLightbox";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export default function DevicePage() {
+  const location = useLocation();
+  const navigate = useNavigate();
   const { t } = useTranslation("userDevices");
   const [devices, setDevices] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -44,6 +47,19 @@ export default function DevicePage() {
     fetch();
   }, []);
 
+  // [NEW] Auto-open modal if navigated from Image Search
+  useEffect(() => {
+    if (location.state?.openDeviceId && devices.length > 0) {
+      const deviceToOpen = devices.find(d => d.id === location.state.openDeviceId);
+      if (deviceToOpen) {
+        setViewDevice(deviceToOpen);
+        
+        // Clean up state so refreshing doesn't keep opening it
+        navigate(location.pathname, { replace: true, state: {} });
+      }
+    }
+  }, [location.state?.openDeviceId, devices]);
+
   // ===== TRẠNG THÁI =====
   const getStatusDisplay = (status) => {
     switch (status) {
@@ -62,15 +78,50 @@ export default function DevicePage() {
     }
   };
 
+  const [semanticResults, setSemanticResults] = useState(null);
+
+  useEffect(() => {
+    const term = searchTerm.trim();
+    if (!term) {
+      setSemanticResults(null);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch("http://localhost:8006/api/semantic-search", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query: term, type: "devices" }),
+        });
+        const data = await res.json();
+        if (data.success && data.results) {
+          const matchedIds = data.results
+            .filter((r) => r.score > 0.05)
+            .map((r) => r.id);
+          setSemanticResults(matchedIds);
+        }
+      } catch (err) {
+        console.error("Semantic search error:", err);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm, devices]);
+
   // ===== LỌC THIẾT BỊ =====
   const filteredDevices = devices.filter((d) => {
-    const matchSearch = d.name
-      ?.toLowerCase()
-      .includes(searchTerm.toLowerCase());
+    const term = searchTerm.trim();
+    const matchSearch = !term || (semanticResults !== null && semanticResults.includes(d.id));
     const matchStatus =
       filterStatus === "ALL" || d.status === filterStatus;
     return matchSearch && matchStatus;
   });
+
+  if (searchTerm.trim() && semanticResults) {
+    filteredDevices.sort((a, b) => {
+      return semanticResults.indexOf(a.id) - semanticResults.indexOf(b.id);
+    });
+  }
 
   // Danh sách option cho tickbox filter
   const STATUS_FILTERS = [
@@ -284,7 +335,7 @@ export default function DevicePage() {
               </button>
 
               {/* Title Overlay */}
-              <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent pt-20">
+              <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent pt-20 pointer-events-none">
                 <h2 className="text-3xl font-bold text-white mb-1">{viewDevice.name}</h2>
                 {/* Optional location/type if available */}
               </div>
