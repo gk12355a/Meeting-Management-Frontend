@@ -13,6 +13,7 @@ import ImageLightbox from "../../components/ImageLightbox";
 import BuildingViewer from "../../components/3d/BuildingViewer";
 import { FiBox } from "react-icons/fi";
 import { useLocation, useNavigate } from "react-router-dom";
+import { TEXT_SEARCH_API } from "../../utils/api";
 
 const RoomsPage = () => {
   const location = useLocation();
@@ -101,7 +102,7 @@ const RoomsPage = () => {
     }
     const timer = setTimeout(async () => {
       try {
-        const res = await fetch("http://localhost:8006/api/semantic-search", {
+        const res = await fetch(TEXT_SEARCH_API, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ query: term, type: "rooms" }),

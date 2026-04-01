@@ -26,6 +26,7 @@ import { useTranslation } from "react-i18next";
 import ImageLightbox from "../../components/ImageLightbox";
 import BuildingViewer from "../../components/3d/BuildingViewer";
 import { FiBox } from "react-icons/fi";
+import { TEXT_SEARCH_API } from "../../utils/api";
 const toastColors = {
   success: "#10b981",
   error: "#ef4444",
@@ -152,7 +153,7 @@ export default function RoomsPage() {
     }
     const timer = setTimeout(async () => {
       try {
-        const res = await fetch("http://localhost:8006/api/semantic-search", {
+        const res = await fetch(TEXT_SEARCH_API, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ query: term, type: "rooms" }),

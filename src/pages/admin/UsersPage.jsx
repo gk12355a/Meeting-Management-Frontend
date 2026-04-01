@@ -12,6 +12,7 @@ import { motion } from "framer-motion";
 import "react-toastify/dist/ReactToastify.css";
 import Pagination from "../../components/Pagination";
 import { useTranslation } from "react-i18next";
+import { TEXT_SEARCH_API } from "../../utils/api";
 
 /* Tuỳ chỉnh màu cho Toast theo theme */
 const toastColors = {
@@ -264,7 +265,7 @@ export default function UsersPage() {
     }
     const timer = setTimeout(async () => {
       try {
-        const res = await fetch("http://localhost:8006/api/semantic-search", {
+        const res = await fetch(TEXT_SEARCH_API, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ query: term, type: "users" }),

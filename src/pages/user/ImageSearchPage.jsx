@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { getAllRooms } from "../../services/roomService";
 import { getDevices } from "../../services/deviceService";
+import { MULTIMEDIA_SEARCH_API } from "../../utils/api";
 
 export default function ImageSearchPage() {
   const navigate = useNavigate();
@@ -81,7 +82,7 @@ export default function ImageSearchPage() {
 
     try {
       // Gọi tới Python Microservice API
-      const response = await axios.post("http://localhost:8005/api/search-image", formData, {
+      const response = await axios.post(MULTIMEDIA_SEARCH_API, formData, {
         headers: { "Content-Type": "multipart/form-data" }
       });
 

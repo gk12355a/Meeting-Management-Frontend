@@ -10,6 +10,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { useTranslation } from "react-i18next";
 import ImageLightbox from "../../components/ImageLightbox";
 import { useLocation, useNavigate } from "react-router-dom";
+import { TEXT_SEARCH_API } from "../../utils/api";
 
 export default function DevicePage() {
   const location = useLocation();
@@ -88,7 +89,7 @@ export default function DevicePage() {
     }
     const timer = setTimeout(async () => {
       try {
-        const res = await fetch("http://localhost:8006/api/semantic-search", {
+        const res = await fetch(TEXT_SEARCH_API, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ query: term, type: "devices" }),

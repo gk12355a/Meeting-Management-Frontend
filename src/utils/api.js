@@ -11,6 +11,8 @@ const AUTH_SERVICE_URL = getEnv("VITE_AUTH_SERVICE_URL") || "http://oauth-meetin
 
 // Export URL Chatbot để dùng ở các file khác
 export const AI_SERVICE_URL = getEnv("VITE_AI_SERVICE_URL") || "http://ai-meeting.co/api/chat";
+export const TEXT_SEARCH_API = getEnv("VITE_TEXT_SEARCH_API");
+export const MULTIMEDIA_SEARCH_API = getEnv("VITE_MULTIMEDIA_SEARCH_API");
 
 if (!API_URL) {
   console.error("❌ VITE_BACKEND_URL chưa được định nghĩa (kiểm tra window.ENV hoặc .env)");
