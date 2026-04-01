@@ -12,25 +12,25 @@ export default function AdminLayout() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
-      
+
       {/* === HEADER === */}
       {/* Truyền setter để nút Menu trên header có thể mở Sidebar */}
       <AdminHeader setIsSidebarOpen={setIsSidebarOpen} />
 
       {/* === BODY === */}
       <div className="flex flex-1 relative">
-        
+
         {/* === SIDEBAR === */}
         {/* Truyền state và setter để sidebar tự điều khiển hiển thị và overlay */}
         <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
 
         {/* === MAIN CONTENT === */}
-        <div className={`flex-1 mt-14 transition-all duration-300 ${isSidebarOpen ? 'ml-64' : 'ml-0'}`}>
+        <div className={`flex-1 mt-14 transition-all duration-300 ${isSidebarOpen ? 'ml-20' : 'ml-0'}`}>
           <main className="p-6 overflow-y-auto bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-gray-100 transition-colors min-h-[calc(100vh-56px)]">
             <Outlet />
           </main>
         </div>
-        
+
       </div>
     </div>
   );

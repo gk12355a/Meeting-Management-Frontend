@@ -2,15 +2,19 @@
 import React, { useEffect, useState } from "react";
 import { FiSearch, FiTool, FiImage, FiX, FiCheckCircle } from "react-icons/fi";
 import { HiComputerDesktop } from "react-icons/hi2";
-import { Spin } from "antd";
+import { Spin, Pagination } from "antd";
 import { getDevices } from "../../services/deviceService";
 import BookDeviceModal from "../../components/user/BookDeviceModal";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useTranslation } from "react-i18next";
 import ImageLightbox from "../../components/ImageLightbox";
+import { useLocation, useNavigate } from "react-router-dom";
+import { TEXT_SEARCH_API } from "../../utils/api";
 
 export default function DevicePage() {
+  const location = useLocation();
+  const navigate = useNavigate();
   const { t } = useTranslation("userDevices");
   const [devices, setDevices] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -22,6 +26,13 @@ export default function DevicePage() {
   });
   const [viewDevice, setViewDevice] = useState(null);
   const [lightbox, setLightbox] = useState({ open: false, index: 0, images: [] });
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 9;
+
+  // Reset trang về 1 khi tìm kiếm hoặc lọc
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterStatus]);
 
   useEffect(() => {
     const fetch = async () => {
@@ -36,6 +47,19 @@ export default function DevicePage() {
     };
     fetch();
   }, []);
+
+  // [NEW] Auto-open modal if navigated from Image Search
+  useEffect(() => {
+    if (location.state?.openDeviceId && devices.length > 0) {
+      const deviceToOpen = devices.find(d => d.id === location.state.openDeviceId);
+      if (deviceToOpen) {
+        setViewDevice(deviceToOpen);
+        
+        // Clean up state so refreshing doesn't keep opening it
+        navigate(location.pathname, { replace: true, state: {} });
+      }
+    }
+  }, [location.state?.openDeviceId, devices]);
 
   // ===== TRẠNG THÁI =====
   const getStatusDisplay = (status) => {
@@ -55,15 +79,50 @@ export default function DevicePage() {
     }
   };
 
+  const [semanticResults, setSemanticResults] = useState(null);
+
+  useEffect(() => {
+    const term = searchTerm.trim();
+    if (!term) {
+      setSemanticResults(null);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(TEXT_SEARCH_API, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query: term, type: "devices" }),
+        });
+        const data = await res.json();
+        if (data.success && data.results) {
+          const matchedIds = data.results
+            .filter((r) => r.score > 0.05)
+            .map((r) => r.id);
+          setSemanticResults(matchedIds);
+        }
+      } catch (err) {
+        console.error("Semantic search error:", err);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm, devices]);
+
   // ===== LỌC THIẾT BỊ =====
   const filteredDevices = devices.filter((d) => {
-    const matchSearch = d.name
-      ?.toLowerCase()
-      .includes(searchTerm.toLowerCase());
+    const term = searchTerm.trim();
+    const matchSearch = !term || (semanticResults !== null && semanticResults.includes(d.id));
     const matchStatus =
       filterStatus === "ALL" || d.status === filterStatus;
     return matchSearch && matchStatus;
   });
+
+  if (searchTerm.trim() && semanticResults) {
+    filteredDevices.sort((a, b) => {
+      return semanticResults.indexOf(a.id) - semanticResults.indexOf(b.id);
+    });
+  }
 
   // Danh sách option cho tickbox filter
   const STATUS_FILTERS = [
@@ -110,8 +169,8 @@ export default function DevicePage() {
         </div>
 
         {/* Tickbox filter trạng thái */}
-        <div className="flex items-center gap-3">
-          <span className="font-medium text-gray-700 dark:text-gray-300">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 w-full sm:w-auto pt-1 flex-nowrap scrollbar-hide">
+          <span className="font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
             {t("statusLabel")}
           </span>
           {STATUS_FILTERS.map((opt) => {
@@ -154,7 +213,7 @@ export default function DevicePage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredDevices.length > 0 ? (
-            filteredDevices.map((dv) => {
+            filteredDevices.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((dv) => {
               const statusDisplay = getStatusDisplay(dv.status);
               const isAvailable = dv.status === "AVAILABLE";
 
@@ -222,6 +281,18 @@ export default function DevicePage() {
         </div>
       )}
 
+      {filteredDevices.length > 0 && !loading && (
+        <div className="flex justify-center mt-6">
+          <Pagination
+            current={currentPage}
+            pageSize={pageSize}
+            total={filteredDevices.length}
+            onChange={(page) => setCurrentPage(page)}
+            showSizeChanger={false}
+          />
+        </div>
+      )}
+
       {/* Modal đặt lịch thiết bị */}
       <BookDeviceModal
         open={bookingModal.open}
@@ -265,7 +336,7 @@ export default function DevicePage() {
               </button>
 
               {/* Title Overlay */}
-              <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent pt-20">
+              <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent pt-20 pointer-events-none">
                 <h2 className="text-3xl font-bold text-white mb-1">{viewDevice.name}</h2>
                 {/* Optional location/type if available */}
               </div>

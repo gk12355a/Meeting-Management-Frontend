@@ -1,6 +1,4 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import { useAuth } from "./context/AuthContext";
 
 // ===== Layouts =====
@@ -25,6 +23,7 @@ import AdminProfilePage from "./pages/admin/ProfilePage";
 import UserDashboard from "./pages/user/DashboardPage";
 import MyMeetingsPage from "./pages/user/MyMeetingsPage";
 import CreateMeetingPage from "./pages/user/CreateMeetingPage";
+import ContactGroupsPage from "./pages/user/ContactGroupsPage";
 import UserRoomsPage from "./pages/user/RoomsPage";
 import HistoryPage from "./pages/user/HistoryPage";
 import ProfilePage from "./pages/user/ProfilePage";
@@ -32,6 +31,7 @@ import ChangePasswordPageUser from "./pages/user/ChangePasswordPage";
 import DevicePage from "./pages/user/DevicePage";
 import CheckInProcessingPage from "./pages/user/CheckInProcessingPage";
 import VideoPage from "./pages/user/VideoPage";
+import ImageSearchPage from "./pages/user/ImageSearchPage";
 // ===== Guards =====
 import ProtectedRoute from "./routes/ProtectedRoute";
 import AdminOnlyRoute from "./routes/AdminOnlyRoute";
@@ -118,11 +118,13 @@ export default function App() {
           <Route path="dashboard" element={<UserDashboard />} />
           <Route path="my-meetings" element={<MyMeetingsPage />} />
           <Route path="create-meeting" element={<CreateMeetingPage />} />
+          <Route path="contact-groups" element={<ContactGroupsPage />} />
           <Route path="rooms" element={<UserRoomsPage />} />
           <Route path="devices" element={<DevicePage />} />
           <Route path="history" element={<HistoryPage />} />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="change-password" element={<ChangePasswordPageUser />} />
+          <Route path="image-search" element={<ImageSearchPage />} />
         </Route>
         <Route path="/meeting/:meetingId" element={<VideoPage />} />
         {/* === GOOGLE OAUTH CALLBACK === */}
@@ -161,16 +163,6 @@ export default function App() {
         />
         <Route path="/check-in/:code" element={<CheckInProcessingPage />} />
       </Routes>
-
-      {/* ToastContainer */}
-      <ToastContainer
-        position="top-right"
-        autoClose={2000}
-        limit={3}
-        pauseOnHover
-        newestOnTop
-        theme="light"
-      />
     </>
   );
 }

@@ -26,8 +26,10 @@
       "location": "Vị trí",
       "capacity": "Sức chứa",
       "status": "Trạng thái",
-      "equipment": "Thiết bị có sẵn"
+      "equipment": "Thiết bị có sẵn",
+      "images": "Hình ảnh phòng họp"
     },
+    "clickToUpload": "Click để tải ảnh",
     "placeholders": {
       "name": "VD: Phòng Họp Sao Hỏa",
       "location": "VD: Tầng 3",
@@ -69,6 +71,7 @@
     "capacityInvalid": "Sức chứa phải lớn hơn 0",
     "deviceExists": "Thiết bị này đã có trong danh sách",
     "loadError": "Lỗi khi tải danh sách phòng họp",
-    "noResults": "Không tìm thấy dữ liệu"
+    "noResults": "Không tìm thấy dữ liệu",
+    "noImage": "Chưa có hình ảnh"
   }
 }

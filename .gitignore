@@ -4,3 +4,4 @@ dist
 .cache
 build
 .vite
+01-frontend-config.yaml

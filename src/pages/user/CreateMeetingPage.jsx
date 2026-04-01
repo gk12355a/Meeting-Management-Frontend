@@ -326,21 +326,21 @@ const CreateMeetingPage = () => {
                   format="HH:mm"
                   minuteStep={15}
                   className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                  placeholder="Giờ bắt đầu"
+                  placeholder={t("startTime")}
                   showNow={false}
                 />
               </Form.Item>
 
               <Form.Item
                 name="endTime"
-                label="Giờ kết thúc"
+                label={t("endTime")}
                 rules={[{ required: true, message: "Chọn giờ kết thúc" }]}
               >
                 <TimePicker
                   format="HH:mm"
                   minuteStep={15}
                   className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                  placeholder="Giờ kết thúc"
+                  placeholder={t("endTime")}
                   showNow={false}
                 />
               </Form.Item>
@@ -437,7 +437,7 @@ const CreateMeetingPage = () => {
               </div>
             )}
 
-            <Form.Item name="description" label={t("note")} className="mt-4">
+            <Form.Item name="description" label={t("meetingNote")} className="mt-4">
               <TextArea rows={4} className="dark:bg-gray-700 dark:text-white dark:border-gray-600" />
             </Form.Item>
 

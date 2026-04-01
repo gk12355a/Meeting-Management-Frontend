@@ -12,6 +12,7 @@ import { motion } from "framer-motion";
 import "react-toastify/dist/ReactToastify.css";
 import Pagination from "../../components/Pagination";
 import { useTranslation } from "react-i18next";
+import { TEXT_SEARCH_API } from "../../utils/api";
 
 /* Tuỳ chỉnh màu cho Toast theo theme */
 const toastColors = {
@@ -254,13 +255,40 @@ export default function UsersPage() {
     );
   };
 
+  const [semanticResults, setSemanticResults] = useState(null);
+
+  useEffect(() => {
+    const term = searchTerm.trim();
+    if (!term) {
+      setSemanticResults(null);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(TEXT_SEARCH_API, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query: term, type: "users" }),
+        });
+        const data = await res.json();
+        if (data.success && data.results) {
+          const matchedIds = data.results
+            .filter((r) => r.score > 0.05)
+            .map((r) => r.id);
+          setSemanticResults(matchedIds);
+        }
+      } catch (err) {
+        console.error("Semantic search error:", err);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm, users]);
+
   // Filter users to show
   const filteredUsers = users.filter((user) => {
-    const term = searchTerm.toLowerCase();
-    const matchSearch =
-      !term ||
-      user.fullName?.toLowerCase().includes(term) ||
-      user.username?.toLowerCase().includes(term);
+    const term = searchTerm.trim();
+    const matchSearch = !term || (semanticResults !== null && semanticResults.includes(user.id));
 
     const matchStatus =
       statusFilter === "all"
@@ -271,6 +299,12 @@ export default function UsersPage() {
 
     return matchSearch && matchStatus;
   });
+
+  if (searchTerm.trim() && semanticResults) {
+    filteredUsers.sort((a, b) => {
+      return semanticResults.indexOf(a.id) - semanticResults.indexOf(b.id);
+    });
+  }
 
   // Pagination logic
   const startIndex = (currentPage - 1) * pageSize;

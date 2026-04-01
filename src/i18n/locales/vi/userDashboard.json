@@ -1,31 +1,50 @@
 {
   "welcomeTitle": "Xin chào, {{username}}",
   "welcomeSubtitle": "Chào mừng bạn đến với hệ thống quản lý lịch họp",
-
   "stats": {
     "today": "Lịch họp hôm nay",
     "week": "Lịch họp tuần này",
     "upcoming": "Cuộc họp sắp tới",
     "total": "Tổng số cuộc họp"
   },
-
   "upcomingMeetingsTitle": "Lịch họp sắp tới",
-
   "meeting": {
     "participants": "{{count}} người",
     "room": "Phòng họp {{room}}",
     "upcomingMeetingsEmpty": "Không có lịch họp nào sắp tới"
   },
-
   "buttons": {
     "create": "Tạo lịch họp mới",
     "rooms": "Xem phòng trống",
     "devices": "Xem thiết bị"
   },
-
   "buttonDesc": {
-  "create": "Đặt phòng và thiết bị cho cuộc họp",
-  "rooms": "Tìm phòng họp phù hợp với nhu cầu",
-  "devices": "Xem thiết bị phù hợp với nhu cầu"
+    "create": "Đặt phòng và thiết bị cho cuộc họp",
+    "rooms": "Tìm phòng họp phù hợp với nhu cầu",
+    "devices": "Xem thiết bị phù hợp với nhu cầu"
+  },
+  "charts": {
+    "weeklyActivity": "Hoạt động hàng tuần",
+    "meetingTypes": "Loại cuộc họp",
+    "recentActivity": "Hoạt động gần đây",
+    "participantsTrend": "Xu hướng người tham gia",
+    "days": {
+      "Mon": "T2",
+      "Tue": "T3",
+      "Wed": "T4",
+      "Thu": "T5",
+      "Fri": "T6",
+      "Sat": "T7",
+      "Sun": "CN"
+    },
+    "labels": {
+      "meetings": "Cuộc họp",
+      "participants": "Người tham gia",
+      "votes": "Phiếu bầu"
+    },
+    "activityTypes": {
+      "meetingScheduled": "Đã lên lịch họp"
+    },
+    "noActivity": "Chưa có hoạt động nào"
   }
 }
