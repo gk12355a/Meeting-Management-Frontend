@@ -44,12 +44,12 @@ const MeetingDetailModal = ({ open, onClose, meeting, children }) => {
     const statusMap = {
       PENDING: {
         color: "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 border-amber-100 dark:border-amber-800",
-        label: t("participantPending") || "Chờ xác nhận",
+        label: t("participantPending") || "Chưa xác nhận",
         icon: <FiAlertCircle size={14} />
       },
       ACCEPTED: {
         color: "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 border-emerald-100 dark:border-emerald-800",
-        label: t("participantAccepted") || "Đã tham gia",
+        label: t("participantAccepted") || "Đã xác nhận",
         icon: <FiCheckCircle size={14} />
       },
       DECLINED: {
@@ -156,7 +156,10 @@ const MeetingDetailModal = ({ open, onClose, meeting, children }) => {
                       {p.fullName || t("unknown")}
                     </span>
                   </div>
-                  <span className={`block w-2.5 h-2.5 rounded-full ${status.color.split(' ')[1] || 'bg-slate-400'}`} title={status.label}></span>
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded border flex items-center gap-1.5 font-medium ${status.color}`}>
+                    {status.icon}
+                    {status.label}
+                  </span>
                 </div>
               );
             })}

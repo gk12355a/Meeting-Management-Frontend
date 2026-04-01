@@ -33,7 +33,9 @@ const NotificationItem = ({ notification, onMarkRead }) => {
     notification.message.includes("CẬP NHẬT") ||
     notification.message.includes("duyệt lại");
 
-  const showActions = notification.meetingId && !notification.read;
+  // Chỉ hiển thị Action duyệt phòng NẾU trạng thái meeting thực tế trên Backend vẫn đang là PENDING_APPROVAL
+  const isValidApproval = !isApprovalRequest || notification.meetingStatus === "PENDING_APPROVAL";
+  const showActions = notification.meetingId && !notification.read && isValidApproval;
 
   const handleAccept = async (e) => {
     e.stopPropagation();
@@ -169,10 +171,10 @@ const NotificationItem = ({ notification, onMarkRead }) => {
               </div>
             )}
 
-            {/* Status Text if Read and No Actions */}
-            {notification.read && notification.meetingId && !showActions && (
+            {/* Status Text if No Actions */}
+            {notification.meetingId && !showActions && (
               <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 font-medium italic">
-                {isApprovalRequest ? "Đã được xử lý." : "Đã phản hồi."}
+                {isApprovalRequest ? "Yêu cầu đã được xử lý (hoặc đã bị từ chối/hủy)." : "Đã phản hồi (hoặc cuộc họp đã kết thúc)."}
               </div>
             )}
           </div>

@@ -12,8 +12,8 @@
   "meetingConfirmed": "Đã xác nhận",
   "meetingCancelled": "Đã hủy",
   "meetingPending": "Chờ duyệt",
-  "participantPending": "Chờ xác nhận",
-  "participantAccepted": "Đã chấp nhận",
+  "participantPending": "Chưa xác nhận",
+  "participantAccepted": "Đã xác nhận",
   "participantDeclined": "Từ chối",
   "close": "Đóng"
 }

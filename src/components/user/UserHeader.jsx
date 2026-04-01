@@ -31,11 +31,15 @@ const NotificationItem = ({ notification, onMarkRead }) => {
     notification.message.includes("đã chấp nhận") ||
     notification.message.includes("đã từ chối");
 
+  // Chỉ hiển thị Action nếu meeting thực tế chưa bị hủy hoặc từ chối
+  const isMeetingActive = notification.meetingStatus !== "CANCELLED" && notification.meetingStatus !== "REJECTED";
+
   const showActions =
     isInvite &&
     notification.meetingId &&
     !notification.read &&
-    !isStatusUpdate;
+    !isStatusUpdate &&
+    isMeetingActive;
 
   const handleResponse = async (status) => {
     if (isResponding) return;
