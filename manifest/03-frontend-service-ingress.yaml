@@ -19,7 +19,7 @@ metadata:
   name: frontend-ingress
   namespace: meeting-system
 spec:
-  ingressClassName: nginx
+  ingressClassName: haproxy
   rules:
     - host: npd-meeting.co
       http:
